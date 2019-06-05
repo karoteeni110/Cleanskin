@@ -14,6 +14,6 @@ intro_pt = r'\\section{[iI]ntroduction}(.*?)\\section{'
 
 # == Output == 
 section = re.findall(abstract_pt, data, re.S)
-print(type(section))
+print(section)
 # with open(os.path.join(results_dir, '/extracted.txt'),'w') as out:
 #     out.write(section) 
