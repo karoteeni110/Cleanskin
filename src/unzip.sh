@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #gunzip astro-*.gz
 
 for basename in *0001* ; do # untar
