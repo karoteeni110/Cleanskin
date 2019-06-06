@@ -1,2 +1,2 @@
 # Cleanskin
-Pipelines for proprecessing .tex files
+Pipelines that convert diverse .Tex documents into structured (mostly XML) formatted files.
