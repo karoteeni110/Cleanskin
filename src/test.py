@@ -20,16 +20,16 @@ macros = '(%s|%s|%s|%s|%s|%s)' % (citept, ref, label, comments, equationpt, math
 
 # To be captured:
 abstract_pt = r'(\\begin{abstract}.*\\end{abstract})' # we need the full match
-#middle_secs_pt = r'(\\section{.*)(\\section{)' # only group 1 needed
-secs_pt = r'(\\section{.*?)(^\\)' # only group 1 needed
-patterns = [abstract_pt, secs_pt]
+#middle_secs_pt = r'((\\section{.*?)(^\\section))' # only group 1 needed
+last_sec_pt = r'(\\section{.*?)(\\begin{thebibliography})'
+patterns = [abstract_pt, last_sec_pt]
 
 # == Filtering macros == #
 # == Extracting == 
 extracted = ''
 for idx, pt in enumerate(patterns):
     for match in re.finditer(pt, data, re.S | re.M | re.I):
-        body = match.groups()[0] # the full match for abstract OR the group 1 for other secs
+        body = match.groups()[0]
         extracted += '\n\n' + body
 
 # == Output ==
