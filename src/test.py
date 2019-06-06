@@ -8,6 +8,11 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
     data = tex_file.read()
 
 # == Paterns ==
+citept = '\\cite{\w+}'
+equationpt = '\\begin{equation}.*?\\end{equation}'
+mathmodept = '\${.*}\$'
+macros = '(%s|%s|%s)' % (citept, equationpt, mathmodept)
+
 abstract_pt = r'(\\begin{abstract}.*\\end{abstract})' # we need the full match
 #middle_secs_pt = r'(\\section{.*)(\\section{)' # only group 1 needed
 secs_pt = r'(\\section{.*?)(^\\)' # only group 1 needed
