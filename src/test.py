@@ -27,27 +27,35 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
 # '\\SUBBED'
 
 # To be filtered/skipped:
-witharg = '\\w+{\w+}{\d*}' 
-newpage = '\\newpage'
+float_num = '(\d*(\.\d+)*?)'
+witharg = '\\\w+{\w+}{\d*}*' # TODO
+newpage = '(\\\newpage|\\vfill|\\vspace{.*?}|\\\large|\\bigskip|\\\par[box{.*?}])'
+styles = '(\\\thispagestyle{\w+}|\\\\begin{center}|\\\end{center}|(\[%sex\])|(\[%scm\])|\\\w+size)' \
+    % (float_num, float_num)
 citept = '\\\cite{.*?}' # bad escape c?
-ref = '\\ref{.*?}'
+ref = '\\\ref{.*?}'
 label = '\\\label{.*?}'
 comments = '%.*?$' 
-equationpt = '\\begin{equation}.*?\\\end{equation}'
-tabular = '\\begin{tabular}.*?\\\end{tabular}'
-items = '(\\begin{itemize}|\\\end{itemize})' # Commands without item content
-mathmodept = '(\${.*?}\$|\$\$.*?\$\$)'
-macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
-         comments, equationpt, tabular, items, mathmodept)
+equationpt = '((\\\\begin{equation}.*?\\\end{equation})|(\\\\begin{eqarray}.*?\\\end{eqarray}))'
+tabular = '(\\\\begin{table}.*?\\\end{table}|\\\\begin{tabular}.*?\\\end{tabular})' 
+items = '(\\\\begin{itemize}|\\\end{itemize}|\\\item)' # Commands without item content
+figbib = '(\\\\begin{figure}.*?\\\end{figure}|\\\\begin{thebibliography}.*?\\\end{thebibliography})'
+mathmodept = '\$.*?\$'
+macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, styles, citept,\
+        ref, label, comments, equationpt, tabular, items, figbib, mathmodept)
 
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 
 # == Filtering macros == #
-print('Stripping 1...')
-start1 = time.time()
-data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
-end1 = time.time()
-print(end1 - start1)
+# print('Stripping 1...')
+# start1 = time.time()
+# data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
+# end1 = time.time()
+# print(end1 - start1)
+
+# Check the match
+# print(re.search(mathmodept, data, flags=re.S | re.M | re.I).group())
+# exit(0)
 
 print('Stripping 2...')
 data = re.sub(macros,'', data, flags=re.S | re.M | re.I)
