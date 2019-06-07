@@ -30,8 +30,9 @@ macros = '(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, 
 
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 # == Filtering macros == #
-d2 = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
-print(d2[:4000])
+print('subbing...')
+d2 = re.sub(begindoc,'', data[:4000], flags=re.S | re.M | re.I)
+print(d2)
 print('==!!==')
 d3 = re.sub(comments,'', d2, flags=re.S | re.M | re.I)
 print(d3[:4000])
