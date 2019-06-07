@@ -28,19 +28,20 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
 
 # To be filtered/skipped:
 float_num = '(\d*(\.\d+)*?)'
-witharg = '\\\w+{\w+}{\d*}*' # TODO
-newpage = '(\\\newpage|\\vfill|\\vspace{.*?}|\\\large|\\bigskip|\\\par[box{.*?}]|\\\medskip)'
+witharg = '\\\w+{.*?}{1,}' # TODO: express "\footnote{blahblah}" pattern 
+newpage = '(\\\newpage|\\vfill|\\vspace{.*?}|\\\large|\\bigskip|\\\par[box{.*?}]|\\\medskip|\\\maketitle)'
 styles = '(\\\thispagestyle{\w+}|\\\\begin{center}|\\\end{center}|(\[%sex\])|(\[%scm\])|\\\w+size)' \
     % (float_num, float_num)
-citept = '\\\cite{.*?}' # bad escape c?
-ref = '\\\\ref{.*?}' # TODO
+citept = '\\\cite{.*?}' # TODO: cite p, t, author?
+ref = '\\\\ref{.*?}' 
 label = '\\\label{.*?}'
 comments = '%.*?$' 
 equationpt = '((\\\\begin{equation}.*?\\\end{equation})|(\\\\begin{eqarray}.*?\\\end{eqarray}))'
 tabular = '(\\\\begin{table}.*?\\\end{table}|\\\\begin{tabular}.*?\\\end{tabular})' 
 items = '(\\\\begin{itemize}|\\\end{itemize}|\\\item)' # Commands without item content
 figbib = '(\\\\begin{figure}.*?\\\end{figure}|\\\\begin{thebibliography}.*?\\\end{thebibliography})'
-mathmodept = '\${1,2}.*?\${1,2}' # TODO
+mathmodept = '\${1,2}.*?\${1,2}' 
+authors = '\\\author{%s}' #TODO
 macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, styles, citept,\
         ref, label, comments, equationpt, tabular, items, figbib, mathmodept)
 
