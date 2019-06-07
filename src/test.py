@@ -8,16 +8,18 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
 
 # == Paterns ==
 # To be filtered/skipped:
-macro = '\\\w'
+witharg = '\\w+{\w+}{\d*}' 
+newpage = '\\newpage'
 citept = '\\cite{.*?}'
 ref = '\\ref{.*?}'
 label = '\\label{.*?}'
 comments = '^%.*?$'
 equationpt = '\\begin{equation}.*?\\end{equation}'
 tabular = '\\begin{tabular}.*?\\end{tabular}'
-#items = '\\begin{itemize}.*?\\end{itemize}' # Nested items???
+items = '(\\begin{itemize}|\\end{itemize})' # Commands without item content
 mathmodept = '(\${.*?}\$|\$\$.*?\$\$)'
-macros = '(%s|%s|%s|%s|%s|%s)' % (citept, ref, label, comments, equationpt, mathmodept)
+macros = '(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
+        comments, equationpt, tabular, items, mathmodept)
 
 # To be captured:
 """
@@ -37,6 +39,7 @@ Known patterns:
 abstract_pt = r'(\\begin{abstract}.*\\end{abstract})' # we need the full match
 #middle_secs_pt = r'((\\section{.*?)(^\\section))' # only group 1 needed
 secs_pt = r'(\\section{.*?)(\\begin{thebibliography})' # TODO: generalizable?
+chap_pt = r'(\\chapter{.*?)(\\begin{thebibliography})'
 patterns = [abstract_pt, secs_pt]
 
 # == Filtering macros == #
@@ -44,7 +47,12 @@ patterns = [abstract_pt, secs_pt]
 extracted = ''
 for idx, pt in enumerate(patterns):
     for match in re.finditer(pt, data, re.S | re.M | re.I):
-        body = match.groups()[0]
+        grps = match.groups()
+        if len(grps) >= 1:
+            body = match.groups()[0]
+        else:
+            print('No match! Problematic pattern: %s' % pt)
+            body = ''
         extracted += '\n\n' + body
 
 # == Output ==
