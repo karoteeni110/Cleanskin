@@ -1,5 +1,5 @@
 from paths import tester_tex_path, results_dir
-import re, os
+import re, os, time
 
 def check_match(subbed, original):
     if subbed == original:
@@ -16,28 +16,34 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
 # To be filtered/skipped:
 witharg = '\\w+{\w+}{\d*}' 
 newpage = '\\newpage'
-citept = '\\cite{.*?}'
+citept = '\\\cite{.*?}' # bad escape c?
 ref = '\\ref{.*?}'
 label = '\\label{.*?}'
-comments = r'^%.*?$'
+comments = '^%.*?$' 
 equationpt = '\\begin{equation}.*?\\end{equation}'
 tabular = '\\begin{tabular}.*?\\end{tabular}'
 items = '(\\begin{itemize}|\\end{itemize})' # Commands without item content
 mathmodept = '(\${.*?}\$|\$\$.*?\$\$)'
-newcommand = '\\newcommand.*?$'
-macros = '(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
-        comments, equationpt, tabular, items, mathmodept, newcommand)
+macros = re.compile('(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
+         comments, equationpt, tabular, items, mathmodept))
 
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
+
 # == Filtering macros == #
-print('subbing...')
-d2 = re.sub(begindoc,'', data[:4000], flags=re.S | re.M | re.I)
-print(d2)
-print('==!!==')
-d3 = re.sub(comments,'', d2, flags=re.S | re.M | re.I)
-print(d3[:4000])
+print('Stripping 1...')
+start1 = time.time()
+data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
+end1 = time.time()
+print(end1 - start1)
+
+print('Stripping 2...')
+data = re.sub(macros,'', data, flags=re.S | re.M | re.I)
+
+# Check the filtered results:
+with open(os.path.join(results_dir, 'filtered.txt'),'w') as out:
+    out.write(data)
 exit(0)
-#re.sub(comments,'', d3, flags=re.S | re.M | re.I)
+
 # To be captured:
 """
 Notes: 
@@ -57,7 +63,7 @@ abstract_pt = r'(\\begin{abstract}.*\\end{abstract})' # we need the full match
 #middle_secs_pt = r'((\\section{.*?)(^\\section))' # only group 1 needed
 secs_pt = r'(\\section{.*?)(\\begin{thebibliography})' # TODO: generalizable?
 chap_pt = r'(\\chapter{.*?)(\\begin{thebibliography})'
-patterns = [abstract_pt, secs_pt]
+patterns = [abstract_pt, chap_pt]
 
 # == Extracting == 
 extracted = ''
