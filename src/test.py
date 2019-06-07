@@ -13,19 +13,32 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
     data = tex_file.read()
 
 # == Paterns ==
+# Notes:
+# >>> re.compile(citept)re.compile('\\\\cite{.*?}')
+# >>> c = re.compile(citept)
+# >>> a='\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# 'SUBBED'
+# >>> a='\\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# 'SUBBED'
+# >>> a='\\\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# '\\SUBBED'
+
 # To be filtered/skipped:
 witharg = '\\w+{\w+}{\d*}' 
 newpage = '\\newpage'
 citept = '\\\cite{.*?}' # bad escape c?
 ref = '\\ref{.*?}'
-label = '\\label{.*?}'
-comments = '^%.*?$' 
-equationpt = '\\begin{equation}.*?\\end{equation}'
-tabular = '\\begin{tabular}.*?\\end{tabular}'
-items = '(\\begin{itemize}|\\end{itemize})' # Commands without item content
+label = '\\\label{.*?}'
+comments = '%.*?$' 
+equationpt = '\\begin{equation}.*?\\\end{equation}'
+tabular = '\\begin{tabular}.*?\\\end{tabular}'
+items = '(\\begin{itemize}|\\\end{itemize})' # Commands without item content
 mathmodept = '(\${.*?}\$|\$\$.*?\$\$)'
-macros = re.compile('(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
-         comments, equationpt, tabular, items, mathmodept))
+macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, citept, ref, label, \
+         comments, equationpt, tabular, items, mathmodept)
 
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 
