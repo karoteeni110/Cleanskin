@@ -33,7 +33,7 @@ newpage = '(\\\newpage|\\vfill|\\vspace{.*?}|\\\large|\\bigskip|\\\par[box{.*?}]
 styles = '(\\\thispagestyle{\w+}|\\\\begin{center}|\\\end{center}|(\[%sex\])|(\[%scm\])|\\\w+size)' \
     % (float_num, float_num)
 citept = '\\\cite{.*?}' # bad escape c?
-ref = '\\\ref{.*?}'
+ref = '\\ref{.*?}' # TODO
 label = '\\\label{.*?}'
 comments = '%.*?$' 
 equationpt = '((\\\\begin{equation}.*?\\\end{equation})|(\\\\begin{eqarray}.*?\\\end{eqarray}))'
@@ -47,11 +47,11 @@ macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, styles, c
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 
 # == Filtering macros == #
-# print('Stripping 1...')
-# start1 = time.time()
-# data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
-# end1 = time.time()
-# print(end1 - start1)
+print('Stripping 1...')
+start1 = time.time()
+data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
+end1 = time.time()
+print(end1 - start1)
 
 # Check the match
 # print(re.search(mathmodept, data, flags=re.S | re.M | re.I).group())
@@ -61,7 +61,7 @@ print('Stripping 2...')
 data = re.sub(macros,'', data, flags=re.S | re.M | re.I)
 
 # Check the filtered results:
-with open(os.path.join(results_dir, 'filtered.txt'),'w') as out:
+with open(os.path.join(results_dir, 'out.txt'),'w') as out:
     out.write(data)
 exit(0)
 
