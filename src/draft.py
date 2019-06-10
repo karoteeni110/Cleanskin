@@ -34,15 +34,15 @@ to_be_filtered_cmds = {
     # "newpage" : r'(\\\newpage|\\vfill|\\vspace{.*?}|\\\\large|\\bigskip|\\\\par[box{.*?}]|\\medskip|\\maketitle)',
     # "styles" : r'(\\\thispagestyle{\w+}|\\\\begin{center}|\\\\end{center}| \
     #     (\[%sex\])|(\[%scm\])|\\\w+size)' % (float_num, float_num),
-    # "citept" : r'\\\\cite{.*?}', # TODO: cite p, t, author?
-    # "ref" : r'\\\\ref{.*?}',
+    "citept" : r'\\cite{.*?}', # TODO: cite p, t, author?
+    "ref" : r'\\ref{.*?}',
     # "label" : r'\\\\label{.*?}',
     # "comments" : r'%.*?$', 
-    # "equationpt" : r'\\\\begin{[equation|eqarray]}.*?\\\\end{[equation|eqarray]}',
+    "equationpt" : r'\\begin{equa(tion|rry)}.*?\\end{equa(tion|rry)}',
     # "tabular" : r'(\\\\begin{table}.*?\\\\end{table}|\\\\begin{tabular}.*?\\\\end{tabular})', 
     # "items" : r'(\\\\begin{itemize}|\\\\end{itemize}|\\\\item)', # Commands without item content
-    # "figbib" : r'(\\\\begin{figure}.*?\\\\end{figure}|\\\\begin{thebibliography}.*?\\\\end{thebibliography})',
-    "mathmodept" : r'\${1,2}.*?\${1,2}', 
+    "figbib" : r'(\\begin{figure}.*?\\end{figure}|\\begin{thebibliography}.*?\\end{thebibliography})',
+    "mathmodept" : r'(\${1,2}.*?\${1,2})', 
     # "authors" : r'\\\author{.*?}$', #TODO
     # "newline" : r'\\\\',
     # "bold_and_italic" : r"({\\\\[it|bf]).*?(}$)"
@@ -54,7 +54,7 @@ macros = r'('
 for cmd in to_be_filtered_cmds:
     macros += r'%s|' % to_be_filtered_cmds[cmd]
 macros = macros[:-1] + ')' # get rid of the last "|"
-
+print(macros)
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 
 # == Filtering macros == #

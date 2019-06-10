@@ -40,4 +40,4 @@ class LTXparser():
     
     def filter(self):
         rawdata = self.rawdata
-        
+        if self.clean_precommath
