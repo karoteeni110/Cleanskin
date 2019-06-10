@@ -27,38 +27,48 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
 # '\\SUBBED'
 
 # To be filtered/skipped:
-float_num = '(\d*(\.\d+)*?)'
-witharg = '\\\w+{.*?}{1,}' # TODO: express "\footnote{blahblah}" pattern 
-newpage = '(\\\newpage|\\vfill|\\vspace{.*?}|\\\large|\\bigskip|\\\par[box{.*?}]|\\\medskip|\\\maketitle)'
-styles = '(\\\thispagestyle{\w+}|\\\\begin{center}|\\\end{center}|(\[%sex\])|(\[%scm\])|\\\w+size)' \
-    % (float_num, float_num)
-citept = '\\\cite{.*?}' # TODO: cite p, t, author?
-ref = '\\\\ref{.*?}' 
-label = '\\\label{.*?}'
-comments = '%.*?$' 
-equationpt = '((\\\\begin{equation}.*?\\\end{equation})|(\\\\begin{eqarray}.*?\\\end{eqarray}))'
-tabular = '(\\\\begin{table}.*?\\\end{table}|\\\\begin{tabular}.*?\\\end{tabular})' 
-items = '(\\\\begin{itemize}|\\\end{itemize}|\\\item)' # Commands without item content
-figbib = '(\\\\begin{figure}.*?\\\end{figure}|\\\\begin{thebibliography}.*?\\\end{thebibliography})'
-mathmodept = '\${1,2}.*?\${1,2}' 
-authors = '\\\author{%s}' #TODO
-macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, styles, citept,\
-        ref, label, comments, equationpt, tabular, items, figbib, mathmodept)
+float_num = r'(\d*(\.\d+)*?)'
+
+to_be_filtered_cmds = {
+    #"witharg" : r'\\\w+{.*?}{1,}', # TODO: express "\footnote{blahblah}" pattern 
+    # "newpage" : r'(\\\newpage|\\vfill|\\vspace{.*?}|\\\\large|\\bigskip|\\\\par[box{.*?}]|\\medskip|\\maketitle)',
+    # "styles" : r'(\\\thispagestyle{\w+}|\\\\begin{center}|\\\\end{center}| \
+    #     (\[%sex\])|(\[%scm\])|\\\w+size)' % (float_num, float_num),
+    # "citept" : r'\\\\cite{.*?}', # TODO: cite p, t, author?
+    # "ref" : r'\\\\ref{.*?}',
+    # "label" : r'\\\\label{.*?}',
+    # "comments" : r'%.*?$', 
+    # "equationpt" : r'\\\\begin{[equation|eqarray]}.*?\\\\end{[equation|eqarray]}',
+    # "tabular" : r'(\\\\begin{table}.*?\\\\end{table}|\\\\begin{tabular}.*?\\\\end{tabular})', 
+    # "items" : r'(\\\\begin{itemize}|\\\\end{itemize}|\\\\item)', # Commands without item content
+    # "figbib" : r'(\\\\begin{figure}.*?\\\\end{figure}|\\\\begin{thebibliography}.*?\\\\end{thebibliography})',
+    "mathmodept" : r'\${1,2}.*?\${1,2}', 
+    # "authors" : r'\\\author{.*?}$', #TODO
+    # "newline" : r'\\\\',
+    # "bold_and_italic" : r"({\\\\[it|bf]).*?(}$)"
+}
+
+# macros = r'(%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s)' % (witharg, newpage, styles, citept,\
+#         ref, label, comments, equationpt, tabular, items, figbib, mathmodept)
+macros = r'('
+for cmd in to_be_filtered_cmds:
+    macros += r'%s|' % to_be_filtered_cmds[cmd]
+macros = macros[:-1] + ')' # get rid of the last "|"
 
 begindoc = r'(.*^\\begin{document}$)' # all the code before \begin{doc}
 
 # == Filtering macros == #
-print('Stripping 1...')
-start1 = time.time()
-data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
-end1 = time.time()
-print(end1 - start1)
+# print('Stripping preamble...')
+# start1 = time.time()
+# data = re.sub(begindoc,'', data, flags=re.S | re.M | re.I)
+# end1 = time.time()
+# print(end1 - start1)
 
 # Check the match
 # print(re.search(mathmodept, data, flags=re.S | re.M | re.I).group())
 # exit(0)
 
-print('Stripping 2...')
+print('Stripping macros...')
 data = re.sub(macros,'', data, flags=re.S | re.M | re.I)
 
 # Check the filtered results:
