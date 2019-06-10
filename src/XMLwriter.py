@@ -3,4 +3,4 @@ import re, os
 
 txt = os.path.join(results_dir, 'out.txt')
 
-title = (r'\\\title{',''
+title = (r'\\\title{','')
