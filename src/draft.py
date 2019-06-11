@@ -72,7 +72,7 @@ print('Stripping macros...')
 data = re.sub(macros,'', data, flags=re.S | re.M | re.I)
 
 # Check the filtered results:
-with open(os.path.join(results_dir, 'out.txt'),'w') as out:
+with open(os.path.join(results_dir, 'out.tex'),'w') as out:
     out.write(data)
 exit(0)
 
