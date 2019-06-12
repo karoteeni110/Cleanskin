@@ -10,7 +10,7 @@ Note: The return of an action is either:
 
 """
 
-from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk, Table, Image
+from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk, Table, Image, OrderedList, BulletList, DefinitionList
 
 def no_math(k, v, fmt, meta):
   if k == 'Math':
@@ -37,13 +37,14 @@ def no_cite(k, v, fmt, meta):
 
 def delist(k, v, fmt, meta):  
   if k == 'OrderedList':
-    return v[2][2]
-  elif k == 'BulletList':
-    return v[0] # a list of paras
-  elif k == 'DefinitionList':
-    return v[0].append(v[1])
+    return v[1]
+  elif k == 'BulletList': # This is ugly but working
+    paragraphs = v[0]
+    for i in v[1:]:
+      paragraphs += i
+    return paragraphs
 
-actions = [no_math, no_cite, no_emph, no_table, no_image]
+actions = [no_math, no_cite, no_emph, no_table, no_image, delist]
 
 if __name__ == "__main__":
   toJSONFilters(actions)
