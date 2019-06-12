@@ -17,7 +17,8 @@ def meta2para(k, v, fmt, meta):
   return None
 
 def no_math(k, v, fmt, meta):
-  return []
+  if k=='Math':
+    return []
 
 def no_comment(k, v, fmt, meta):
   return []
@@ -28,8 +29,12 @@ def no_table(k, v, fmt, meta):
 def no_image(k, v, fmt, meta):
   return []
 
+def no_cite(k, v, fmt, meta):
+  if k=='Cite':
+    return []
 
-actions = [no_math, no_comment, no_table, no_image]
+
+actions = [no_math, no_comment, no_table, no_image, no_cite]
 
 if __name__ == "__main__":
   toJSONFilters(actions)
