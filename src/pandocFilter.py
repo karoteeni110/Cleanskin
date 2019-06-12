@@ -10,7 +10,7 @@ Note: The return of an action is either:
 
 """
 
-from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk
+from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk, Table, Image
 
 def no_math(k, v, fmt, meta):
   if k == 'Math':
@@ -43,7 +43,7 @@ def delist(k, v, fmt, meta):
   elif k == 'DefinitionList':
     return v[0].append(v[1])
 
-actions = [no_math, no_cite, no_emph]
+actions = [no_math, no_cite, no_emph, no_table, no_image]
 
 if __name__ == "__main__":
   toJSONFilters(actions)
