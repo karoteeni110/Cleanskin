@@ -5,7 +5,7 @@ repo_path = dirname(src_path)
 data_path = join(repo_path,'data')
 results_dir = join(repo_path, 'results')
 
-tester_tex_path = join(data_path, 'paper.tex')
+tester_tex_path = join(data_path, 'nat_orders_revisionv4Amaro.tex')
 mkd_path = join(data_path, 'example.text')
 
 if __name__ == "__main__":

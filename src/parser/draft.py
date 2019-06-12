@@ -1,9 +1,11 @@
-"""
-Cleans out bibliography and \ref 
-"""
-
 from paths import tester_tex_path, results_dir
 import re, os, time
+
+def check_match(subbed, original):
+    if subbed == original:
+        print('No match!')
+    else:
+        print('MATCHED! ')
 
 # == Loading data ==
 print(tester_tex_path)
@@ -11,6 +13,20 @@ with open(tester_tex_path, mode='r', encoding='utf-8') as tex_file:
     data = tex_file.read()
 
 # == Paterns ==
+# Notes:
+# >>> re.compile(citept)re.compile('\\\\cite{.*?}')
+# >>> c = re.compile(citept)
+# >>> a='\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# 'SUBBED'
+# >>> a='\\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# 'SUBBED'
+# >>> a='\\\cite{fras94}'
+# >>> re.sub(c,'SUBBED',a)
+# '\\SUBBED'
+
+# To be filtered/skipped:
 float_num = r'(\d*(\.\d+)*?)'
 
 to_be_filtered_cmds = {
