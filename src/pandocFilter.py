@@ -10,32 +10,40 @@ Note: The return of an action is either:
 
 """
 
-from pandocfilters import toJSONFilters, Math, Image, Emph, Cite, Table
-import re
-
-def meta2para(k, v, fmt, meta): # Exctract the abstract from metadata
-  return None
+from pandocfilters import Math, toJSONFilters, Cite
 
 def no_math(k, v, fmt, meta):
-  if k=='Math':
+  if k == 'Math':
     return []
 
-# def no_comment(k, v, fmt, meta):
-#   return None
+def no_emph(k, v, fmt, meta):
+  def caps(key, value, format, meta):
+    if key == 'Str':
+      return Str(value.upper())
+  if k == 'Emph':
+    return walk(v, caps, fmt, meta)
 
 def no_table(k, v, fmt, meta):
-  if k=='Table':
+  if k == 'Table':
     return []
 
 def no_image(k, v, fmt, meta):
-  if k=='Image':
-    return None
-
-def no_cite(k, v, fmt, meta):
-  if k=='Cite' and fmt=='Latex':
+  if k == 'Image':
     return []
 
-actions = [no_math, no_table, no_image, no_cite]
+def no_cite(k, v, fmt, meta):
+  if k == 'Cite' and fmt == 'Latex':
+    return []
+
+def delist(k, v, fmt, meta):  
+  if k == 'OrderedList':
+    return v[2][2]
+  elif k == 'BulletList':
+    return v[0] # a list of paras
+  elif k == 'DefinitionList':
+    return v[0].append(v[1])
+
+actions = [no_math, no_cite]
 
 if __name__ == "__main__":
   toJSONFilters(actions)
