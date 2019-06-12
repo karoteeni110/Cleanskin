@@ -1,11 +1,12 @@
 """
 A pandoc filter that aims to:
-    Ignore comments (automatically), math mode, 
+    Ignore comments (automatically), math mode, cites,
     images, lists (itemize), tables; 
     Turn emphasized text into ALL CAPS.
 """
 
-from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk, Table, Image, OrderedList, BulletList, DefinitionList
+from pandocfilters import Math, toJSONFilters, Cite, \
+  Emph, Str, walk, Table, Image, OrderedList, BulletList, DefinitionList
 
 def no_math(k, v, fmt, meta):
   if k == 'Math':
@@ -27,7 +28,7 @@ def no_image(k, v, fmt, meta):
     return []
 
 def no_cite(k, v, fmt, meta):
-  if k == 'Cite' and fmt == 'Latex':
+  if k == 'Cite' or fmt == 'Latex':
     return []
 
 def delist(k, v, fmt, meta):  
