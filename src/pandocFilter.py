@@ -1,13 +1,8 @@
 """
 A pandoc filter that aims to:
-    Turn the abstracts in metadata into paragraphs;  
-    Ignore comments, math mode, images and tables.
-
-Note: The return of an action is either:
-    None: this means that the object should remain unchanged
-    a pandoc object: this will replace the original object
-    a list of pandoc objects: these will replace the original object; the list is merged with the neighbors of the original objects (spliced into the list the original object belongs to); returning an empty list deletes the object
-
+    Ignore comments (automatically), math mode, 
+    images, lists (itemize), tables; 
+    Turn emphasized text into ALL CAPS.
 """
 
 from pandocfilters import Math, toJSONFilters, Cite, Emph, Str, walk, Table, Image, OrderedList, BulletList, DefinitionList
