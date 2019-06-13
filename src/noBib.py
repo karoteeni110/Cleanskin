@@ -56,7 +56,7 @@ def main():
 
         clean_data = re.sub(bib,'', data, flags=re.S | re.M | re.I)
         debib_fname = os.path.join(results_dir, '%s_debib.tex' % dirname) # Name files with dirname
-        if os.path.exists(debib_fname): # If there are more than one tex file, name others with fname.
+        if os.path.exists(debib_fname): # Avoid overwriting
             debib_fname = os.path.join(results_dir, '%s_%s_debib.tex' % (dirname, fname[:-4]))
         with open(debib_fname,'w') as out:
             out.write(clean_data)
