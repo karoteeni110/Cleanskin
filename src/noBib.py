@@ -65,7 +65,9 @@ def main():
         clean_data = re.sub(bib,'', data, flags=re.S | re.M | re.I)
         debib_fname = os.path.join(output_path, '%s_debib.tex' % dirname) # Name files with dirname
         if os.path.exists(debib_fname): # Avoid overwriting
-            debib_fname = os.path.join(output_path, '%s_%s_debib.tex' % (dirname, fname[:-4]))
+            with open(os.path.join(output_path, 'problematic/00error.txt'), 'a') as errorlog:
+                errorlog.write('MULTIPLE TEX IN ' + dirname + '\n')
+            # debib_fname = os.path.join(output_path, '%s_%s_debib.tex' % (dirname, fname[:-4]))
         with open(debib_fname,'w') as out:
             out.write(clean_data)
         
