@@ -1,0 +1,325 @@
+\documentclass[5p,authoryear]{elsarticle}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{eqparbox}
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage{subfig}
+\usepackage{tabularx}
+\usepackage{subfiles}
+\usepackage[explicit]{titlesec}
+
+% -- Document formatting -- %
+\setlength{\topmargin}{-1.25cm}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.85}
+% \voffset -2.0cm
+
+% -- Section label formatting -- %
+\titleformat{\section}{\normalfont}{\textbf{\thesection}}{1em}{\MakeUppercase{\textbf{#1}}}
+\titlespacing*{\section}{0em}{2em}{0.8em}
+\titleformat{\subsection}{\normalfont}{\textbf{\thesubsection}}{1em}{\textbf{#1}}
+\titlespacing*{\subsection}{0em}{2em}{0.8em}
+\titleformat{\subsubsection}{\normalfont}{\textit{\thesubsubsection}}{1em}{\textit{#1}}
+\titlespacing*{\subsubsection}{0em}{2em}{0.8em}
+
+% -- Figure label formatting -- %
+\captionsetup{labelfont=bf}
+
+% -- Table formatting -- %
+\setlength{\extrarowheight}{3pt}
+
+\def\mnras{{MNRAS}}
+\def\aj{{Astronomical Journal}}
+\def\procspie{{Proceedings of the SPIE}}
+\def\apj{{Astrophysical Journal}}
+\def\apjl{{Astrophysical Journal, Letters}}
+\def\aaps{{Astronomy and Astrophysics, Supplement}}
+\def\aap{{Astronomy and Astrophysics}}
+
+% --- macros --- %
+\newcommand{\hompc}{\,h\,{\rm Mpc}^{-1}}
+\newcommand{\mpcoh}{\,h^{-1}\,{\rm Mpc}}
+\newcommand{\gpcoh}{\,h^{-1}\,{\rm Gpc}}
+\newcommand{\cell}[1]{\multirow{2}{*}{#1}}
+
+\newcommand{\MCK}[1]{{\color{blue}\textbf{MCK: #1\ }}}
+
+\renewcommand{\algorithmiccomment}[1]{\hfill\eqparbox{COMMENT}{\textcolor{blue}{!! #1}}}
+
+
+% --- weixiang --- %
+\graphicspath{{figs/}{../figs/}}
+\usepackage{textcomp}
+\usepackage{float}
+
+% --- document --- %
+\begin{document}
+
+% --- title --- %
+\title{Vizic: A Jupyter-based Interactive Visualization Tool for Astronomical Catalogs
+}
+
+\author[phy,ncsa]{Weixiang Yu \corref{email1}}
+\author[ncsa,astro]{Matias Carrasco Kind}
+\author[astro,ncsa]{Robert J. Brunner}
+\address[phy]{Department of Physics, University of Illinois at Urbana-Champaign, Urbana IL, USA}
+\address[ncsa]{National Center for Supercomputing Applications, University of Illinois at Urbana-Champaign, Urbana IL, USA}
+\address[astro]{Department of Astronomy, University of Illinois at Urbana-Champaign, Urbana IL, USA}
+\cortext[email1]{wyu16@illinois.edu}
+\date{outline}
+
+\begin{abstract}
+The ever-growing datasets in observational astronomy have challenged scientists in many aspects, including an efficient and interactive data exploration and visualization.
+Many tools have been developed to confront this challenge. However, they usually focus on displaying the actual images or focus on visualizing patterns within catalogs in a predefined way.
+In this paper we introduce \textit{Vizic}, a Python visualization library that builds the connection between images and catalogs through an interactive map of the sky region.
+\textit{Vizic} visualizes catalog data over a custom background canvas using the shape, size and orientation of each object in the catalog.
+The displayed objects in the map are highly interactive and customizable comparing to those in the observation images.
+These objects can be filtered by or colored by their property values, such as redshift and magnitude. They also can be sub-selected using a lasso-like tool for further analysis using standard Python functions and everything is done from inside a Jupyter notebook. Furthermore, \textit{Vizic} allows custom overlays to be appended dynamically on top of the sky map.
+We have initially implemented several overlays, namely, Voronoi, Delaunay, Minimum Spanning Tree and HEALPix grid layer, which are helpful for visualizing large-scale structure. All these overlays can be generated, added or removed interactively with just one line of code.
+The catalog data is stored in a non-relational database, and the interfaces have been developed in JavaScript and Python to work within Jupyter Notebook, which allows to create customizable widgets, user generated scripts to analyze and plot the data selected/displayed in the interactive map. This unique design makes \textit{Vizic} a very powerful and flexible interactive analysis tool.
+\textit{Vizic} can be adopted in variety of exercises, for example, data inspection, clustering analysis, galaxy alignment studies, outlier identification or just large scale visualizations.
+\end{abstract}
+
+\begin{keyword}
+Jupyter, Python, Visualization, catalogs, large-scale structure of universe - methods: numerical
+\end{keyword}
+
+\maketitle
+
+\section{Introduction}
+For the past decades, conducting large-area sky surveys became one of the most powerful approaches to carry out observations within the astronomy community in order to understand the Universe. The Sloan Digital Sky Survey (SDSS) \citep{sdssYork2000} set the foundations for such surveys followed by others, such as DES and Pan-STARRS \citep{des, PanSTARRS}. Modern telescopes and world-class supercomputing facilities produced exceptionally good images and exceptionally precise measurements of astrophysical sources, challenging astronomers to face unprecedentedly massive datasets.
+Moreover, future large sky, for example, LSST and Euclid \citep{lsstOverview,lsstSci,euclid}, will obtain data of orders of magnitude larger than what we have today. These massive datasets place a new challenge on astronomers in the light of data exploration and visualization.
+
+Various groups and individuals have tried to confront this challenge by developing new astronomical applications that are capable of displaying and visualizing large datasets. Notable examples include \textit{Aladin Lite} \citep{AladinLite2014}, \textit{VisiOmatic} \citep{Bertin2015}, \textit{ASCOT} and \textit{Toyz} \citep{Moolekamp2015}, to mention just a few.
+The majority of these softwares are web-based applications that focus on the visualization of high-resolution images with additional functionalities of catalog over-plotting or image analysis. Meanwhile, \textit{GLUE} \citep{GlueViz}, a desktop application that specializes in visualizing selection propagations between different plots of the same dataset, has became a popular tool for exploring hidden patterns within catalogs and images.
+Unfortunately all these mentioned tools, while being very powerful, have some drawbacks when it comes to the study of large-scale structure and flexible customization.
+Image-focused applications are limited by the fundamental characters of photometric observations, whereas images produced by sky surveys are fixed in terms of compositions, in other words, the sources are immoveable. In this regard, catalogs are more flexible considering astronomical sources in a catalog can be easily sorted and filtered.
+However, tools that are more friendly with tabular data are usually less good at interactive visualizations of geospatial data.
+They either render data points into simple scatter plots or summarize data distribution into pixels like with \textit{VaeX} \citep{vaex}, which lacks rich interactions with individual object while providing a very powerful way to visualize distributions of extremely large catalogs.
+The regarding limitations of existing softwares in addition to emerging new technologies for building interactive web tools have generated a need to improve existing tools and develop new ones.
+
+Thanks to the increasingly powerful web technologies (e.g., HTML5 \citep{HTML5}, CSS \citep{CSS} and JavaScript \citep{JS}) and the improved data bandwidth, nowadays much more complex tasks can be carried out in a browser.
+Along with the great availability of graphic design JavaScript libraries, web browser has became a fertile ground for visualization projects. In addition, thanks to projects like Jupyter \citep{Jupyter} we now have the powerful combination of a web-based application that can run anywhere with the flexibility of a Python scripting environment where scientist can customize plots, algorithms and workflows only restricted by the limitations of the programming language.
+
+Considering astronomers are usually experienced scripting programmers (but less so in web development) and the fact that Python is one of the most common languages used today, we have created \textit{Vizic}, a Jupyter-based interactive visualization tool, which is a Python package designed to work with the Jupyter Notebook App.
+This tool (formally IPython \citep{ipython} Notebook) is a server-client application that allows creating and running Jupyter notebooks in which Python code can be executed interactively in executable cells. Unlike other existing tools, \textit{Vizic} tries to make the connection between a source catalog and its images by drawing astronomical sources on an interactive map, where we can clearly visualize the spatial distribution of the observed objects, and at the same time keeping full control over the compositions, through objects filtering, color mapping, over plotting layers, among other useful features to visualize patterns on the data in a much more efficient manner.
+Since Jupyter Notebook App is a server-client system, \textit{Vizic} can be used for accessing data archives at remote locations as well as working with catalogs stored on a local machine. Regarding the rising popularity of Jupyter Notebook App within the science community, we believe in providing an interactive interface without limiting the scripting ability to extend and to use this package, which will enable a faster scientific discovery.
+
+The rest of the article is organized as follows. In Section \ref{package}, we start with a brief introduction to \textit{Vizic} and highlight some of its important features.
+In Section \ref{technical}, we discuss the technical details regarding the architecture and dependencies of \textit{Vizic}.
+In Section \ref{application}, we present an example application of \textit{Vizic} in visualizing large-scale structure.
+Section \ref{install} provides the installation instruction, and Section \ref{performance} assesses the performance of \textit{Vizic} with various loads.
+Lastly, in Section \ref{future}, we gives the conclusions, and describes future plans and possible extensions.
+
+\section{Vizic}
+\label{package}
+\textit{Vizic} is a Python and Javascript library, which provides the API to display and interact with sky maps created from catalogs within Jupyter notebooks.
+At the front-end, the interactive sky maps are generated using \textit{Leaflet}\footnote{http://leafletjs.com/} \citep{leaflet}, a popular JavaScript library for building interactive map applications on the web, and rendered through the widget framework provided by \textit{ipywidgets}\footnote{https://ipywidgets.readthedocs.io/en/latest/} \citep{ipywidgets}, which is a library of interactive HTML widgets for Jupyter notebooks and IPython kernels.
+\textit{Vizic} works side by side with MongoDB\footnote{https://www.mongodb.com/} \citep{mongo}, therefore an active MongoDB instance, either running in the background or in a remote location (see Figure \ref{fig:model_d} for a workflow diagram), is required when \textit{Vizic} is used.
+MongoDB is a non SQL, document-oriented database, which is built for scalability and performance. Since the data is stored in documents instead of multiple tables with complex relations, MongoDB database can spread the data over different servers and nodes. In the case of storing simple astronomical catalogs, MongoDB is particularly suitable. MongoDB also provides a geospatial index for making extremely efficient location-based queries. The rational to use MongoDB is discussed in more detail in Section \ref{mongodb}.
+
+The interactive sky maps can be easily created from catalogs stored in pandas \citep{pandas} DataFrames or catalogs that are previously ingested into the database by providing the collection names. Data stored in other formats, for example, \textit{Astropy} \citep{astropy} Table object, can also be fed into \textit{Vizic} after a simple conversion to pandas DataFrame.
+A \textit{pandas} DataFrame is a Python object that handles arrays and tabular data very efficiently.\footnote{http://pandas.pydata.org}
+When a DataFrame is provided, \textit{Vizic} will format the data to match the mapping mechanism used, which is described in more detail in Section \ref{slippy}.
+In the sky maps, astronomical objects are drawn using their shapes, sizes and rotation angles determined by source catalog extractor softwares such as \textit{SExtractor} \citep{sextractor} to cite an example.
+If relevant shape information is not available, the objects will be drawn as filled circles with appropriate radius provided in the catalog. If neither the shape data nor the size data is provided, the objects will be drawn as filled circles with a fixed radius of $0.5$ pixel at the minimum zoom level, however alternative sizes can be specified as an argument, and scaled up as the map is zoomed in.
+
+There are two main categories of widgets provided by \textit{Vizic}, namely, map widgets and control widgets. Map widgets are responsible for creating and managing sky maps and overlays. The core map widgets include \texttt{AstroMap} and \texttt{GridLayer}. The \texttt{AstroMap} widget is the container for all map layers, and the \texttt{GridLayer} widget is the tile-based layer for displaying the astronomical sources or simply the catalog layer. Additional custom overlay widgets are also provided for aid in visualizing large-scale structure (see Section \ref{adv}).
+The control widgets are the main interfaces that take advantage of the extensive interactivity of the displayed objects (see Section \ref{interaction}).
+For example, through control widgets, we can filter the displayed objects by their property values and apply custom colormaps to these sources. These control widgets do not possess mutual reliance, therefore they can be used independently from each other.
+Such a modularized design brings a much cleaner graphical user interface (GUI) comparing to other tools. Users can create their own application and interface by selecting only the needed components and interact with the data and the maps from within the Jupyter notebooks.
+After all, \textit{Vizic} provides the foundation for a complete and customizable analysis, which is complementary to the standard scripting analysis workflows.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\textwidth]{FIG1}
+  \caption{A diagram showing the workflow of \textit{Vizic}. ``NB Server'' refers to Jupyter Notebook server.}
+  \label{fig:model_d}
+\end{figure}
+
+\subsection{Sky Maps}
+\label{basic}
+Before any sky maps can be created, the connection to a running MongoDB instance has to be established.
+The connection could be initiated by creating a \texttt{Connection} class object with a URL that specifies the address of the MongoDB instance and a port number. In the background, the IPython kernel creates a MongoDB client using the provided information and assigns the client to an attribute of the \texttt{Connection} object, which is required for creating \texttt{GridLayer} widgets.
+After the connection is successfully established, the \texttt{AstroMap} widget and the \texttt{GridLayer} widget instances can be created by initializing the corresponding Python object. To display catalogs in the notebook cells, we need to add the \texttt{GridLayer} widget to the \texttt{AstroMap} widget using the \texttt{add\_layer} function.
+Then we can zoom and pan the map interactively as with a Google Map\footnote{https://www.google.com/maps}
+The transformation of the celestial coordinates is accomplished by a customized coordinate reference system (CRS) JavaScript library that determines the projection scale based on the extent of the map measured in degrees. In this manner, we can use RA and DEC information from the sources directly.
+
+When creating catalog layers from \textit{pandas} DataFrames, the default columns used for reading the locations are the standard RA and DEC. The default columns used for reading the shape and orientation of each object are A\_IMAGE, B\_IMAGE, THETA\_IMAGE, which are respectively the semi-major axis, semi-minor axis and the rotation angle used in the Scalable Vector Graphics (SVG) \citep{SVG} ellipse adopted to represent that object. This process is repeated for every object in the catalog.
+Different column names can also be specified in the arguments for reading this information.
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{FIG2}
+	\caption{A GUI created from widgets provided by \textit{Vizic}, where the dashboard is completely customizable. The pink rectangle on the sky map is the selection bounding box. The table below the ``Object Catalog'' toolbar displays the catalog entry for a clicked object. The middle section shows the data returned by the selection tool in a \textit{pandas} DataFrame for direct manipulation through the notebook.
+	Two plots at the bottom of this figure are generated using the data returned by the selection tool.
+    The objects on the sky map are colored by their magnitude in $I$ band. And the size of these objects are scaled up by a factor of 3 to better visualize the effect of color mapping. }
+	\label{fig:overall}
+\end{figure*}
+
+% 2.2
+\subsection{Interaction}
+\label{interaction}
+\subfile{sections/interaction}
+
+% 2.3
+\subsection{Custom Overlay}
+\label{adv}
+\subfile{sections/advanced}
+
+% 3
+\section{Architecture \& Dependencies}
+\label{technical}
+\subfile{sections/architecture}
+
+% 4
+\section{Example Application}
+\label{application}
+\begin{figure}[h]
+    \centering
+    \subfloat[The trimmed MST with $r_{max}=0.05^\circ$ (0.6 Mpc/h at z=0.2) and $n_{min}=30$]{\includegraphics[width=0.4\textwidth]{FIG11a}\label{fig:app1}}
+    \hfill
+    \subfloat[The trimmed MST with $r_{max}=0.08^\circ$ ((0.957 Mpc/h at z=0.2)) and $n_{min}=20$]{\includegraphics[width=0.4\textwidth]{FIG11b}\label{fig:app2}}
+    \caption{Two figures showing different combination of $r_{max}$ and $n_{min}$ to prune the full MST to identify structures. The green circles mark the galaxy clusters while the white circles mark the voids.}
+    \label{fig:app}
+\end{figure}
+In this section, we present an example usage of \textit{Vizic} in scientific research. We first create an interactive map using a subset of the spectroscopic catalog from SDSS Data Release 13 (DR13) \citep{dr13, sdss_cam}.
+This subset covers the area from $227^\circ$ to $230^\circ$ in right ascension and from $4^\circ$ to $7^\circ$ in declination with a total of nine square degrees.
+This sample catalog contains only the objects from the $[0, 0.2]$ redshift bin \citep{sdss_spec}. For demonstration purpose, we choose not to provide the shape and size information when creating the sky map.
+
+Then we look for galaxy clusters and voids on the sky map and mark them with circle layers using different colors. For the sake of this example, the positions and sizes are selected by eye.
+The approximated centers of the clusters and voids are determined by the mouse position tracker located on the bottom left corner of the map (See Figure \ref{fig:app}). Next, we apply the MST overlay onto the sky map.
+By pruning the tree with different combination of $r_{max}$ and $n_{min}$, we can confirm our previous structure selections with the tree groups that are kept.
+We can observe that for a more strict cut in $r_{max}$, i.e. reducing maximum linkage length between two points, as shown in Figure \ref{fig:app1}, compact structures selected by the MST are correlated to those circles shown in green (i.e., clusters), while for a more relaxed cut, in Figure \ref{fig:app2}, the structures shown follow the underlying filament structure around voids (white circles) much better.
+
+Additionally, other layers can be over-plotted, data can be selected for further inspection, objects can be filtered, colored and scaled to aid with visualization and analysis.
+Multiple maps, multiple cuts and multiple datasets can be used interactively with other scripting  procedures and functions on the data from other cells in one single Jupyter notebook, increasing the potential and effectiveness of \textit{Vizic}.
+
+\section{Distribution \& Installation}
+\label{install}
+\textit{Vizic} is registered with Python Package Index\footnote{https://pypi.python.org/pypi/vizic}, therefore it can be installed with \textit{pip} for Python 3.
+It can also be installed from source code by downloading the GitHub repository\footnote{https://github.com/ywx649999311/vizic}.
+\textit{Vizic} requires a running MongoDB instance, the installation and setup instructions can be found from the official MongoDB website\footnote{https://docs.mongodb.com/manual/}.
+More detailed instructions on the installation of \textit{Vizic} and its required dependencies as well as tutorials, API documentation and examples can be found in the official \textit{Vizic} documentation\footnote{http://www.wx-yu.com/vizic/index.html}.
+
+Instead of installing the package in a local machine and keeping a MongoDB instance running, the user can also build a Docker\footnote{https://www.docker.com} container from the Dockerfile included in the GitHub repository.
+Both the MongoDB database and the Jupyter notebook server run inside the container with only designated ports exposed to the host for easy deployment.
+An example dataset and notebooks are included as part of the \textit{Vizic} distribution on GitHub as well.
+
+\section{Performance \& Discussion}
+\label{performance}
+
+Visualizing large datasets through a browser has always been a difficult task. Unlike some of the existing tools, the goal of \textit{Vizic} is not to display as many objects as possible at once, but instead to reduce the number of displayed sources without losing important information using the ``slippy map'' implementation described before.
+
+We set up several tests to examine the overall performance of \textit{Vizic} regarding data ingestion and map interaction and deployment. All tests were performed on a Macbook Pro running OS X El Capitan equipped with a 2.5GHz Intel Core i7 (i7-4870HQ) processor, 16Gb of RAM and a SSD.
+Both MongoDB instance and the Jupyter App server were running locally. Unless specifically stated, \textit{Vizic} was tested using the browser Chrome.
+
+Figure \ref{fig:ingest} shows the time in seconds for the data ingestion as a function of catalog size (number of objects), and all catalogs ingested in this test contain fifteen columns. The linear baseline shown in this figure is a trendline for the first three data points on this plot. We notice that the actual performance curve starts to deviate from the linear baseline when the catalog size exceeds 3 million. We presume such diverging behavior as a result of computational resources being exhausted.
+
+The second test performed, as shown in Figure \ref{fig:load}, profiles the timings for map loading triggered when applying interactively different zoom levels.
+To focus on the effect of catalog sizes on the tiles loading performance, we created the test datasets by continuously and repeatedly throwing a collection of objects onto a $15^\circ \times 15^\circ$ area until the desired number of objects is reached, hence increasing the density of the objects each time.
+This collection of objects were selected from a same $15^\circ \times 15^\circ$ area in SDSS Data Release 13.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{FIG12}
+  \caption{Data ingestion time as a function of catalog size. The linear baseline was created using the first three data points on this plot, showing the diverging character of the performance curve after 3 million objects.}
+  \label{fig:ingest}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{FIG13}
+  \caption{Display response and loading time as a function of catalog size for different zoom levels.}
+  \label{fig:load}
+\end{figure}
+
+The tile loading time is a direct indication of the responsiveness of the map when zoom level changes interactively.
+In our test, we fixed the map window to 512 by 512 pixels and aligned the center of map with the center of the window. Then, four tiles were loaded simultaneously each time the zoom level changes. We used the Chrome DevTool to record the loading time for each tile and take the average as the final result.
+Accordingly, if more tiles are loaded at the same time, for example, in the full screen mode, the loading performance might differ but follow a similar trend seen in Figure \ref{fig:load}.
+
+Another critical measurement is the smoothness of the panning motion on the map.
+Without triggering new tile loadings, the responsiveness of the panning motion is proportional to the number of SVG elements added to the Document Object Model (DOM) tree, the larger the DOM tree the longer it takes to pan the map.
+In the tests performed above, the tile loadings were usually slower than the panning motion and we didn't experience any significant lags, where the maximum number of objects loaded in one tile was around fifteen hundred.
+Nonetheless, higher latencies were observed in the full screen mode, as a direct result of increased number of SVG elements added to the DOM tree.
+
+As shown in the performance tests, the largest catalog being visualized on the mentioned machine include 10 million rows and 15 columns. Due to the constraints of the available hardware, we were not able to further examine the limit of \textit{Vizic}. However, we believe \textit{Vizic} will perform well with any dataset that has less than 50 million objects, on a more powerful machine. In the future release, we expect to make \textit{Vizic} capable of handling catalogs on the order of  $10^8$ and above. Currently if a user would like to work with a dataset on that order, we suggest the user to divide the entire dataset into several subareas and then create a map for each subarea. In a case that displaying the whole dataset and observing the big picture is most critical, the users can turn to tools like \textit{VaeX}, but sacrificing the ability to further interact with the data through object filtering and coloring, as well as the application of custom overlays.
+
+
+At this stage, the pre-defined custom overlays are not suitable for use on a single large dataset (typically over 100K data points being displayed at a time).
+However, these overlays could also be made to work by first dividing the region covered by the large catalog into several small areas and then creating a map for each smaller area.
+If the interesting objects happen to be near the edges of these small maps, the user can use the provided selection tool to query the catalog from the large map and create another new map from it.
+In the future release of \textit{Vizic}, a performance improvement related to the custom overlay is expected.
+
+\section{Conclusions \& Future Work}
+\label{future}
+In this paper, we present \textit{Vizic}, a Python visualization package, which is designed to work with the Jupyter Notebook App.
+To offer an easy and complete analysis environment, \textit{Vizic} utilizes the best part of both images and catalogs by visualizing astronomical sources on an interactive sky map and provides powerful interactions with the Jupyter notebook cells for further interactive scripting analysis with the data.
+
+While resembling the spatial distributions of the sources on the original images, the interactive sky maps created using \textit{Vizic} also allow us to filter or color displayed astronomical objects by their property values.
+The lasso-like selection tool provides us the ability to interactively select interesting objects from the sky map and retrieve their catalog from the linked MongoDB database.
+Alongside the returned DataFrame containing the catalog for the selected objects, we can further explore and analyze the hidden patterns among the data using various plotting packages available for Python and Jupyter, like \textit{matplotlib}, \textit{scikit-learn} and many others.
+In addition, \textit{Vizic} offers us the option to over-plot custom layers on the base map. Four pre-defined custom overlays are included in this package.
+The Voronoi diagram overlay, the minimum spanning tree overlay and the Delaunay triangulation overlay provide an easy and fast way to visualize cosmological structures.
+The HEALPix grid overlay is a convenient tool to interactively inspect the density field generated by the catalog or to complement with other astronomical data. \textit{Vizic} supports multiple datasets and multiple layers for a full exploration between different catalogs.
+
+We also demonstrate an immediate application of \textit{Vizic} by identifying galaxy clusters, voids and filaments. By utilizing the tree pruning feature provided by the minimum spanning tree overlay, we can match the saved tree branches with previously selected structures to visualize and detect these structures.
+The result shows that \textit{Vizic} is a powerful and friendly tool for visualizing large-scale structure. However, its usage is not limited to just galaxy catalogs, any form of catalog data can be easily handled by \textit{Vizic}, such as star and galaxy clusters, star forming regions in a galaxy, etc.
+
+In general, \textit{Vizic} provides a new way to efficiently visualize and interact with astronomical catalogs. Nevertheless, these features provided by \textit{Vizic} can also be applied to data from other scientific fields.
+
+Multiple improvements over the current version has already been planned.
+A major improvement is to further increase the scalability of this tool.
+While keep increasing the number of objects that \textit{Vizic} can efficiently visualize (with a maximum loading time of 0.5 second for each zoom level), we also would like to match the responsiveness of the custom overlays to that of the tiled base layer.
+We are currently testing new method of building these overlay layers using Web Components.
+With Web Components we can isolate each overlay from the outside world, so that the CSS style of the elements inside the overlay component is not affected by style changes originated from outside the overlay.
+Such feature can dramatically reduce the amount of time consumed by style recalculations when the map shifts locations.
+
+Another improvement is integrating \textit{Vizic} with other interactive plotting libraries and making it even easier for astronomers to explore the catalogs by taking advantage of the scripting power of Python, in a way that multiple tools are connected and the change in one is reflected in the other one, providing a complete user analysis experience in a Jupyter notebook.
+
+\section*{Acknowledgements}
+RJB acknowledges support from the National Science Foundation Grant No. AST-1313415.
+
+Some of the results in this paper have been derived using the HEALPix \citep{healpix} package.
+
+Funding for the Sloan Digital Sky Survey IV has been provided by
+the Alfred P. Sloan Foundation, the U.S. Department of Energy Office of
+Science, and the Participating Institutions. SDSS-IV acknowledges
+support and resources from the Center for High-Performance Computing at
+the University of Utah. The SDSS web site is www.sdss.org.
+
+SDSS-IV is managed by the Astrophysical Research Consortium for the
+Participating Institutions of the SDSS Collaboration including the
+Brazilian Participation Group, the Carnegie Institution for Science,
+Carnegie Mellon University, the Chilean Participation Group, the French Participation Group, Harvard-Smithsonian Center for Astrophysics,
+Instituto de Astrof\'isica de Canarias, The Johns Hopkins University,
+Kavli Institute for the Physics and Mathematics of the Universe (IPMU) /
+University of Tokyo, Lawrence Berkeley National Laboratory,
+Leibniz Institut f\"ur Astrophysik Potsdam (AIP),
+Max-Planck-Institut f\"ur Astronomie (MPIA Heidelberg),
+Max-Planck-Institut f\"ur Astrophysik (MPA Garching),
+Max-Planck-Institut f\"ur Extraterrestrische Physik (MPE),
+National Astronomical Observatories of China, New Mexico State University,
+New York University, University of Notre Dame,
+Observat\'ario Nacional / MCTI, The Ohio State University,
+Pennsylvania State University, Shanghai Astronomical Observatory,
+United Kingdom Participation Group,
+Universidad Nacional Aut\'onoma de M\'exico, University of Arizona,
+University of Colorado Boulder, University of Oxford, University of Portsmouth,
+University of Utah, University of Virginia, University of Washington, University of Wisconsin,
+Vanderbilt University, and Yale University.
+
+\bibliographystyle{model2-names}
+\nocite{*}
+
+\bibliography{vis}
+\end{document}

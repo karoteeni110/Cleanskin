@@ -1,0 +1,155 @@
+\begin{section}{Understanding Neural Style Transfer}
+In this section, we first theoretically demonstrate that matching Gram matrices is equivalent to minimizing a specific form of MMD. Then based on this interpretation, we extend the original neural style transfer with different distribution alignment methods.
+
+Before explaining our observation, we first briefly review the original neural style transfer approach~\cite{neuralart}. The goal of style transfer is to generate a stylized image $\mathbf{x}^*$ given a content image $\mathbf{x}_c$ and a reference style image $\mathbf{x}_s$. The feature maps of $\mathbf{x}^*$, $\mathbf{x}_c$ and $\mathbf{x}_s$ in the layer $l$ of a CNN are denoted by $\mathbf{F}^l \in \mathbb{R}^{N_l \times M_l}$, $\mathbf{P}^l \in \mathbb{R}^{N_l \times M_l}$ and $\mathbf{S}^l \in \mathbb{R}^{N_l \times M_l}$ respectively, where $N_l$ is the number of the feature maps in the layer $l$ and $M_l$ is the height times the width of the feature map.
+
+In \cite{neuralart}, neural style transfer iteratively generates $\mathbf{x}^*$ by optimizing a content loss and a style loss:
+\begin{equation}\label{eq:total_loss}
+\begin{aligned}
+\mathcal{L} = \alpha\mathcal{L}_{content} + \beta\mathcal{L}_{style},
+\end{aligned}
+\end{equation}
+where $\alpha$ and $\beta$ are the weights for content and style losses, $\mathcal{L}_{content}$ is defined by the squared error between the feature maps of a specific layer $l$ for $\mathbf{x}^*$ and $\mathbf{x}_c$:
+\begin{equation}
+\begin{aligned}
+\mathcal{L}_{content} = \frac{1}{2}\sum_{i=1}^{N_l}\sum_{j=1}^{M_l}(F_{ij}^l - P_{ij}^l)^2,
+\end{aligned}
+\end{equation}
+and $\mathcal{L}_{style}$ is the sum of several style loss $\mathcal{L}_{style}^{l}$ in different layers:
+\begin{equation}
+\begin{aligned}
+\mathcal{L}_{style} = \sum_{l} w_l\mathcal{L}_{style}^{l},
+\end{aligned}
+\end{equation}
+where $w_l$ is the weight of the loss in the layer $l$ and  $\mathcal{L}_{style}^{l}$ is defined by the squared error between the features correlations expressed by Gram matrices of $\mathbf{x}^*$ and $\mathbf{x}_s$:
+\begin{equation}\label{eq_style}
+\begin{aligned}
+\mathcal{L}_{style}^l = \frac{1}{4N_l^2M_l^2}\sum_{i=1}^{N_l}\sum_{j=1}^{N_l}(G_{ij}^l - A_{ij}^l)^2,
+\end{aligned}
+\end{equation}
+where the Gram matrix $\mathbf{G}^l \in \mathbb{R}^{N_l \times N_l}$ is the inner product between the vectorized feature maps of $\mathbf{x}^*$ in layer $l$:
+\begin{equation}
+\begin{aligned}
+G_{ij}^l = \sum_{k=1}^{M_l}F_{ik}^lF_{jk}^l,
+\end{aligned}
+\end{equation}
+and similarly $\mathbf{A}^l$ is the Gram matrix corresponding to $\mathbf{S}^l$.
+
+\begin{figure*}[hbtp]
+\begin{footnotesize}
+\begin{equation}\label{eq:provemmd}
+\begin{aligned}
+&\mathcal{L}_{style}^l = \frac{1}{4N_l^2M_l^2}\sum_{i=1}^{N_l}\sum_{j=1}^{N_l}(\sum_{k=1}^{M_l}F_{ik}^lF_{jk}^l - \sum_{k=1}^{M_l}S_{ik}^lS_{jk}^l)^2\\
+&=  \frac{1}{4N_l^2M_l^2}\sum_{i=1}^{N_l}\sum_{j=1}^{N_l}\Big( 
+		(\sum_{k=1}^{M_l}F_{ik}^lF_{jk}^l)^2 +
+		(\sum_{k=1}^{M_l}S_{ik}^lS_{jk}^l)^2 -
+		2(\sum_{k=1}^{M_l}F_{ik}^lF_{jk}^l)(\sum_{k=1}^{M_l}S_{ik}^lS_{jk}^l) \Big)\\
+&=  \frac{1}{4N_l^2M_l^2}\sum_{i=1}^{N_l}\sum_{j=1}^{N_l}\sum_{k_1=1}^{M_l}\sum_{k_2=1}^{M_l} ( F_{ik_1}^l F_{jk_1}^l F_{ik_2}^l F_{jk_2}^l + 
+S_{ik_1}^l S_{jk_1}^l S_{ik_2}^l S_{jk_2}^l - 2 F_{ik_1}^l F_{jk_1}^l  S_{ik_2}^l S_{jk_2}^l)\\
+&= \frac{1}{4N_l^2M_l^2}\sum_{k_1=1}^{M_l}\sum_{k_2=1}^{M_l} \sum_{i=1}^{N_l}\sum_{j=1}^{N_l} ( F_{ik_1}^l F_{jk_1}^l F_{ik_2}^l F_{jk_2}^l + 
+S_{ik_1}^l S_{jk_1}^l S_{ik_2}^l S_{jk_2}^l - 2 F_{ik_1}^l F_{jk_1}^l  S_{ik_2}^l S_{jk_2}^l)\\
+&= \frac{1}{4N_l^2M_l^2}\sum_{k_1=1}^{M_l}\sum_{k_2=1}^{M_l} 
+   \Big( (\sum_{i=1}^{N_l}F_{ik_1}^lF_{ik_2}^l)^2 + 
+         (\sum_{i=1}^{N_l}S_{ik_1}^lS_{ik_2}^l)^2 - 
+         2(\sum_{i=1}^{N_l}F_{ik_1}^lS_{ik_2}^l)^2
+   \Big)\\
+&= \frac{1}{4N_l^2M_l^2}\sum_{k_1=1}^{M_l} \sum_{k_2=1}^{M_l} 
+   \Big(  ({\col{\mathbf{f}^l}{k_1}}^T \col{\mathbf{f}^l}{k_2} )^2  + 
+   		  ({\col{\mathbf{s}^l}{k_1}}^T \col{\mathbf{s}^l}{k_2} )^2  -
+   		  2 ({\col{\mathbf{f}^l}{k_1}}^T \col{\mathbf{s}^l}{k_2} )^2 
+   \Big),
+\end{aligned}
+\end{equation}
+\end{footnotesize}
+\vspace{-2mm}
+\end{figure*}
+
+\begin{subsection}{Reformulation of the Style Loss}
+In this section, we reformulated the style loss $\mathcal{L}_{style}$ in Eq.~\ref{eq_style}. By expanding the Gram matrix in Eq.~\ref{eq_style}, we can get the formulation of Eq.~\ref{eq:provemmd}, where $\col{\mathbf{f}^l}{k}$ and $\col{\mathbf{s}^l}{k}$ is the $k$-th column of $\mathbf{F}^l$ and $\mathbf{S}^l$.
+
+By using the second order degree polynomial kernel $k(\mathbf{x}, \mathbf{y}) = (\mathbf{x}^T\mathbf{y})^2$, Eq.~\ref{eq:provemmd} can be represented as:
+\begin{equation}\label{eq:prove_result}
+\begin{aligned}
+\mathcal{L}_{style}^l =& \frac{1}{4N_l^2M_l^2}\sum_{k_1=1}^{M_l}\sum_{k_2=1}^{M_l}  
+	\Big( k(\col{\mathbf{f}^l}{k_1}, \col{\mathbf{f}^l}{k_2}) \\
+		 & + k(\col{\mathbf{s}^l}{k_1}, \col{\mathbf{s}^l}{k_2}) 
+		 - 2k(\col{\mathbf{f}^l}{k_1}, \col{\mathbf{s}^l}{k_2})
+	\Big)\\
+	=& \frac{1}{4N_l^2} \text{MMD}^2[\mathcal{F}^{l}, \mathcal{S}^{l}],
+\end{aligned}
+\end{equation}
+where $\mathcal{F}^{l}$ is the feature set of $\mathbf{x}^*$ where each sample is a column of $\mathbf{F}^l$, and $\mathcal{S}^{l}$ corresponds to the style image $\mathbf{x}_s$. In this way, the activations at each position of feature maps is considered as an individual sample. Consequently, the style loss ignores the positions of the features, which is desired for style transfer. In conclusion, the above reformulations suggest two important findings:
+\begin{enumerate}
+\item The style of a image can be intrinsically represented by feature distributions in different layers of a CNN.
+\item The style transfer can be seen as a distribution alignment process from the content image to the style image. 
+\end{enumerate}
+\end{subsection}
+
+\begin{subsection}{Different Adaptation Methods for Neural Style Transfer}\label{sec:methods}
+Our interpretation reveals that neural style transfer can be seen as a problem of distribution alignment, which is also at the core in domain adaptation. If we consider the style of one image in a certain layer of CNN as a ``domain'', style transfer can also be seen as a special domain adaptation problem. The specialty of this problem lies in that we treat the feature at each position of feature map as one individual data sample, instead of that in traditional domain adaptation problem in which we treat each image as one data sample. (\emph{e.g.} The feature map of the last convolutional layer in VGG-19 model is of size $14 \times 14$, then we have totally 196 samples in this ``domain''.)
+
+%The difference between the distribution alignment in these two problems is that the sample in neural style transfer is position-level (a feature vector in one position of a feature map for one image), while the sample in domain adaptation is image-level (a feature vector for a single image). 
+
+Inspired by the studies of domain adaptation, we extend neural style transfer with different adaptation methods in this subsection.
+
+\begin{paragraph}{MMD with Different Kernel Functions}
+As shown in Eq.~\ref{eq:prove_result}, matching Gram matrices in neural style transfer can been seen as a MMD process with second order polynomial kernel. It is very natural to apply other kernel functions for MMD in style transfer. First, if using MMD statistics to measure the style discrepancy, the style loss can be defined as:
+\begin{equation}\label{eq:style_mmd}
+\begin{aligned}
+&\mathcal{L}_{style}^l = \frac{1}{Z^l_k}\text{MMD}^2[\mathcal{F}^{l}, \mathcal{S}^{l}],\\
+	&= \frac{1}{Z^l_k}\sum_{i=1}^{M_l}\sum_{j=1}^{M_l}\Big( 
+		k(\col{\mathbf{f}^l}{i}, \col{\mathbf{f}^l}{j}) +
+		  k(\col{\mathbf{s}^l}{i}, \col{\mathbf{s}^l}{j}) - 2k(\col{\mathbf{f}^l}{i}, \col{\mathbf{s}^l}{j})
+	\Big),
+\end{aligned}
+\end{equation}
+where $Z^l_k$ is the normalization term corresponding to different scale of the feature map in the layer $l$ and the choice of  kernel function. Theoretically, different kernel function implicitly maps features to different higher dimensional space. Thus, we believe that different kernel functions should capture different aspects of a style. We adopt the following three popular kernel functions in our experiments:
+\begin{enumerate}[{(1)}]
+	\item Linear kernel: $k(\mathbf{x}, \mathbf{y}) = \mathbf{x}^T\mathbf{y}$;
+	\item Polynomial kernel: $k(\mathbf{x}, \mathbf{y}) = (\mathbf{x}^T\mathbf{y} + c)^d$;
+	\item Gaussian kernel: $k(\mathbf{x}, \mathbf{y}) = \exp\big( -\frac{\|\mathbf{x} - \mathbf{y}\|_2^2}{2\sigma^2}  \big)$.
+\end{enumerate}
+For polynomial kernel, we only use the version with $d = 2$. Note that matching Gram matrices is equivalent to the polynomial kernel with $c = 0$ and $d = 2$. For the Gaussian kernel, we adopt the unbiased estimation of MMD~\cite{gretton2012optimal}, which samples $M_l$ pairs in Eq.~\ref{eq:style_mmd} and thus can be computed with linear complexity. % Using the MMD statistics the style loss , the style loss Eq.~\ref{eq:prove_result} can be changed to  different forms:
+% \begin{equation}
+% \begin{aligned}
+% \mathcal{L}_{style}^l = \left\{
+% 		\begin{array}{ll}
+% 			\frac{1}{N_lM_l}\sum_{i,j=1}^{M_l} 
+% 	\Big( {\col{\mathbf{F}^l}{i}}^T \col{\mathbf{F}^l}{j} +
+% 		  {\col{\mathbf{S}^l}{i}}^T \col{\mathbf{S}^l}{j} + 
+% 		  -2{\col{\mathbf{F}^l}{i}}^T \col{\mathbf{S}^l}{j} \Big)\\
+% 			y\\
+% 		\end{array}
+% \right.
+% \end{aligned}
+% \end{equation}
+
+
+\end{paragraph}
+
+\begin{paragraph}{BN Statistics Matching} In~\cite{adabn}, the authors found that the statistics (\emph{i.e.} mean and variance) of Batch Normalization (BN) layers contains the traits of different domains. Inspired by this observation, they utilized separate BN statistics for different domain. This simple operation aligns the different domain distributions effectively. As a special domain adaptation problem, we believe that BN statistics of a certain layer can also represent the style. Thus, we construct another style loss by aligning the BN statistics (mean and standard deviation) of two feature maps between two images:
+\begin{equation}
+%\begin{small}
+\begin{aligned}
+&\mathcal{L}_{style}^l = \frac{1}{N_l} \sum_{i=1}^{N_l}\Big( ( \mu^i_{F^l} - \mu^i_{S^l} )^2 + ( \sigma^i_{F^l} - \sigma^i_{S^l} )^2 \Big),
+\end{aligned}
+%\end{small}
+\end{equation}
+where $\mu^i_{F^l}$ and $\sigma^i_{F^l}$ is the mean and standard deviation of the $i$-th feature channel among all the positions of the feature map in the layer $l$ for image $\mathbf{x}^*$:
+\begin{equation}
+%\begin{small}
+\begin{aligned}
+\mu^i_{F^l} = \frac{1}{M_l} \sum_{j=1}^{M_l} F^l_{ij}, \quad
+{\sigma^i_{F^l}}^2 =  \frac{1}{M_l} \sum_{j=1}^{M_l} (F^l_{ij} - \mu^i_{F^l})^2,
+\end{aligned}
+%\end{small}
+\end{equation}
+and $\mu^i_{S^l}$ and $\sigma^i_{S^l}$ correspond to the style image $\mathbf{x}_s$.
+\end{paragraph}
+
+
+The aforementioned style loss functions are all differentiable and thus the style matching problem can be solved by back propagation iteratively.
+\end{subsection}
+
+\end{section}
+
