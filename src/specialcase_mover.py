@@ -7,18 +7,19 @@ Usage:
     e.g.: python3 specialcase_mover.py 1701/log/00error.txt
 """
 import sys, shutil
-from os.path import join, listdir
+from os.path import join
+from os import listdir
 from paths import results_path, data_path
 
 fl_path = join(results_path, sys.argv[1])
 with open(fl_path, 'r') as flfile:
     fl = flfile.readlines()
-fl = [line.split()[-1] for line in fl] # Special case list: ['', '=1701.01118', ...]
+fl = [line.split()[-1] for line in fl if line.split()[-1].isdigit()] # Special case list: ['', '=1701.01118', ...]
 
 fournum_dir = sys.argv[1][:4] # 1701
 src = join(data_path, fournum_dir) # root/data/1701
 list_dir = listdir(src) # ['=1701.00001', '=1701.00002', ...]
-dest = join(results_path, fournum_dir) # root/results/1701
+dest = join(data_path, 'special') # root/data/special
 
 for sub_dir in list_dir:
     if sub_dir in fl:
