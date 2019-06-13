@@ -45,7 +45,7 @@ def main():
     
     # Substitute & write out
     for i, (fpath, dirname, fname) in enumerate(all_tex):
-        with open(fpath, mode='r', encoding='utf-8',errors='ignore') as texfile:
+        with open(fpath, mode='r', encoding='utf-8', errors='ignore') as texfile:
             try:
                 data = texfile.read()
             except UnicodeDecodeError as e:
