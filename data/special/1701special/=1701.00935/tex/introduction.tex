@@ -1,0 +1,65 @@
+%!TEX root = ../wbi.tex
+\section{Introduction}
+
+Nowadays, robotics is moving from the original industrial context to more human-like environments.
+Foreseen applications involve robots with augmented autonomy and physical mobility. 
+Within this novel context, physical interaction influences stability and balance.
+Consequently, the requirements and tasks that we expect from some platforms are changing as well. 
+Instead of precise positioning tasks confined in cages in industrial assemblies, robots are foreseen to help in everyday-life tasks such as cleaning houses or elderly assistance. 
+
+The increase in complexity of robotic systems demands an increase in complexity of the corresponding control software.
+While ad-hoc solutions can be easy to implement, it is important to consider scalability, flexibility and portability of the developed software.
+The possibility to use the same software to control more than one platform can be of enormous importance in simplifying the testing, tuning, and deployment of the same controller on different robots.
+
+% Foreseen applications involve robots with augmented autonomy and physical mobility.
+% Within this novel context, physical interaction influences stability and balance.
+Whole-body control has received an increased attention by the robotics community because of the possibility it offers to accomplish tasks coordination and to fully take advantage of the robots dynamics in presence of contacts.
+% To allow robots to surpass barriers between interaction and posture control, CoDyCo will be grounded in principles governing whole-body coordination with contact dynamics.
+% In the context of multiple degrees of freedom redundant robots, whole-body control has received an increased attention by the robotics community.
+Indeed, the possibility to specify multiple objectives, even conflicting, at the same time opens the possibility to properly exploit robots for complex scenarios.
+% Unfortunately the existence of multiple objective to be satisfied greatly complexifies the control problem.
+% Whole-body control is a control formulation in which the whole robot is taken into account during the execution of a single task, with all the possible constraints and by considering all the tasks the robot should execute.
+In particular, citing the definition from the RAS Technical Committee \cite{RAS_WBC_TC} ``\emph{Whole-Body Control aims to i) define a small set of simple, low-dimensional rules (e.g., equilibrium, self collision avoidance, etc.) ii) that are sufficient to guarantee the correct execution of any single task, whenever feasible [...], and of simultaneous multiple tasks [...], iii) exploiting the full capabilities of the entire body of redundant, floating-based robots in compliant multi-contact interaction with the environment}''.
+
+In the context of whole-body control the Task function approach \cite{Samson1991} has been successfully used. 
+In this method, the control objectives are represented as $n$-dimensional continuous output functions, called tasks, to be regulated to zero.
+All the tasks, together with possible constraints are then transformed into a constrained optimization problem. % to be solved by an appropriate solver.
+From a software perspective, different implementations exist nowadays, among which the Stack of Task (SoT)~\cite{Mansard2009}, OpenSoT~\cite{rocchi2015opensot}, ControlIt!~ \cite{fok2016controlit} and the Instantaneous Task Specification using Constraints (iTaSC)~\cite{DeSchutter2007}.
+The above softwares allow the user to specify the objectives and constraints but they solve the control problem internally. 
+A disadvantage is that they force the user to choose a specific task-based approach to obtain the control solution thus denying the control designer the possibility to synthesize different control laws.
+
+In this paper we propose a different approach for the whole-body control of mechanical systems.
+We deal with the control problem from a more general perspective, without limiting the user to the use of a task-based approach.
+Indeed, when we consider a generic control system, we usually identify three main building blocks:
+% A control system has to access, in general, three basic types of information of the controlled plant:
+\begin{itemize}
+    \item Plant model. If we consider a model-based control system, in this block the information about the plant model given the current plant state are computed.
+    \item Feedback from the plant. This usually implies the possibility to obtain the current state of the controlled plant.
+    \item Actuation. The control system must interact with the plant.
+\end{itemize}
+Any control-oriented software library must provide the above features to be of any use.
+Given the complexity of robotic systems it can be difficult, time consuming and error prone to write the controller directly in a low-level programming language such as C++. 
+Nevertheless the control library must be efficient as it is usually required to have fast control loops. 
+% I don't think citing 100 Hz is useful here. 
+% For example a commonly chosen control loop frequency is $100 \mathrm{Hz}$, but this can greatly vary depending on the dynamic response of the considered controlled system.
+% Support to model-driven engineering is thus an additional welcome functionality of the library.
+The aforementioned requirements serve as motivation for a model-based driven approach in such control libraries.
+
+In this paper we propose a software abstraction layer which is responsible of decoupling the control software from 
+\begin{inparaenum}[i)]
+    \item the actual interface used to obtain the state feedback;
+    \item the actual interface used to command the actuation;
+    \item the dynamic software library used to represent the robot dynamical model.
+\end{inparaenum}
+Furthermore the proposed library is scalable and easily portable to other robots or different configurations.
+
+
+
+
+% - Flexibility: test in simulation, on the robot, etc
+
+This paper is structured as follows. Section~\ref{sec:background} introduces the mathematical formulation of the dynamics of mechanical systems and it shows an example of a simple classic controller.
+Section~\ref{sec:software_architecture} describes the architecture of the proposed whole-body abstraction library and its key elements.
+A specific implementation is instead presented in Section~\ref{sec:software_implementation}.
+The controller mathematically introduced in Section~\ref{sec:background} is implemented with the proposed library in Section~\ref{sec:experiments}. 
+Finally Section~\ref{sec:conclusions} draws the conclusions.

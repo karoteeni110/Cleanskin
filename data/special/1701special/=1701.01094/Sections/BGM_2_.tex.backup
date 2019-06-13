@@ -1,0 +1,129 @@
+% !TEX root = ../ICDMW.tex
+Bayesian graphical model assumes a particular form for the joint probabilistic distribution over the set of local characteristics and the global characteristic to be predicted, where the idea is to represent conditional dependencies and independence among charcteristics by means of a graph structure.
+Besides, modelling complex joint probability distribution over the set of characteristics in a modular way, Bayesian networks can be used for predicting the probability distribution over the states of unknown global charcteristics by a process called \textit{Bayesian inferencing}.
+
+In this section, we present our approach of predicting global characteristic $G_j$ using $M$ local characteristics with Bayesian graphical modeling approach. It consists of three steps as following:
+\begin{enumerate}
+ \item Given the global characteristic $G_j$ and local databse consist of $N_{p}$ products where each product having $M$ local characteristics, we first find set of top k most relavent local characteristics w.r.t $G_j$, i.e., those having highest pairwise mutual information with $G_j$. We denote this set of local characteristics by $S^j(L) = \{L_i: i = 1$ to $k\}$.
+ \item Once we identify the set $S^j(L)$ for $G_j$, we learn the Bayesian Network structure for $k+1$ characteristics (includes $k$ local characteristics and $G_j$) using a novel approach of tree based Bayesian structure learning based on maximum spanning tree, we call it \textit{Restricted Structure learning}. 
+ \item Further, we learn parameters of Bayesian Network and do Bayesian inferencing based on the idea of \cite{yadav2015business}, that perform probabilistic queries using SQL queries on the database of the conditional probability tables of the Bayesian network and predict the probability distribution over the states of $G_j$.
+\end{enumerate}
+
+
+\subsection{Restricted (Tree) Structure Learning}\label{sec:struct}
+Bayesian graphical modeling is used to perform density estimation of the underlying distribution of the data. Bayesian graphical structure is learned to generalize the network model to new data instances. Broadly, there are two kinds of approaches for learning Bayesian network structures from data. First, which try to test conditional independence implied by the data and then tries to find a network which best satisfies the conditional independence constraints~\cite{spirtes2000causation}. However, these tests are sensitive to independence tests and can lead to an incorrect network if independence conditions return wrong results. Second, which search through combinatorial space of potential graphical models and uses some scoring metric to choose from them, typically returning the highest scoring model~\cite{cooper1992bayesian,lam1994learning}.
+
+Bayesian networks are associated with parameters known as conditional probability tables (CPT), where a CPT of a node indicates the probability that each value of a node can take given all combinations of values of its parent nodes. In CPTs, the number of bins grows exponentially as the number of parents increases leaving fewer data instances in each bin for estimating the parameters. Thus, sparser structures often provides better estimation of the underlying distribution~\cite{koller2009probabilistic}. Also, if the number of states of each node becomes high and the learned model is complex, Bayesian inferencing becomes conceptually and computationally intractable~\cite{lam1994learning}.
+Hence, tree-based structures can be useful for density estimation from limited data and in the presence of higher number of states for facilitating faster inferencing. We employ a tree-based, greedy search, and score based approach for learning tree-structured Bayesian networks. 
+
+\subsubsection{Approach for Maximum weight spanning tree based Bayesian structure}
+For a given $G_j$, once we obtain a set $S^j(L)$, we learn a Tree based Bayesian Network structure with $k+1$ characteristics $G_j$ and $L_i \in S^j(L)$. In order to explain our approach, we denote the set of these $k+1$ characteristics by $X = \{X_1, X_2,..., X_{k+1}\}$, where each $X_r \in X$ is either $G_j$ or $L_i \in S^j(L)$. Our approach of learning tree based Bayesian network structure consists of two steps. In first step, we learn maximum spanning tree (MST) of the relevant local characteristics and the global charcteristic to be predicted with non-directed edges. In second step, we learn the tree based Bayesian structure using the maximum spanning tree learned in the previous step.
+
+\textbf{Step-1:} Given the set $X$ of local characteristics and a global characteristic $G_j$, cross-entropy over tree structured distributions is minimized using  the results stated in theorem~\ref{Chow}, which states that cross-entropy between the the tree structures distributions and the actual underlying distribution is minimized when the structure is a maximum weight spanning tree.
+
+\begin{theorem}
+\label{Chow}
+\cite{chow1968approximating} states that if the mutual information between any two nodes, representing local/global characteristics in our case, $X_{r}$ and $X_{s}$ (where $X_{r}, X_{s} \in \lbrace S^j(L) \cup G_{j} \rbrace) $ is defined as Equation~\ref{eq:Mutual_info}
+\begin{equation}
+\label{eq:Mutual_info}
+W(X_{r},X_{s}) = \sum_{X_{r},X_{s}} P(X_{r},X_{s}) \log_2 \frac{P(X_{r},X_{s})}{P(X_{r})P(X_{s})}
+\end{equation}
+where we are summing over all possible values of $X_{r}$ and $X_{s}$, then by assigning to every arc between two nodes $X_{r}$ and $X_{s}$ a weight equal to $W(X_{r},X_{s})$, cross-entropy between the tree structures distributions and the actual underlying distribution is minimized when the structure is a maximum weight spanning tree. 
+\end{theorem}
+
+\begin{theorem}
+\label{Lam and Bacchus}
+\cite{lam1994learning} states that cross entropy is a monotonically decreasing function of Equation~\ref{eq:cross_ent}
+\begin{equation}
+\label{eq:cross_ent}
+\sum_{r=1,Pa(X_{r}) \neq 0}^{k+1} W(X_{r},Pa(X_{r}))
+\end{equation}
+
+Cross-entropy will be minimized if and only if sum (\ref{eq:cross_ent}) is maximized.
+\end{theorem}
+
+Mutual information is computed between each pair of nodes ($X_r, X_s$) using non-parametric entropy estimation toolbox \cite{ver2000non}. This tool implements an approach in \cite{kraskov2004estimating} to find mutual informations estimators based on k-nearest neighbor distances. With mutual information as the weight between each pair of nodes, maximum spanning weight tree is obtained using Kruskal's algorithm. Maximum spanning tree obtained for $k+1$ characteristics will have $k$ edges. For example, Fig~\ref{fig:mst} shows the maximum spanning tree learned on six nodes, where one of the node is represented by $G_j$ while rest of the nodes are represented by the local characteristics $L_i \in S^j(L)$.
+%  \begin{figure}
+%  \centering
+%  \includegraphics[scale=0.30]{Figures/MSTN}
+%  \caption{Maximum Spanning Weight Tree over six nodes}
+%  \label{fig:bn1}
+%  \end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width = 55mm]{Figures/MST}
+\caption{Maximum Spanning Weight Tree over six nodes}
+\label{fig:mst}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width = 55mm, height=50mm]{Figures/BN-1}
+\caption{Tree based Bayesian Graphical Structure}
+\label{fig:bn1}
+\end{figure}
+
+\textbf{Step 2:} Once we obtain a maximum spanning tree, each edge direction is randomly initialized to find optimal tree based graph. By learning MST in step 1, we reduce the search space of possible graphs to the order of $2^{O(k+1)}$, which was of order $2^{O((k+1)^2)}$ earlier. Edge directions are flipped sequentially to obtain $2^{k}$ directed graphs along with their corresponding weights given by Equation~\ref{eq:cross_ent}. Further, we reduce our search space by restricting number of parents of each node to be at most one. Graph with maximum weight ((minimum cross-entropy) (Theorem~\ref{Lam and Bacchus})) 
+is chosen as the best graphical (sparse) structure representative of underlying distribution. Fig~\ref{fig:bn1}, shows an example of the tree based graph learned from MST in Fig~\ref{fig:mst}.
+
+\subsection{Parameter learning and Bayesian Inference}\label{sec:cpt}
+
+Once we obtain a Tree based Bayesian Network structure over the set of nodes, we learn the CPTs of each node
+Once we obtain a Tree based Bayesian Network structure over the set of nodes $X = \{ X_1, X_2,... X_{k+1}\}$, we learn the CPT of each node in the network. Let each node $X_r$ in a network takes $n_r$ discrete states $v_{r,1}, v_{r,2},..., v_{r,nr}$. We learn the CPTs of each node in the network using aggregation queries similar to:
+\begin{equation}
+ G_{count()} \sigma_{[X_r=v_{r,t}]} X
+\end{equation}
+
+for each $t=1, 2,..., n_r$. Here $G_{count()}$ refers to aggregate function $count()$ under the select operation($\sigma$) with condition $X_r=v_{r,t}$.
+
+It should be noted that due to high cardinality, i.e., for large value of $n_r$, size of the CPTs become exponentially large in case of traditional Bayesian networks. However, our approach of structure learning makes sure that we model the Bayesian structures as tree rather than complex DAGs, which helps in restricting size of CPTs, eventually facilitating in faster inferencing. Further, as we shall describe below in Section \ref{subsec:global}, we construct many small models with selected characteristics rather than one large Bayesian network.
+
+\subsection{Bayesian inference using SQL database}\label{sec:inference}
+The CPTs learned from the data are stored in SQL database and all further probabilistic queries are then answered using this database. A probabilistic query for $n$ target characteristics/nodes $X_{r_1}, X_{r_2},..., X_{r_n}$ under the condition Q, where Q specifies a set of conditions on the remaining $N-k$ characteristics can be computed by executing $n_{r_1}\times n_{r_2}\times...n_{r_n}$ queries, each of the form as given in Equation~\ref{eq:query}
+\begin{equation}
+\label{eq:query}
+ G_{count()}\sigma_{[X_{r_1}= v_{r_1,t_1}, X_{r_2}=v_{r_2,t_2},...,X_{r_k} = v_{r_n,t_n},Q]} X
+\end{equation}
+
+For example in Fig~\ref{fig:bn1}, consider nodes $X_{1}$ and $X_{3}$ are observed with the values $v_{1,1}$ and $v_{3,1}$ respectively, then distribution of node $X_{2}$ can be obtained by executing 10 queries for the ten possible values of $X_2=v_{2,t}$, $t =1,2,..., 10$ of the form %$G_{count()}\sigma_{[X_2=x^j_2, X_1=x_1,X_3=x_3]} I $
+\begin{equation}
+\label{eq:queryex}
+ G_{count()}\sigma_{[X_2=v_{2,t}, X_1=v_{1,1},X_3=v_{3,1}]} X
+\end{equation}
+
+We use SQL for querying the CPTs considering them as set of relational tables.
+For example, if we translate the relational expression of Equation~\ref{eq:queryex} for the Figure~\ref{fig:bn1}(b), it is equivalent to the following SQL query:
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`$=3\catcode`_=8}]
+ \scriptsize{SELECT $X_2$, SUM($P\_X_1*P\_X_2*P\_X_3*P\_X_4*P\_X_5*P\_X_6$)}
+  \scriptsize{FROM $T\_X_1,T\_X_3,T\_X_4,T\_X_5,T\_X_6$}
+  \scriptsize{WHERE $X_1=x_1$ AND $X_3=x_3$}
+ \scriptsize{GROUP BY $X_2$} 
+\end{Verbatim}
+Here $X_2$ is the query variable, and $T\_X_1$,$T\_X_3$, $T\_X_4$, $T\_X_5$, $T\_X_6$ are CPTs of $X1, X_3, X_4, X_5, X_6$ respectively. $P\_X_1$, $P\_X_3$, $P\_X_4$, $P\_X_5$, $P\_X_6$ are respective probability column names and WHERE clause defines the given condition. Similar query can be used to calculate evidence of given condition:
+
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`$=3\catcode`_=8}]
+ \scriptsize{SELECT SUM($P\_X_1*P\_X_2*P\_X_3*P\_X_4*P\_X_5*P\_X_6$)}
+  \scriptsize{FROM $T\_X_1,T\_X_2,T\_X_3,T\_X_4,T\_X_5,T\_X_6$}
+  \scriptsize{WHERE $X_1=x_1$ AND $X_3=x_3$}
+\end{Verbatim}
+
+Note that  exact inference in the above manner it is not necessarily efficient unless the network structure is simple.
+However, as we describe below, we learn many simple tree-based structures on small numbers of characteristics instead of
+one large network, so such a procedure performs adequately in our practical scenario, especially since the SQL engine's internal optimizer executes joins in an optimal manner.
+
+\subsection{Predicting Global Characteristics}
+\label{subsec:global}
+Given the local database $L$ of $N$ products $I_l$, $l = 1, 2..., N$, where each product has $M$ local characteristics,
+%$I =\{I_1, I_2,..., I_N\}$, where each item $I_r$ has $M$ local characteristics denoted by $l_1, l_2,...,$ $l_M$. Further, consider each local characteristic has $n_i$ possible discrete values $v_{i1}, v_{i2},..., v_{in_i}$. For each item,
+our goal is to predict $K$ global characteristics denoted by $G_1, G_2,..., G_K$. Here, each global characteristic $G_j$ has $m_j$ possible discrete states $g_{j,1}, g_{j,2},..., g_{j,m_j}$.
+
+We use Bayesian graphical models to predict the value of $G_j$ for every product in the set $L$. In order to predict global characteristics, we construct Bayesian Network for each $G_j$ separately using an approach explained above.  For each $G_j$, we first choose top $k$ most relevant local characteristics, i.e., those having the highest pair-wise mutual information with $G_j$. We learn a tree-structured Bayesian network
+and its parameters as described earlier and use it to predict the probabilities $p^l_{j,1}, p^l_{j,2},..., p^l_{j,m_j}$ for every state of $G_j$, given the observed  values of local characteristics in the Bayesian network, using inference as explained earlier in Section~\ref{sec:inference}. H
+
+\subsection{Why use Exact Inference?}
+Exact inference for Bayesian networks is usually deemed to be impractical because of its potential intractability. At the same time, the popular Naive Bayes classifier can be viewed as exact inference, albeit on a trivial network with one root connected to each other variable. Exact inference works in this case because all variables are usually observed during inference (i.e., prediction). Our approach can be viewed as merely extending the above to slightly more complex networks. Again, most of the time all local characteristics are present (i.e., `observed') while predicting a global characteristic value. However, the advantage of the network structure comes into play in cases where some local attributes are \textit{missing}. Specially, when few data points are used for training in case of high cardinality characteristics (we present our results on such cases also). In such cases, Bayesian posterior inference naturally averages over all possible values for such missing characteristics, leading to better predictions. 
+
+Moreover, approximate inference techniques (such as belief propagation or variational techniques), which can deal with large networks, hidden variables,
+etc., are usually best performant when variable cardinalities are small. Generative (i.e., sampling-based) approaches are resorted to otherwise. Exact inference on the \textit{small} networks, as demanded in our approach, proved to be quite adequate, at least in our scenario.
+At the same time, we admit to not having done an exhaustive exploration of approximate alternatives, since that was not our goal, and it remains an area for possible further investigation.

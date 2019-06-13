@@ -1,0 +1,31 @@
+Each product in local databse has another form of information called \textit{descriptions}. Uncertainty in the description(as shown in Fig~\ref{fig:retailer}) for a single product poses lot of challenges to extract relevant information from it. In this section, we present an approach called \textit{Text information retrieval}(TIR) which uses descriptions of each product to predict the probability of each possible state of the global characteristics $G_j$. %In this approach, we first find the scores of each state of $G_j$ using string matching algorithm and then we convert these scores into probabilities which is explained as  follows:
+%\begin{itemize}
+
+%\item 
+Consider each product $I_l$ in $L$ has $r_l$ descriptions $d_{l,1}, d_{l,2}$, $..., d_{l,r_l}$. For each $d_{l,r}$
+we concatenate retailer descriptions from all retailers into one string $S_l$. Further, we prepare a set of n-grams of adjacent words (up to bi-grams) in $S_l$, denoted by $N_l = \{n_k\}$, where frequency $f_k$ of each $n_k$ is defined as a ratio of the number of times $n_k$ exists in $S_l$ to the number of descriptions of $I_l$.
+%  \begin{equation}
+%   f_k = \frac{\textrm{no. of times} \ n_k \textrm{ exist in} \ S_l}{\textrm{no. of descriptions of} \ I_l}
+%  \end{equation}
+Descriptions of a product may contain repetitive words e.g., a word `Cherry' from first retailer exist twice in Fig~\ref{fig:retailer}. For such cases, where maximum frequency exceeds 1, we restrict it to 1. 
+
+%\item
+For every state $g_{j,t}$ of $G_j$, where $t = 1,2,...,m_j$, we find the best matching n-gram from the set $N_l$ by calculating   Jaro-Wrinkler distance \cite{winkler1990string} between $g_{j,t}$ and every $n_k \in N_l$ and choose the n-gram $n^t_k$ with the maximum score say $s^{l}_{j,t}$.  
+%  \[
+% d_j =
+%  \left\{
+% \begin{array}{ll}
+%       0 & if \ m = 0\\
+%       \frac{1}{3}(\frac{m}{\textbar s_1 \textbar} + \frac{m}{\textbar s_2 \textbar} + \frac{m-t}{m} )& otherwise \\
+% \end{array} 
+% \right. \]
+% where $m$ is the number of matching characters and t is half the number of transpositions.
+% %\item 
+% Choose n-gram say $n_t$ with maximum score and let for an item $I_l$, the score between $v_{j,t}$ and $n_t$ denoted by $s^{l}_{j,t}$. 
+% %\item 
+Further, multiply the scores $s^l_{j,t}$ with the frequency of corresponding n-gram to get the new score say $s^{l}_{j,t}$, i.e., $s^{l}_{j,t} = s^{l}_{j,t} \times f_{t}$
+% \begin{equation}
+%  s^{r}_{jl} = s^{r}_{jl} \times f_{l}
+% \end{equation}
+%\end{itemize}
+Therefore, for a product $I_l \in L$, we have scores $s^{l}_{j,t}$ for every possible value $g_{j,t}$ of global characteristic $G_j$. Further, we convert each score $s^{l}_{j,t}$ into the probability $q^{l}_{j,t}$ by using softmax scaling function.

@@ -1,0 +1,58 @@
+Traditional business intelligence is rapidly evolving to adopt modern big-data analytics architectures based on the concept of a `data lake', where, rather than  first integrating multiple historical data from diverse sources into a common star schema via extraction-transformation-load operations, the datasets are maintained in their raw form for analysis. Such an environment leads to a number of challenges while deriving analytical insights; for example, dealing with incongruous join keys between different datasets. 
+
+In this paper, we focus on a class of problems in the above context, such as fusion of information about consumer products, such as sales, market share, etc., which is spread across disparate databases belonging to different organizations, across which a product is \textit{not} easily identifiable via a common key. In a real-world data-lake created for one of our enterprise customer, one of the datasets called \textit{Global database} contains the global-product-ids used at the global-level along with their key-characteristics. The local-product-ids along with their key characteristics used in various countries were present in another dataset called \textit{Local databse}. Here, the local-product-ids for the same product were different for every country as well as different from global-product-ids, i.e., no mapping existed between same product from two countries, or with the \textit{Global database}. As a result, it is hard to perform analytic tasks such as comparing the sales of a portfolio of products sold in two different countries. Attributes of products such as brand, flavor, material used etc, for carbonated drinks, are inconsistent across geographies. The same product could be defined using different values of attributes (sometimes using different set of attributes altogether) across different countries as shown in Figure~\ref{fig:local}. In addition to above, textual \textit{description} of products written by retailers are also available, e.g., for carbonated drinks it usually contains information of brand, size, material used, packaging etc.  Number of descriptions of a single product in one geography depends on the number of retailers which can go up to the order of hundreds. 
+
+\begin{figure}
+\centering
+\includegraphics[width=65mm]{Figures/local-char}
+\vspace{4pt}
+\caption{Local characteristics of the same product across four geographies and its corresponding global characteristics}
+\vspace{-18pt}
+\label{fig:local}
+\end{figure}
+
+One way to perform analytical tasks across such disparate database is via a global reference database that maintains reliable and consistent information of a product, by a fixed set of global characteristics(as shown in the last column of Figure~\ref{fig:local}). However, preparing such global reference is a huge manual and complicated task because: a)~The cardinality (number of possible values) of local and global characteristics varies from tens to thousands, and b)~Uncertainty in the semantics of local characteristics, of the same product from different geographies, leads to confusion in identifying the product, even by human annotators.
+ 
+Our aim is to help reduce cost of the operational process of creating and maintaining global reference data by reducing manual workload via automation, and 
+establish modern data-lake architectures of fusion of federated databases without a complete join into star-schema.
+At the same time, we would like matchings to be precise with high confidence, or abstain from making the prediction so that such records can be sent to human annotators. Ideally, we would like to minimize the number of such abstentions while maximizing the precision of the predictions we make automatically.
+
+\subsection{Attribute Fusion using Record Matching}
+Consider two databases (see Figure~\ref{fig:Prob1}): a)~local database with each product having local characteristics $L_1, L_2,..., L_M$, e.g., flavor, brand, etc., and retailer descriptions($D_i$), and b)~a global database having $K$ global characteristic. This problem can also be seen as the \textit{record matching} problem where products from local database need to matched with their respective global values in other database. However, our objective is only to reconcile sales performance metrics such as volume sales, market-share, revenue etc., with respect to characteristics such as brand, flavor etc. This can be achieved by mapping products in local database with specific  global characteristic $G_j$ separately, e.g., brand-name. This breaks the above mentioned problem into $K$ different record matching problems (as shown in Figure~\ref{fig:Prob2}). However, solving these $K$ problems with traditional \textit{record matching} method is computationally expensive and less efficient (as shall be shown in Section \ref{sec:experiment}) due to challenges like high cardinality and inconsistencies of local and global characteristics. Therefore in this paper, we propose an alternative approach to this problem (as shown in Figure~\ref{fig:Prob2}), by treating it as a prediction problem of global characteristics given the local characteristics and retailer descriptions, i.e., $P(G_j/L_1, ..., L_M, D_i)$. So, for every product in a local database, we predict the values of global characteristics $G_1, G_2,...,$ and $G_K$ separately and then join the local database with global database based on predicted values. 
+
+\textbf{\textit{Novel Approach}}: 
+Our approach employs an ensemble of Bayesian network models and textual similarity. Importantly, it produces a confidence value along with each prediction, which helps to decide whether the predicted global characteristic is reliable or not, i.e., whether to use the predicted global characteristic or re-direct a particular record for human annotation. The performance of our approach has been demonstrated using both a traditional split of training vs testing data, as well as a more realistic and practical split of training on say, 20$\%$ of the data and testing on the remaining records. For both the cases, confidence based ensemble approach shows high accuracy.  We also compare our approach with available techniques \cite{christen2008febrl} by treating it as a record matching problem; we demonstrate that our approach outperforms FEBRL\cite{christen2008febrl} on our real-life data.
+\begin{figure}
+\centering
+\includegraphics[width=78mm]{Figures/Prob-combine}
+%\vspace{-8pt}
+\caption{Local and Global Database}
+\vspace{-12pt}
+\label{fig:Prob1}
+\end{figure}
+
+% \begin{figure}
+% \centering
+% \includegraphics[width=65mm]{Figures/Prob-2}
+% %\vspace{-8pt}
+% \caption{$K$ record matching problems}
+% %\vspace{-12pt}
+% \label{fig:Prob2}
+% \end{figure}
+
+\subsection{Key Contributions}
+\begin{enumerate}
+\item We have addressed the problem of automating attribute fusion across diverse data sources that do not share a common join key in an indirect
+manner, to derive the most likely mapping of each federated record to a set of common `global' reference attributes.
+\item We have combined supervised, structured Bayesian predictive models with an unsupervised, unstructured technique in a confidence-based
+ensemble to predict the most likely value of a `global' reference attribute.
+\item Our approach additionally delivers confidence bounds on its predictions so that records can be routed for human annotation 
+for cases where the automated predictions are less likely to be correct.
+\item
+We have tested our approach in a real-life market research scenario where large volume, disparate datasets lack a natural join key, including
+cases where attribute values have high cardinalities  (in the thousands).
+\end{enumerate}
+
+% \subsection{Paper Organization}
+% The remainder of the paper is organized as follows: We begin with overview of our approach in Section~\ref{sec:over} followed by the detail description of BGM model in Section~\ref{sec:BGM}, where we present Bayesian approach to predict global characteristics, which includes tree-based structure learning, Bayesian parameter learning, and Bayesian inference using SQL databases. The TIR model to predict global characteristics using textual descriptions is presented in Section~\ref{sec:tir}. Next, we present an ensemble approach of these two models in Section~\ref{sec:ensemble}, where we calculate confidence of the prediction from each model and use it to combine predictions from both models. Results of our techniques and integrated approach using real world 
+% data are presented in Section~\ref{sec:experiment}. Finally, after the brief description of related work in Section~\ref{sec:related}, we conclude in Section~\ref{sec:conc} highlighting the prevalence of the problem we have addressed.
