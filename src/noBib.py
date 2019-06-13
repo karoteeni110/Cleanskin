@@ -13,7 +13,7 @@ Usage:
         python3 noBib.py DIRNAME
 """
 import re, os, sys
-from paths import results_dir, data_path, debib_dir
+from paths import results_path, data_path, debib_dir
 
 VERBOSE = True
 REPORT_EVERY = 100
@@ -50,7 +50,7 @@ def main():
                 data = texfile.read()
             except UnicodeDecodeError as e:
                 # Write out the error message and skip the file
-                with open(os.path.join(output_path, '00error.txt'), 'a') as errorlog:
+                with open(os.path.join(output_path, 'log/00error.txt'), 'a') as errorlog:
                     errorlog.write(fname + ' ' + e.reason + '\n')
                 continue
 
@@ -65,7 +65,7 @@ def main():
         clean_data = re.sub(bib,'', data, flags=re.S | re.M | re.I)
         debib_fname = os.path.join(output_path, '%s_debib.tex' % dirname) # Name files with dirname
         if os.path.exists(debib_fname): # Avoid overwriting
-            with open(os.path.join(output_path, 'problematic/00error.txt'), 'a') as errorlog:
+            with open(os.path.join(output_path, 'log/00error.txt'), 'a') as errorlog:
                 errorlog.write('MULTIPLE TEX IN ' + dirname + '\n')
             # debib_fname = os.path.join(output_path, '%s_%s_debib.tex' % (dirname, fname[:-4]))
         with open(debib_fname,'w') as out:
