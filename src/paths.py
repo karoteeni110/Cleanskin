@@ -5,8 +5,9 @@ repo_path = dirname(src_path)
 data_path = join(repo_path,'data')
 results_dir = join(repo_path, 'results')
 
-tester_tex_path = join(data_path, 'nat_orders_revisionv4Amaro.tex')
-mkd_path = join(data_path, 'example.text')
+def debib_dir(subdirn):
+    debib_dir = join(results_dir, subdirn)
+    return debib_dir
 
 if __name__ == "__main__":
     # Check that we are reading the correct file
@@ -14,4 +15,3 @@ if __name__ == "__main__":
     print('repo', repo_path)
     print('data', data_path)
     print('results', results_dir)
-    print('tester', tester_tex_path)

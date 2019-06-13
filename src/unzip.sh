@@ -1,12 +1,13 @@
 # !/bin/bash
-# 
-# gunzip astro-*.gz
 
-for basename in 1701.*. ; do # untar
-  if [ ${basename: -4} != ".pdf" ]; then 
+gunzip 1701.*.gz
+
+for basename in 1701.* ; do # untar
+  if [ ${basename: -4} != ".pdf" ] || [ $basename = cluster*]; then 
     tar -xvf "$basename" --one-top-level=="$basename" 
-  if [[ ! $basename =~ "=" ]] ; then # if it's not a directory, move to /cluster
-    mv $basename cluster
+  fi
+  if [[ ! $basename =~ "=" ]] ; then # if not a directory, move to /cluster
+    mv $basename cluster17
   fi
 done
 
