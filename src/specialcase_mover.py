@@ -14,7 +14,7 @@ from paths import results_path, data_path
 fl_path = join(results_path, sys.argv[1])
 with open(fl_path, 'r') as flfile:
     fl = flfile.readlines()
-fl = [line.split()[-1] for line in fl if line.split()[-1].isdigit()] # Special case list: ['', '=1701.01118', ...]
+fl = [line.split()[-1] for line in fl if line.split()[-1][-4:].isdigit()] # Special case list: ['', '=1701.01118', ...]
 
 fournum_dir = sys.argv[1][:4] # 1701
 src = join(data_path, fournum_dir) # root/data/1701
