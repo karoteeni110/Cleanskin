@@ -10,7 +10,7 @@ Usage:
 import re, os, sys
 from paths import results_dir, data_path
 
-VERBOSE = True
+VERBOSE = False
 REPORT_EVERY = 5
 
 def list_input(arg):
@@ -48,7 +48,9 @@ def main():
                 print('Stripping file %d: %s' % (i+1, fname))
 
         clean_data = re.sub(bib,'', data, flags=re.S | re.M | re.I)
-        with open(os.path.join(results_dir, '%s_debib.tex' % fname[:-4]),'w') as out:
+        debib_fname = os.path.join(results_dir, '%s_debib.tex' % fname[:-4])
+        print(debib_fname)
+        with open(debib_fname,'w') as out:
             out.write(clean_data)
             
 if __name__ == "__main__":
