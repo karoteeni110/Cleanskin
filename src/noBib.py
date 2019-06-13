@@ -45,12 +45,12 @@ def main():
     
     # Substitute & write out
     for i, (fpath, dirname, fname) in enumerate(all_tex):
-        with open(fpath, mode='r', encoding='utf-8') as texfile:
+        with open(fpath, mode='r', encoding='utf-8',errors='ignore') as texfile:
             try:
                 data = texfile.read()
             except UnicodeDecodeError as e:
                 # Write out the error message and skip the file
-                with open(os.path.join(output_path, 'error.txt'), 'a') as errorlog:
+                with open(os.path.join(output_path, '00error.txt'), 'a') as errorlog:
                     errorlog.write(fname + ' ' + e.reason + '\n')
                 continue
 
