@@ -1,0 +1,76 @@
+\documentclass[a4page,10pt]{article}
+\usepackage[top=0.8in, bottom=0.8in, left=0.5in, right=0.5in]{geometry}
+\usepackage{fancyhdr}
+\renewcommand{\thispagestyle}[1]{}
+\pagestyle{fancy}
+\fancyhead[RE,RO]{Technical Report}
+\fancyfoot[RE,RO]{TCS Research}
+\fancyfoot[LE,LO]{Copyright $\copyright$ 2015 Tata Consultancy Services Ltd.}
+%\usepackage[dvips]{graphicx}
+\usepackage[pdftex]{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{floatrow}
+\usepackage{multirow}
+\newfloatcommand{capbtabbox}{table}[][\FBwidth]
+
+\title{Minimally-Supervised Attribute Fusion for Data Lakes}
+
+
+\begin{document}
+\author{Karamjit Singh, Garima Gupta, Gautam Shroff, and Puneet Agarwal
+%
+% Optional short acknowledgment: remove next line if non-needed
+%
+% DO NOT MODIFY THE FOLLOWING '\vspace' ARGUMENT
+\vspace{.3cm}\\
+%
+%Addresses and institutions (remove "1- " in case of a single institution)
+TCS Research, New-Delhi, India\\
+%
+% Remove the next three lines in case of a single institution
+}
+\maketitle 
+
+
+\begin{abstract}
+Aggregate analysis, such as comparing country-wise sales versus global market share across product categories, is often complicated by the unavailability of common join attributes, e.g., category, across diverse datasets from different geographies
+or retail chains, even after disparate data is technically ingested into a common \textit{data lake}.
+Sometimes this is a missing data issue, while in other cases it may be inherent, e.g., the records in different 
+geographical databases may actually describe different product `SKUs', or follow different norms
+for categorization. Record linkage techniques, such as \cite{christen2008febrl} can be used to automatically map products in different data sources
+to a common set of \textit{global} attributes, thereby enabling federated aggregation joins to be performed.
+Traditional record-linkage techniques are typically unsupervised, relying textual similarity features across attributes
+to estimate matches. In this paper, we present an ensemble model combining minimal supervision using Bayesian network
+models together with unsupervised textual matching for automating such `attribute fusion'. We present results of our approach 
+on a large volume of real-life data from a market-research scenario and compare with a standard record matching algorithm. 
+Finally we illustrate how attribute fusion using machine 
+learning could be included as a data-lake management feature, especially as our approach also
+provides confidence values for matches, enabling human intervention, if required.
+%\keywords{We would like to encourage you to list your keywords within
+%the abstract section}
+\end{abstract}
+
+
+\section{Introduction}
+\input{Sections/Intro}\label{sec:intro}
+\section{Approach}
+Each product $l$ in $L$ has two kind of information (1) $M$ Local characteristics and (2) Textual descriptions by retailers. In this section, we present our approach to predict the value of global characteristic $G_j$ for each product in $L$. We use two different models for two different datasets (1) Supervised Bayesian Model (SBM) using local characteristics, and (2) Unsupervised Textual Similarity (UTS) using descriptions to compute probability of every possible state $g_{j,t}, t = 1, 2, ..., m j$ of $G_j$. Finally, we use an weighted ensemble based approach to combine the probabilities of both models to predict the value of $G_j$.
+\subsection{Supervised Bayesian Model}\label{sec:BGM}
+\input{Sections/BGM}
+\subsection{Unsupervised Text Similarity}\label{sec:tir}
+\input{Sections/TIR}
+\subsection{Ensemble of models}\label{sec:ensemble}
+\input{Sections/Ensemble}
+\section{Experiments and results}\label{sec:experiment}
+\input{Sections/experiments}
+%\section{Related Work}\label{sec:related}
+%\input{Sections/Related}
+\section{Conclusion}\label{sec:conc}
+\input{Sections/conclusions}
+
+\bibliographystyle{splncs03}
+%{\scriptsize
+\bibliography{PAKDD_bib}
+\end{document}

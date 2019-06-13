@@ -1,0 +1,124 @@
+%!TEX root = ../wbi.tex
+\section{Experiments}
+\label{sec:experiments}
+
+This section presents the implementation of the PD plus gravity compensation controllers briefly described in Section \ref{sub:control_examples}. 
+We also discuss the results of a more complex controller, namely a momentum-based balancing controller which has been implemented with the Simulink interface described in Section~\ref{sub:simulink_interface}.
+
+\subsection{PD plus Gravity Compensation} % (fold)
+\label{sub:pd_plus_gravity_compensation}
+
+This section reports the code for the  example presented in Section~\ref{sub:control_examples}, i.e. the code for the PD plus gravity compensation controller.
+
+Because it is a simple example we show both the C++ code (see Code~\ref{code:wbi_init} and \ref{code:cpp_pd_plus_grav}) and the Simulink model diagram (see Figure~\ref{fig:figs_PD_plus_grav_simulink}).
+Note that, while the Simulink diagram completely represents the controller, the C++ code snippet has been extracted from the main loop function, i.e. the function which runs at every iteration. 
+How the control thread is created and managed depends on the particular system and it is outside the scope of the present paper.
+
+The snippet of code in Code~\ref{code:wbi_init} shows how the specific YARP-based implementation is instantiated. 
+In particular, the current implementation needs information about the URDF model representing the kinematic and dynamic information of the robot and the mapping between the model joints and the YARP control boards. This is provided by the object created at line $4$ and passed to the interface constructor at line $7$.
+Additionally, the list of controlled joints are passed to the interface at line $19$, just before the interface initialization routine is called.
+
+Reading the code in Code~\ref{code:cpp_pd_plus_grav} it is possible to observe how all the details regarding the specific robot platform are hidden by the library.
+The object {\tt robot}, in fact, is accessed through its abstract type, as it can be also seen during its instantiation, i.e. in line $7$ of Code~\ref{code:wbi_init}.
+In lines $4-7$ the state of the robot, i.e. $(q_j, \dot{q}_j)$, is read.
+The feedforward term, corresponding to $G(q)$ is computed at lines $10 - 14$ where the last parameter is the resulting gravity compensation term.
+Finally the error and the feedback term necessary to implement Eq.~\eqref{eq:pd_plus_grav_law} is computed in lines $17-22$. 
+Because we did not use any specific mathematical library we explicitly computed the term $K_p \tilde{q}_j + K_d \dot{q}_j$ in the {\tt for} loop.
+Finally, at line $25$ we send the torque command to the robot, which we previously setup to be controlled in torque mode.
+
+\begin{algorithm}
+    \centering
+\begin{lstlisting}
+//Properties.
+// - Fill with model URDF path
+// - Yarp controlboard mapping
+yarp::os::Property wbiProperties = ...;
+
+//create an instance of wbi
+wbi::wholeBodyInterface* m_robot =
+new yarpWbi::yarpWholeBodyInterface(
+    "PD plus gravity", 
+    wbiProperties);
+    
+if (!m_robot) {
+    return false;
+}
+
+//Create list of controllable joints
+wbi::IDList controlledJoints = ...;
+
+m_robot->addJoints(controlledJoints);
+if (!m_robot->init()) {
+    return false;
+}
+
+\end{lstlisting}
+\caption{C++ code snippet for library initialization}
+\label{code:wbi_init}
+\end{algorithm}
+
+\begin{algorithm}
+    \centering
+\begin{lstlisting}
+  wbi::Frame w_H_b; //identity + zero vector
+  
+  //read state
+  (*@\textcolor{wbi_position}{robot->getEstimates(wbi::ESTIMATE\_JOINT\_POS,}@*)
+                      (*@\textcolor{wbi_position}{positions);}@*)
+  (*@\textcolor{wbi_velocity}{robot->getEstimates(wbi::ESTIMATE\_JOINT\_VEL,}@*)
+                      (*@\textcolor{wbi_velocity}{velocities);}@*)
+  
+  //use model to compute feedforward
+  robot->computeGravityBiasForces(
+                      positions, 
+                      w_H_b, 
+                      grav,
+                      gravityCompensation);
+  
+  //compute feedback.
+  for (int i = 0; i < robot->getDoFs(); i++) {
+      error(i)   = positions(i) - reference(i);
+      torques(i) = gravityCompensation(i + 6) 
+                 - kp(i) * error(i) 
+                 - kd(i) * velocities(i);
+  }
+  
+  //send desired torques to the robot
+  (*@\textcolor{wbi_torque}{robot->setControlReference(torques);}@*)
+
+\end{lstlisting}
+\caption{C++ code for PD plus Gravity compensation}
+\label{code:cpp_pd_plus_grav}
+\end{algorithm}
+
+Figure~\ref{fig:figs_PD_plus_grav_simulink} shows the same code implemented directly in Simulink.
+It is evident how the block-based diagram is clearer with respect to its C++ counterpart.
+Furthermore, the possibility to add scopes, or dump signal variables directly into Matlab workspace greatly increases its advantages with respect to directly coding in C++.
+
+\begin{figure*}[t]
+  \centering
+  	\def\svgwidth{\textwidth}
+    \import{figs/}{PD_plus_grav.pdf_tex}
+  \caption{Simulink model diagram of the PD plus gravity compensation controller for a fixed-base robot}
+  \label{fig:figs_PD_plus_grav_simulink}
+\end{figure*}
+
+% subsection pd_plus_gravity_compensation (end)
+
+\subsection{Momentum-based Balance Control} % (fold)
+\label{sub:subsection_name}
+
+To show the power of the proposed architecture we present here a second example, i.e. we show the results of a momentum-based balancing controller which has been synthesized directly by using the Simulink interface. 
+Given the complexity of the control problem we do not report here screenshots or code snippets of the Simulink model, but the model can be examined in \cite{WBTController}, while the mathematical formulation can be found in \cite{nava16}.
+
+The YouTube\textsuperscript{\textcopyright} video \cite{iCubWithSim} shows the robot performing complex movements by using the controller implemented and running as a Simulink Model.
+By using the \emph{yarpWholeBodyInterface} implementation we also leverage the capabilities of the YARP middleware to seamlessly connect to the real or simulated system.
+In particular the test platform is the iCub humanoid robot \cite{Metta20101125}, endowed with $53$ degrees of freedom, 6-axis force/torque sensors and distributed tactile skin.
+The robot is simulated on the Gazebo simulator \cite{Koenig04} by means of Gazebo-YARP plugins \cite{YarpGazebo2014}.
+The same demo has also been implemented on a different configuration of the iCub platform \cite{UtubeHeiCub}.
+Note that the two robots have a different set of degrees of freedom.
+Thanks to the flexibility of the library, the controller code remains the same in both scenarios.
+
+We encourage the interested reader to test the controller on the Gazebo Simulator. 
+Instructions on how to run the controller can be found directly in the model repository {\tt readme} \cite{WBTController}.
+% subsection subsection_name (end)

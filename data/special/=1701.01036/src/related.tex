@@ -1,0 +1,62 @@
+\begin{section}{Related Work}
+In this section, we briefly review some closely related works and the key concept MMD in our interpretation.
+\begin{paragraph}{Style Transfer}
+Style transfer is an active topic in both academia and industry. Traditional methods mainly focus on the non-parametric patch-based texture synthesis and transfer, which resamples pixels or patches from the original source texture images~\cite{hertzmann2001image,efros2001image,efros1999texture,liang2001real}. Different methods were proposed to improve the quality of the patch-based synthesis and constrain the structure of the target image. For example, the image quilting algorithm based on dynamic programming was proposed to find optimal texture boundaries in~\cite{efros2001image}. A Markov Random Field (MRF) was exploited to preserve global texture structures in~\cite{frigo2016split}. However, these non-parametric methods suffer from a fundamental limitation that they only use the low-level features of the images for transfer. 
+
+Recently, neural style transfer~\cite{neuralart} has demonstrated remarkable results for image stylization. It fully takes the advantage of the powerful representation of Deep Convolutional Neural Networks (CNN). This method used Gram matrices of the neural activations from different layers of a CNN to represent the artistic style of a image. Then it used an iterative optimization method to generate a new image from white noise by matching the neural activations with the content image and the Gram matrices with the style image. This novel technique attracts many follow-up works for different aspects of improvements and applications. To speed up the iterative optimization process in~\cite{neuralart}, Johnson \emph{et al.}~\cite{johnson2016perceptual} and Ulyanov \emph{et al.}~\cite{ulyanov2016texture} trained a feed-forward generative network for fast neural style transfer. % \cite{gatys2016controlling} further extended the neural style transfer by introducing control over spatial location, color information and across spatial scale.\footnote{Neural Doodle and MRF work here} To stabilize the transfer results in one video, \cite{ruder2016artistic} further incorporated a temporal constraint that penalizes the optical flow between two frames~\footnote{Double check whether it is accurate.}. \cite{selim2016painting} proposed novel spatial constraints through gain map to extend the neural style transfer to head portrait painting transfer.
+\textcolor{black}{To improve the transfer results in~\cite{neuralart}, different complementary schemes are proposed, including spatial constraints~\cite{selim2016painting}, semantic guidance~\cite{neuraldoodle} and Markov Random Field (MRF) prior~\cite{li2016combining}. There are also some extension works to apply neural style transfer to other applications. Ruder \emph{et al.}~\cite{ruder2016artistic} incorporated temporal consistence terms by penalizing deviations between frames for video style transfer. Selim \emph{et al.}~\cite{selim2016painting} proposed novel spatial constraints through gain map for portrait painting transfer. }
+Although these methods further improve over the original neural style transfer, they all ignore the fundamental question in neural style transfer: \emph{Why could the Gram matrices represent the artistic style?} This vagueness of the understanding limits the further research on the neural style transfer. 
+\end{paragraph}
+
+\begin{paragraph}{Domain Adaptation}
+Domain adaptation belongs to the area of transfer learning~\cite{pan2010survey}. It aims to transfer the model that is learned on the source domain to the unlabeled target domain. The key component of domain adaptation is to measure and minimize the difference between source and target distributions. The most common discrepancy metric is Maximum Mean Discrepancy (MMD)~\cite{mmd}, which measure the difference of sample mean in a Reproducing Kernel Hilbert Space. It is a popular choice in domain adaptation works~\cite{ddc,dan,long2016unsupervised}. Besides MMD, Sun \emph{et al.}~\cite{coral} aligned the second order statistics by whitening the data in source domain and then re-correlating to the target domain. In \cite{adabn}, Li \emph{et al.} proposed a parameter-free deep adaptation method by simply modulating the statistics in all Batch Normalization (BN) layers.
+\end{paragraph}
+
+\begin{paragraph}{Maximum Mean Discrepancy} Suppose there are two sets of samples $X=\{\mathbf{x}_i\}_{i=1}^{n}$ and $Y = \{\mathbf{y}_j\}_{j=1}^{m}$ where $\mathbf{x}_i$ and $\mathbf{y}_j$ are generated from distributions $p$ and $q$, respectively. Maximum Mean Discrepancy (MMD) is a popular test statistic for the two-sample testing problem, where acceptance or rejection decisions are made for a null hypothesis $p = q$~\cite{mmd}. Since the population MMD vanishes if and only $p = q$, the MMD statistic can be used to measure the difference between two distributions. Specifically, we calculates MMD defined by the difference between the mean embedding on the two sets of samples. Formally, the squared MMD is defined as:
+\begin{small}
+\begin{equation}\label{mmd}
+\begin{aligned}
+&  \text{MMD}^2[X, Y]\\
+		 = ~ &\| \mathbf{E}_x[\phi(\mathbf{x})] - \mathbf{E}_y[\phi(\mathbf{y})] \|^2\\
+		= ~&\| \frac{1}{n}\sum_{i=1}^{n}\phi(\mathbf{x}_i) - \frac{1}{m}\sum_{j=1}^{m}\phi(\mathbf{y}_j) \|^2\\
+		= ~&\frac{1}{n^2}\sum_{i=1}^{n}\sum_{i'=1}^{n}\phi(\mathbf{x}_i)^T\phi(\mathbf{x}_{i'}) + 
+		   \frac{1}{m^2}\sum_{j=1}^{m}\sum_{j'=1}^{m}\phi(\mathbf{y}_j)^T\phi(\mathbf{y}_{j'}) \\
+		&   -\frac{2}{nm}\sum_{i=1}^{n}\sum_{j=1}^{m}\phi(\mathbf{x}_i)^T\phi(\mathbf{y}_{j}),
+\end{aligned}
+\end{equation}
+\end{small}
+where $\phi(\cdot)$ is the explicit feature mapping function of MMD. Applying the associated kernel function $k(\mathbf{x}, \mathbf{y}) = \langle\phi(\mathbf{x}), \phi(\mathbf{y})\rangle$, the Eq.~\ref{mmd} can be expressed in the form of kernel:
+\begin{small}
+\begin{equation}{\label{mmd_kernel}}
+\begin{aligned}
+&\text{MMD}^2[X, Y]\\
+	= ~ & \frac{1}{n^2}\sum_{i=1}^{n}\sum_{i'=1}^{n}k(\mathbf{x}_i, \mathbf{x}_{i'}) + 
+		   \frac{1}{m^2}\sum_{j=1}^{m}\sum_{j'=1}^{m}k(\mathbf{y}_j, \mathbf{y}_{j'}) \\
+	&	   -\frac{2}{nm}\sum_{i=1}^{n}\sum_{j=1}^{m}k(\mathbf{x}_i, \mathbf{y}_j).
+\end{aligned}
+\end{equation}
+\end{small}
+The kernel function $k(\cdot, \cdot)$ implicitly defines a mapping to a higher dimensional feature space.
+\end{paragraph}
+
+\end{section}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
