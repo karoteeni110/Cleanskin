@@ -1,0 +1,142 @@
+%!TEX root =  HuangS16_QIP17.extended_abstract.tex
+\section{Introduction}
+\subsection{The problem and the motivation}
+Cryptographic hash functions are a fundamental primitive used widely in today's cryptographic systems. They are  considered ``workhorses of modern cryptography''\footnote{Bob Schneier, \url{https://www.schneier.com/essays/archives/2004/08/cryptanalysis_of_md5.html}.} For simplicity, we focus our discussions on {\em keyless} (cryptographic) hash functions, each of which is an efficiently computable function $h$ from some message space $\mathcal{M}$ to some {\em digest space} $\mathcal{T}$~\cite{BonehS:book,preneel1994cryptographic, rogaway2004cryptographic}. Ideally, we want the hash function to have the following properties. First, the digest should be much shorter than the message. Depending on applications, the following security properties are desirable~\cite{rogaway2004cryptographic}. (1) {\em Collision resistant}: It is computationally infeasible to find a ``collision'', i.e., two distinct messages $x$ and $x'$, such that $h(x)=h(x')$.  (2) {\em Preimage Resistance}: It is computationally infeasible to invert $h$. (3) {\em Second Preimage Resistance}: Given a message $x$, it should be computational infeasible to $x'\neq x$ with $h(x')=h(x)$.
+
+
+Prominent examples of widely used cryptographic hash functions include SHA-256 and SHA-512, part of the SHA-2 algorithms that were designed by NSA and are US Federal Standards. These algorithms are used in UNIX and LINUX for secure password hashing, in Bitcoin for proof-of-work.
+As a motivating example, we consider how proof-of-work can be carried out through hash. Suppose that Alice receives a trove of valuable documents $x\in\{0, 1\}^n$, and Bob claims that he was the person producing and sending it. To prove his claim, he  sends Alice a tag $t\in\{0, 1\}^m$, which supposedly is the result of applying a
+cryptographic hash function $h:\{0, 1\}^n\to\{0, 1\}^m$ on $x$. Alice simply checks if $t=h(x)$. Accept if yes, reject otherwise. By the collision resistance property, it is nearly impossible that Bob can produce $h(x)$ without knowing $x$. 
+
+%\YY{the passwd example seems to be more accurately modeling the case that the verifier only has the hash, not the original message.}
+
+In practice, there may be information leakage of the message over time due to information transmission, adversarial attacks, etc. Therefore, it is rather desirable if the hash function is resilient against information leakage. We ask: how many bits $\ell$ about the message $x$ can be leaked before the adversary is able to forge the tag $h(x)$ easily? 
+
+Cleary, $\ell \le m$, since if the tag $h(x)$ itself is known to the adversary, he does not need to know more about $x$ to pass the verification. This is rather disappointing, since $m$ is typically much smaller than $n$. 
+We then ask: what if a quantum tag is used instead? If the leakage is quantum, by the same reasoning, $m$ remains a trivial and rather lower upper-bound on $\ell$. This leads us to our central question: 
+{\em Can a quantum hash function be much more resilient to {\em classical} leakage?}
+
+\subsection{Quantum cryptographic hash functions}
+By a ``quantum hash function,'' we simply mean a classical-to-quantum encoding $\phi: \{0, 1\}^n\to {\mathbb{C}}^{2^m}$ that maps $x\in\{0, 1\}^n$ to a pure $m$-qubit state $|\phi_x\rangle$. In a seminal paper, Buhrman et al.~\cite{buhrman2001quantum} introduced the notion of {\em quantum fingerprinting}. In their most general form, a quantum fingerprinting is the following.
+\begin{definition}[Generalized Quantum Fingerprinting (Buhrman et al.~\cite{buhrman2001quantum})]\label{def:qfinger}
+A function $\phi:\{0, 1\}^n\to{\mathbb{C}^{2^m}}$ is a $(n, m, \delta)$ (generalized) quantum fingerprinting where
+ $\delta:=\max_{x,x': x\ne x'} \left|\langle\phi_x | \phi_{x'}\rangle\right|$.
+\end{definition}
+
+We use the convention that $\phi:=|\phi\rangle\langle\phi|$ represent the projector for the pure state $|\phi\rangle$.
+If one replaces the predicate $h(x)=h(x')$ by the fidelity $F(\phi_x, \phi_{x'}) = \left|\langle\phi_x|\phi_{x'}\rangle\right|$, one sees that $\delta$ precisely quantify the extent of collision resistance. For concreteness, we define what we mean by quantum cryptographic hash function as follows. For a function $\delta_n\in(0, 1)$, we say $\delta_n$
+is negligible in $n$ if $\delta_n\le 1/n^c$ for all $c>0$ and all sufficiently large $n$.
+
+\begin{definition}\label{def:qhash}
+A $(n, m, \delta)$ quantum fingerprinting $\phi$ is a {\em quantum cryptographic hash function}  if $\delta=\negl(n)$. 
+\end{definition}
+
+We note that while classical cryptographic hash functions necessarily rely on computational assumptions for security, their quantum counterparts can achieve the three security properties (1-3) information-theoretically.
+We now proceed to formulate our leakage problem precisely. We consider average case
+security and model classical side-channel information using a classical-classical (c-c) state,
+called the {\em side information state},
+$
+\eta_{XY}:=\sum_{x,y} p_{x, y} |x\rangle\langle x|\otimes|y\rangle\langle y|$
+on $\{0, 1\}^n\times\{0, 1\}^{n'}$. Here $X$ is uniformly distributed and $Y$ represents
+the side information. The largest probability of correctly guessing $X$ conditioned on $Y$
+is $p_g:=p_g(X|Y)_\eta:=\sum_{y} \max_x p_{x, y}$. The {\em conditional min-entropy} is
+$H_{\text{min}}(X|Y)_\eta:=-\log p_g(X|Y)_\eta$. We quantify the amount of leakage by 
+$k:=n-H_{\text{min}}(X|Y)_\eta$.
+
+
+
+The adversary is given the $Y$ sub-system and creates a classical-quantum (cq) state $\rho_{XE}$,
+called the {\em forgery state},
+through local quantum operations on $Y$. 
+The {\em verification scheme} for $\phi$ is the following measurement on $XE$:
+$
+V := \sum_{x}|x\rangle\langle x|\otimes\phi_x$.
+The probability of the forgery state to pass the verification scheme is 
+$e_s:=\Tr(V\rho)$. Given the leakage $\ell$, the optimal passing probability of a forgery state is
+denoted by $e_s^*:=e_s^*(\ell)$.
+We can now define security precisely.
+
+\begin{definition}[Resilience against classical leakage]
+A $(n, m, \delta)$ quantum cryptographic hash function $\phi$ is said to be {\em $\sigma$-resilient against $\ell$
+bits of classical leakage} if for all forgery state $\rho$ obtained from $\ell$ bits of side information,
+the probability of passing the verification scheme $e_s^*(\ell)\leq \sigma$. If no $\sigma$ is specified, it is assumed that $\sigma=\negl(n)$.
+\end{definition}
+
+
+\subsection{Main Result}
+We show that quantum cryptographic hash functions can be extremely resilient to classical leakage. Our main theorem is informally stated below.
+
+\begin{theorem}[Main Theorem]\label{thm:main}
+For all $n$ and $k=n-\omega(\log n)$, 
+all quantum cryptographic hash functions are resilient against $k$ bits of classical leakage.
+\end{theorem}
+
+Buhrman et al.~\cite{buhrman2001quantum} showed that for all $n$ and $\delta\in(0, 1)$, there exists
+a $(n, m, \delta)$ quantum fingerprinting for $m=\log n+ O(\log1/\delta)$ for which explicit constructions
+can be derived from~\cite{naor1993small}. We thus have the following corollary.
+\begin{corollary}
+For all $n$, $k=n-\omega(\log n)$, and $m=\omega(\log n)$, there exist efficient quantum cryptographic hash functions
+resilient to leaking $k$ bits of information. 
+\end{corollary}
+
+One drawback of the verification scheme is that the verifier has to get access to full information about the original message $X$ in order to perform the verification. In some cases this would be a heavy burden on the verifier. One natural question to ask is that if it is possible to develop a lightweighted verification scheme where the verifier does not need to read the whole message. More formally, let the verifier now receive $k$ qubits of {\em advice state} and $m$ bits of the {\em
+    forgery state} provided
+by the adversary. An $(n,k,m)$ verification scheme $V$ would then be a joint measurement on the advice state together with the forgery state. This generalizes the original verification where $k=n$ and $V=\sum_{x}|x\rangle\langle x|\otimes\phi_x$.
+
+Out next result shows that, by increasing the hash a little bit we can dramatically reduce the size of system needed by the verifier:
+
+\begin{theorem}
+    For all $n$, fix $k=m=\omega(\log^2 n), \ell\leq n-\omega(\log n)$. There exists a verification scheme $V$ acting on $k+m$ qubits, together with an ensemble of $k$-qubit states $\{\rho_x\}$ such that 
+    $$\sup_{Y:H_{\min}(X|Y)\leq \ell}\sup_{\{\sigma_Y\}}\mathbb{E}_{XY}\Tr[V(\rho_X\otimes \sigma_Y)]\leq \negl(n).$$
+\end{theorem}
+
+Arunachalam et al.~\cite{arunachalam2016optimal} showed that $\Omega(n)$ copies of a quantum cryptographic hash based on linear codes is necessary to recover the original $n$-bit classical message, regardless of the length of the hash itself. Our result shows the complimentary aspect that only $\omega(\log n)$ copies are sufficient to ensure that the prover holds the classical message.
+
+\commentout{Note here that we can hash a message into near logarithmic number of qubits, with resiliency to any amount of classical information leakage of interest. Specifically we have the following separation lemma:
+}
+Our central technical result is the following. Recall that $p_g:=2^{\ell-n}$ is the optimal guessing probability of the message conditioned on the $\ell$-bit side information.
+
+\begin{lemma}[Lemma~\ref{lem:sepr}, informally stated]
+    \label{lem:sep} For any $(n, m, \delta)$ quantum fingerprinting $\phi$ and any leakage of $\ell$ classical bits, the probability of the forgery state passing the verification scheme satisfies   $$e_s\leq p_g +\delta.$$
+\end{lemma}
+
+This implies that
+\begin{align}\label{eqn:equiv}
+O(p_g + \delta^2) \le e^*_s\leq p_g + \delta,
+\end{align}
+by considering the two cheating strategies of guessing $X$ first (then applying $\phi$) and using a fixed fingerprint state. Consequently, when $\delta=\negl(n)$, the above inequality means that $e^*_s$ is negligible if and only if $p_g$ is negligible. 
+
+Since $\ell=n-O(\log n)$ is the threshold for $p_g(\ell)$ to be non-negligible, the bounds~(\ref{eqn:equiv}) show for  quantum cryptographic hash functions, the leakage resilience can approach the {\em maximum} of  $n-O(\log n)$ bits. 
+
+One counterpart of this result is shown in~\cite{arunachalam2016optimal}, saying that $\Omega(n)$ copies of quantum fingerprints would be necessary for an adversary to recover the original message with non-negligible probability. Thus, the quantum cryptographic hash functions based on fingerprinting have the following property: The hash itself is efficiently computable, but it is information-theoretically resilient to recovery of the message from the hash (which requires
+$\Omega(n)$
+copies of the hash) and to recovery of the hash from partial information of the message.
+
+
+\subsection{Implications on quantum-proof randomness extraction}
+Our result reveals some stark contrast between quantum and classical side information. This difference shows the difficulty for establishing the quantum security of classical-proof extractors. Roughly speaking, a randomness extractor is a randomized algorithm which turns a weakly random source into near uniform~\cite{nisan1992pseudorandom,nisan1996randomness,trevisan2001extractors}. These are fundamental objects with a wide range of applications in computational complexity, cryptography, and other areas~\cite{bennett1985reduce,dodis2009non,goldreich1997another,sudan1999pseudorandom,moshkovitz2014parallel}.
+In particular, they accomplish the important tasks of privacy amplication~\cite{bennett1995generalized,bennett1985reduce,maurer1993secret}, by decoupling the correlation between the output and the side information.
+
+A major open problem in randomness extraction is whether every classical-proof randomness extractor for $k$ min-entropy sources is secure against quantum adversaries with comparable amount but quantum side information. Loss of parameter is already shown to be inevitable in~\cite{gavinsky2007exponential}, but possibilities still remain in the case where the ranges of parameters are relavant to most typical applications. 
+
+If all quantum side information can be constructed from a comparable amount of classical side information, we would have resolved this major problem positively. Our result shows that this approach would necessarily fail.
+For details, see Section~\ref{sec:re}.
+
+
+\begin{theorem}[Theorem~\ref{thm:topsep}, informally stated]
+    There exists a family of classical-quantum states with arbitrarily small amount of quantum side information, yet
+    these quantum states cannot be approximately constructed from classical side information that is almost a perfect copy of the classical message.
+\end{theorem}
+
+\subsection{Sketch of Proofs}
+To prove Separation Lemma~\ref{lem:sep},  we first answered the following question (see Section~\ref{sec:cgp}): 
+{\em Given a c-q state, how much classical side information is needed to approximate it up to a given error $\epsilon$?}
+It turns out that this quantity, denoted by the \emph{conversion parameter}, can be simplified to a fairly nice expression. An important step is to show (in Lemma~\ref{lem:ccsimp}) that  classical information can without loss of generality be identifying a subset of the messages, and conditioned on this information, the messages are uniformly distributed on that subset. 
+At the end, the proof reduces to estimating the operator norm of  $\sum_iT_i$, where $T_i$'s are projections to the fingerprint states, thus pairwise almost orthogonal. Cotlar-Stein Lemma gives us the desired bound. %\YY{packing is well known.}
+
+\subsection{Related works.}
+As mentioned above, Buhrman et al.~\cite{buhrman2001quantum} introduced the notion and provide the constructions of quantum fingerprinting. The application they focused on is for message identification. For our cryptographic applications, we are primarily interested in instances of a negligible fidelity. They did not discuss properties of quantum fingerprinting in an adversarial context like ours. That quantum fingerprinting satisfies the security properties of cryptographic hash functions was observed and explored by~\cite{ablayev2013cryptographic,vasiliev2014cryptographic}. 
+
+Side-channel attack is a major paradigm studied in the classical information security and cryptography community due to its high level of threat in practice~\cite{side-key,naor2009public,akavia2009simultaneous,dodis2010efficient,brier2002weierstrass,joye2001hessian}. Side-channel key recovery attack has in particular drawn much attention~\cite{side-key}. However, these classical works address problems that necessarily require computational assumptions and many other works focus on the hardware aspects. To the best of our knowledge, this work appears to be the first studying information theoretical security of quantum cryptography against classical side-channel attack.
+
+

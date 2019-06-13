@@ -1,0 +1,484 @@
+\documentclass[preprintnumbers,11pt,onecolumn]{article}
+\pdfoutput=1	% needed for the arXiv to properly compile with pdflatex
+
+\input{header}
+
+\renewcommand{\comment}[1]{}
+\renewcommand{\comments}[1]{}
+
+\begin{document}
+\def\compilefullpaper{}
+
+\title{Overlapping qubits}
+\author{Rui Chao$^1$ \and Ben W. Reichardt$^1$ \and Chris Sutherland$^1$ \and Thomas Vidick$^2$}
+\date{}
+
+
+\maketitle
+\footnotetext[1]{University of Southern California}
+\footnotetext[2]{Department of Computing and Mathematical Sciences, California Institute of Technology}
+
+
+\input{introduction}
+
+
+\section{What is a qubit?  When are qubits in tensor product?}
+
+As explained in the introduction, we take a basis-independent, operator-centric view of what it means to have a qubit, or multiple independent qubits, in an a priori unstructured Hilbert space~$\H$.  The following definition formalizes these notions.  Notation: Let $[n] = \{1, 2, \ldots, n\}$, and $I = \big(\begin{smallmatrix}1&0\\0&1\end{smallmatrix}\big)$, $\sigma^x = \big(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\big)$, $\sigma^y = \big(\begin{smallmatrix}0&-i\\i&0\end{smallmatrix}\big)$ and $\sigma^z = \big(\begin{smallmatrix}1&0\\0&-1\end{smallmatrix}\big)$ be the Pauli matrices.  The commutator is $[S, T] = S T - T S$, and the anticommutator is $\{S, T\} = S T + T S$.  When we write, e.g., ``$S_j$ for $S \in \{X, Z\}$" we mean the set $\{X_j, Z_j\}$, i.e., the letter~$S$ is meant to be directly replaced by $X$ or~$Z$.  
+
+\begin{definition}
+A \emph{qubit} in a Hilbert space $\H$ is a pair of anti-commuting reflections $(X, Z)$ on~$\H$.  The \emph{overlap} between two qubits $(X_1, Z_1)$ and $(X_2, Z_2)$ is given by $\max_{S, T \in \{X, Z\}} \norm{[S_1, T_2]}$.  The qubits are in \emph{tensor product} if they have overlap~$0$; in this case we also say that the qubits are \emph{independent}.  
+\end{definition}
+
+The following simple lemma ties this definition to the more usual one of a qubit as defined by a factorization $\H \simeq \C^2 \otimes \H'$.  The lemma is a special case of \thmref{t:whatismanyqubits} below.  
+
+\begin{lemma} \label{t:whatisaqubit}
+Let $X$ and $Z$ be reflections (Hermitian operators that square to the identity) on a separable Hilbert space~$\H$ such that $X$ and $Z$ anti-commute: $\{X, Z\} = 0$.  Then there exists a separable space $\H'$ such that $\H$ is isomorphic to $\C^2\otimes \H'$, and up to a unitary change of basis the reflections $X, Z$ are the standard Pauli operators: 
+\begin{equation*}
+X = \sigma^x \otimes \identity_{\H'}, \qquad Z = \sigma^z \otimes \identity_{\H'}
+ \enspace .
+\qedhere
+\end{equation*}
+\end{lemma}
+
+The following theorem justifies our definition of two qubits being in ``tensor product'' when their overlap is $0$, or equivalently when the associated reflections pairwise commute.  
+
+\begin{theorem} \label{t:whatismanyqubits}
+Suppose that $X_1, Z_1, \ldots, X_n, Z_n$ are reflections on~$\H$ such that for all~$j$, $\{X_j, Z_j\} = 0$ and furthermore for all $i \neq j$ and $S,T\in\{X,Z\}$, $S_i$ and $T_j$ pairwise commute, $[S_i, T_j] = 0$.  
+Then there exists a separable space $\H''$ such that $\H$ is isomorphic to $(\C^2)^{\otimes n} \otimes \H''$, and up to a unitary change of basis the reflections $X_j, Z_j$ are the standard Pauli operators on $n$ qubits: 
+\begin{equation*}
+\begin{split}
+X_1 &= \sigma^x \otimes I^{\otimes (n-1)} \otimes \identity_{\H''} \\
+Z_1 &= \sigma^z \otimes I^{\otimes (n-1)} \otimes \identity_{\H''}
+\end{split}
+\qquad\quad \cdots \qquad\quad
+\begin{split}
+X_n &= I^{\otimes (n-1)} \otimes \sigma^x \otimes \identity_{\H''} \\
+Z_n &= I^{\otimes (n-1)} \otimes \sigma^z \otimes \identity_{\H''}
+ \enspace . 
+\end{split}
+\end{equation*}
+\end{theorem}
+
+\begin{proof}
+Let $X = X_1$, $Z = Z_1$.  As $Z^2 = \identity$, $\Pi_\pm = \tfrac12 (\identity \pm Z)$ are projections, with $\Pi_+ + \Pi_- = \identity$, $\Pi_+ - \Pi_- = Z$ and $\Pi_+ \Pi_- = \Pi_- \Pi_+ = 0$.  Multiplying both sides of $\{X, Z\} = 0$ by $\Pi_\pm$ yields $\Pi_\pm X \Pi_\pm = 0$, i.e., $X = \Pi_+ X \Pi_- + \Pi_- X \Pi_+$.  Then $X^2 = \identity$ implies that $\Pi_\pm X \Pi_\mp X \Pi_\pm = \Pi_\pm$; and comparing the ranks of both sides gives $\mathrm{Rank}(\Pi_\mp) \geq \mathrm{Rank}(\Pi_\pm)$, i.e., $\mathrm{Rank}(\Pi_+) = \mathrm{Rank}(\Pi_-)$.  
+
+Let $\ket{u_1^\pm}, \ket{u_2^\pm}, \ldots$ be an orthonormal basis for $\mathrm{Range}(\Pi_\pm)$.  Let $S = \sum_j (\ketbra{u_j^+}{u_j^-} + \ketbra{u_j^-}{u_j^+})$.  Then $S = S^\adjoint$, $S^2 = \identity$ and $S \Pi_\pm = \Pi_\mp S$.  Let $U = \Pi_+ X \Pi_- S + \Pi_-$.  $U$ is unitary: $U U^\adjoint = U^\adjoint U = \identity$.  Furthermore, $U^\adjoint Z U = Z$, and $U^\adjoint X U = S$.  Relabeling the basis elements $\ket{0, j} = \ket{u_j^+}$, $\ket{1, j} = \ket{u_j^-}$, we obtain $U^\adjoint Z U = \sigma^z \otimes \identity$ and $U^\adjoint X U = \sigma^x \otimes \identity$, as desired.  
+
+Now consider $X_2$.  In the above basis, it can be expanded as $I \otimes A + \sum_{\beta \in \{x,y,z\}} \sigma^\beta \otimes B_\beta$, but the commutation relationships $[X_2, X_1] = [X_2, Z_1] = 0$ imply that each $B_\beta = 0$.  Similarly, all the reflections $Z_2, \ldots, X_n, Z_n$ act trivially on the first $\C^2$ register.  Inductively repeating the above argument for $X_1$ and~$Z_1$ gives the theorem.  
+\end{proof}
+
+Registers that are in tensor product are independent of each other, in the sense that for a quantum state $\ket \psi \in \H' \otimes \H''$, a quantum operation on $\H'$ cannot affect the reduced density matrix $\Tr_{\H'} \ketbra \psi \psi$ in the other register.  It should be noted, though, that a qubit can simultaneously have maximal overlap with many other mutually independent qubits.  For example, for $n$ odd, $X = (\sigma^x)^{\otimes n}$ and $Z = (\sigma^z)^{\otimes n}$ are anti-commuting reflections, defining a qubit, such that for every $j \in [n]$, $\norm{[X, \sigma^z_j]} = \norm{[Z, \sigma^x_j]} = 2$.  (Similarly, in $(\C^2)^{\otimes n}$, for a Haar random unitary~$U$, $\norm{[U \sigma^\alpha_1 U^\dagger, \sigma^\beta_j]}$ will be concentrated around the maximal value of~$2$.)  Thus the norm of the reflections' commutator is not a ``monogamous" measure of qubit overlap.  
+
+
+\section{Packing qubits} \label{s:packing}
+
+How many pairwise $\eps$-overlapping qubits can be packed into $2^n$ dimensions?  Formally, in $2^n$ dimensions, we wish to place $2 m$ reflections $(X_1, Z_1), \ldots, (X_m, Z_m)$ such that each pair $(X_j,Z_j)$ defines a qubit, so that $\{ X_j, Z_j \} = 0$, and operators with different indices nearly commute: $\norm{[S_i, T_j]} \leq \epsilon$ for $i \neq j$ and $S, T\in \{X,Z\}$. How large can~$m$ be?  
+
+One's intuition might be pulled in either of two directions.  From the perspective of information theory, Nayak's private information retrieval bound $m \leq n / (1 - H(p))$~\cite{Nayak99privateinformationretrieval} suggests that packing $\omega(n)$ qubits into $2^n$ dimensions is unlikely to be possible.  However, a formal connection between our problem and private information retrieval is not obvious: the existence of $m$ pairs of approximately commuting qubit operators does not imply that there exists a family of $2^m$ states that could be used to encode $m$ bits with a good probability of recovery. 
+
+From a geometric perspective the problem can be viewed as one of packing subspaces.  Each reflection $R_j$ is about a certain subspace, projected to by $\tfrac12(I + R_j)$. As explained in the previous section, the anticommutation condition implies that $X_j$ and~$Z_j$ correspond to subspaces with all principal angles $\pi/4$, while the approximate commutation condition $\norm{[S_i, T_j]} \leq \epsilon$ translates into the corresponding subspaces making principal angles close to~$0$ or~$\pi/2$. By analogy to the problem of packing nearly orthogonal unit vectors\footnote{For vector packing upper bounds on~$m$, see, e.g., \cite{KabatjanskiiLevenstein78vectorpacking}, \cite[Lemma~9.1]{Alon03extremal1}, \cite{Tao13vectorpacking}.} one might guess that as long as $\epsilon$ is not required to go to $0$ too fast with $n$, $m$ can be exponential in~$n$.  
+
+The results in this section demonstrate that the geometric intuition is more accurate.  \thmref{t:manynearlycommutingprojections} shows that for sufficiently small $\epsilon$ (inverse linear in~$n$), no more than $m \leq n$ $\epsilon$-overlapping qubits can fit in $2^n$ dimensions.  In contrast, \thmref{t:qubitpacking} shows that as long as $\epsilon = \Omega(1)$, $m$ can be exponential in~$n$; more generally $m = \omega(n)$ for any $\epsilon = \omega(\sqrt{(\log n) / n})$.  For the range of overlaps $1 / n \lesssim \epsilon \lesssim \sqrt{(\log n) / n}$, we do not know whether strictly more than $n$ qubits can be packed into $2^n$ dimensions.  
+
+
+\subsection{Lower bound: packing exponentially many qubits in $2^n$ dimensions} \label{s:packingqubitslowerbound}
+
+We give a randomized construction that packs $m = e^{\Theta(n \epsilon^2)}$ qubits into $2^n$ dimensions.  This beats the trivial $m = n$ for $\epsilon = \Omega(\sqrt{(\log n) / n})$, and is exponential in~$n$ for constant $\epsilon > 0$.  
+
+\begin{theorem} \label{t:qubitpacking}
+There exist $2^n$-dimensional reflections $X_1, Z_1, \ldots, X_m, Z_m$, for $m = e^{\Omega(n \epsilon^2)}$, such that $\{ X_j, Z_j \} = 0$ and $\norm{[S_i, T_j]} = O(\epsilon)$ for all $i \neq j$ and $S,T\in\{X,Z\}$.
+\end{theorem}
+
+\begin{proof}
+By the Johnson-Lindenstrauss Lemma~\cite{JohnsonLindenstrauss84, DasguptaGupta03JohnsonLindenstrauss}, $e^{n \epsilon^2 / 4}$ unit vectors can be chosen in~$\R^{2 n}$ so that for any pair $\ket u, \ket v$, $\abs{\braket u v} \leq \epsilon$.  Collecting these vectors in triples, we obtain $m = \tfrac13 e^{n \epsilon^2 / 4}$ three-dimensional subspaces with the angles between any two in the range $[\tfrac\pi2 - O(\epsilon), \tfrac\pi2]$. Let $\{ \ket{e_j}, \ket{f_j}, \ket{g_j} \}$, for $j \in [m]$, be orthonormal bases for the subspaces.  
+
+Let $C_1, \ldots, C_{2 n}$ denote a $2^n$-dimensional representation of the Clifford algebra, i.e., Hermitian matrices that satisfy $\{C_i, C_j\} = 2 \delta_{ij} \Id$.  For each $j \in [m]$, let 
+\begin{align*}
+E_j &= \sum_k \braket{k}{e_j} \, C_k &
+F_j &= \sum_k \braket{k}{f_j} \, C_k &
+G_j &= \sum_k \braket{k}{g_j} \, C_k
+ \enspace .
+\end{align*}
+Then it is easy to check that for distinct $S, T \in \{E, F, G\}$, $\{S_j, T_j\} = 0$ and $\norm{\{S_i, T_j\}} = O(\epsilon)$ for $i \neq j$.  Let $X_j = i E_j F_j$ and $Z_j = i E_j G_j$; these matrices are Hermitian, square to $\identity$, and anti-commute.  Moreover, for $i \neq j$ and $S,T \in \{X, Z\}$, we have $\norm{[S_i, T_j]} = O(\epsilon)$.  
+\end{proof}
+
+\appref{s:qubitpackingprooftwo} gives an alternative proof of \thmref{t:qubitpacking} using the exterior algebra.  
+
+
+\subsection{Upper bound: Separating overlapping qubit operators} \label{s:packingqubitsupperbound}
+
+We provide two different methods for creating independent qubits from partially overlapping qubits.  The first argument, given in \secref{s:blockdiagonalization}, performs a careful analysis of a sequential block-diagonalization procedure.  The second argument, in \secref{s:swapnorm}, is simpler but requires the introduction of a larger Hilbert space in which to define the approximating operators.  
+
+
+\subsubsection{Separating nearly commuting projections} \label{s:blockdiagonalization}
+
+We first consider the case of separating projections that nearly commute pairwise.  
+
+\begin{theorem} \label{t:manynearlycommutingprojections}
+Let $P_1, \ldots, P_n$ be projections on a finite-dimensional Hilbert space such that for some $\epsilon \leq \tfrac{1}{32 n}$, 
+\begin{equation*}
+\norm{[P_i, P_j]} \leq \epsilon \qquad \text{for all $i, j$.}
+\end{equation*}
+Then there exist projections $Q_1, \ldots, Q_n$ with, for all $i, j$, 
+\begin{align*}
+[Q_i, Q_j] &= 0 \\
+\norm{P_i - Q_i} &\leq 8 n \epsilon
+ \enspace .
+\end{align*}
+\end{theorem}
+
+The bound in \thmref{t:manynearlycommutingprojections} is nearly tight; see \lemref{t:movementlowerbound} below.  
+
+The proof of the theorem is constructive.  It uses two basic operations, that we analyze with two lemmas.  First we block-diagonalize operators with respect to a projection~$Q$ so that they commute with~$Q$.  The first lemma bounds how block-diagonalizing two operators affects their commutator.  
+
+\begin{lemma} \label{t:blockdiagonalizedcommutator}
+Let $Q$ be a projection, and for operators $P_i$, $i = 1, 2$, let $P_i' = Q P_i Q + (\identity-Q) P_i (\identity-Q)$.  Then $[Q, P_i'] = 0$, $\norm{P_i' - P_i} = \norm{[Q, P_i]}$, and 
+\begin{equation*}\begin{split}
+\norm{[P_1', P_2']} &\leq \norm{[P_1, P_2]} + 2 \norm{[Q, P_1]} \cdot \norm{[Q, P_2]}
+ \enspace .
+\end{split}\end{equation*}
+\end{lemma}
+
+\begin{proof}
+Work in a basis in which $Q$ is diagonal: $Q = \fastmatrix{\identity & 0\\0 & 0}$.  Then $P_i = \big(\begin{smallmatrix}A_i & B_i \\ C_i & D_i\end{smallmatrix}\big)$ and $P_i' = \big(\begin{smallmatrix}A_i & 0 \\ 0 & D_i\end{smallmatrix}\big)$.  As $[Q, P_i] = \big(\begin{smallmatrix}0 & B_i \\ -C_i & 0\end{smallmatrix}\big)$, $\norm{P_i' - P_i} = \max\{ \norm{B_i}, \norm{C_i} \} = \norm{[Q, P_i]}$.  We also compute 
+\begin{align*}
+[P_1, P_2] &= \fastmatrix{
+[A_1, A_2] + B_1 C_2 - B_2 C_1
+& A_1 B_2 + B_1 D_2 - A_2 B_1 - B_2 D_1 \\
+C_1 A_2 + D_1 C_2 - C_2 A_1 - D_2 C_1 
+& [D_1, D_2] + C_1 B_2 - C_2 B_1
+}
+ \enspace .
+\end{align*}
+Each diagonal block in $[P_1, P_2]$ above, $Q [P_1, P_2] Q$ and $(\identity - Q) [P_1, P_2] (\identity - Q)$, must have norm at most $\norm{[P_1, P_2]}$.  The claimed bound for $\norm{[P_1', P_2']} = \max\{ \norm{[A_1, A_2]}, \norm{[D_1, D_2]} \}$ follows.  
+\end{proof}
+
+When one block-diagonalizes a projection, the result might not be a projection.  The second basic operation consists in rounding the eigenvalues to the closest integer, $0$ or $1$.  The second lemma bounds how this affects the commutator with another operator.  
+
+\begin{lemma} \label{t:perturbedcommutator}
+Let $Q$ be a projection and $Q'$ Hermitian with $[Q, Q'] = 0$ and $\norm{Q - Q'} < 1/2$.  Then for any Hermitian~$P$, 
+\begin{equation*}
+\norm{[Q, P]} \leq \frac{\norm{[Q', P]}}{1 - 2 \norm{Q - Q'}}
+ \enspace .
+\end{equation*}
+\end{lemma}
+
+\noindent
+This bound can be much stronger than the trivial $\norm{[Q, P]} \leq \norm{[Q', P]} + 2 \norm{P} \norm{Q - Q'}$.\footnote{For $P \succeq 0$, trivially $\norm{[Q, P]} \leq \norm{[Q', P]} + \norm{[Q - Q', P - \tfrac{\norm{P}}{2} \identity]} \leq \norm{[Q', P]} + \norm{P} \norm{Q - Q'}$, but \lemref{t:perturbedcommutator} is still stronger.}  It follows by substituting $A = \Big(\begin{smallmatrix}0 & P (2 Q - \identity) \\ (2Q - \identity) P & 0\end{smallmatrix}\Big)$, $B = \Big(\begin{smallmatrix}0 & (2 Q - \identity) P \\ P (2 Q - \identity) & 0\end{smallmatrix}\Big)$ and $\Gamma = \abs{2 Q' - \identity} \oplus \abs{2 Q' - \identity}$ into the following theorem, and using $\abs{2 Q' - \identity} (2 Q - \identity) = (2 Q - \identity) \abs{2 Q' - \identity} = 2 Q' - \identity$.  
+
+\begin{theorem}[{\cite[Theorem~1]{BhatiaDavisKittaneh91perturbcommutator}}] \label{t:bhatiaroundingeigenvalues}
+If $A$ and $B$ are Hermitian, and $\Gamma \succ 0$, then 
+\begin{equation*}
+\norm{A - B} \leq \norm{\Gamma^{-1}} \cdot \norm{A \Gamma - \Gamma B}
+ \enspace .
+\end{equation*}
+\end{theorem}
+
+\begin{proof}[Proof of \thmref{t:manynearlycommutingprojections}]
+We proceed inductively.  The induction hypothesis is that we have defined $Q_1, \ldots, Q_k, P_{k+1}^{(k)}, \ldots, P_{n}^{(k)}$ such that 
+\begin{itemize}
+\item $0 \preceq P_j^{(k)} \preceq \identity$, $\norm{P_j^{(k)} - P_j} \leq \delta_k$, $\norm{[P_i^{(k)}, P_j^{(k)}]} \leq \epsilon_k$.  
+\item $Q_1, \ldots, Q_k$ are projections, commuting with each other and all $P_j^{(k)}$, with $\norm{P_k - Q_k} \leq 2 \delta_{k-1}$.  
+\end{itemize}
+For the base case, $\delta_0 = 0$ and $\epsilon_0 = \epsilon$.  
+
+In the induction step, we let $Q_{k+1}$ be the projection formed by rounding $P_{k+1}^{(k)}$'s eigenvalues to $0$ or~$1$, and define $P_{k+2}^{(k+1)}, \ldots, P_n^{(k+1)}$ by block-diagonalizing the $P_j^{(k)}$ operators with respect to $Q_{k+1}$: 
+\begin{equation*}
+P_j^{(k+1)} = Q_{k+1} P_j^{(k)} Q_{k+1} + (\identity-Q_{k+1}) P_j^{(k)} (\identity-Q_{k+1})
+ \enspace .
+\end{equation*}
+Indeed, then $\norm{Q_{k+1} - P_{k+1}} \leq \norm{P_{k+1}^{(k)} - P_{k+1}} + \norm{Q_{k+1} - P_{k+1}^{(k)}} \leq 2 \delta_k$.  Also, $0 \preceq P_j^{(k+1)} \preceq \identity$.  Using \lemref{t:blockdiagonalizedcommutator}, we compute 
+\begin{align*}
+\norm{P_j^{(k+1)} - P_j}
+&\leq \norm{P_j^{(k)} - P_j} + \norm{P_j^{(k+1)} - P_j^{(k)}} \\
+&\leq \delta_k + \norm{[Q_{k+1}, P_j^{(k)}]} \\
+\norm{[P_i^{(k+1)}, P_j^{(k+1)}]}
+&\leq \norm{[P_i^{(k)}, P_j^{(k)}]} + 2 \norm{[Q_{k+1}, P_i^{(k)}]} \cdot \norm{[Q_{k+1}, P_j^{(k)}]}
+ \enspace .
+\end{align*}
+Thus we may take $\delta_{k+1} = \delta_k + \max_j \norm{[Q_{k+1}, P_j^{(k)}]}$ and $\epsilon_{k+1} = \epsilon_k + 2 \max_j \norm{[Q_{k+1}, P_j^{(k)}]}{}^2$.  It remains to bound $\max_j \norm{[Q_{k+1}, P_j^{(k)}]}$.  
+
+The naive bound $\norm{[Q_{k+1}, P_j^{(k)}]} \leq \norm{[P_{k+1}^{(k)}, P_j^{(k)}]} + 2 \norm{Q_{k+1} - P_{k+1}^{(k)}} \leq \epsilon_k + 2 \delta_k$ is no good, as it allows the errors to grow exponentially with~$k$.  Instead, applying \lemref{t:perturbedcommutator} gives 
+\begin{equation*}
+\bignorm{[Q_{k+1}, P_j^{(k)}]}
+\leq \frac{\epsilon_k}{1 - 2 \delta_k}
+ \enspace .
+\end{equation*}
+Provided that all $\epsilon_k \leq 2 \epsilon$ and $\delta_k \leq 1/4$, $(1 - 2 \delta_k)^{-1} \leq 2$, and we obtain the recursions 
+\begin{equation*}\begin{split}
+\delta_{k+1} &\leq \delta_k + 2 \epsilon_k \leq \delta_k + 4 \epsilon \\
+\epsilon_{k+1} &\leq \epsilon_k + 8 \epsilon_k^2 \leq \epsilon_k + 32 \epsilon^2
+ \enspace .
+\end{split}\end{equation*}
+Thus $\delta_{k+1} \leq 4 (k+1) \epsilon$ and $\epsilon_{k+1} \leq \epsilon + 32 k \epsilon^2$.  Given $\epsilon \leq \tfrac{1}{32 n}$, indeed $\epsilon_k \leq 2 \epsilon$ and $\delta_k \leq 1/4$.  
+\end{proof}
+
+
+\subsubsection{Separating partially overlapping qubits}
+
+The following theorem is an extension of \thmref{t:manynearlycommutingprojections} which allows us to separate $\eps$-overlapping qubits.   
+
+\begin{theorem} \label{t:manynearlyindependentqubits}
+Let $X_1, Z_1, \ldots, X_n, Z_n$ be Hermitian matrices each having eigenvalues in the range $[-1, -1+\epsilon] \cup [1-\epsilon, 1]$, and satisfying $\norm{\{X_j, Z_j\}} \leq \epsilon$ and $\norm{[S_i, T_j]} \leq \epsilon$ for all $i \neq j$ and $S, T \in \{X, Z\}$.  Assume $\epsilon / (1-\epsilon)^2 \leq \tfrac{1}{64 n}$.  
+Then there exist reflections $X_1', Z_1', \ldots, X_n', Z_n'$ with $\{X_j', Z_j'\} = 0$, and $[S_i', T_j'] = 0$ and $\norm{S_j' - S_j} \leq 4 n \epsilon / (1-\epsilon)^2 + \epsilon$ for all $i \neq j$ and $S, T \in \{X, Z\}$.  
+\end{theorem}
+
+\begin{proof}
+Let $\H$ be the finite-dimensional Hilbert space on which the matrices act.  Introduce $n$ additional qubits, and on $(\C^2)^{\otimes n} \otimes \H$, define 
+\begin{align*}
+R_{2j-1}' &= \sigma_j^x \otimes X_j \\
+R_{2j}' &= \sigma_j^z \otimes Z_j
+ \enspace ,
+\end{align*}
+for $j = 1, \ldots, n$, where $\sigma_j^x$ and $\sigma_j^z$ are the standard Pauli operators acting on the $j$th added qubit.  
+
+For Pauli operators $\sigma$ and~$\tau$, 
+\begin{equation*}
+[\sigma \otimes A, \tau \otimes B] =  \begin{cases} 
+(\sigma \tau) \otimes [A, B] & \text{if $[\sigma, \tau] = 0$} \\
+(\sigma \tau) \otimes \{A, B\} & \text{if $\{\sigma, \tau\} = 0$ \enspace .}
+\end{cases}
+\end{equation*}
+Thus for all $i, j$, 
+\begin{equation*}
+\norm{[R_i', R_j']} \leq \epsilon
+ \enspace .
+\end{equation*}
+
+Define reflections $R_1, \ldots, R_{2n}$ by rounding to $\pm 1$ the eigenvalues of each of $R_1', \ldots, R_{2n}'$.  The operators $R_j$ still have the form $(\text{Pauli}) \otimes (\text{Reflection})$.  By \thmref{t:bhatiaroundingeigenvalues}, 
+\begin{equation*}
+\norm{[R_i, R_j]} \leq \frac{1}{(1 - \epsilon)^2} \epsilon
+ \enspace .
+\end{equation*}
+Define projections $P_1, \ldots, P_{2n}$ by $P_j = \tfrac12 (\identity + R_j)$.  Then 
+\begin{equation*}\begin{split}
+\norm{[P_i, P_j]}
+&= \tfrac14 \norm{[R_i, R_j]} \\
+&\leq \frac14 \frac{1}{(1-\epsilon)^2} \epsilon
+ \enspace .
+\end{split}\end{equation*}
+
+Applying \thmref{t:manynearlycommutingprojections} for separating projections yields projections $Q_1, \ldots, Q_{2n}$ satisfying $[Q_i, Q_j] = 0$ and 
+\begin{equation*}
+\norm{Q_j - P_j} \leq 8 \cdot (2n) \cdot \frac14 \frac{1}{(1-\epsilon)^2} \epsilon = \frac{4 n \epsilon}{(1 - \epsilon)^2}
+ \enspace ,
+\end{equation*}
+provided that $\epsilon / (1-\epsilon)^2 \leq 1/(64n)$.  
+
+We claim that the reflections $2 Q_{2j-1} - \identity$ and $2 Q_{2j} - \identity$ still have the form $\sigma_j^x \otimes X_j'$ and $\sigma_j^z \otimes Z_j'$, resepectively, for reflections $X_j'$ and~$Z_j'$ on $\H$.  Indeed, the proof of the projections separation theorem, \thmref{t:manynearlycommutingprojections}, involved two basic operations: 
+\begin{enumerate}
+\item Block-diagonalizing an operator~$A$ with respect to a reflection~$R$: 
+\begin{align*}
+A
+&\rightarrow \tfrac12 (\identity + R) A \tfrac12 (\identity + R) + \tfrac12 (\identity - R) A \tfrac12 (\identity - R) \\
+&= \frac12 (A + R A R)
+ \enspace .
+\end{align*}
+\item Rounding the eigenvalues of a Hermitian operator~$A$ to $\pm 1$.  
+\end{enumerate}
+Observe that if $A = \sigma \otimes A'$ for a Pauli~$\sigma$, and $R = \tau \otimes R'$ for a Pauli~$\tau$, then both of these basic operations result in an operator $\sigma \otimes A''$, for the same Pauli~$\sigma$.  
+
+Thus indeed $\{X_j', Z_j'\} = 0$ and $[S_i', T_j'] = 0$ for $i \neq j$ and $S, T \in \{X, Z\}$.  Also $\norm{Q_j - P_j} \leq 4 n \epsilon / (1-\epsilon)^2$ implies 
+\begin{align*}
+\norm{S_j' - S_j} 
+&\leq 2 \norm{Q_j - P_j} + \norm{R_j' - R_j} \\
+&\leq \frac{8 n \epsilon}{(1-\epsilon)^2} + \epsilon
+ \enspace . \qedhere
+\end{align*} 
+\end{proof}
+
+Since \thmref{t:manynearlyindependentqubits} yields $n$ qubits in tensor product, the dimension of the ambient space~$\H$ must be at least $2^n$.  Rephrasing this, we obtain: 
+
+\begin{corollary}
+In $2^n$ dimensions, at most $n$ qubits can be placed with pairwise ``overlaps" $\norm{[S_i, T_j]} \leq \epsilon$, if $\epsilon / (1-\epsilon)^2 \leq 1/(64 n)$.  
+\end{corollary}
+
+
+\subsubsection{SWAP-based argument} \label{s:swapnorm}
+
+If we are willing to work in a larger space, then there is a simpler argument for moving overlapping qubits into tensor product.  Instead of repeatedly block-diagonalizing operators and rounding their eigenvalues to $\pm 1$, as in \thmref{t:manynearlyindependentqubits}, we can swap in fresh qubits to enforce a tensor-product structure.  We will show: 
+
+\begin{theorem} \label{t:swappingmanynearlyindependentqubits}
+Let $X_1, Z_1, \ldots, X_n, Z_n$ be reflections on~$\H$, satisfying $\{X_j, Z_j\} = 0$ and $\norm{[S_i, T_j]} \leq \epsilon$ for all $i \neq j$ and $S, T \in \{X, Z\}$.  Extend these operators by the identity to act on $\H \otimes (\C^2)^{\otimes n}$.  
+
+Then there exist reflections $X_1', Z_1', \ldots, X_n', Z_n'$ on $\H \otimes (\C^2)^{\otimes n}$, with $\{X_j', Z_j'\} = 0$, $[S_i', T_j'] = 0$ and $\norm{S_j' - S_j} \leq 2 n \epsilon$.  
+\end{theorem}
+
+\begin{proof}
+For $j \in [n]$, let $\S_j = \frac12 \big( \identity \otimes \identity + X_j \otimes \sigma^x_j + Z_j \otimes \sigma^z_j + i (X_j Z_j) \otimes \sigma^y_j \big)$.  Acting on $\H \otimes (\C^2)^{\otimes n}$, $\S_j$ swaps the $j$th added $\C^2$ register with the qubit defined by $X_j, Z_j$.  
+
+For $T \in \{X, Z\}$ and $i \in \{ 1, \ldots, j \}$ define 
+\begin{equation*}
+T_j^{(i)} = (\S_1 \cdots \S_{i-1}) \, T_j \, (\S_{i-1} \cdots \S_1)
+ \enspace .
+\end{equation*}
+Let $T_j' = T_j^{(j)} = (\S_1 \cdots \S_{j-1}) T_j (\S_{j-1} \cdots \S_1)$.  
+
+Then for $i < j$, $\norm{[S_i', T_j']} = \norm{[S_i, \S_i \cdots \S_{j-1} T_j \S_{j-1} \cdots \S_i]}$.  This is $0$, since for any operator~$A$ that is the identity on the $i$th added $\C^2$ register, $[S_i, \S_i A \S_i] = 0$.  
+
+Furthermore, 
+\begin{align*}
+\norm{T_j' - T_j}
+&\leq \sum_{i=1}^{j-1} \norm{T_j^{(i+1)} - T_j^{(i)}} \\
+&= \sum_{i=1}^{j-1} \norm{\S_i T_j \S_i - T_j} \\
+&= \sum_{i=1}^{j-1} \norm{[\S_i, T_j]} \\
+&\leq \frac12 \sum_{i=1}^{j-1} \big( \norm{[X_i, T_j]} + \norm{[Z_i, T_j]} + \norm{[X_i Z_i, T_j]} \big) \\
+&\leq 2 \epsilon (j-1)
+ \enspace . \qedhere
+\end{align*}
+\end{proof}
+
+Since \thmref{t:swappingmanynearlyindependentqubits} works in the larger space $\H \otimes (\C^2)^{\otimes n}$, unlike \thmref{t:manynearlyindependentqubits} it does not give an upper bound on the number of nearly independent qubits that can be packed into~$\H$.  
+
+
+\subsubsection{Lower bound: Sometimes $\Omega(n \epsilon)$ movement is necessary}
+
+\thmref{t:manynearlyindependentqubits} shows that $n$ qubits with pairwise ``overlaps" at most $\epsilon$ can be separated into tensor product by moving each qubit $O(n \epsilon)$ in operator norm.  Is the loss of a factor of~$n$ necessary?  The following example shows that our bound is essentially tight.  
+
+\begin{lemma} \label{t:movementlowerbound}
+For any integer $n$, and any $\epsilon \in [0, \pi / n^2]$, there exist $2 n$ qubits $X_1, Z_1, \ldots, X_{2n}, Z_{2n}$ in $(\C^2)^{\otimes (2n)}$ such that $\norm{[S_i, T_j]} \leq \epsilon$ for all $i \neq j$ and $S,T\in\{X,Z\}$ but such that for any \emph{independent} qubits $X_1', Z_1', \ldots, X_{2n}', Z_{2n}'$ (with $[S_i', T_j'] = 0$ for $i \neq j$), 
+\begin{equation*}
+\max_{\substack{1 \leq j \leq 2n \\ S \in \{X, Z\}}} \bignorm{S_j - S_j'} \geq \frac{n \epsilon}{2 \pi}
+ \enspace .
+\end{equation*}
+\end{lemma}
+
+\begin{proof}
+Construct qubits $X_j, Z_j$ as the standard qubits, except with the second~$n$ qubit operators perturbed by the Hamiltonian 
+\begin{equation*}
+H = \tfrac14 (\sigma^z_1 + \cdots + \sigma^z_n) (\sigma^z_{n+1} + \cdots + \sigma^z_{2n})
+ \enspace .
+\end{equation*}
+That is, $X_j = \sigma^x_j$, $Z_j = \sigma^z_j$ for $j \leq n$, and $X_j = e^{i \epsilon H} \sigma^x_j  e^{-i \epsilon H}$, $Z_j = e^{i \epsilon H} \sigma^z_j  e^{-i \epsilon H} = \sigma^z_j$ for $j > n$.  Then if $j, k \leq n$ or $j, k > n$, the operators for qubits $j$ and~$k$ commute.  If $j \leq n < k$, then the operators for qubits~$j$ and~$k$ commute, except for $X_j$ and $X_k$.  We compute $\norm{[X_j, X_k]} = \norm{X_j X_k X_j - X_k} = \norm{ e^{-i \epsilon H} \sigma^x_j e^{i \epsilon H} \sigma^x_k e^{-i \epsilon H} \sigma^x_j e^{i \epsilon H} - \sigma^x_k } = \norm{ e^{i \epsilon \sigma^z_j \sigma^z_k} - \identity } = \abs{e^{i \epsilon} - 1} \leq \epsilon$.  
+
+Let $X'_1, \ldots, X'_{2n}$ be any pairwise commuting reflections.  Let $J = \{1, \ldots, n\}$, $K = \{n+1, \ldots, 2n\}$.  Let $X_J = \prod_{j \in J} X_j$, $X_K = \prod_{k \in K} X_k$.  Similarly define $X_J', X_K'$ and $\sigma^x_J, \sigma^x_K$.  Thus $X_J = \sigma^x_J$, $X_K = e^{i \epsilon H} \sigma^x_K e^{-i \epsilon H}$.  In order to lower-bound $\max_j \norm{X_j - X_j'}$, we study $\norm{[X_J, X_K]} = \norm{(X_J X_K)^2 - \identity}$.  
+
+On one hand, since the $X'_j$ operators commute, $(X_J' X_K')^2 = \identity$.  By triangle inequalities, and using $\norm{X_j} = \norm{X_j'} = 1$ for all~$j$, $\norm{X_J X_K - X_J' X_K'} \leq \sum_j \norm{X_j - X_j'}$, and hence 
+\begin{equation} \label{e:movementlowerbound1}
+\norm{(X_J X_K)^2 - \identity} \leq 2 \sum_j \norm{X_j' - X_j} \leq 4 n \cdot \max_j \norm{X_j' - X_j}
+ \enspace .  
+\end{equation}
+On the other hand, 
+\begin{align*}
+(X_J X_K)^2
+&= \sigma^x_J \big( e^{i \epsilon H} \sigma^x_K \, e^{-i \epsilon H} \big) \sigma^x_J \big( e^{i \epsilon H} \sigma^x_K \, e^{-i \epsilon H} \big) \\
+&= e^{-i \epsilon H} \sigma^x_K \, e^{2 i \epsilon H} \sigma^x_K \, e^{-i \epsilon H} \\
+&= e^{-4 i \epsilon H}
+ \enspace .
+\end{align*}
+Since $\norm{H} = n^2/4$, provided that $n^2 \epsilon \leq \pi$ it holds that 
+\begin{equation} \label{e:movementlowerbound2}
+\bignorm{(X_J X_K)^2 - \identity} = \abs{e^{i n^2 \epsilon} - 1} \geq \frac{2}{\pi} \cdot n^2 \epsilon
+ \enspace .
+\end{equation}
+Combining the bounds~\eqnref{e:movementlowerbound1} and~\eqnref{e:movementlowerbound2} gives $\frac{2}{\pi} n^2 \epsilon \leq \norm{(X_J X_K)^2 - \identity} \leq 4 n \cdot \max_j \norm{X_j' - X_j}$, or $\max_j \norm{X_j' - X_j} \geq n \epsilon / (2 \pi)$.  
+\end{proof}
+
+
+\input{statedependentqubits}
+
+
+\subsection*{Acknowledgements}
+
+We would like to thank Greg Kuperberg for helpful comments, particularly regarding the proof of \thmref{t:qubitpacking}.  
+R.C., B.R.~and C.S.~supported by NSF grant CCF-1254119 and ARO grant W911NF-12-1-0541.  T.V.~supported by NSF CAREER grant CCF-1553477, an AFOSR YIP award, and the IQIM, an NSF Physics Frontiers Center (NFS Grant PHY-1125565) with support of the Gordon and Betty Moore Foundation (GBMF-12500028).  
+
+
+\bibliographystyle{alpha-eprint}
+\bibliography{q}
+
+
+\appendix
+
+
+\section{Qubit packing using the exterior algebra} \label{s:qubitpackingprooftwo}
+
+An alternative proof of \thmref{t:qubitpacking} was suggested to the authors by Greg Kuperberg~\cite{kuperberg14personal}.  The rough idea is to begin by packing nearly orthogonal unit vectors in $\R^n$, then define qubits using fermion creation and annihilation operators on the $2^n$-dimensional exterior algebra.   
+
+\begin{proof}[Proof of \thmref{t:qubitpacking}]
+By the Johnson-Lindenstrauss Lemma~\cite{JohnsonLindenstrauss84, DasguptaGupta03JohnsonLindenstrauss}, $e^{n \epsilon^2 / 8}$ unit vectors can be chosen in~$\R^n$ so that for any pair $\ket u, \ket v$, $\abs{\braket u v} \leq \epsilon$.  Pairing these vectors up arbitrarily, we obtain $m = \tfrac12 e^{n \epsilon^2 / 8}$ two-dimensional planes the angles between any two of which are in the range $(\tfrac\pi2 - \epsilon, \tfrac\pi2]$.  
+
+If $\ket 1, \ldots, \ket n$ is a basis for $\R^n$, let $\Lambda(\R^n)$ be the $2^n$-dimensional exterior algebra, with basis $\ket{i_1} \wedge \ket{i_2} \wedge \ldots \wedge \ket{i_k}$ for $i_1, \ldots, i_k \in [n]$ and $k = 0, 1, \ldots, n$.  For a unit vector $\ket v \in \R^n$ and $\ket w \in \Lambda(\R^n)$, define the fermion creation and annihilation operators 
+\begin{equation*}\begin{split}
+a_v^\dagger \ket w &= \ket v \wedge \ket w \\
+a_v \ket w &= (\bra v \otimes \identity) \ket w
+ \enspace .
+\end{split}\end{equation*}
+Observe that this definition is basis independent, in the sense that for any unitary $R$ on $\R^n$, 
+\begin{equation*}\begin{split}
+a_{R v}^\dagger \hat R \ket w &= \hat R a_v^\dagger \ket w \\
+a_{R v} \hat R \ket w &= \hat R a_v \ket w
+ \enspace ,
+\end{split}\end{equation*}
+where $\hat R (\ket{v_1} \wedge \cdots \wedge \ket{v_k}) = (R \ket{v_1}) \wedge \cdots \wedge (R \ket{v_k})$.  
+
+If we choose a basis for $\R^n$ beginning with $\ket v$, then $a_v^\dagger a_v$ projects onto those basis terms in $\Lambda(\R^n)$ that include $\ket v$, while $a_v a_v^\dagger$ projects onto the complementary set of basis terms.  Thus $a_v^\dagger a_v + a_v a_v^\dagger = \identity$, while also $a_v^2 = (a_v^\dagger)^2 = 0$.  Furthermore, if $\ket u$ is a unit vector perpendicular to $\ket v$, then the anticommutators satisfy $\{a_v, a_u\} = \{a_v^\dagger, a_u^\dagger\} = 0$, as $\ket u \wedge \ket v = - \ket v \wedge \ket u$, while if $\ket w$ has $k$ terms, 
+\begin{align*}
+a_u a_v^\dagger \ket w 
+&= (\bra u \otimes \identity)(\ket v \wedge \ket w) \\
+&= (-1)^k (\bra u \otimes \identity \ket w \wedge \ket v \\
+&= -a_v^\dagger a_u \ket w
+ \enspace .
+\end{align*}
+Thus $\{a_u, a_v^\dagger\} = 0$.  
+
+Now for each of the $m$ pairwise nearly orthogonal planes, let $\{ \ket{u_j}, \ket{v_j} \}$ constitute an orthonormal basis.  Define 
+\begin{equation}\begin{split}
+X_j &= (-a_{u_j} + a_{u_j}^\dagger)(a_{v_j} + a_{v_j}^\dagger) \\
+Z_j &= 2 a_{v_j} a_{v_j}^\dagger - \identity = a_{v_j} a_{v_j}^\dagger - a_{v_j}^\dagger a_{v_j}
+ \enspace .
+\end{split}\end{equation}
+To understand this construction, observe that for orthonormal vectors $\ket u, \ket v \in \R^n$, and any $\ket w \in \Lambda(\R^n)$ with $a_u \ket w = a_v \ket w = 0$, the operators $a_u, a_u^\dagger, a_v, a_v^\dagger$ fix the subspace spanned by $\ket w, \ket v \wedge \ket w, \ket u \wedge \ket w, \ket u \wedge \ket v \wedge \ket w$.  In this basis, 
+\begin{equation*}
+a_u = \fastmatrix{0&0&1&0\\0&0&0&1\\0&0&0&0\\0&0&0&0}
+\qquad 
+a_v = \fastmatrix{0&1&0&0\\0&0&0&0\\0&0&0&-1\\0&0&0&0}
+ \enspace .
+\end{equation*}
+Hence, 
+\begin{gather*}
+(-a_u + a_u^\dagger)(a_v + a_v^\dagger) = \fastmatrix{0&0&0&1\\0&0&1&0\\0&1&0&0\\1&0&0&0}
+\qquad
+2 a_v a_v^\dagger - \identity = \fastmatrix{1&0&0&0\\0&-1&0&0\\0&0&1&0\\0&0&0&-1}
+ \enspace .
+\end{gather*}
+The former matrix is $\sigma_X \otimes \sigma_X$, and the latter matrix is $I \otimes \sigma_Z$, where $\sigma_X, \sigma_Z$ are the standard Pauli operators.  In particular, observe that $X_j^2 = Z_j^2 = \identity$, $X_j Z_j = -Z_j X_j$.  
+
+The above construction satisfies that if $\ket{u_1}, \ket{v_1}, \ket{u_2}, \ket{v_2}$ are pairwise orthogonal, then $[X_1, X_2] = [X_1, Z_2] = [Z_1, X_2] = [Z_1, Z_2] = 0$.  The reason we use two vectors to define each $X_j, Z_j$ (instead of just taking $X = a_u + a_u^\dagger$, $Z = 2 a_u a_u^\dagger - \identity$) is to obtain the above commutation relationships.  Since $X_1, Z_1$ are each quadratic in $a_{u_1}, a_{u_1}^\dagger, a_{v_1}, a_{v_1}^\dagger$, terms involving only $a_{u_2}, a_{u_2}^\dagger, a_{v_2}, a_{v_2}^\dagger$ commute past them.  
+
+Next, for \emph{nearly} orthogonal planes we will show that the commutator norm $\norm{[S_i, T_j]} = O(\epsilon)$, for $i\neq j$ and $S,T\in\{X,Z\}$.  
+
+If $\ket u, \ket v$ are orthonormal, and $\ket t = \epsilon \ket u + \sqrt{1-\epsilon^2} \ket v$, then 
+\begin{equation*}
+a_t = \epsilon a_u + \sqrt{1 - \epsilon^2} a_v = \fastmatrix{0&\sqrt{1-\epsilon^2}&\epsilon&0\\0&0&0&\epsilon\\0&0&0&-\sqrt{1-\epsilon^2}\\0&0&0&0}
+\end{equation*}
+satisfies $\{a_t, a_u\} = 0$, $\{a_t, a_u^\dagger\} = \epsilon \identity$.  In general, 
+\begin{align*}
+\{a_t, a_u\} &= 0 \\
+\{a_t, a_u^\dagger\} &= \braket{u}{t} \identity
+ \enspace .
+\end{align*}
+
+It follows that if $\abs{\braket{u_1}{u_2}}, \abs{\braket{u_1}{v_2}}, \abs{\braket{v_1}{u_2}}, \abs{\braket{v_1}{v_2}} \leq \epsilon$, then $\norm{[S_1, T_2]} = O(\epsilon)$ for $S,T\in\{X,Z\}$.  Indeed, 
+\begin{align*}
+X_1 a_{u_2}
+&= (-a_{u_1} + a_{u_1}^\dagger)(a_{v_1} + a_{v_1}^\dagger) a_{u_2} \\
+&= -(-a_{u_1} + a_{u_1}^\dagger) \big[ a_{u_2} (a_{v_1} + a_{v_1}^\dagger) - \braket{u_2}{v_1} \identity \big] \\
+&= \big[ a_{u_2} (-a_{u_1} + a_{u_1}^\dagger) - \braket{u_2}{u_1} \identity \big] (a_{v_1} + a_{v_1}^\dagger) + \braket{u_2}{v_1} (-a_{u_1} + a_{u_1}^\dagger) \\
+&= a_{u_2} X_1 - \braket{u_2}{u_1} (a_{v_1} + a_{v_1}^\dagger) + \braket{u_2}{v_1} (-a_{u_1} + a_{u_1}^\dagger)
+ \enspace ,
+\end{align*}
+implying $\norm{[X_1, a_{u_2}]} \leq \abs{\braket{u_2}{u_1}} + \abs{\braket{u_2}{v_1}} \leq 2 \epsilon$.  Similarly, 
+\begin{align*}
+Z_1 a_{u_2} 
+&= (2 a_{u_1} a_{u_1}^\dagger - \identity) a_{u_2} \\
+&= 2 a_{u_1} (\braket{u_1}{u_2} \identity - a_{u_2} a_{u_1}^\dagger) - a_{u_2} \\
+&= a_{u_2} Z_1 + 2 \abs{\braket{u_1}{u_2}} a_{u_1}
+ \enspace ,
+\end{align*}
+implying $\norm{[Z_1, a_{u_2}]} \leq 2 \abs{\braket{u_1}{u_2}} \leq 2 \epsilon$.  Thus $\norm{[S_1, T_2]} \leq c \, \epsilon$ for a fairly small constant~$c$.  
+\end{proof}
+
+
+\end{document}

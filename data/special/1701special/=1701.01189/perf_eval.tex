@@ -1,0 +1,291 @@
+\section{Performance Evaluation}\label{sec:perf_eval}
+In this section we evaluate our multisplit methods and analyze their performance. First, we discuss a few characteristics in our simulations:
+
+\paragraph{Simulation Framework}
+All experiments are run on a NVIDIA K40c with the Kepler architecture, and a NVIDIA GeForce GTX 1080 with the Pascal architecture (Table~\ref{table:gpus}).
+All programs are compiled with NVIDIA's nvcc compiler (version~8.0.44).
+The authors have implemented all codes except for device-wide scan operations and radix sort, which are from CUB (version~1.6.4).
+All experiments are run over 50 independent trials.
+Since the main focus of this paper is on multisplit as a GPU primitive within the context of a larger GPU application, we assume that all required data is already in the GPU's memory and hence no transfer time is included.
+
+Some server NVIDIA GPUs (such as Tesla K40c) provide an error correcting code (ECC) feature to decrease occurrence of unpredictable memory errors (mostly due to physical noise perturbations within the device in long-running applications).
+ECCs are by default enabled in these devices, which means that hardware dedicates a portion of its bandwidth to extra parity bits to make sure all memory transfers are handled correctly (with more probability).
+Some developers prefer to disable ECC to get more bandwidth from these devices.
+In this work, in order to provide a more general discussion, we opt to consider three main hardware choices: 1)~Tesla K40c with ECC enabled (default), 2)~Tesla K40c with ECC disabled, and 3)~GeForce GTX 1080 (no ECC option).
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{lcc}
+\toprule
+NVIDIA GPU & Tesla K40c & GeForce GTX 1080 \\
+\midrule
+Architecture    & Kepler & Pascal \\
+Compute capability & 3.5 & 6.1 \\
+Number of SMs & 15 & 20 \\
+Global Memory size & 12~GB & 8~GB \\
+Global memory bandwidth & 288~GB/s & 320~GB/s \\
+Shared memory per SM & 48~KB & 96~KB \\
+\bottomrule
+\end{tabular}
+\caption{Hardware characteristics of the NVIDIA GPUs that we used in this paper.}\label{table:gpus}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Bucket identification}
+The choice of bucket identification directly impacts performance results of any multisplit method, including ours.
+We support user-defined bucket identifiers.
+These can be as simple as unary functions, or complicated functors with arbitrary local arguments. For example, one could utilize a functor which determines whether a key is prime or not.
+Our implementation is simple enough to let users easily change the bucket identifiers as they please.
+
+In this section, we assume a simple user-defined bucket identifier as follows: buckets are assumed to be of equal width $\Delta$ and to partition the whole key domain (\emph{delta-buckets}). For example, for an arbitrary key $u$, bucket IDs can be computed by a single integer division (i.e., $\defn{f}(u) = \lfloor u/ \Delta\rfloor$).
+Later, in Section~\ref{subsec:multisplit_sort} we will consider a simpler bucket identifier (\emph{identity buckets}): where keys are equal to their bucket IDs (i.e., $\defn{f}(u) = u$).
+This is particularly useful when we want to use our multisplit algorithm to implement a radix sort.
+In Section~\ref{subsec:multisplit_histogram} we use more complicated identifiers as follows: given a set of arbitrary splitters $s_0< s_1 < \dots < s_{m-1}$, for each key $s_0 < u < s_{m-1}$, finding those splitters (i.e., bucket $B_j$) such that $s_j \leq u < s_{j+1}$. This type of identification requires performing a binary search over all splitters per input key.
+
+\paragraph{Key distribution}
+Throughout this paper we assume uniform distribution of keys among buckets (except in Section~\ref{subsec:perf_distribution} where we consider other distributions), meaning that keys are randomly generated such that there are, on average, equal number of elements within each bucket.
+For delta-buckets and identity buckets (or any other linear bucket identifier), this criteria results in uniform distribution of keys in the key domain as well.
+For more complicated nonlinear bucket identifiers this does not generally hold true.
+
+\paragraph{Parameters} In all our methods and for every GPU architecture we have used either: 1)~four warps per block (128 threads per block), where each warp processes 7 consecutive windows, or 2)~eight warps per block where each warp processes 4 consecutive windows.
+Our key-only BMS for up to $m \leq 32$ uses the former, while every other case uses the latter (including WMS and BMS for both key-only and key-value pairs).
+These options were chosen because they gave us the best performance experimentally.
+
+This is a trade off between easier inter-warp computations (fewer warps) versus easier intra-warp communications (fewer windows).
+By having fewer warps per block, all our inter-warp computations in BMS (segmented scans and reductions in Section~\ref{subsubsec:block_histogram} and \ref{subsubsec:block_offset}) are directly improved, because each segment will be smaller-sized and hence fewer rounds of shuffles are required ($\log{N_\text{warp}}$ rounds).
+On the other hand, we use subword optimizations to pack the intermediate results of 4 processed windows into a single 32-bit integer (a byte per bucket per window). This lets us communicate among threads within a warp by just using a single shuffle per 4 windows.
+Thus, by having fewer warps per block, if we want to load enough input keys to properly hide memory access latency, we would need more than 4 windows to be read by each warp (here we used 7), which doubles the total number of shuffles that we use.
+
+It is a common practice for GPU libraries, such as in CUB's radix sort, to choose their internal parameters at runtime based on the GPU's compute capability and architecture.
+These parameters may include the number of threads per block and the number of consecutive elements to be processed by a single thread.
+The optimal parameters may substantially differ on one architecture compared to the other.
+In our final API, we hid these internal parameters from the user; however, our experiments on the two GPUs we used (Tesla K40c with \texttt{sm\_35} and GeForce GTX 1080 with \texttt{sm\_61}) exhibited little difference between the optimal set of parameters for the best performance on each architecture.
+
+In our algorithms, we always use as many threads per warp as allowed on NVIDIA  hardware ($N_\text{thread} = 32$).
+Based on our reliance on warp-wide ballots and shuffles to perform our local computations (as discussed in Section~\ref{subsec:histogram}), using smaller-sized logical warps would mean having smaller sized subproblems (reducing potential local work and increasing global computations), which is unfavorable.
+On the other hand, providing a larger-sized warp in future hardware with efficient ballots and shuffles (e.g., performing ballot over 64 threads and storing results as a 64-bit bitvector) would directly improve all our algorithms.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Common approaches and performance references}\label{subsec:perf_references}
+\paragraph{Radix sort} As we described in Section~\ref{sec:init_approaches}, not every multisplit problem can be solved by directly sorting input keys (or key-values). However, in certain scenarios where keys that belong to a lower indexed bucket are themselves smaller than keys belonging to larger indexed buckets (e.g., in delta-buckets), direct sorting results in a non-stable multisplit solution.
+In this work, as a point of reference, we compare our performance to a full sort (over 32-bit keys or key-values).
+Currently, the fastest GPU sort is provided by CUB's radix sort (Table~\ref{table:reference}).
+With a uniform distribution of keys, radix sort's performance is independent of the number of buckets; instead, it only depends on the number of significant bits.
+
+\paragraph{Reduced-bit sort} Reduced-bit sort (\emph{RB-sort}) was introduced in Section~\ref{sec:init_approaches} as the most competitive conventional-GPU-sort-based multisplit method.
+In this section, we will compare all our methods against RB-sort. We have implemented our own kernels to perform labeling (generating an auxiliary array of bucket IDs) and possible packing/unpacking (for key-value multisplit). For its sorting stage, we have used CUB's radix sort.
+
+\paragraph{Scan-based splits}
+Iterative scan-based split can be used on any number of buckets. For this method, we ideally have a completely balanced distribution of keys, which means in each round we run twice the number of splits as the previous round over half-sized subproblems.
+So, we can assume that in the best-case scenario, recursive (or iterative) scan-based split's average running time is lower-bounded by $\log(m)$ (or $m$) times the runtime of a single scan-based split method. This ideal lower bound is not competitive for any of our scenarios, and thus we have not implemented this method for more than two buckets.
+
+\begin{table}
+  \centering
+  \small
+  \resizebox{\columnwidth}{!}{
+  \begin{tabular}{lcc|cc|cc}
+    \toprule
+    & \multicolumn{2}{c}{Tesla K40c (ECC on)} & \multicolumn{2}{c}{Tesla K40c (ECC off)} & \multicolumn{2}{c}{GeForce GTX 1080} \\
+    \cmidrule(r){2-3}\cmidrule{4-5} \cmidrule(l){6-7}
+    Method & time & rate & time & rate & time & rate\\
+    \midrule
+    Radix sort (key-only) & 25.99~ms & 1.29~Gkeys/s
+    & 19.41~ms & 1.73~Gkeys/s & 9.84~ms & 3.40~Gkeys/s \\
+    Radix sort (key-value) & 43.70~ms & 0.77~Gpairs/s
+    & 28.60~ms & 1.17~Gpairs/s & 17.59~ms & 1.90~Gpairs/s\\
+    \midrule
+    \midrule
+    {\scriptsize Scan-based split (key-only)} & 5.55~ms & 6.05~Gkeys/s
+    & 4.91~ms & 6.84~Gkeys/s  & 3.98~ms & 8.44~Gkeys/s \\
+    {\scriptsize Scan-based split (key-value)} & 6.96~ms & 4.82~Gpairs/s
+    & 5.97~ms & 5.62~Gpairs/s  & 5.13~ms & 6.55~Gpairs/s \\
+    \bottomrule
+  \end{tabular}
+  }
+  \caption{On the top: CUB's radix sort. Average running time (ms) and processing rate (billion elements per second), over $2^{25}$ randomly generated 32-bit inputs (keys or key-value pairs). On the bottom: our scan-based split. Average running time (ms) and processing rate (billion elements per second), over $2^{25}$ randomly generated 32-bit inputs uniformly distributed into two buckets.\label{table:reference}}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Performance versus number of buckets: \texorpdfstring{$m\leq 256$}{m less than or equal to 256}}\label{sec:perf_avg_time}
+% \subsection{Performance versus number of buckets: {$m\leq 256$}}\label{sec:perf_avg_time}
+In this section we analyze our performance as a function of the number of buckets ($m \leq 256$).
+Our methods differ in three principal ways: 1)~how expensive are our local computations, 2)~how expensive are our memory accesses, and 3)~how much locality can be extracted by reordering.
+
+% Summary of the results:
+In general, our WMS method is faster for a small number of buckets and BMS is faster for a large number of buckets. Both are generally faster than RB-sort.
+There is a crossover between WMS and BMS (a number of buckets such that BMS becomes superior for all larger numbers of buckets) that may differ based on 1) whether multisplit is key-only or key-value, and 2) the GPU architecture and its available hardware resources.
+Key-value scenarios require more expensive data movements and hence benefit more from reordering (for better coalesced accesses).
+That being said, BMS requires more computational effort for its reordering (because of multiple synchronizations for communications among warps), but it is more effective after reordering (because it reorders larger sized subproblems compared to WMS).
+As a result, on each device, we expect to see this crossover with a smaller number of buckets for key-value multisplit vs.\ key-only.
+%
+
+\subsubsection{Average running time}
+Table~\ref{table:timing} shows the average running time of different stages in each of our three approaches, and the reduced bit sort (RB-sort) method.
+All of our proposed methods have the same basic computational core, warp-wide local histogram, and local offset computations. Our methods differ in performance as the number of buckets increases for three major reasons (Table~\ref{table:timing}):
+\begin{description}
+        \item [Reordering process] Reordering keys (key-values) requires extra computation and shared memory accesses. Reordering is always more expensive for BMS as it also requires inter-warp communications.
+        These negative costs mostly depend on the number of buckets $m$, the number of warps per block $N_\text{warp}$, and the number of threads per warp $N_\text{thread}$.
+        \item [Increased locality from reordering] Since block level subproblems have more elements than warp level subproblems, BMS is always superior to WMS in terms of locality.
+        On average and for both methods, our achieved gain from locality decreases by $\frac{1}{m}$ as $m$ increases.
+        \item [Global operations] As described before, by increasing $m$, the height of the matrix $\mathbf{H}$ increases. However, since BMS's subproblem sizes are relatively larger (by a factor of $N_\text{warp}$), BMS requires fewer global operations compared to DMS and WMS (because the smaller width of its $\mathbf{H}$).
+        As a result, scan operations for both the DMS and WMS get significantly more expensive, compared to other stages, as $m$ increases (as $m$ doubles, the cost of scan for all methods also doubles).
+\end{description}
+\input{multisplit_timings}
+
+\begin{figure}
+\centering
+\subfloat[Key-only: K40c (ECC on)]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_k_k40_on.pdf}
+}
+\subfloat[Key-only: K40c (ECC off)]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_k_k40_off.pdf}
+}
+\subfloat[Key-only: GTX 1080]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_k_gtx.pdf}
+}\\
+\subfloat[Key-value: K40c (ECC on)]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_kv_k40_on.pdf}
+}
+\subfloat[Key-value: K40c (ECC off)]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_kv_k40_off.pdf}
+}
+\subfloat[Key-value: GTX 1080]{
+        \includegraphics[width=0.32\linewidth]{avg_plot_kv_gtx.pdf}
+}
+\caption{Average running time (ms) versus number of buckets for all multisplit methods: (a,b,c) key-only, 32~M elements (d,e,f) key-value, 32~M elements.} \label{fig:avg_time}
+\end{figure}
+
+Figure~\ref{fig:avg_time} shows the average running time of our multisplit algorithms versus the number of buckets ($m$).
+For small $m$, BMS has the best locality (at the cost of substantial local work), but WMS achieves fairly good locality coupled with simple local computation; it is the fastest choice for small $m$ ($\leq 32$ [key-only, Tesla K40c], $\leq 16$ [key-value, Tesla K40c], and $\leq2$ [key-only, GeForce GTX 1080]).
+For larger $m$, the superior memory locality of BMS coupled with a minimized global scan cost makes it the best method overall.
+
+Our multisplit methods are also almost always superior to the RB-sort method (except for the $m \geq 128$ key-only case on Tesla K40c with ECC off).
+This is partly because of the extra overheads that we introduced for bucket identification and creating the label vector, and packing/unpacking stages for key-value multisplit.
+Even if we ignore these overheads, since RB-sort performs its operations and permutations over the label vector as well as original key (key-value) elements, its data movements are more expensive compared to all our multisplit methods that instead only process and permute original key (key-value) elements.\footnote{In our comparisons against our own multisplit methods, RB-sort will be the best sort-based multisplit method as long as our bucket identifier cannot be interpreted as a selection of some consecutive bits in its key's binary representation (i.e., $\defn{f}(u) = (u \gg k) \& (2^{r}-1)$ for some $k$ and $r$). Otherwise, these cases can be handled directly by a radix sort over a selection of bits (from the $k$-th bit until the $(k+r)$-th bit) and do not require the extra overhead that we incur in RB-sort (i.e., sorting certain bits from input keys is equivalent to a stable multisplit solution). We will discuss this more thoroughly in Section~\ref{subsec:multisplit_sort}.}
+
+For our user-defined delta-buckets and with a uniform distribution of keys among all 32-bit integers, by comparing Table~\ref{table:reference}~and~Table~\ref{table:timing} it becomes clear that our multisplit method outperforms radix sort by a significant margin. Figure~\ref{fig:speedup} shows our achieved speedup against the regular 32-bit radix sort performance (Table~\ref{table:reference}).
+We can achieve up to 9.7x (and 10.8x) for key-only (and key-value) multisplits against radix sort.
+
+\begin{figure}
+\centering
+\subfloat[Key-only: K40c (ECC on)]{
+        \includegraphics[width=0.32\linewidth]{speedup_k_k40_on.pdf}
+}
+\subfloat[Key-only: K40c (ECC off)]{
+        \includegraphics[width=0.32\linewidth]{speedup_k_k40_off.pdf}
+}
+\subfloat[Key-only: GTX 1080]{
+        \includegraphics[width=0.32\linewidth]{speedup_k_gtx.pdf}
+}\\
+\subfloat[Key-value: K40c (ECC on)]{
+        \includegraphics[width=0.32\linewidth]{speedup_kv_k40_on.pdf}
+}
+\subfloat[Key-value: K40c (ECC off)]{
+        \includegraphics[width=0.32\linewidth]{speedup_kv_k40_off.pdf}
+}
+\subfloat[Key-value: GTX 1080]{
+        \includegraphics[width=0.32\linewidth]{speedup_kv_gtx.pdf}
+}
+\caption{Achieved speedup against regular radix sort versus number of buckets for all multisplit methods: (a,b,c) key-only, (d,e,f) key-value. Both scenarios are over 32~M elements random elements uniformly distributed among buckets, and delta-bucket identifiers.} \label{fig:speedup}
+\end{figure}
+
+\subsubsection{Processing rate, and multisplit speed of light}\label{sec:perf_rate}
+It is instructive to compare any implementation to its ``speed of light'': a processing rate that could not be exceeded.
+For multisplit's speed of light, we consider that computations take no time and all memory accesses are fully coalesced. Our parallel model requires one single global read of all elements before our global scan operation to compute histograms. We assume the global scan operation is free. Then after the scan operation, we must read all keys (or key-value pairs) and then store them into their final positions. For multisplit on keys, we thus require 3 global memory accesses per key; 5 for key-value pairs.
+Our Tesla K40c has a peak memory bandwidth of 288~GB/s, so the speed of light for keys, given the many favorable assumptions we have made for it, is 24~Gkeys/s, and for key-value pairs is 14.4~G~pairs/s.
+Similarly, our GTX 1080 has 320~GB/s memory bandwidth and similar computations give us a speed of light of 26.6 G~keys/s for key-only case and 16~Gpairs/s for key-value pairs.
+
+Table~\ref{table:ms_rate} shows our processing rates for 32M keys and key-value pairs using delta-buckets and with keys uniformly distributed among all buckets.
+WMS has the highest peak throughput (on 2 buckets): 12.48~Gkeys/s on Tesla K40c (ECC on), 14.15~Gkeys/s on Tesla K40c (ECC off), and 18.93~Gkeys/s on GeForce GTX 1080.
+We achieve more than half the speed of light performance (60\% on Tesla K40c and 71\% on GeForce GTX 1080) with 2 buckets.
+As the number of buckets increases, it is increasingly more costly to sweep all input keys to compute final permutations for each element.
+We neglected this important part in our speed of light estimation.
+With 32 buckets, we reach 7.57 G~keys/s on Tesla K40c and 16.64 G~keys/s on GeForce GTX 1080. While this is less than the 2-bucket case, it is still a significant fraction of our speed of light estimation (32\% and 63\% respectively).
+
+The main obstacles in achieving the speed of light performance are 1)~non-coalesced memory writes and 2)~the non-negligible cost that we have to pay to sweep through all elements and compute permutations.
+The more registers and shared memory that we have (fast local storage as opposed to the global memory), the easier it is to break the whole problem into larger subproblems and localize required computations as much as possible. This is particularly clear from our results on the GeForce GTX 1080 compared to the Tesla K40c, where our performance improvement is proportionally more than just the GTX 1080's global memory bandwidth improvement (presumably because of more available shared memory per SM).
+% \john{Then say why! Is it more registers, faster registers, more shared memory, faster shared memory?}
+% Our achieved rates significantly outperform regular 32-bit radix sort (Table~\ref{table:reference}).
+\input{multisplit_rates}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Performance on different GPU microarchitectures}\label{subsec:perf_architecture}
+In our design we have not used any (micro)architecture-dependent optimizations and hence we do not expect radically different behavior on different GPUs, other than possible speedup differences based on the device's capability.
+Here, we briefly discuss some of the issues related to hardware differences that we observed in our experiments.
+
+\paragraph{Tesla K40c} It is not yet fully disclosed whether disabling ECC (which is a hardware feature and requires reboot after modifications) has any direct impact besides available memory bandwidth (such as available registers, etc.).
+% \saman{will spend a few hours by the profiler to investigate more}
+For a very small number of buckets, our local computations are relatively cheap and hence having more available bandwidth (ECC off compared to ECC on) results in better overall performance (Table~\ref{table:ms_rate}).
+The performance gap, however, decreases as the number of buckets increases.
+This is mainly because of computational bounds due to the increase in ballot, shuffle, and numerical integer operations as $m$ grows.
+% This is mainly because we are also getting more compute bounded (by having to deal with more ballots, shuffles and numerical integer computations per read input element, as $m$ grows).
+% \saman{one part that I still am not sure about, is that I'm getting marginally better results for my key-only with ECC on compared to ECC off. I will do more profiling to see if I can say something useful here.}
+
+CUB's radix sort greatly improves on Tesla K40c when ECC is disabled (Table~\ref{table:reference}), and because of it, RB-sort improves accordingly.
+CUB has particular architecture-based fine-grained optimizations, and we suspect it is originally optimized for when ECC is disabled to use all hardware resources to exploit all available bandwidth as much as possible. We will discuss CUB further in Section~\ref{subsec:multisplit_sort}.
+RB-sort's speedups in Fig.~\ref{fig:speedup} are relatively less for when ECC is disabled compared to when it is enabled. The reason is not because RB-sort performs worse (Table~\ref{table:ms_rate} shows otherwise), but rather because  CUB's regular radix sort (that we both use in RB-sort and compare against for speedup computations) improves when ECC is disabled (Table~\ref{table:reference}).
+
+\paragraph{GeForce GTX 1080}
+This GPU is based on NVIDIA's latest ``Pascal'' architecture. It both increases global memory bandwidth (320~GB/s) and appears to be better at hiding memory latency caused by non-coalesced memory accesses. The GTX 1080 also has more available shared memory per SM, which results in more resident thread-blocks within each SM.
+As a result, it is much easier to fully occupy the device, and our results (Table~\ref{table:ms_rate}) show this.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Performance for more than 256 buckets}\label{subsec:perf_more}
+So far, we have only characterized problems with $m \leq 256$ buckets.
+As we noted in Section~\ref{sec:radix}, we expect that as the number of buckets increases, multisplit converges to a sorting problem and we should see the performance of our multisplits and sorting-based multisplits converge as well.
+
+The main obstacle for efficient implementation of our multisplits for large  bucket counts is the limited amount of shared memory available on GPUs for each thread-block.
+Our methods rely on having privatized portions of shared memory with $m$ integers per warp (total of $32m$ bits/warp).
+As a result, as $m$ increases, we require more shared storage, which limits the number of resident thread-blocks per SM, which limits our ability to hide memory latency and hurts our performance.
+Even if occupancy was not the main issue, with the current GPU shared memory sizes (48~KB per SM for Tesla K40c, and 96~KB per SM to be shared by two blocks on GeForce GTX 1080), it would only be physically possible for us to scale our multisplit up to about $m = 12\text{k}/{N_\text{warp}}$ (at most 12k buckets if we use only one warp per thread-block).
+
+In contrast, RB-sort does not face this problem. Its labeling stage (and the packing/unpacking stage required for key-value pairs) are independent of the number of buckets. However, the radix sort used for RB-sort's sorting stage is itself internally scaled by a factor of $\log m$, which results in an overall logarithmic dependency for RB-sort vs.\ the number of buckets.
+
+\paragraph{Solutions for larger multisplits ($m>256$)}
+Our solution for handling more buckets is similar to how radix sort handles the same scalability problem: iterative usage of multisplit over $m' \leq 256$ buckets. However, this is not a general solution and it may not be possible for any general bucket identifier.
+For example, for delta-buckets with 257 buckets, we can treat the first 2 buckets together as one single super-bucket which makes the whole problem into 256 buckets. Then, by two rounds of multisplit 1)~on our new 256 buckets, 2)~on the initial first 2 buckets (the super-bucket), we can have a stable multisplit result.
+This approach can potentially be extended to any number of buckets, but only if our bucket identifier is suitable for such modifications.
+There are some hypothetical cases for which this approach is not possible (for instance, if our bucket identifier is a random hash function, nearby keys do not necessarily end up in nearby buckets).
+
+Nevertheless, if iterative usage is not possible, it is best to use RB-sort instead, as it appears to be quite competitive for a very large number of buckets. As a comparison with regular radix sort performance, on Tesla K40c (ECC on), RB-sort outperforms radix sort up to almost 32k keys and 16k key-value pairs. However, we reiterate that unlike RB-sort, which is always a correct solution for multisplit problems, direct usage of radix sort is not always a possible solution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Initial key distribution over buckets}\label{subsec:perf_distribution}
+So far we have only considered scenarios in which initial key elements were uniformly distributed over buckets (i.e., a uniform histogram).
+In our implementations we have considered small subproblems (warp-sized for WMS and block-sized for BMS) compared to the total size of our initial key vector.
+Since these subproblems are relatively small, having a non-uniform distribution of keys means that we are more likely to see empty buckets in some of our subproblems; in practice, our methods would behave as if there were fewer buckets for those subproblems.
+All of our \emph{computations} (e.g., warp-level histograms) are data-independent and, given a fixed bucket count, would have the same performance for any distribution. However, our \emph{data movement}, especially after reordering, would benefit from having more elements within fewer buckets and none for some others (resulting in better locality for coalesced global writes). Consequently, the uniform distribution is the worst-case scenario for our methods.
+
+As an example of a non-uniform distribution, consider the binomial distribution.
+In general $B(m-1,p)$ denotes a binomial distribution over $m$ buckets with a probability of success $p$. For example, the probability that a key element belongs to bucket $0\leq k < m$ is $\binom{m-1}{k}p^k {(1-p)}^{m-k-1}$.
+This distribution forces an unbalanced histogram as opposed to the uniform distribution.
+Note that by choosing $p=0.5$, the expected number of keys within the $k$th bucket will be $n\binom{m-1}{k} 2^{1-m}$.
+For example, with $n=2^{25}$ elements and $m=256$ total buckets, there will be on average almost 184 empty buckets (72\%).
+Such an extreme distribution helps us evaluate the sensitivity of our multisplit algorithms to changes in input distribution.
+
+Figure~\ref{fig:binomial} shows the average running time versus the number of buckets for BMS and RB-sort with binomial and uniform distributions, on our Tesla K40c (ECC off).
+There are two immediate observations here.
+First, as the number of buckets increases, both algorithms become more sensitive to the input distribution of keys.
+This is mainly because, on average, there will be more empty buckets and our data movement will resemble situations where there are essentially much fewer number of buckets than the actual $m$.
+Second, the sensitivity of our algorithms increases in key-value scenarios when compared to key-only scenarios, mainly because data movement is more expensive in the latter. As a result, any improvement in our data movement patterns (here caused by the input distribution of keys) in a key-only multisplit will be almost doubled in a key-value multisplit.
+
+\begin{figure}
+  \centering
+  \subfloat[Key-only]
+  {
+    \includegraphics[width = 0.4\linewidth]{avg_dist_k_k40_off.pdf}
+    \label{fig:dist_k}
+  }
+  \subfloat[Key-value]
+  {
+    \includegraphics[width = 0.4\linewidth]{avg_dist_kv_k40_off.pdf}
+    \label{fig:dist_kv}
+  }
+  \caption{Average running time (ms) vs.\ number of buckets ($m$) for two different initial key distributions: (a) a uniform distribution and (b) the binomial distribution $B(m-1,0.5)$.}\label{fig:binomial}
+\end{figure}
+
+To get some statistical sense over how much improvement we are getting, we ran multiple experiments with different input distributions, with delta-buckets as our bucket identifiers, and on different GPUs. Table~\ref{table:distribution} summarizes our results with $m=256$ buckets.
+In this table, we also consider a milder distribution where $\alpha n$ of total keys are uniformly distributed among buckets and the rest are within one random bucket ($\alpha$-uniform).
+BMS achieves up to 1.24x faster performance on GeForce GTX 1080 when input keys are distributed over buckets in the binomial distribution. Similarly, RB-sort achieve up to 1.15x faster on Tesla K40c (ECC off) with the binomial distribution.
+In general, compared to our methods, RB-sort seems to be less sensitive to changes to the input distribution.
+
+% Figure~\ref{fig:binomial} shows the average running time of BMS and RB-sort with different distributions. Both methods perform better as keys become less uniformly distributed, because on average there is less intermediate data movement. The RB-sort is more sensitive, because the internal hierarchical approach in radix sort helps it to put most of its effort on more common bits.
+% With a uniform distribution, all bits are equally populated, so all bits get the same attention. \john{There's no real conclusion in this paragraph. I want the text to say something like ``our methods look correspondingly \{better, worse\} than RB-sort as the distribution diverges from uniform''.}
+
+\input{multisplit_distribution}

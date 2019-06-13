@@ -1,0 +1,56 @@
+%!TEX root = main.tex
+
+In order to establish notation, we first briefly review 
+how continuous meaning representations
+can be derived recursively using a structured neural model
+based on Tree-LSTM \cite{tai2015improved}.
+
+Long short-term memory (LSTM) \cite{hochreiter1997long} 
+has been successfully applied in a wide 
+range of NLP tasks including 
+parsing \cite{dyer2015transition},
+machine translation \cite{sutskever2014sequence},
+and RTE \cite{bowman2015large},
+thanks to its effectiveness in handling problems 
+with sequences of events that are vulnerable to 
+the vanishing gradient problem.
+
+\newcite{tai2015improved} extend LSTM from the sequence model 
+to models with more
+complicated structures, i.e., a constituent tree ($N$-ary Tree-LSTM) or
+a dependency tree (Child-Sum Tree-LSTM).
+Here we describe the extension to constituent tree ($N$-ary Tree-LSTM) 
+as an example,
+since we build our structured attention model based on it.
+Our model can also easily be adapted for the 
+dependency tree based model (Child-Sum Tree-LSTM). 
+
+The transition for $N$-ary Tree-LSTM are shown 
+in Figure~\ref{fig:treelstm}.
+The corresponding equations are listed in 
+Equations~\ref{eq:treelstm-input}-\ref{eq:treelstm-hidden}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{figures/treelstm.pdf}
+\caption{Transitions in one Tree-LSTM unit \protect\cite{tai2015improved}.
+Here the parent node is with subscript 0, and its two children are with 
+subscripts 1 and 2 respectively. 
+At each node, $c$ represents the memory cell, 
+$h$ represents the hidden state,
+and $x$ represents the optional meaning representation of the word.
+Some edges are labeled with the corresponding gates 
+controlling the propagation of the information.
+\label{fig:treelstm}}
+\end{figure}
+
+as Equations~\ref{eq:treelstm-input}-\ref{eq:treelstm-hidden}.
+\begin{align}
+i_j & = \sigma(W^{(i)}x_j + \sum_{\ell=1}^N U_\ell^{(i)}h_{j, \ell}+b^{(i)}) \label{eq:treelstm-input}\\
+f_{j,k} & = \sigma(W^{(f)}x_j + \sum_{\ell=1}^N U_{k, \ell}^{(f)}h_{j, \ell} +b^{(f)}), \notag\\
+& \pushright{k = \{1,\dots, N\}} \label{eq:treelstm-forget}\\
+o_j & = \sigma(W^{(o)}x_j + \sum_{\ell=1}^N U_\ell^{(o)}h_{j,\ell} + b^{(o)})\label{eq:treelstm-output}\\
+u_j & = \tanh(W^{(u)}x_j + \sum_{\ell=1}^N U_\ell^{(u)}h_{j,\ell} + b^{(u)})\\
+c_j & = i_j \odot u_j + \sum_{\ell=1}^N f_{j, \ell} \odot c_{j, \ell}\label{eq:treelstm-mem}\\
+h_j & = o_j \odot \tanh(c_j) \label{eq:treelstm-hidden}
+\end{align}

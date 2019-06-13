@@ -1,0 +1,10 @@
+Multisplit is a broadly useful parallel primitive that permutes its input data into contiguous \emph{buckets} or \emph{bins}, where the function that categorizes an element into a bucket is provided by the programmer.
+Due to the lack of an efficient multisplit on GPUs, programmers often choose to implement multisplit with a sort.
+One way is to first generate an auxiliary array of bucket IDs and then sort input data based on it.
+In case smaller indexed buckets possess smaller valued keys, another way for multisplit is to directly sort input data.
+Both methods are inefficient and require more work than necessary: the former requires more expensive data movements while the latter spends unnecessary effort in sorting elements within each bucket.
+In this work, we provide a parallel model and multiple implementations for the multisplit problem. Our principal focus is multisplit for a small (up to 256) number of buckets.
+We use warp-synchronous programming models and emphasize warp-wide communications to avoid branch divergence and reduce memory usage.
+We also hierarchically reorder input elements to achieve better coalescing of global memory accesses.
+On a GeForce GTX 1080 GPU, we can reach a peak throughput of 18.93 Gkeys/s (or 11.68 Gpairs/s) for a  key-only (or key-value) multisplit.
+Finally, we demonstrate how multisplit can be used as a building block for radix sort. In our multisplit-based sort implementation, we achieve comparable performance to the fastest GPU sort routines, sorting 32-bit keys (and key-value pairs) with a throughput of 3.0 G~keys/s (and 2.1 Gpair/s).

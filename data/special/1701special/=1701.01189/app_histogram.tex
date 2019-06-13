@@ -1,0 +1,55 @@
+\subsection{GPU Histogram}\label{subsec:multisplit_histogram}
+All three of our multisplit methods from  Section~\ref{sec:impl_details}   (DMS, WMS and BMS) have a pre-scan stage, where we compute bucket histograms for each subproblem using our warp-wide ballot-based voting scheme (Algorithm~\ref{alg:warp_histogram}).
+In this section, we explore the possibility of using our very same warp-wide histogram to compute a \emph{device-wide} (global) histogram.
+We define our histogram problem as follows: The inputs are $n$ unordered input elements (of any data type) and a bucket identifier $\defn{f}$ that assigns each input element to one of $m$ distinct buckets (bins). The output is an array of length $m$ representing the total number of elements within each bucket.
+
+\paragraph{Our Histogram} In the pre-scan stage of our multisplit algorithms, we store histogram results for each subproblem so that we can perform a global scan operation on them, then we use this result in our post-scan stage to finalize the multisplit.
+In the GPU Histogram problem, however, we no longer need to report per-subproblem histogram details. Instead, we only must sum all subproblems' histograms together to form the output global histogram.
+Clearly, we would prefer the largest subproblems possible to minimize the cost of the final global summation. So, we base our implementation on our BMS method (because it always addresses larger subproblems than the other two).
+We have two main options for implementation. 1)~Store our subproblem results into global memory and then perform a segmented reduction, where each bucket represents a segment. 2)~Modify our pre-scan stage to atomically add histogram results of each subproblem into the final array.
+Based on our experiments, the second option appears to be more efficient on both of our devices (Tesla K40c and GeForce GTX 1080).
+
+\paragraph{Experimental setup}
+In order to evaluate a histogram method, it is common to perform an extensive set of experiments with various distributions of inputs to demonstrate the performance and consistency of that method.
+A complete and thorough benchmarking of all possible distributions of inputs is beyond the scope of this short section.
+Nevertheless, just to illustrate the potentials in our histogram implementation, we continue this section with a few simple experimental scenarios.
+Our goal is to explore whether our warp-wide histogram method can potentially be competitive to others (such as CUB's histogram), under what conditions, and most importantly why.
+To achieve this goal, we consider the following two scenarios:
+\begin{enumerate}
+        \item Even Histogram: Consider a set of evenly spaced splitters $\{s_0, s_1, \dots, s_{m}\}$ such that each two consecutive splitters bound a bucket ($m$ buckets, each with a width of $|s_i - s_{i-1}| = \Delta$). For each real number input $s_0 < x < s_m$, we can easily identify its bucket as $\lfloor(x-s_0)/\Delta\rfloor$.
+        \item Range Histogram: Consider a set of arbitrarily ranged splitters $\{s_0, s_1, \dots, s_{m}\}$ such that each two consecutive splitters bound a bucket. For each real number input $s_0 < x < s_m$, we must perform a binary search (i.e., an upper bound operation) on splitters to find the appropriate bucket (requires at most $\lceil \log m \rceil$ searches).
+\end{enumerate}
+
+We generate $n=2^{25}$ random floating point numbers uniformly distributed between 0 and 1024. For the Even histogram experiment, splitters are fixed based on the number of buckets $m$. For Range histogram experiment, we randomly generate a set of $m-1$ random splitters ($s_0$ and $s_m$ are already fixed).
+We use our histogram method to compute the global histogram for $m\leq 256$ buckets. We compare against CUB Histogram, which supports equivalents  (\texttt{HistogramEven} and \texttt{HistogramRange}) to our Even and Range test scenarios.
+We have repeated our experiments over 100 independent random trials.
+
+\subsubsection{Performance Evaluation}
+Table~\ref{table:histogram_rate} shows our achieved average processing rate (in billion elements per second) as well as our speedup against CUB, and for different hardware choices.
+For the Even Histogram, we observe that we are better than CUB for $m\leq 128$ buckets on Tesla K40c, but only marginally better for $m\leq 8$ on GeForce GTX 1080. For Range Histogram, we are always better than CUB for $m\leq 256$ on both devices.
+
+\input{multisplit_histogram}
+
+\paragraph{Even Histogram}
+CUB's even histogram  is designed to operate with any number of buckets (even $m\gg256$).
+This generality has consequences in its design choices.
+For example, if an implementation generalizes to any number of buckets (especially large $m>256$), it is not possible to privatize histogram storage for each thread (which requires size proportional to $m$) and then combine  results to compute a block-level histogram solution.
+(This is a different scenario than radix sort, because radix sort can choose the number of bits to process on each iterations. CUB's radix sort only supports histograms of size up to 128 buckets [at most 7 bits] on Pascal GPUs).
+As a result, CUB uses shared memory atomics to directly compute histograms in shared memory.
+Then these intermediate results are atomically added again into global memory to form the output global histogram. (Since CUB is mostly bounded by atomic operations, ECC does not have much effect on its performance on Tesla K40c.)
+
+On the other hand, our focus here is on a limited number of buckets.
+As a result, by using warp-level privatization of histograms, we avoid shared memory atomics within blocks, resulting in better performance for the histogram bucket counts that we target.
+As the number of buckets increases, we gradually increase pressure on our shared memory storage until CUB's histogram becomes the better choice.
+
+Atomic operation performance has improved significantly on the Pascal architecture (GeForce GTX 1080), which helps CUB's histogram performance. On this architecture, Table~\ref{table:histogram_rate} shows that that we are barely better than CUB for a very small number of buckets ($m\leq 8$), and then we witness a decrease in our performance because of the shared-memory pressure that we explained above.
+
+\paragraph{Range Histogram}
+We see better performance for range histograms for two main reasons.
+First, bucket identification in this case requires a binary search, which is much more expensive than the simpler floating point multiplications required for the even histogram.
+Our histogram implementation is relatively insensitive to expensive bucket-computation operations because they help us hide any extra overheads caused by our extensive shuffle and ballot usage. A thread-level approach like CUB's would also have to do the same set of expensive operations (in this case, expensive memory lookups), but then they would lose the comparative benefit they would otherwise gain from faster local register-level computations.
+
+Another reason for our better performance is again because of CUB's generality. Since CUB must operate with an arbitrary number of splitters, it does not store those splitters into shared memory, which means every binary search is directly performed in global memory. On the other hand, for $m \leq 256$, we can easily store our splitters into shared memory in order to avoid repetitive global memory accesses.
+%
+
+\paragraph{Summary} Specializing a histogram computation to support only a limited number of buckets allows potential performance increases over more general histogram implementations. For some applications, this may be desirable. For other applications---and this is likely CUB's design goal---consistent performance across an arbitrary number of buckets may be more important. Nonetheless, multisplit was the key building block that made these performance increases possible.

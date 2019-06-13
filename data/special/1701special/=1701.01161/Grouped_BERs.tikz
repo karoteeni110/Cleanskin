@@ -1,0 +1,76 @@
+ 	\begin{tikzpicture}
+ 	\begin{groupplot}[
+	 	group style={group name=my plots,group size= 2 by 2,%
+	 		vertical sep=1.2cm, horizontal sep = 0.5cm,%
+	 		xticklabels at=edge bottom, yticklabels at=edge left},
+	 	ymin=1e-4,
+	 	ymax=1e0,
+	 	xmin=0,
+	 	xmax=30,
+	 	xtick={0,5,...,30},
+	 	minor x tick num=4,
+	 	xmajorgrids, 
+	 	ymajorgrids,	 	
+	 	cycle list name=my cycle list,
+	 	%smooth,
+	 	ytick align=outside,
+	 	xtick align=outside,
+	 	width=0.8\columnwidth, height=0.19\paperheight]
+ 	\nextgroupplot[mark size=1.2, ymode=log, ylabel={Uncoded BER}]
+	 	\foreach \yindex in {1,...,12}
+	 	{   
+	 		\addplot table [y index = \yindex] {UL_all_users_qpsk.dat};\label{plots:plot\yindex}
+	 	} 
+	 	\coordinate (top) at (rel axis cs:0,1);% coordinate at top of the first plot
+ 	\nextgroupplot[mark size=1.2, ymode=log]
+	 	\foreach \yindex in {1,...,12}
+	 	{   
+	 		\addplot table [y index = \yindex] {UL_all_users_64.dat};
+	 	} 
+ 	\nextgroupplot[mark size=1.2, ymode=log, ylabel={Uncoded BER}, xlabel={Amplifier Gain in dB}]
+	 	\foreach \yindex in {1,...,12}
+	 	{   
+	 		\addplot table [y index = \yindex] {DL_all_users_qpsk.dat};
+	 	} 
+ 	\nextgroupplot[mark size=1.2, ymode=log, xlabel={Amplifier Gain in dB}]
+	 	\foreach \yindex in {1,...,12}
+	 	{   
+	 		\addplot table [y index = \yindex] {DL_all_users_64.dat};
+	 	} 
+ 	\coordinate (bot) at (rel axis cs:1,0);% coordinate at bottom of the last plot
+ 	\end{groupplot}
+ 	\node[below = 0.4cm of my plots c1r1.south] {(a) UL with QPSK};
+ 	\node[below = 0.4cm of my plots c2r1.south] {(b) UL with 64-QAM};
+ 	\node[below = 1.2cm of my plots c1r2.south] {(c) DL with QPSK};
+ 	\node[below = 1.2cm of my plots c2r2.south] {(d) DL with 64-QAM};
+ 	%\node[text width=6cm,align=center,anchor=north] at ([yshift=-5mm]my plots c2r1.south) {\captionof{subfigure}{Pressure relative (P/P)\label{subplot:two}}};
+% Uncomment if text on the left for all y-axis needed
+% 	\path (top-|current bounding box.west)--
+% 	node[anchor=south,rotate=90] {TEXT GOES HERE}
+% 	(bot-|current bounding box.west);
+ 	% legend
+ 	\path (top|-current bounding box.north)--
+ 	coordinate(legendpos)
+ 	(bot|-current bounding box.north);
+ 	\matrix[
+ 	matrix of nodes,
+ 	anchor=south,
+ 	draw,
+ 	inner sep=0.2em,
+ 	draw
+ 	]at([yshift=1ex]legendpos)
+ 	{
+	 	% foreach loop unfortunately not working here...
+ 		\ref{plots:plot1}& UE0&[5pt]
+ 		\ref{plots:plot2}& UE1&[5pt]
+ 		\ref{plots:plot3}& UE2&[5pt]
+ 		\ref{plots:plot4}& UE3&[5pt]
+ 		\ref{plots:plot5}& UE4&[5pt]
+ 		\ref{plots:plot6}& UE5&[5pt]\\
+ 		\ref{plots:plot7}& UE6&[5pt]
+ 		\ref{plots:plot8}& UE7&[5pt]
+ 		\ref{plots:plot9}& UE8&[5pt]
+ 		\ref{plots:plot10}& UE9&[5pt]
+ 		\ref{plots:plot11}& UE10&[5pt]
+ 		\ref{plots:plot12}& UE11\\};
+ 	\end{tikzpicture}

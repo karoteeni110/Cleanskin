@@ -1,0 +1,97 @@
+
+ODC-Prediction \ignore{under our  framework }is performed in  three steps. 
+%\subsection{Finding the closest subdomains}
+%\label{ss:fcc}
+
+\noindent\textbf{{ (1) Finding the closest subdomains.}}
+The closest  $K' \ll K$  subdomains  are determined based on the covariance norm of the displacement of  the test input from the means of the subdomain distribution (i.e. $\|\mathbf{x}-\boldsymbol{\mu
+}'_{i} \|_{{\Sigma'_{i}}^{-1}}, i = 1: K$, where \ignore{$\boldsymbol{\mu
+}'_{i}, {\Sigma'_{i}}^{-1}$ are as described in section ~\ref{sec:train2}),} $\|\mathbf{x}-\boldsymbol{\mu
+}'_{i} \|_{{\Sigma'_{i}}^{-1}}$  = $ (\mathbf{x}-\boldsymbol{\mu
+}'_{i})^T {\Sigma'_{i}}^{-1}  (\mathbf{x}-\boldsymbol{\mu
+}'_{i})$. The reason behind using the covariance norm is that it captures details of the density of the distribution in all dimensions. Hence, it better models $p(\mathbf{x}|D_i)$, indicating better prediction of $\mathbf{x}$ on $D_i$.\ignore{, which indicates better prediction of corresponding $\mathbf{x}$ on $D_i$}
+\ignore{
+\begin{itemize}
+\itemsep0em 
+%\subsubsection{Mode 1} 
+\item \textbf{Mode 1: } Closest clusters are determined based on the distance to the means of the clusters (i.e. $\|x-\mu_k \|, k = 1: NC$ ).
+%\subsubsection{Mode 2}
+\item \textbf{Mode 2: } This mode has an extra prediction parameter $M2K (Mode2 K)$. Algorithm ~\ref{alg:mode2FC}  details how closest clusters are selected in Mode 2.
+%\subsubsection{Mode 3}
+\item \textbf{Mode 3: } Closest clusters are determined based on the covariance norm of the displacement of  the test input from the means of the clusters (i.e. $\|x-\mu_{D_k} \|_{{\Sigma_{D_k}}^{-1}}, k = 1: NC$ . where $\mu_{D_k}, {\Sigma_{D_k}}^{-1}$ are as described in Algorithm ~\ref{alg:ddtgpm}), $\|x-\mu_{D_k} \|_{{\Sigma_{D_k}}^{-1}}$  = $ (x-\mu_{D_k})^T {\Sigma_{D_k}}^{-1}  (x-\mu_{D_k})$ 
+\end{itemize}
+}
+\ignore{
+\begin{algorithm}
+\KwIn{query point X, DDTGPModel}
+\KwOut{Closest subdomains }
+Let $KNN_x =  KNN(x, X)$  \Comment{X is all input training points} \\
+Let ${L_{KNN_x}} =  Clusters(KNN_x)$ \Comment{where Clusters($KNN_x$) returns the corresponding clusters for the returned points} \\ 
+$FT = frequencyTable(L_{KNN_x})$ \Comment{where $frequencyTable(L_{KNN_x})$ returns an frequency of each clusters in $L_{KNN_x}$ }\\
+$[sortedFT, sortedInd]  = sort(FT$) \\
+$closestDomains = sortedInd[1:CDC] $\\ 
+$closestFTS = sortedFT[1:CDC]$ \\
+\caption{Mode 2 closest clusters algorithm}
+\label{alg:mode2FC}
+\end{algorithm}
+}
+%\subsection{Closest subdomains Prediction}
+%\label{ss:csdp}
+
+
+\noindent\textbf{{(2) Closest subdomains Prediction.}}
+Having determined the closest subdomains, predictions are made for each of the closest clusters. We denote these predictions as ${\{Y^i_{x_*}\}}_{i=1}^{K'}$.  Each of these prediction are computed \ignore{by the following equation,} according to the selected kernel machine. For GPR, predictive mean and  variance are  $O(M\cdot d_X)\,$  and  $O(M^2 \cdot d_Y)\,$ respectively, for each output  dimension.  For TGP,   the prediction is  $O(l_2 \cdot M^2 \cdot d_Y)$; see Eq ~\ref{eq:tgp}. \ignore{, where $l_2$ is the number of iterations for  convergence, since TGP prediction has no closed form expression Similarly, any arbitrary kernel machine saves all factor of the prediction function that only depends on the training data.} \ignore{????? Add Example Kernel machines here????}
+\begin{comment}
+\textbf{GPR:}
+\begin{equation}
+\begin{split}
+\hat{Y^i_{x_*}}_j = &\textbf{k}_{*_j}^T \mathcal{M}^i.(\textbf{K}_j + \sigma^2_{nj} \textbf{I})^{-1} \textbf{y}_j, \,\,
+\sigma_{{Y^i_{x_*}}_j}^2  = k_{{**}_j} -\textbf{k}_{*_i}^T \mathcal{M}^i.(\textbf{K}^i_j + \sigma_{nj} \textbf{I})^{-1} \textbf{k}_{*_i})
+\end{split}
+\end{equation}
+, where $\hat{Y^i_{x_*}}_j$ is the prediction output of the $j^{th}$ dimension at domain $i$.  Given $\mathcal{M}^i$ ,  $\hat{Y^i_{x_*}}_j$ and  $\sigma_{{Y^i_{x_*}}_j}^2$ are  $O(M)$  and  $O(M)^2$ respectively, for each dimension $j$.  
+
+\textbf{TGP:}
+\begin{equation}
+\begin{split}
+\hat{Y^i_{x_*}} =  \underset{Y^i_{x_*}}{\operatorname{argmin       }}[ & k_Y(Y^i_{x_*},Y^i_{x_*})  -2 k^i_y(Y_{x_*})^T \textbf{u}_i  -  \eta_i  log (k_Y(Y_{x_i},Y_{x_i})  -k^i_y(Y_{x_i})^T \mathcal{M}^i. ({\textbf{K}^i_Y}+ \lambda_y \textbf{I})^{-1}.  k^i_y(Y^i_{x_*}) ) ]
+\end{split}
+\end{equation}
+where $\textbf{u}_i = \mathcal{M}^i.((\textbf{K}^i_X + \lambda^i_x  \textbf{I})^{-1}) \textbf{k}^i_x(\textbf{x}_*)$, $\eta  = K^i_X(\textbf{x}_*,\textbf{x}_*) -\textbf{k}(\textbf{x}_*)^T  \textbf{u} $.Given $\mathcal{M}^i$ , the $\hat{Y^i_{x_*}}_j$ has  $O(l_2 \cdot M)^2$ complexity, where $l_2$ is the number of iterations for  convergence of BFGS quasi-Newton gradient based optimizer. 
+\end{comment}
+\begin{comment}
+\textbf{IWTGP:}
+\begin{equation}
+\begin{split}
+\hat{Y^i_{x_*}} =  \underset{Y^i_{x_*}}{\operatorname{argmin       }}[ & k_Y(\textbf{Y}^i_{x_*},\textbf{Y}^i_{x_*}) -2 
+k_y(\textbf{Y}^i_{x_*})^T \textbf{u}_w -\\ & \eta_w  log (K_Y(\textbf{Y}^i_{x_*},\textbf{Y}^i_{x_*}) -\\& 
+k_y(\textbf{Y}^i_{x_*})^T {\textbf{W}^i}^\frac{1}{2} ({\textbf{W}^i}^\frac{1}{2} \textbf{K}_Y {\textbf{W}^i}^\frac{1}{2} +  \lambda_y I)^{-1} \\&{\textbf{W}^i}^\frac{1}{2} k_y(\textbf{Y}^i_{x_*}) ) ]
+\end{split}
+\end{equation}
+where $\textbf{u}_w = \textbf{W}^\frac{1}{2}  (\textbf{W}^\frac{1}{2} \textbf{K}_X \textbf{W}^\frac{1}{2} + \lambda_x I)^{-1} \textbf{W}^\frac{1}{2} k_x(\textbf{x})$, $\eta_w = k_X(\textbf{x},\textbf{x}) - k_x(\textbf{x})^T \textbf{u}_w$. As detailed in section ~\ref{sec:train2}, $({\textbf{W}^i}^\frac{1}{2} \textbf{K}_X^i {\textbf{W}^i}^\frac{1}{2} + \lambda_x \textbf{I})^{-1}$,  $({{\textbf{W}^i}}^\frac{1}{2} \textbf{K}_X {\textbf{W}^i}^\frac{1}{2} + \lambda_x \textbf{I})^{-1}$ could be computed in quadratic time given  $\mathcal{M}^i$ and $W$. Hence,  the $\hat{Y^i_{x_*}}_j$ has  $O(l_d \cdot M)^2$ complexity, where $l_2$ is the number of iterations. 
+\end{comment}
+%\subsection{Subdomains weighting and Final prediction}
+%\label{ss:sdw}
+
+\noindent \textbf{{(3) Subdomains weighting and Final prediction.}}
+The final predictions are formulated as $\textbf{Y}(x_*) = \sum_{i=1}^{K'} a_i \textbf{Y}^i_{x_*}, a_i>0, \sum_{i=1}^{K'} {a_i} =1 $. ${\{a_i\}}_{i=1}^{K'}$ are computed as follows.  Let the distribution of domain ${\{D^i_{x_*} = \|x-\mu'_{i} \|_{{\Sigma'_{k}}^{-1}}\}}_{i=1}^{K'}$ denotes to the distances to the closest subdomains, ${\{L^i_{x_*} = {1}/{D^i_{x_*}}\}}_{i=1}^{K'}$, $a_i ={L^i_{x_*}}/{\sum_{i=1}^{K'} {L^i_{x_*}}} $. \ignore{; see table ~\ref{tab:thcomp} for detailed complexity of the ODC framework in GPR and TGP. }
+
+
+It is not hard to see that when $K' = 1$, the prediction step reduces to regression using the closest subdomain to the test point. However it is  reasonable in most of the prior work to make prediction using the closest model, we generalized it to $K'$ closest kernel machines and combining their predictions,  so as to study how consistency of the combined prediction behaves as the overlap increases (i.e., $p$); see the experiments.\ignore{ Table ~\ref{tab:thcomp} illustrates the computational complexity of the framework. }
+
+
+% Table generated by Excel2LaTeX from sheet 'Sheet1'
+
+
+\ignore{\begin{itemize}
+\itemsep0em 
+%\subsubsection{Mode 1} 
+\item \textbf{Mode 1: } Let ${\{D_{x_i}\}}_{i=1}^{CDC}$ denotes to the distances to the closest clusters, ${\{L_{x_i} = \frac{1}{D_{x_i}}\}}_{i=1}^{CDC}$. Then $W_i =\frac{L_x(i)}{\sum_{i=1}^{CDC} {L_x(i)}} $
+\item \textbf{Mode 2: }$W_i = \frac{closestFTS(i)}{\sum_{i=1}^{CDC} closestFTS(i)}$
+ where closestFTS is as computed in subsection ~\ref{ss:fcc}.
+\item \textbf{Mode 3: } Let ${\{D_{x_i} = \|x-\mu_{D_k} \|_{{\Sigma_{D_k}}^{-1}}\}}_{i=1}^{CDC}$ denotes to the distances to the closest clusters, ${\{L_{x_i} = \frac{1}{D_{x_i}}\}}_{i=1}^{CDC}$. Then  $W_i =\frac{L_x(i)}{\sum_{i=1}^{CDC} {L_x(i)}} $.
+\end{itemize}}
+\ignore{
+noindent \textbf{Computational Complexity:} Overall computational complexity of the prediction = $O( n_{Tst}* CDC * (\frac{N_{Tr}}{NC}) ^2)$ (i.e. quadratic complexity) which is significantly better than cubic complexity of the original TGP model. where $n_{Tst}$ is the number of the test points, $N_{Tr}$ is the number of points in the training data.
+\subsection{Data Bias handling ($CovShift$ Flag = $True$)}
+\input{databias}}

@@ -1,0 +1,587 @@
+\usepackage{amsfonts}
+\usepackage{amsmath, amsthm}
+\usepackage{color}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\usepackage{mathtools}
+\usepackage{hyperref}
+
+\usepackage{shuffle}
+%\usepackage[all]{xy}
+%\usepackage[utf8]{inputenc} 
+%\usepackage{comment}
+
+\RequirePackage[inline]{enumitem}
+\RequirePackage[numbers]{natbib}
+
+%\usepackage{hyperref}
+%\usepackage{breakurl}
+
+\usepackage{mathrsfs}
+%\usepackage{enumitem}
+%
+\usepackage{tikz}
+%\usepackage{dsfont}
+\usepackage{mhequ} 
+%\usepackage{mhsymb} 
+%\usepackage{mhenvs} 
+%\usepackage{array}
+%
+%\usepackage{wasysym}
+%\usepackage{centernot}
+%
+%\setlist{noitemsep,nolistsep,leftmargin=1.7em}
+%\parindent1em
+% 
+\usetikzlibrary{snakes}
+\usetikzlibrary{decorations}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
+\usetikzlibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%              Some tikz code to draw nice trees
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\makeatletter
+\pgfdeclareshape{crosscircle}
+{
+  \inheritsavedanchors[from=circle] % this is nearly a circle
+  \inheritanchorborder[from=circle]
+  \inheritanchor[from=circle]{north}
+  \inheritanchor[from=circle]{north west}
+  \inheritanchor[from=circle]{north east}
+  \inheritanchor[from=circle]{center}
+  \inheritanchor[from=circle]{west}
+  \inheritanchor[from=circle]{east}
+  \inheritanchor[from=circle]{mid}
+  \inheritanchor[from=circle]{mid west}
+  \inheritanchor[from=circle]{mid east}
+  \inheritanchor[from=circle]{base}
+  \inheritanchor[from=circle]{base west}
+  \inheritanchor[from=circle]{base east}
+  \inheritanchor[from=circle]{south}
+  \inheritanchor[from=circle]{south west}
+  \inheritanchor[from=circle]{south east}
+  \inheritbackgroundpath[from=circle]
+  \foregroundpath{
+    \centerpoint%
+    \pgf@xc=\pgf@x%
+    \pgf@yc=\pgf@y%
+    \pgfutil@tempdima=\radius%
+    \pgfmathsetlength{\pgf@xb}{\pgfkeysvalueof{/pgf/outer xsep}}%  
+    \pgfmathsetlength{\pgf@yb}{\pgfkeysvalueof{/pgf/outer ysep}}%  
+    \ifdim\pgf@xb<\pgf@yb%
+      \advance\pgfutil@tempdima by-\pgf@yb%
+    \else%
+      \advance\pgfutil@tempdima by-\pgf@xb%
+    \fi%
+    \pgfpathmoveto{\pgfpointadd{\pgfqpoint{\pgf@xc}{\pgf@yc}}{\pgfqpoint{-0.707107\pgfutil@tempdima}{-0.707107\pgfutil@tempdima}}}
+    \pgfpathlineto{\pgfpointadd{\pgfqpoint{\pgf@xc}{\pgf@yc}}{\pgfqpoint{0.707107\pgfutil@tempdima}{0.707107\pgfutil@tempdima}}}
+    \pgfpathmoveto{\pgfpointadd{\pgfqpoint{\pgf@xc}{\pgf@yc}}{\pgfqpoint{-0.707107\pgfutil@tempdima}{0.707107\pgfutil@tempdima}}}
+    \pgfpathlineto{\pgfpointadd{\pgfqpoint{\pgf@xc}{\pgf@yc}}{\pgfqpoint{0.707107\pgfutil@tempdima}{-0.707107\pgfutil@tempdima}}}
+  }
+}
+\makeatother
+
+
+
+
+\def\XiTwoTwo{\tikz[baseline=0.5,scale=0.15]{\draw (0,0) node[xi] {} -- (-1,1) node[not] {} -- (0,2) node[xi] {};}}
+
+\def\XiTwoX{\tikz[baseline=-2,scale=0.15]{\draw (0,-0.25) node[xi] {} -- (-1,1) node[xix] {};}}
+
+\def\XiThree{\tikz[baseline=0,scale=0.15]{\draw (0,0) node[xi] {} -- (-1,1) node[xi] {} -- (0,2) node[xi] {};}}
+\def\IXiTwo{\tikz[baseline=0,scale=0.15]{\draw (0,-0.25) node[not] {} -- (-1,1) node[xi] {} -- (0,2) node[xi] {};}}
+\def\XiThreeb{\tikz[baseline=-1,scale=0.15]{\draw (-1,1) node[xi] {} -- (0,0) node[xi] {} -- (1,1) node[xi] {};}}
+\def\XiFourd{\tikz[baseline=-4.5,scale=0.15]{\draw (0,-1.5) node[not] {} -- (0,0); \draw (-1,1) node[xi] {} -- (0,0) node[xi] {} -- (1,1) node[xi] {};}}
+\def\IXiIXi{\tikz[baseline=-1,scale=0.15]{\draw (-1,1) node[xi] {} -- (0,0) node[not] {} -- (1,1) node[xi] {};}}
+
+\def\XiFour{\tikz[baseline=2,scale=0.15]{\draw (0,0) node[xi] {} -- (-1,1) node[xi] {} -- (0,2) node[xi] {} -- (-1,3) node[xi] {};}}
+\def\IXiThree{\tikz[baseline=2,scale=0.15]{\draw (0,-0.25) node[not] {} -- (-1,1) node[xi] {} -- (0,2) node[xi] {} -- (-1,3) node[xi] {};}}
+\def\XiOne{\tikz[baseline=-2.8,scale=0.15]{\node[xib] {};}}
+\def\XiX{\tikz[baseline=-2.8,scale=0.15]{\node[xibx] {};}}
+\def\IXi{\tikz[baseline=-2,scale=0.15]{\draw (0,-0.25) node[not] {} -- (-1,1) node[xi] {};}}
+\def\XiI{\tikz[baseline=-2,scale=0.15]{\draw (0,-0.25) node[xi] {} -- (-1,1) node[not] {};}}
+\def\IXiX{\tikz[baseline=-1,scale=0.15]{\draw (0,-0.25) node[not] {} -- (-1,1) node[xix] {};}}
+
+\def\XiFourb{\tikz[baseline=-1,scale=0.15]{\draw(0,1.5) node[xi] {} -- (0,0); \draw (-1,1) node[xi] {} -- (0,0) node[xi] {} -- (1,1) node[xi] {};}}
+\def\XiFourc{\tikz[baseline=2,scale=0.15]{\draw (0,-0.25) node[xi] {} -- (-1,1) node[xi] {} -- (0,2) node[xi] {} -- (-1,3) node[xi] {};}}
+\def\XiFoure{\tikz[baseline=0,scale=0.15]{\draw (0,2) node[xi] {} -- (-1,1) node[xi] {} -- (0,0) node[xi] {} -- (1,1) node[xi] {};}}
+
+\colorlet{symbols}{blue!90!black}
+\colorlet{testcolor}{green!60!black}
+\colorlet{connection}{red!30!black}
+\def\symbol#1{\textcolor{symbols}{#1}}
+\def\symbol#1{\textcolor{symbols}{#1}}
+
+
+\tikzset{
+root/.style={circle,fill=black!50,inner sep=0pt, minimum size=3mm},
+        dot/.style={circle,fill=black,inner sep=0pt, minimum size=1.5mm},
+        dotred/.style={circle,fill=black!50,inner sep=0pt, minimum size=2mm},
+        var/.style={circle,fill=black!10,draw=black,inner sep=0pt, minimum size=3mm},
+        kernel/.style={semithick,shorten >=2pt,shorten <=2pt},
+        kernel1/.style={thick},
+        kernels/.style={snake=zigzag,shorten >=2pt,shorten <=2pt,segment amplitude=1pt,segment length=4pt,line before snake=2pt,line after snake=5pt,},
+		kernels1/.style={snake=zigzag,segment amplitude=0.5pt,segment length=2pt},
+		rho1/.style={dotted,semithick},
+        rho/.style={densely dashed,semithick,shorten >=2pt,shorten <=2pt},
+           testfcn/.style={dotted,semithick,shorten >=2pt,shorten <=2pt},
+        renorm/.style={shape=circle,fill=white,inner sep=1pt},
+        labl/.style={shape=rectangle,fill=white,inner sep=1pt},
+        xic/.style={very thin,circle,fill=symbols,draw=black,inner sep=0pt,minimum size=1.2mm},
+        xi/.style={very thin,circle,fill=blue!10,draw=black,inner sep=0pt,minimum size=1.2mm},
+        xix/.style={crosscircle,fill=blue!10,draw=black,inner sep=0pt,minimum size=1.2mm},
+	xib/.style={very thin,circle,fill=blue!10,draw=black,inner sep=0pt,minimum size=1.6mm},
+	xie/.style={very thin,circle,fill=green!50!black,draw=black,inner sep=0pt,minimum size=1mm},
+	xid/.style={very thin,circle,fill=symbols,draw=black,inner sep=0pt,minimum size=1.6mm},
+	xibx/.style={crosscircle,fill=blue!10,draw=black,inner sep=0pt,minimum size=1.6mm},
+	edgetype/.style={very thin,circle,draw=black,inner sep=0pt,minimum size=5mm},
+	nodetype/.style={very thick,circle,draw=black,inner sep=0pt,minimum size=5mm},
+	kernels2/.style={very thick,draw=connection,segment length=12pt},
+clean/.style={thin,circle,fill=black,inner sep=0pt,minimum size=1mm},	not/.style={thin,circle,fill=symbols,draw=connection,fill=connection,inner sep=0pt,minimum size=0.5mm},
+	>=stealth,
+        }
+
+\tikzset{ individus/.style={scale=0.40,draw,circle,thick,fill=black!10},
+ individu/.style={scale=0.40,draw,circle,thick,fill=black!50},       } 
+\makeatletter
+\def\DeclareSymbol#1#2#3{\expandafter\gdef\csname MH@symb@#1\endcsname{\tikz[baseline=#2,scale=0.15,draw=symbols]{#3}}\expandafter\gdef\csname MH@symb@#1s\endcsname{\scalebox{0.7}{\tikz[baseline=#2,scale=0.15,draw=symbols]{#3}}}}
+\def\<#1>{\csname MH@symb@#1\endcsname}
+\makeatother
+
+\def\sXi{\symbol{\Xi}} 
+ \def\1{\mathbf{\symbol{1}}}
+\def\X{\symbol{X}}
+ \def\un#1{\hbox{{\indic 1}$_{#1}$}}
+\def\one{\mathbf{1}}
+\def\eps{\varepsilon}
+\def\gep{\varepsilon}
+
+   
+\def\MHmakebox#1#2#3{\tikz[baseline=#3,line width=#1,cross/.style={path picture={ 
+  \draw[black](path picture bounding box.south) -- (path picture bounding box.north) (path picture bounding box.west) -- (path picture bounding box.east);
+}}]{\draw[white] (0,0) rectangle (#2,#2);
+\draw[black,cross] (0.1em,0.1em) rectangle (#2-0.1em,#2-0.1em);}}
+
+\def\XI#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (center) {};
+     \draw[rho1,color=#1] (center) to
+     node [sloped,below] {\small }     (root);     
+     \end{tikzpicture}}
+
+\def\IXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (center) {};
+         \draw[kernel1,color=#1] (center) to node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+    \def\Xib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,2)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,2)  [dot,color=#1,label=below:] (left) {};
+         \draw[rho1,color=#1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[rho1,color=#1] (left) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+    \def\XiIXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,2)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,2)  [dot,color=#1,label=below:] (left) {};
+         \draw[rho1,color=#1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[kernel1,color=#1] (left) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+
+\def\IIXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (1,4)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,4)  [dot,color=#1,label=below:] (left) {};
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (rootbis) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+     \def\IIIXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+     \node at (0,0)  [dot,color=#1,label=below:] (root1) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,4)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (1,6)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,6)  [dot,color=#1,label=below:] (left) {};
+          \draw[color=#1,kernel1] (root) to
+     node [sloped,below] {\small }     (root1);
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (rootbis) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+     \def\IIXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (0,4)  [dot,color=#1,label=below:] (center) {};
+         \draw[color=#1,kernel1] (center) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (rootbis) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+     \def\IIIXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (0,4)  [dot,color=#1,label=below:] (center) {};
+        \node at (0,6)  [dot,color=#1,label=below:] (centerbis) {};
+         \draw[color=#1,kernel1] (center) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (centerbis) to
+     node [sloped,below] {\small }     (center);
+     \draw[color=#1,kernel1] (rootbis) to
+     node [sloped,below] {\small }     (root);
+     \end{tikzpicture}}
+     
+     \def\XiIIXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (-1,2)  [dot,color=#1,label=below:] (left) {};
+        \node at (1,2)  [dot,color=#1,label=below:] (right) {};
+        \node at (0,4)  [dot,color=#1,label=below:] (leftr) {};
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+      \draw[color=#1,kernel1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     
+     \def\IXiIIXi#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+     \node at (0,0)  [dot,color=#1,label=below:] (root1) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (root) {};
+        \node at (-1,4)  [dot,color=#1,label=below:] (left) {};
+        \node at (1,4)  [dot,color=#1,label=below:] (right) {};
+        \node at (0,6)  [dot,color=#1,label=below:] (leftr) {};
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,kernel1] (root) to
+     node [sloped,below] {\small }     (root1);
+      \draw[color=#1,kernel1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     
+     
+\def\XiIIXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,2)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,2)  [dot,color=#1,label=below:] (left) {};
+        \node at (0,4)  [dot,color=#1,label=below:] (leftr) {};
+        \node at (-2,4)  [dot,color=#1,label=below:] (leftl) {};
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \draw[color=#1,kernel1] (leftl) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     
+     \def\IXiIIXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+     \node at (0,0)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,4)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,4)  [dot,color=#1,label=below:] (left) {};
+        \node at (0,6)  [dot,color=#1,label=below:] (leftr) {};
+        \node at (-2,6)  [dot,color=#1,label=below:] (leftl) {};
+         \draw[color=#1,kernel1] (root) to
+     node [sloped,below] {\small }     (rootbis);
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \draw[color=#1,kernel1] (leftl) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     \def\XiIXiIIXibc#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+     
+     \node at (2,2)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_4 $}] (rightbis) {};
+     \node at (1,0)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,4)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_3 $} ] (right) {};
+        \node at (-1,4)  [dot,color=#1,label=below:] (left) {};
+        \node at (0,6)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_2 $}] (leftr) {};
+        \node at (-2,6)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_1 $}] (leftl) {};
+         \draw[color=#1,kernel1] (root) to
+     node [sloped,below] {\small }     (rootbis);
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (rightbis) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \draw[color=#1,kernel1] (leftl) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     
+     \def\XiIXiIIXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+     
+     \node at (2,2)  [dot,color=#1,label=below:] (rightbis) {};
+     \node at (1,0)  [dot,color=#1,label=below:] (rootbis) {};
+        \node at (0,2)  [dot,color=#1,label=below:] (root) {};
+        \node at (1,4)  [dot,color=#1,label=below:] (right) {};
+        \node at (-1,4)  [dot,color=#1,label=below:] (left) {};
+        \node at (0,6)  [dot,color=#1,label=below:] (leftr) {};
+        \node at (-2,6)  [dot,color=#1,label=below:] (leftl) {};
+         \draw[color=#1,kernel1] (root) to
+     node [sloped,below] {\small }     (rootbis);
+         \draw[color=#1,rho1] (right) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (rightbis) to
+     node [sloped,below] {\small }     (rootbis);
+     \draw[color=#1,kernel1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[color=#1,rho1] (leftr) to
+     node [sloped,below] {\small }     (left);
+     \draw[color=#1,kernel1] (leftl) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+     
+     \def\IXib#1{\begin{tikzpicture}[scale=0.2,baseline=0.1cm]
+        \node at (0,0)  [dot,color=#1,label=below:$  $] (root) {};
+         \node at (2,2)  [dot,color=#1,label=right:] (right) {};
+         \node at (-2,2)  [dot,color=#1,label=left: ] (left) {};
+         \node at (-3,4)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_1 $}] (leftl) {};
+          \node at (-1,4)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_2 $} ] (leftr) {};
+          \node at (1,4)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_3 $}  ] (rightl) {};
+           \node at (3,4)  [dot,color=#1,label={[label distance=-0.2em]above: \scriptsize  $ \ell_4 $} ] (rightr) {};
+            \draw[color=#1,kernels1] (right) to
+     node [sloped,below] {\small }     (root); \draw[color=#1,kernels1] (left) to
+     node [sloped,below] {\small }     (root);
+     \draw[rho1,color=#1] (leftr) to
+     node [sloped,below] {\small }     (left);
+      \draw[kernel1,color=#1] (rightr) to
+     node [sloped,below] {\small }     (right);
+      \draw[rho1,color=#1] (rightl) to
+     node [sloped,below] {\small }     (right);
+      \draw[kernel1,color=#1] (leftl) to
+     node [sloped,below] {\small }     (left);
+     \end{tikzpicture}}
+    
+\DeclareMathOperator*{\bplus}{
+\tikzexternaldisable
+\mathchoice{\MHmakebox{.17ex}{1.5em}{0.48em}}{\MHmakebox{.12ex}{1.1em}{0.28em}}{}{}
+\tikzexternalenable
+}
+
+
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Wednesday, March 09, 2016 07:57:09}
+%TCIDATA{LastRevised=Wednesday, March 09, 2016 09:12:56}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+%\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+
+
+
+\newcommand{\Nr}{\textnormal{Nr}}
+\newcommand{\Vol}{\textnormal{Vol}}
+\newcommand{\Tr}{\textnormal{Tr}}
+\newcommand{\Cl}{\textnormal{Cl}}
+\newcommand{\Hom}{\textnormal{Hom}}
+\newcommand{\End}{\textnormal{End}}
+\newcommand{\Ker}{\textnormal{Ker}}
+\newcommand{\Aut}{\textnormal{Aut}}
+\newcommand{\Sh}{\textnormal{Shuffle}}
+\newcommand{\Id}{\textnormal{Id}}
+\newcommand{\diam}{\textnormal{diam}}
+\newcommand{\Diag}{\textnormal{Diag}}
+\newcommand{\ExpSig}{\textnormal{ESig}}
+\newcommand{\supp}{\textnormal{supp}}
+\newcommand{\Lip}{\textnormal{Lip}}
+\newcommand{\sign}{\textnormal{sign}}
+\newcommand{\loc}{\textnormal{loc}}
+\newcommand{\Lie}{\textnormal{Lie}}
+\newcommand{\Vect}{\textnormal{Vect}}
+\newcommand{\diver}{\textnormal{div}}
+\newcommand{\stat}{\textnormal{stat}}
+\newcommand{\op}{\textnormal{op}}
+\newcommand{\Real}{\textnormal{Re}}
+
+\newcommand{\GPrimal}{T(\R^{1+d})}
+\newcommand{\GDual}{T((\R^{1+d}))}
+\newcommand{\BPrimal}{\HH}
+\newcommand{\BDual}{\HH^*}
+\newcommand{\extract}{\delta}
+
+\newcommand{\Deltam}{\Delta^{\!-}}
+\newcommand{\Deltap}{\Delta^{\!+}}
+\newcommand{\Deltashuff}{\Delta_{\shuffle}}
+\newcommand{\tensor}{{\dot\otimes}}
+\newcommand{\poly}{\odot}
+
+
+\newcommand{\OO}{\mathcal{O}}
+\newcommand{\QQ}{\mathcal{Q}}
+\newcommand{\RR}{\mathcal{R}}
+\newcommand{\II}{\mathcal{I}}
+\newcommand{\TT}{\mathcal{T}}
+\newcommand{\CC}{\mathcal{C}}
+\newcommand{\PP}{\mathcal{P}}
+\newcommand{\DD}{\mathcal{D}}
+\newcommand{\EE}{\mathcal{E}}
+\newcommand{\HH}{\mathcal{H}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\GG}{\mathcal{G}}
+\newcommand{\BB}{\mathcal{B}}
+\newcommand{\LL}{\mathcal{L}}
+\newcommand{\VV}{\mathcal{V}}
+\newcommand{\UU}{\mathcal{U}}
+\newcommand{\MM}{\mathcal{M}}
+\newcommand{\NN}{\mathcal{N}}
+\newcommand{\KK}{\mathcal{K}}
+\newcommand{\SSS}{\mathcal{S}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\WW}{\mathcal{W}}
+
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\F}{\mathbb F}
+\newcommand{\K}{\mathbb K}
+\newcommand{\T}{\mathbb T}
+\newcommand{\W}{\mathbb W}
+\newcommand{\Pbb}{\mathbb P}
+\newcommand{\Xbb}{\mathbb X}
+\newcommand{\Abb}{\mathbb A}
+\newcommand{\Ybb}{\mathbb Y}
+
+\newcommand{\Xbf}{\mathbf X}
+\newcommand{\Y}{\mathbf Y}
+\newcommand{\x}{\mathbf x}
+\newcommand{\y}{\mathbf y}
+\newcommand{\z}{\mathbf z}
+\newcommand{\w}{\mathbf w}
+\newcommand{\mm}{\mathbf m}
+\newcommand{\hh}{\mathbf h}
+\newcommand{\B}{\mathbf B}
+\newcommand{\ZZ}{\mathbf Z}
+\newcommand{\WWW}{\mathbf W}
+\newcommand{\bpi}{\mathbf \Pi}
+
+\newcommand{\G}{G}
+
+\newcommand{\var}[1]{#1\textnormal{-var}}
+\newcommand{\Hol}[1]{#1\textnormal{-H{\"o}l}}
+\newcommand{\pvar}{p\textnormal{-var}}
+\newcommand{\pprimevar}{p'\textnormal{-var}}
+\newcommand{\qvar}{q\textnormal{-var}}
+\newcommand{\onevar}{1\textnormal{-var}}
+\newcommand{\twovar}{2\textnormal{-var}}
+\newcommand{\rhovar}{\rho\textnormal{-var}}
+\newcommand{\aHol}{\alpha\textnormal{-H{\"o}l}}
+\newcommand{\pHol}{1/p\textnormal{-H{\"o}l}}
+\newcommand{\pprimeHol}{1/p'\textnormal{-H{\"o}l}}
+\newcommand{\qHol}{1/q\textnormal{-H{\"o}l}}
+\newcommand{\betaHol}{\beta\textnormal{-H{\"o}l}}
+\newcommand{\aprimeHol}{\alpha'\textnormal{-H{\"o}l}}
+\newcommand{\oneHol}{1\textnormal{-H{\"o}l}}
+
+\newcommand{\EEE}[1]{\mathbb E \left[ #1 \right]}
+\newcommand{\EEEover}[2]{\mathbb E^{#1} \left[ #2 \right]}
+\newcommand{\PPPover}[2]{\mathbb P^{#1} \left[ #2 \right]}
+\newcommand{\EEEunder}[2]{\mathbb E_{#1} \left[ #2 \right]}
+\newcommand{\Var}[1]{\textnormal{Var} \left[ #1 \right]}
+\newcommand{\Diff}{\textnormal{Diff}}
+\newcommand{\Homeo}{\textnormal{Homeo}}
+\newcommand{\PPP}[1]{\mathbb{P} \left[ #1 \right]}
+\newcommand{\QQQ}[1]{\Q \left[ #1 \right]}
+\newcommand{\cv}[1]{\textnormal{cv}\left( #1 \right)}
+\newcommand{\ob}[1]{\textnormal{ob}\left( #1 \right)}
+\newcommand{\spn}[1]{\textnormal{span}\left( #1 \right)}
+\newcommand{\id}{\textnormal{id}}
+\newcommand{\norm}[1]{\left|\left|#1 \right|\right|}
+\newcommand{\normt}[1]{\left|\left|\left|#1 \right|\right|\right|}
+\newcommand{\norms}[1]{\left|#1 \right|}
+\newcommand{\normc}{\norm{\cdot}}
+\newcommand{\normtc}{\normt{\cdot}}
+%\newcommand{\1}[1]{\mathbf 1 \{#1\}}
+\newcommand{\0}{\mathbf 0}
+\newcommand{\LLL}{\mathbf L}
+\newcommand{\GL}{\mathbf{GL}}
+\newcommand{\LMC}{\mathbf{LMC}}
+\newcommand{\Lyons}{S}
+
+\newcommand{\uu}{\mathfrak u}
+\newcommand{\g}{\mathfrak g}
+\newcommand{\llie}{\mathfrak l}
+\newcommand{\h}{\mathfrak h}
+\newcommand{\gl}{\mathfrak {gl}}
+\newcommand{\su}{\mathfrak{su}}
+\newcommand{\symp}{\mathfrak{sp}}
+\newcommand{\m}{\mathfrak m}
+
+\newcommand{\gen}[1]{\langle #1 \rangle}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\roof}[1]{\lceil #1 \rceil}
+
+\newcommand{\midset}{\,\middle|\,}
+
+\newcommand\restr[2]{{\left.\kern-\nulldelimiterspace % automatically resize the bar with \right
+  #1 % the function
+  \vphantom{\big|} % pretend it's a little taller at normal size
+  \right|_{#2} % this is the delimiter
+  }}
+
+\def\eqd{\,{\buildrel \DD \over =}\,}
+\def\neqd{\,{\buildrel \DD \over \neq}\,}
+\def\convd{\,{\buildrel \DD \over \rightarrow}\,}

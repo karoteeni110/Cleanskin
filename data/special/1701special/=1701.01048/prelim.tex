@@ -1,0 +1,478 @@
+%
+
+\section{Preliminaries}
+
+This section provides a formal description of the representation language, the relational planning problem, and the description of the running example in this context.
+
+
+%
+%
+%
+%
+
+%
+\subsection{Relational Expressions and their Calculus of Operations}
+
+%
+
+The computation of SDP algorithms is facilitated by a representation
+that enables compact specification of functions over world
+states. Several such representations have been devised and used. In
+this chapter we chose to abstract away some of those details and focus
+on a simple language of relational expressions. This is closest to the
+GFODD representation of \cite{JoshiKeKh11,JoshiKhRaTaFe13}, but it resembles the case
+notation of \cite{BoutilierRePr01,SannerBo09}.
+
+%
+%
+%
+%
+%
+\subfour{Syntax}
+We assume familiarity with basic concepts and notation in  first order logic (FOL) \cite{Lloyd87,RussellNo95,ChangKe90}. 
+Relational expressions are similar to expressions in 
+FOL. They are defined relative to a relational signature, with a
+finite set of predicates $p_1, p_2, \ldots, p_n$ each with an
+associated arity (number of arguments), a countable set of variables
+$x_1, x_2, \ldots$, and a set of constants $c_1, c_2, \ldots, c_m$. We
+do not allow function symbols other than constants (that is, functions
+with arity $\geq 1$).  
+%
+%
+A term is a
+variable (often denoted in uppercase) or constant (often denoted in lowercase)
+and an atom is either an equality between two
+terms or a predicate with an appropriate list of terms as arguments.
+Intuitively, a term refers to an object in the world of interest and
+an atom is a property which is either true or false.
+
+We illustrate relational expressions informally by some examples. In
+FOL we can consider open formulas that have unbound variables. For
+example, the atom $color(X,Y)$ is such a formula and its truth value
+depends on the assignment of $X$ and $Y$ to objects in the world.  To
+simplify the discussion, we assume for this example that arguments are
+typed (or sorted) and $X$ ranges over ``objects'' and $Y$ over ``colors''.  We can
+then quantify over these variables to get a sentence which will be
+evaluated to a truth value in any concrete possible world. For
+example, we can write $[\exists Y, \forall X, color(X,Y)]$ expressing
+the statement that there is a color associated with all objects.
+Generalized expressions allow for more general open formulas that
+evaluate to numerical values.  For example, $E_1=[\mbox{if }
+  color(X,Y) \mbox{ then 1 else 0}]$ is similar to the previous logical
+expression but $E_2 =[\mbox{if } color(X,Y) \mbox{ then 0.3 else
+    0.5}]$ returns non-binary values.
+
+Quantifiers from logic are replaced with aggregation operators that
+combine numerical values and provide a generalization of the logical
+constructs. In particular, when the open formula is restricted to
+values 0 and 1, the operators $\max$ and $\min$ simulate existential
+and universal quantification.  Thus, $[\max_{Y}, \min_{X}, \mbox{if }
+  color(X,Y) \mbox{ then 1 else 0}]$ is equivalent to the logical
+sentence $[\exists Y, \forall X, color(X,Y)]$ given above.  But we can
+allow for other types of aggregations. For example, $[\max_{Y},
+  \mbox{sum}_{X}, \mbox{if }$ $color(X,Y)$ $\mbox{ then 1 else 0}]$
+evaluates to the largest number of objects associated with one color,
+and the expression $[\mbox{sum}_{X}, \min_{Y},$ $\mbox{if }
+  color(X,Y)$ $\mbox{ then 0 else 1}]$ evaluates to the number of
+objects that have no color association.
+In this
+manner, a generalized expression represents a function from possible
+worlds to numerical values and, as illustrated, can capture interesting properties of the state.
+
+Relational expressions are also related to work in statistical
+relational learning \cite{RichardsonDo06,Problog,LiftedWMC}.  For example, if the
+open expression $E_2$ given above captures probability of ground facts for the
+predicate $color()$ and the ground facts are mutually independent then
+$[\mbox{product}_{X}, \mbox{product}_{Y}, \mbox{if } color(X,Y)$ $\mbox{
+    then 0.3 else 0.5}]$ captures the joint probability for all facts
+for $color()$. Of course, the open formulas in logic can include more
+than one atom and similarly expressions can be more involved. 
+
+%
+%
+%
+In the following we will drop the cumbersome if-then-else notation and
+instead will assume a simpler notation with a set of mutually exclusive conditions which we refer to as {\em cases}.  In particular, an
+expression includes a set of mutually exclusive open formulas in FOL
+(without any quantifiers or aggregators) 
+denoted $c_1,\ldots,c_k$ associated with corresponding numerical values
+$v_1,\ldots,v_k$.  The list of cases refers to a finite set of
+variables $X_1,\ldots,X_m$. A generalized expression is given by a
+list of aggregation operators and their variables and the list of
+cases $[agg_{X_1}, agg_{X_2}, \ldots , agg_{X_m}
+  [c_1:v_1,\ldots,c_k:v_k]]$ so that the last expression is
+canonically represented as $[\mbox{product}_{X}, \mbox{product}_{Y},
+    [color(X,Y):0.3; \neg color(X,Y):0.5]]$.
+
+\subfour{Semantics}
+The semantics of expressions is defined inductively exactly as in
+first order logic and we skip the formal definition.  
+As usual, an expression is evaluated in an \emph{interpretation}  also known as a possible world. 
+In our context, an interpretation specifies (1) a
+finite set of $n$ domain elements also known as objects, (2) a mapping
+of constants to domain elements, and (3) the truth values of all the
+predicates over tuples of domain elements of appropriate size to match
+the arity of the predicate.
+Now,
+given an expression $B=(agg_X,\ f(X))$, an interpretation $I$, and a
+substitution $\zeta$ of variables in $X$ to objects in $I$, one can
+identify the case $c_i$ which is true for this substitution.  Exactly
+one such case exists since the cases are mutually exclusive and exhaustive.
+Therefore, the value associated with $\zeta$ is $v_i$.  These values
+are then aggregated using the aggregation operators.  For example,
+consider again the expression $[\mbox{product}_{X},
+    \mbox{product}_{Y}, [color(X,Y):0.3; \neg color(X,Y):0.5]]$ and an
+    interpretation $I$ with objects $a,b$ and where $a$ is associated
+    with colors black and white and $b$ is associated with color
+    black.  In this case we have exactly 4 substitutions evaluating to
+    0.3, 0.3, 0.5, 0.3. Then the final value is $0.3^3 \cdot 0.5$.
+
+\subfour{Operations over expressions}
+Any binary operation $op$ over real values can be generalized to open
+and closed expressions in a natural way. If $f_1$ and $f_2$ are two
+closed expressions, $f_1\ op\ f_2$ represents the function which maps
+each interpretation $w$ to $f_1(w)\ op\ f_2(w)$.
+%
+%
+%
+%
+%
+%
+%
+%
+%
+This provides a definition but not an implementation of binary
+operations over expressions.  
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+For implementation,
+the work in \cite{JoshiKeKh11} showed that if the binary operation is
+{\em safe}, i.e.,\ it distributes with respect to all aggregation
+operators, then there is a simple algorithm (the Apply procedure)
+implementing the binary operation over expressions.  For example, $+$
+is safe w.r.t.\ $\max$ aggregation, and it is easy to see that
+$(\max_X f(X)) + (\max_X g(X))$ = $\max_X \max_Y f(X)+ g(Y)$, and the
+open formula portion of the result can be calculated directly from the
+open expressions $f(X)$ and $g(Y)$.  
+Note that we need to standardize
+the expressions apart, as in the renaming of $g(X)$ to $g(Y)$ for such
+operations. 
+When $f(x)$ and $g(y)$
+are open relational expressions
+the result can be computed through a cross product of the cases. 
+For example,
+\begin{align*}
+[\max_{X}, \min_{Y} \, [color & (X,Y) :3; \neg color(X,Y):5]] \; \oplus \;
+[\max_{X}, [box(X):1; \neg box(X):2]] 
+\\
+= [\max_Z, \max_{X}, \min_{Y} \, [& color(X,Y)\wedge box(Z):4; \neg color(X,Y)\wedge box(Z):6; 
+\\
+& color(X,Y)\wedge \neg box(Z):5; \neg color(X,Y)\wedge \neg box(Z):7]]
+\end{align*}
+When the binary operation is not safe then this procedure
+fails, but in some cases, operation-specific algorithms can be
+used for such combinations.\footnote{For example, a product of expressions that include only product aggregations, which is not safe, can be obtained by scaling the result with a number that depends on domain size, and 
+$[\prod_{x_1} \prod_{x_2} \prod_{x_3} f(x_1,x_2,x_3)] 
+\otimes
+[\prod_{y_1} \prod_{y_2} g(y_1,y_2)]$ is euqal to 
+$
+[\prod_{x_1} \prod_{x_2} \prod_{x_3} 
+[f(x_1,x_2,x_3)
+\times g(x_1,x_2)^{1/n} ] ]
+$ when the domain has $n$ objects.
+}
+
+As will become clear later, to implement SDP we need the binary
+operations $\oplus$, $\otimes$, $\max$ and the aggregation includes
+$\max$ in addition to aggregation in the reward function.  Since
+$\oplus$, $\otimes$, $\max$ are safe with respect to $\max,\min$
+aggregation one can provide a complete solution 
+when the reward is restricted to have $\max,\min$ aggregation. 
+When this is not the case, for example when using sum aggregation in the
+reward function,  one requires a special algorithm for the
+combination. Further details are provided in \cite{JoshiKeKh11,JoshiKhRaTaFe13}.
+
+\subfour{Summary}
+Relational expressions are closest to the GFODD representation of
+\cite{JoshiKeKh11,JoshiKhRaTaFe13}.  Every case $c_i$ in a relational expression corresponds to a path or set of paths in the GFODD, all of which reach the same leaf in the graphical representation
+of the GFODD.  GFODDs are potentially more compact than relational expressions since paths share common subexpressions, which can lead to an exponential reduction in size. On the other hand, GFODDs require special algorithms for their manipulation.
+Relational expressions are also similar to the
+%
+case notation
+of~\cite{BoutilierRePr01,SannerBo09}. However, in contrast with that representation, cases are not allowed to include any quantifiers and instead quantifiers and general aggregators are globally applied over the cases, as in standard quantified normal form in logic.
+
+
+
+
+\subsection{Relational MDPs}
+
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+
+In this section we define MDPs, starting 
+with the basic case with enumerated state and action spaces,
+and then providing the relational representation.
+
+\subfour{MDP Preliminaries}
+We assume familiarity with basic notions of Markov Decision Processes
+(MDPs) \cite{RussellNo09,Puterman1994}.  Briefly,
+a MDP is a tuple $\langle S,A,P,R,\gamma \rangle$ given by a set of
+states $S$, set of actions $A$, transition probability $Pr(S'|S,A)$, immediate
+reward function $R(S)$
+and discount factor $\gamma<1$.  The solution of a MDP is a policy
+$\pi$
+%
+%
+that maximizes the expected discounted total reward
+obtained by following that policy starting from any state.  The Value
+Iteration algorithm (VI) informally introduced in Eq~\ref{eq:VI}, calculates the
+optimal value function by iteratively performing Bellman backups,
+$V_{k+1} = T[V_k]$, defined for each state $s \in S$ as,
+%
+%
+\begin{equation}
+\label{eq:viflat}
+V_{k+1}(s) = T[V_k](s) \leftarrow \max_{a \in A} \{ R(s) + \gamma \sum_{s' \in S} Pr(s'|s,a) V_k(s')\}.
+\end{equation}
+Unlike Eq~\ref{eq:VI}, which was goal-oriented and had only a single
+reward at the terminal horizon, here we allow the reward R(S) to accumulate
+at all time steps as typically allowed in MDPs.  
+If we iterate the update until convergence, we get the
+optimal infinite horizon value function typically denoted by $V^*$ and optimal stationary policy $\pi^*$.
+For finite horizon problems, which is the topic of this chapter, we simply stop the iterations at a
+specific $k$. 
+In general, the optimal policy for the finite horizon case is not stationary, that is, we might make different choice in the same state depending on how close we are to the horizon. 
+
+\subfour{Logical Notation for Relational MDPs (RMDPs)}  
+RMDPs are simply MDPs where the states and actions are
+described in a function-free first order logical language. 
+%
+%
+%
+%
+A state corresponds to an interpretation over the corresponding logical signature, and actions are transitions between such interpretations.
+%
+%
+%
+%
+%
+
+A relational planning problem is specified by providing the logical
+signature, the start state, the transitions as controlled by actions,
+and the reward function.  As mentioned above, one of the advantages of
+relational SDP algorithms is that they are intended to produce an
+abstracted form of the value function and policy that does not require
+specifying the start state or even
+the number of objects $n$ in the interpretation at planning
+time.  This yields policies that generalize across domain sizes.  
+We therefore need to explain how one can use logical notation to represent the
+transition model and reward function in a manner that does not depend on domain size. 
+
+%
+%
+
+%
+%
+%
+%
+%
+%
+%
+%
+
+
+%
+%
+%
+%
+%
+%
+
+%
+
+%
+Two types of transition models have been considered in the literature:
+\begin{itemize}
+\item {\bf Endogenous Branching Transitions:} In the basic form, state transitions
+  have limited stochastic branching due to a finite number of action
+  outcomes.  The agent has a set of action types $\{A\}$ each
+  parametrized with a tuple of objects to yield an action template
+  $A(X)$ and a concrete ground action $A(x)$ (e.g. template
+  $\unload(B,T)$ and concrete action
+  $\unload(\mathit{box23},\mathit{truck1})$). 
+  %
+  %
+  %
+  %
+  Each agent action has a finite number of action
+  variants $A_j(X)$ (e.g., action success vs. action failure), and
+  when the user performs $A(X)$ in state $s$ one of the variants is
+  chosen randomly using the state-dependent action choice distribution
+  $Pr(A_j(X) | A(X))$.  
+    To simplify the presentation we follow
+\cite{WangJoKh08,JoshiKeKh11} and require that $Pr(A_j(X)|A(X))$ are given by open expressions, i.e., they have no aggregations and cannot introduce new
+variables.  For example, in \textsc{BoxWorld}, the agent
+  action $\unload(B,T,C)$ has success outcome $\unloadS(B,T,C)$ and
+  failure outcome $\unloadF(B,T,C)$ with action outcome distribution
+  as follows:
+%
+%
+%
+%
+%
+\begin{align}
+  P(\unloadS(B,T,C) | \unload(B,T,C)) & = [(\On(B,T) \wedge \TIn(T,C)): .9; \neg: 0] \nonumber \\
+  P(\unloadF(B,T,C) | \unload(B,T,C)) & = [(\On(B,T) \wedge \TIn(T,C)): .1; \neg: 1]
+   \label{eq:stoch_act_ex} 
+\end{align}
+where, to simplify the notation, the last case is shortened as $\neg$ to denote that it complements previous cases.
+This provides the distribution over deterministic outcomes of 
+actions.
+
+%
+%
+%
+The deterministic action dynamics are specified by providing an open expression,
+capturing successor state axioms~\cite{reiter_KIA}, for each variant
+$A_j(X)$ and predicate template $p'(Y)$. Following \cite{WangJoKh08} we
+call these expressions TVDs, standing for truth value diagrams.  The corresponding TVD,
+$T(A_j(X),p'(Y))$, is an open expression that specifies the truth value
+of $p'(Y)$ {\em in the next state} 
+  (following standard practice we use prime to denote that the predicate refers to the next state) when $A_j(X)$ has been executed {\em
+  in the current state}.  
+The arguments $X$ and $Y$ are intentionally different logical variables as this allows us to specify the truth value of all instances of $p'(Y)$ simultaneously.  
+Similar to the choice probabilities we follow
+\cite{WangJoKh08,JoshiKeKh11} and assume that 
+  TVDs $T(A_j(X),p'(Y))$ have no aggregations and cannot introduce new
+variables.
+%
+%
+%
+%
+%
+This implies that the regression and
+product terms in the SDP algorithm of the next section do not change the aggregation
+function, thereby enabling analysis of the algorithm.
+%
+%
+%
+%
+Continuing our \textsc{BoxWorld} example, we define the TVD for $\BIn'(B,C)$ for
+$\unloadS(B_1,T_1,C_1)$ and $\unloadF(B_1,T_1,C_1)$ as follows:
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\begin{align}
+  \BIn'(B,C) \equiv & T(\unloadS(B_1,T_1,C_1),\BIn'(B,C)) \nonumber \\
+  \equiv & [(\BIn(B,C) \lor \nonumber \\
+  & \, ((B_1=B)\land (C_1=C)  \land \On(B_1,T_1) \land \TIn(T_1,C_1))):1; \neg: 0] \nonumber \\
+ & \nonumber  \\
+  \BIn'(B,C) \equiv & T(\unloadF(B_1,T_1,C_1),\BIn'(B,C)) \nonumber \\
+  \equiv & [\BIn(B,C):1; \neg:0] 
+  \label{eq:ssa_ex}
+%
+%
+\end{align}
+Note that each TVD has exactly two cases, one leading to the outcome 1 and the other leading to the outcome 0.
+Our algorithm below will use these cases individually.
+Here we remark that since the next state (primed) only depends on the previous
+state (unprimed), we are effectively logically encoding the Markov assumption of MDPs.
+%
+%
+%
+\item {\bf Exogenous Branching Transitions:} The more complex form combines the
+  endogenous model with an exogenous stochastic process that affects
+  ground atoms independently.  As a simple example in our
+  \textsc{BoxWorld} domain, we might imagine that with some small
+  probability, each box $B$ in a city $C$ ($\BIn(B,C)$) may
+  independently randomly disappear (falsify $\BIn(B,C)$) owing to
+  issues with theft or improper routing --- such an outcome is
+  independent of the agent's own action.  
+  %
+  %
+  %
+  %
+  Another more complicated example could be an
+  inventory control problem where customer arrival at shops (and
+  corresponding consumption of goods) follows an independent
+  stochastic model.  Such exogenous transitions can be formalized
+  in a number of ways~\cite{Sanner08,sanner:icaps07,JoshiKhRaTaFe13};
+  we do not aim to commit to a particular representation in this chapter,
+  but rather to mention its possibility and the computational
+  consequences of such general representations.
+\end{itemize}
+
+%
+%
+%
+%
+
+Having completed our discussion of RMDP transitions, we now proceed to
+define the reward $R(S,A)$, which can be any function of the state and
+action, specified by a relational expression. 
+Our running example with existentially quantified reward is given by
+\begin{equation}
+[\max_B [\BIn(B,\paris): 10; \neg  \BIn(B,\paris): 0]]
+\label{eq:reward}
+\end{equation}
+but we will also consider additive reward as in 
+\begin{equation}
+[\sum_B [\BIn(B,\paris): 10; \neg  \BIn(B,\paris): 0]].
+\label{eq:reward-additive}
+\end{equation}
+
+
+%
+%
+%
+
+%
+%
+%
+%
+%
+%
+%
+%
+
+
+
+
+
+
+
+
+
