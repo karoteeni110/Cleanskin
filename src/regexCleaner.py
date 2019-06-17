@@ -56,7 +56,7 @@ def list_input(parentdir, dddd):
 def main():
     # Patterns
     bib = {r'(\\begin{thebibliography}.*?\\end{thebibliography})':''}
-    xmlImpurity = {r'(&#[0-9a-z]+;)':'\t', r'(\\\[.*?\\\])|(\\#[0-9]+)':'\t'}
+    xmlImpurity = {r'((\\\[.*?\\\])|(&#[0-9]+;))':' '} 
 
     # Set sub mode & collect paths
     if sys.argv[1] == 'debib':
