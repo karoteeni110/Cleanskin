@@ -44,7 +44,7 @@ def list_input(parentdir, dddd):
                 if parentdir == 'data':
                     artID = os.path.basename(os.path.dirname(path))
                 elif parentdir == 'results':
-                    artID = fn[1:-10] # TODO check this!!
+                    artID = fn[1:-13] # TODO check this!!
                 all_files.append((path,artID,fn))
     return all_files
 
