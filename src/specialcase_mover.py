@@ -2,7 +2,7 @@
 Moves the "article folder" with multiple tex files to data/specialcase.
 
 Usage:
-    Get the folder list with noBib.py ('00error.txt');
+    Get the folder list ('00error.txt') from noBib.py;
     Enter the relpath of '00error.txt' in /results as sysarg[1], in the format of '1701/log/00error.txt'.
     e.g.: python3 specialcase_mover.py 1701/log/00error.txt
 """
