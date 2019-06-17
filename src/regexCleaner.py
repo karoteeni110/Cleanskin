@@ -24,11 +24,6 @@ from paths import results_path, data_path, within_results
 VERBOSE = True
 REPORT_EVERY = 100
 
-if sys.argv[2] not in ['1701', '0001', '0002'] \
-    or sys.argv[1] not in ['debib', 'postclean'] \
-    or len(sys.argv) != 3:
-    raise TypeError('Argument error.')
-
 def list_input(parentdir, dddd):
     """
     Return a list of (path, artID, filename) for each of the .tex.
@@ -49,11 +44,16 @@ def list_input(parentdir, dddd):
                 if parentdir == 'data':
                     artID = os.path.basename(os.path.dirname(path))
                 elif parentdir == 'results':
-                    artID = fn[1:11]
+                    artID = fn[1:-10] # TODO check this!!
                 all_files.append((path,artID,fn))
     return all_files
 
 def main():
+    if sys.argv[2] not in ['1701', '0001', '0002'] \
+    or sys.argv[1] not in ['debib', 'postclean'] \
+    or len(sys.argv) != 3:
+        raise TypeError('Argument error.') 
+
     # Patterns
     bib = {r'(\\begin{thebibliography}.*?\\end{thebibliography})':''}
     xmlImpurity = {r'((\\\[.*?\\\])|(&#[0-9]+;))':' '} 
@@ -64,12 +64,14 @@ def main():
         output_path = within_results(sys.argv[2]) # results/1701/
         patterns = bib
         fname_end = '_debib.tex'
-
     elif sys.argv[1] == 'postclean':
         all_input = list_input('results', sys.argv[2]) # results/1701/*_filtered.xml
         output_path = within_results( '%s/%sxml' % (sys.argv[2], sys.argv[2]) ) # results/1701/1701xml/ 
         patterns = xmlImpurity
         fname_end = '.xml'
+
+
+    
 
     for i, (fpath, artid, fname) in enumerate(all_input):
         # Read data & handle exceptions
