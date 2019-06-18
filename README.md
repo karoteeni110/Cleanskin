@@ -14,16 +14,29 @@ The "pipes":
 - Done.
 
 
-## Pipeline
+## Pipelines
 
-1. ``python3 src/noBib.py DIRNAME``
+> python3 regexCleaner.py debib DIRNAME 
 
 Cleans {thebibliography} in the TeX code before using Pandoc.
 
-2. ``python3 specialcase_mover.py 1701/log/00error.txt``
+> python3 specialcase_mover.py 1701/log/00error.txt 
 
 If there happens error during bibliography removing, check results/DIRNAME/log/00error.txt and remove the problematic articles into data/specialcase/DIRNAME.
 
-3. ``usefilter.sh 2> log/xmlerror.txt``
+> usefilter.sh 2> log/xmlerror.txt 
 
 Use Pandoc and format filter (src/pandocFilter.py) to convert results/DIRNAME/*_debib.tex into XMLs.
+
+_TODO: handle exceptions_
+
+> python3 regexCleaner.py postclean DIRNAME
+
+Cleans the XML characters (e.g. '&\#10;', '&amp\;') and refs ('\\[sec:summery\\]') 
+after it.
+
+> python3 xmlCleaner.py 
+
+_TODO: design the usage_
+
+_TODO: clean data picker_
