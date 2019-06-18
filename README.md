@@ -3,12 +3,16 @@ A pipeline which converts diverse .TeX documents into XML format.
 
 The "pipes":
 
-<ul>
-<li>Removing bibliography with RegEx -> </li> 
-<li>Convert TeXes with Pandoc & filter -> </li>
-<li>Clean the unrecognized formats with RegEx -> </li>
-<li>Done. </li>
-</ul>
+- Removing bibliography (regexCleaner.py) -> 
+
+- Convert TeXes (usefilter.sh) -> 
+
+- Clean the unrecognized formats (regexCleaner.py) -> 
+
+- Removing unrecognized references & acknowledgements (xmlCleaner.py) ->
+
+- Done.
+
 
 ## Pipeline
 
