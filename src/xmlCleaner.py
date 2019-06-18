@@ -1,6 +1,6 @@
 """
-Parses XML, ruling out the <acknowledgement> and <references> sections
-and flattening the subsections
+Ruling out the <acknowledgement> and <references> sections.
+Flattening the subsections.
 
 Handles at most one layer subsection structure.
 """
@@ -13,18 +13,35 @@ data = open(fpath,'r')
 tree = ET.parse(data)
 root = tree.getroot()
 
+def recur_rm(parent):
+    '''
+    Check and remove the acknowledgement sec in the children.
+    '''
+    for child in list(parent): # If no child, list is empty
+        if child.get('text', False).lower() in ('acknowledgements', 'references', 'bibliography'):
+            parent.remove(child)
+
+def flatten(parent):
+    '''
+    Organize subsections into one whole section.
+    '''
+    if parent.tag == 'outline':
+        for subsec in list(parent): # If no child, list is empty
+            parent.set('_note', parent.get('_note', '') + subsec.attrib['_note'] + ' \n') # don't use defaultdict!
+            parent.remove(subsec)
+
 # title, abstract, sections['introduction'] ... 
 sections = defaultdict(str)
 for child in root: # head, body
     if child.tag == 'head':
         title = child[0].text
         abstract = child[1].text
+
     elif child.tag == 'body':
-        for secOrSubsec in child.iter():
-            try:
-                print(secOrSubsec.tag, secOrSubsec.attrib['text'])
-            except KeyError:
-                continue
+        for outline in child.iter():
+            recur_rm(outline)
+            flatten(outline)
+
             # if secOrSubsec.attrib['text'].lower() in ('acknowledgements', 'references'):
             #     secOrSubsec.clear()
             #     continue
