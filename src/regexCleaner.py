@@ -55,7 +55,7 @@ def main():
         raise TypeError('Argument error.') 
 
     # Patterns
-    bib = {r'(\\begin{thebibliography}.*?\\end{thebibliography})':''}
+    bib = {r'(\\begin(\*){thebibliography}.*?\\end(\*){thebibliography})':''}
     xmlImpurity = {r'((\\\[.*?\\\])|(&#[0-9]+;))':' '} 
 
     # Set sub mode & collect paths
