@@ -26,7 +26,7 @@ REPORT_EVERY = 100
 
 def list_input(parentdir, dddd):
     """
-    Return a list of (path, artID, filename) for each of the .tex.
+    Return a list of (path, artID, filename) for each of the TeX file.
     """
     print(parentdir, dddd)
     if parentdir == 'data':
@@ -34,7 +34,7 @@ def list_input(parentdir, dddd):
     elif parentdir == 'results':
         ext, pdirpath = '_filtered.xml', results_path
     else:
-        raise TypeError('Argument error.')
+        raise AssertionError('Argument error.')
 
     all_files = []
     for root, _, files in os.walk(os.path.join(pdirpath, dddd)):
