@@ -25,4 +25,5 @@ def diff_subdirs(path_for_subdirlist, path_for_fnamelist):
     print(diff, ' => %d discrepencies' % len(diff))
 
 if __name__ == "__main__":
-    diff_subdirs('/home/yzan/Desktop/try/0001', '/home/yzan/Desktop/arXiv/0001')
+    dddd = '0002'
+    diff_subdirs('/home/yzan/Desktop/try/%s' % dddd, '/home/yzan/Desktop/arXiv/%s' % dddd)
