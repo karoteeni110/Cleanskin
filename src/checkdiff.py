@@ -18,7 +18,11 @@ def fname_list(p):
     
 def diff_subdirs(path_for_subdirlist, path_for_fnamelist):
     sl1, sl2 = subdir_list(path_for_subdirlist), fname_list(path_for_fnamelist)
-    return sl1.symmetric_difference(sl2)
+    diff = sl1.symmetric_difference(sl2)
+    print('len(arg2):', len(sl2))
+    print('len(arg1):', len(sl1))
+    print('Difference: arg2 - arg1 =', len(sl2)-len(sl1))
+    print(diff, ' => %d discrepencies' % len(diff))
 
 if __name__ == "__main__":
-    print(diff_subdirs('/home/yzan/Desktop/try/0001', '/home/yzan/Desktop/arXiv/0001'))
+    diff_subdirs('/home/yzan/Desktop/try/0001', '/home/yzan/Desktop/arXiv/0001')
