@@ -1,5 +1,5 @@
 # !/bin/bash
-dddd='0001'
+dddd='1701'
 
 if cd /home/yzan/Desktop/try/$dddd ; then
   pwd

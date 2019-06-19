@@ -2,7 +2,7 @@
 # usefilter.sh 2> ../results/dddd/log/xmlerror.txt 
 
 # pwd: /src
-dddd=0002
+dddd='0002'
 if cd ../results/${dddd}; then
     # set -e # Stop script if a simple command fails
     for basename in =*${dddd}*_debib.tex; do
