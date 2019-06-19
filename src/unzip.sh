@@ -3,25 +3,22 @@ dddd='0002'
 
 if cd /home/yzan/Desktop/try; then
   pwd
-  gunzip ./*$dddd*.gz
 else
   echo 'Could not change directory! Aborting.' 1>&2
   exit 1
 fi
 
 for basename in *$dddd* ; do # untar 
-  if tar -xvzf $basename --one-top-level==$basename; then
-    #pass
-  else #if tar: This does not look like a tar archive
-# tar: Skipping to next header
-# tar: Exiting with failure status due to previous errors
-    tar -xvf $basename --one-top-level==$basename
-
-  else # pdf, html
-    mv 
+  if [ tar -xvzf $basename --one-top-level==$basename ]; 
+  then 
+      ; #do nothing
+  elif [ tar -xvf $basename --one-top-level==$basename ]; 
+  then 
+      ; #do nothing
+    else # pdf, html
+      mv ./Acluster
   fi
-
-
+done
 
   if [ ${basename: -4} != ".pdf" ] ; then 
     tar -xvf "$basename" --one-top-level==$basename
