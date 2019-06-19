@@ -1,7 +1,7 @@
 # !/bin/bash
-dddd='0002'
+dddd='0001'
 
-if cd /home/yzan/Desktop/try; then
+if cd /home/yzan/Desktop/try/$dddd ; then
   pwd
 else
   echo 'Could not change directory! Aborting.' 1>&2
@@ -12,10 +12,10 @@ for gz in *$dddd* ; do
   basename=${gz:0:-3}
   if tar -xzf $gz --one-top-level==$basename ; then 
       rm $gz
-  elif gunzip -cd $gz > single.tex ; then 
-      mkdir $basename | mv single.tex ./$basename 
+  elif gunzip -cd $gz > single.tex && rm $gz ; then 
+      mkdir ./=$basename ; mv single.tex $_
   else # pdf, html
-      mv $gz ./Acluster
+      mv $gz Acluster
   fi
 done
 

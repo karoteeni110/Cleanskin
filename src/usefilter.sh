@@ -12,6 +12,7 @@ if cd ../results/${dddd}; then
         -s -o ${dddd}filtered/${basename:0:-10}_filtered.xml
         if [ "$?" = "0" ]; then
             echo 'FILE:' $basename 'MESSAGE:' 1&>2
+        fi
     done
 fi
 
