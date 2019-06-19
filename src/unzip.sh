@@ -9,13 +9,13 @@ else
 fi
 
 for gz in *$dddd* ; do
-  basename=${gz:0:-3}
+  basename=${gz%.*} # DONT USE ${gz:0:-3} !!!
   if tar -xzf $gz --one-top-level==$basename ; then 
-      rm $gz
-  elif gunzip -cd $gz > single.tex && rm $gz ; then 
-      mkdir ./=$basename ; mv single.tex $_
-  else # pdf, html
-      mv $gz Acluster
+    rm $gz
+  elif mkdir ./=$basename ; mv $gz $_ ; then
+    gunzip -rdN ./=$basename/$gz # retains the original filename
+  else 
+    mv $gz Acluster # just in case, expected to be empty
   fi
 done
 
