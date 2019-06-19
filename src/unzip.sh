@@ -12,8 +12,8 @@ for gz in *$dddd* ; do
   basename=${gz%.*} # DONT USE ${gz:0:-3} !!!
   if tar -xzf $gz --one-top-level==$basename ; then 
     rm $gz
-  elif mkdir ./=$basename ; mv $gz $_ ; then
-    gunzip -rdN ./=$basename/$gz # retains the original filename
+  elif mkdir ./=${basename} ; mv ${gz} $_ ; then
+    gunzip -rdN ./=${basename}/${gz} # retains the original filename
   else 
     mv $gz Acluster # just in case, expected to be empty
   fi
