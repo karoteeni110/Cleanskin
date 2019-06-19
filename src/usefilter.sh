@@ -1,5 +1,6 @@
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html
-# cwd: /src/
+# pwd: /src
+
 if cd ../results/0002; then
     # set -e # Stop script if a simple command fails
     for basename in =*0002*_debib.tex; do
@@ -7,6 +8,8 @@ if cd ../results/0002; then
         --filter /home/local/yzan/Desktop/Cleanskin/src/pandocFilter.py \
         --template=/home/local/yzan/Desktop/Cleanskin/data/temp.xml \
         -s -o 0002filtered/${basename:0:-10}_filtered.xml
+        if [ "$?" = "0" ]; then
+            echo 'FILE:' $basename 'MESSAGE:' 1&>2
     done
 fi
 

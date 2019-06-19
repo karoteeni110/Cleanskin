@@ -8,13 +8,14 @@ else
   exit 1
 fi
 
-for basename in *$dddd* ; do # untar 
-  if tar -xzf $basename --one-top-level==${basename:0:-3} ; then 
-      rm $basename 
-  elif gunzip $basename ; then 
-      mv ${basename:0:-3} ./Acluster # without '.gz'
+for gz in *$dddd* ; do
+  basename=${gz:0:-3}
+  if tar -xzf $gz --one-top-level==$basename ; then 
+      rm $gz
+  elif gunzip -cd $gz > single.tex ; then 
+      mkdir $basename | mv single.tex ./$basename 
   else # pdf, html
-      mv $basename ./Acluster
+      mv $gz ./Acluster
   fi
 done
 
