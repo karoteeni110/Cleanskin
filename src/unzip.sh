@@ -9,22 +9,12 @@ else
 fi
 
 for basename in *$dddd* ; do # untar 
-  if [ tar -xvzf $basename --one-top-level==$basename ]; 
-  then 
-      ; #do nothing
-  elif [ tar -xvf $basename --one-top-level==$basename ]; 
-  then 
-      ; #do nothing
-    else # pdf, html
-      mv ./Acluster
-  fi
-done
-
-  if [ ${basename: -4} != ".pdf" ] ; then 
-    tar -xvf "$basename" --one-top-level==$basename
-  fi
-  if [[ ! $basename =~ "=" ]] ; then # if not a directory, move to /cluster
-    mv $basename ./Acluster/
+  if tar -xzf $basename --one-top-level==${basename:0:-3} ; then 
+      rm $basename 
+  elif gunzip $basename ; then 
+      mv ${basename:0:-3} ./Acluster # without '.gz'
+  else # pdf, html
+      mv $basename ./Acluster
   fi
 done
 
