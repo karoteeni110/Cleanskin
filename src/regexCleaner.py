@@ -102,11 +102,15 @@ def main():
         for pt in patterns:
             clean_data = re.sub(pt, patterns[pt], data, flags=re.S | re.M | re.I)
         output_fname = os.path.join(output_path, '%s%s' % (artid, fname_end) ) # Name files with artid
-        if os.path.exists(output_fname): # Avoid overwriting
+        if os.path.exists(output_fname): # Check multiple tex articles
+            os.remove(output_fname)
             with open(os.path.join(within_results(sys.argv[2]), 'log/00error.txt'), 'a') as errorlog:
-                errorlog.write('MULTIPLE TEX IN ' + artid + '\n')
+                errorlog.write('Overwriting err at:' + fpath + '\n')
         else:
             with open(output_fname,'w') as out:
                 out.write(clean_data)
-        
+
+    with open(os.path.join(within_results(sys.argv[2]), 'log/00error.txt'), 'a') as errorlog:
+        errorlog.write('=======================' + '\n')
+
 main()
