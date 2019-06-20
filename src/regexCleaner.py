@@ -37,12 +37,17 @@ def list_input(parentdir, dddd):
         raise AssertionError('Argument error.')
 
     all_files = []
-    for root, _, files in os.walk(os.path.join(pdirpath, dddd)):
+    dddd_dir = os.path.join(pdirpath, dddd) # data/1701 or results/0001
+
+    for root, _, files in os.walk(dddd_dir):
+        # $HOME/data/0001/=astro-ph0001306 
+        # [] 
+        # ['fig15b.epsi', 'fig4.epsi', 'fig1.epsi', 'paper.tex',  'fig8b.epsi', 'fig11.epsi']
         for fn in files:
             if ext in fn:
                 path = os.path.join(root, fn)
                 if parentdir == 'data':
-                    artID = os.path.basename(os.path.dirname(path))
+                    artID = os.path.basename(root).strip('=')
                 elif parentdir == 'results':
                     artID = fn[1:-13] # TODO check this!!
                 all_files.append((path,artID,fn))
@@ -79,8 +84,8 @@ def main():
             try:
                 data = texfile.read()
             except UnicodeDecodeError as e:
-                # Write out the error message and skip the file
-                with open(os.path.join(within_results(sys.argv[2]), 'log/00error.txt'), 'a') as errorlog:
+                # Write out the error message and skip the file; should be useless
+                with open(os.path.join(within_results(sys.argv[2]), 'log/debibErr.txt'), 'a') as errorlog:
                     errorlog.write(fname + ' ' + e.reason + '\n')
                 continue
 
@@ -100,8 +105,8 @@ def main():
         if os.path.exists(output_fname): # Avoid overwriting
             with open(os.path.join(within_results(sys.argv[2]), 'log/00error.txt'), 'a') as errorlog:
                 errorlog.write('MULTIPLE TEX IN ' + artid + '\n')
-        with open(output_fname,'w') as out:
-            out.write(clean_data)
+        else:
+            with open(output_fname,'w') as out:
+                out.write(clean_data)
         
-if __name__ == "__main__":
-    main()
+main()
