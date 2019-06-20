@@ -48,7 +48,7 @@ def list_input(parentdir, dddd):
             if ext in fn:
                 path = os.path.join(root, fn)
                 if parentdir == 'data':
-                    artID = get_artIDdir_in_data(root).strip('=')
+                    artID = get_artIDdir_in_data(root, dddd).strip('=')
                 elif parentdir == 'results':
                     artID = fn[1:-13] # TODO check this!!
                 all_files.append((path,artID,fn))

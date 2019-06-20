@@ -19,12 +19,12 @@ with open(fl_path, 'r') as flfile:
     fl = flfile.readlines()
 pathlist = [line.strip('Overwriting err at:') for line in fl] # '.../data/0001/=hep-ph0001171/mu2.tex'
 
-def get_artIDdir_in_data(path):
-    relp = relpath(path, data_path + '/%s' % dddd) # '=hep-ph0001171/mu2.tex'
+def get_artIDdir_in_data(path, d4):
+    relp = relpath(path, data_path + '/%s' % d4) # '=hep-ph0001171/mu2.tex'
     artIDdir = relp.split('/')[0] # ['=hep-ph0001171/', 'mu2.tex']
     return artIDdir
 
-dirlist = [get_artIDdir(p) for p in pathlist]
+dirlist = [get_artIDdir_in_data(p, dddd) for p in pathlist]
 dirlist = set(dirlist)
 
 for dir_to_cp in dirlist:
