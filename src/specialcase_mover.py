@@ -8,7 +8,7 @@ Usage:
 """
 import sys
 from shutil import copytree
-from os.path import join, dirname, basename
+from os.path import join, dirname, basename, relpath
 from os import listdir
 from paths import results_path, data_path
 
@@ -18,7 +18,13 @@ fl_path = join(results_path, '%s/log/00error.txt' % sys.argv[1])
 with open(fl_path, 'r') as flfile:
     fl = flfile.readlines()
 pathlist = [line.strip('Overwriting err at:') for line in fl] # '.../data/0001/=hep-ph0001171/mu2.tex'
-dirlist = [dirname(path) for path in pathlist] # '.../data/0001/=hep-ph0001171'
+
+def get_artIDdir_in_data(path):
+    relp = relpath(path, data_path + '/%s' % dddd) # '=hep-ph0001171/mu2.tex'
+    artIDdir = relp.split('/')[0] # ['=hep-ph0001171/', 'mu2.tex']
+    return artIDdir
+
+dirlist = [get_artIDdir(p) for p in pathlist]
 dirlist = set(dirlist)
 
 for dir_to_cp in dirlist:

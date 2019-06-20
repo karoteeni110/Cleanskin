@@ -20,6 +20,7 @@ Usage:
 """
 import re, os, sys
 from paths import results_path, data_path, within_results
+from specialcase_mover import get_artIDdir_in_data
 
 VERBOSE = True
 REPORT_EVERY = 100
@@ -47,7 +48,7 @@ def list_input(parentdir, dddd):
             if ext in fn:
                 path = os.path.join(root, fn)
                 if parentdir == 'data':
-                    artID = os.path.basename(root).strip('=')
+                    artID = get_artIDdir_in_data(root).strip('=')
                 elif parentdir == 'results':
                     artID = fn[1:-13] # TODO check this!!
                 all_files.append((path,artID,fn))
