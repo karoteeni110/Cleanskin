@@ -59,7 +59,7 @@ function postclean {
         DIRNAME2=$(basename "$(dirname "$xml")")/$(basename "$xml")
         OUT=results/$dddd/3/${DIRNAME2:0:-4}.xml
 
-        python3 src/regexCleaner.py postclean $xml $OUT 
+        #python3 src/regexCleaner.py postclean $xml $OUT 
         python3 src/xmlCleaner.py $OUT results/$dddd/fi/${DIRNAME2:0:-4}.xml
 
         if [ "$?" -eq "0" ]; then
@@ -68,4 +68,4 @@ function postclean {
     done
 }
 
-postclean 2>>results/$dddd/fi/log.txt
+postclean #2>>results/$dddd/fi/log.txt

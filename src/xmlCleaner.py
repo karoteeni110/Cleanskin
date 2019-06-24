@@ -5,6 +5,8 @@ Handles at most one layer subsection structure.
 """
 import xml.etree.ElementTree as ET
 import sys
+from os import mkdir
+from os.path import dirname
 from collections import defaultdict
 from unicodedata import normalize
 
@@ -27,8 +29,7 @@ def flatten(parent):
 
 # title, abstract, sections['introduction'] ... 
 fpath = sys.argv[1] # Change This
-data = open(fpath,'r')
-tree = ET.parse(data)
+tree = ET.parse(fpath)
 root = tree.getroot()
 
 for child in root: # head, body
@@ -40,5 +41,8 @@ for child in root: # head, body
         for outline in child.iter():
             recur_rm(outline)
             flatten(outline)
-
+try:
+    mkdir(dirname(sys.argv[2]))
+except FileExistsError:
+    pass
 tree.write(sys.argv[2])
