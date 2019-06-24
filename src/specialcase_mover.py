@@ -8,9 +8,10 @@ Usage:
 """
 import sys
 from shutil import copytree
-from os.path import join, dirname, basename, relpath
+from os.path import join, dirname, basename
 from os import listdir
 from paths import results_path, data_path
+from regexCleaner import get_artIDdir_in_data
 
 dddd = sys.argv[1]
 
@@ -18,11 +19,6 @@ fl_path = join(results_path, '%s/log/00error.txt' % sys.argv[1])
 with open(fl_path, 'r') as flfile:
     fl = flfile.readlines()
 pathlist = [line.strip('Overwriting err at:') for line in fl] # '.../data/0001/=hep-ph0001171/mu2.tex'
-
-def get_artIDdir_in_data(path, d4):
-    relp = relpath(path, data_path + '/%s' % d4) # '=hep-ph0001171/mu2.tex'
-    artIDdir = relp.split('/')[0] # ['=hep-ph0001171/', 'mu2.tex']
-    return artIDdir
 
 dirlist = [get_artIDdir_in_data(p, dddd) for p in pathlist]
 dirlist = set(dirlist)
