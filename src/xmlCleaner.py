@@ -4,6 +4,7 @@ Flattening the subsections.
 Handles at most one layer subsection structure.
 """
 import xml.etree.ElementTree as ET
+import sys
 from collections import defaultdict
 from unicodedata import normalize
 
@@ -25,7 +26,7 @@ def flatten(parent):
             parent.remove(subsec)
 
 # title, abstract, sections['introduction'] ... 
-fpath = sys.arg[1] # Change This
+fpath = sys.argv[1] # Change This
 data = open(fpath,'r')
 tree = ET.parse(data)
 root = tree.getroot()
@@ -40,4 +41,4 @@ for child in root: # head, body
             recur_rm(outline)
             flatten(outline)
 
-tree.write(sys.arg[2])
+tree.write(sys.argv[2])

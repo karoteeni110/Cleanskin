@@ -40,7 +40,7 @@ def main(mode, infile, outfile):
         patterns = xmlImpurity
 
     # Read data & handle exceptions
-    ovw_err_log = open(join(dirname(dirname(outfile)),'log/00error.txt'), 'a')
+    ovw_err_log = open(join(dirname(dirname(outfile)),'00error.txt'), 'a')
     try:
         with open(infile, mode='r', encoding='utf-8') as texfile:
             data = texfile.read()

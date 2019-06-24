@@ -52,4 +52,20 @@ function call_converter {
     done
 }
 
-call_converter 2>>results/$dddd/xml1/log.txt
+# call_converter 2>>results/$dddd/xml1/log.txt
+
+function postclean {
+    for xml in results/$dddd/xml1/*/*.xml; do
+        DIRNAME2=$(basename "$(dirname "$xml")")/$(basename "$xml")
+        OUT=results/$dddd/3/${DIRNAME2:0:-4}.xml
+
+        python3 src/regexCleaner.py postclean $xml $OUT 
+        python3 src/xmlCleaner.py $OUT results/$dddd/fi/${DIRNAME2:0:-4}.xml
+
+        if [ "$?" -eq "0" ]; then
+            echo 'FILE:' $1 'MESSAGE:' 1&>2
+        fi
+    done
+}
+
+postclean 2>>results/$dddd/fi/log.txt

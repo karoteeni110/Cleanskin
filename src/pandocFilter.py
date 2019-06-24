@@ -22,8 +22,6 @@ def no_emph(k, v, fmt, meta):
 def no_table(k, v, fmt, meta):
   if k == 'Table':
     return []
-  elif k == 'Span' and 'll' in v:
-    return []
 
 def no_image(k, v, fmt, meta):
   if k == 'Image':
