@@ -1,0 +1,572 @@
+\def\CTeXPreproc{Created by ctex v0.2.12, don't edit!}
+%\documentclass[a4paper,11pt]{article}
+\documentclass[11pt,draftcls,onecolumn]{IEEEtran}
+%\documentclass[journal]{IEEETran}
+%\documentclass[conference]{IEEEtran}
+%\documentclass[10pt,onecolumn,twoside,compsoc]{IEEEtran} %IET Communication
+%\documentclass[10pt,twocolumn,twoside,compsoc]{IEEEtran} %IET Communication
+
+\usepackage{indentfirst,flushend}
+\usepackage{amssymb,bm,mathrsfs,bbm,amscd,amsmath,amsthm,amsfonts,bbm}
+\usepackage{dsfont,diagbox}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{cases}
+%\usepackage{geometry,cases}
+\usepackage{cases}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\usepackage{multirow}
+\usepackage{cite}
+%\usepackage{citesort}
+\usepackage{multicol}
+\usepackage[nooneline,flushleft]{caption2}
+\usepackage{algorithm,clrscode}
+\usepackage{algorithmic}
+\usepackage{subfigure}
+%\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\begin{document}
+
+\title{Energy-Efficient Transceiver Design for Hybrid Sub-Array Architecture MIMO Systems}
+%\author{Shiwen~He,~\IEEEmembership{Member,~IEEE}, Chenhao Qi,~\IEEEmembership{Senior Member,~IEEE},\\ Yongpeng Wu,~\IEEEmembership{Member,~IEEE}, and Yongming~Huang,~\IEEEmembership{Member,~IEEE}
+\author{\IEEEauthorblockN{Shiwen~He\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}, Chenhao Qi\IEEEauthorrefmark{1}, Yongpeng Wu\IEEEauthorrefmark{3}, and Yongming~Huang\IEEEauthorrefmark{1}}\\
+\begin{flushleft}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Information Science and Engineering, Southeast University, Nanjing 210096, China}\\
+\IEEEauthorblockA{\IEEEauthorrefmark{2}Key Laboratory of Cognitive Radio and Information Processing, Ministry of Education, Guilin University of Electronic Technology, Guilin 541004. }\\
+\IEEEauthorblockA{\IEEEauthorrefmark{3}Institute for Communications Engineering,  Technical University of Munich, Theresienstrasse 90, D-80333 Munich, Germany.}\\
+Corresponding author: Y. Huang, (huangym@seu.edu.cn), S. He (shiwenhe@seu.edu.cn)\\
+Manuscript received Nov. 22, 2016; accepted Jan. 3, 2017, date of current version Jan. 4, 2017.\\
+This work was supported by National Natural Science Foundation of China under Grants 61471120, 61422105, and 61302097
+, Key Laboratory of Cognitive Radio and Information Processing Ministry of Education (Guilin University of Electronic Technology) under Grants CRKL160203, 863 Program of China under Grant 2015AA01A703, and Natural Science Foundation of Jiangsu Province under Grant BK20161428
+.
+\end{flushleft}
+}
+\maketitle
+\vspace{-.6 in}
+
+\begin{abstract}
+Millimeter-wave (mmWave) communication operated in frequency bands between 30 and 300 GHz has attracted extensive attention due to the potential ability of offering orders of magnitude greater bandwidths combined with further gains via beamforming and spatial multiplexing from multi-element antenna arrays. MmWave system may exploit the hybrid analog and digital precoding to achieve simultaneously the diversity, array and multiplexing gain with a lower cost of implementation. Motivated by this, in this paper, we investigate the design of hybrid precoder and combiner with sub-connected architecture, where each radio frequency chain is connected to only a subset of base station (BS) antennas from the perspective of energy efficient transmission. The problem of interest is a non-convex and NP-hard problem that is difficult to solve directly. In order to address it, we resort to design a two-layer optimization method to solve the problem of interest by exploiting jointly the interference alignment and fractional programming. First, the analog precoder and combiner are optimized via the alternating-direction optimization method (ADOM) where the phase shifter can be easily adjusted with an analytical structure. Then, we optimize the digital precoder and combiner based on an effective multiple-input multiple-output (MIMO) channel coefficient. The convergence of the proposed algorithms is proved using the monotonic boundary theorem and fractional programming theory. Extensive simulation results are given to validate the effectiveness of the presented method and to evaluate the energy efficiency performance under various system configurations.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Millimeter-wave communication, multiple-input multiple-output (MIMO) system, analog precoding and combining, interference alignment, energy efficiency.
+\end{IEEEkeywords}
+
+
+%\section{Introduction}
+\section{Introduction}
+
+Recently, data traffic has suffered an exponential growth due to the rapid proliferation of wireless devices, which are creating a spectrum crisis at the current wireless frequency bands. A variety of communication and signal processing techniques are currently being pursued for improvement of wireless rate and efficient use of the available spectrum, such as multiple-input multiple-output (MIMO) technologies~\cite{WirelessGhosh2010,WirelessDamn2011,TITGou2010,TITGoma2011,WirelssBi2015,WirelessPya2015}. Despite these efforts, meeting the dramatically increasing data demands of wireless devices and applications is still a tremendous challenge for sub-6 Gigabit Hertz wireless communications~\cite{JSACAnd2014}.
+
+Millimeter Wave (mmWave) wireless communication systems, operating in the frequency bands from $30-300$ GHz, are emerging as a promising technology for the exploding bandwidth requirements by enabling multi-Gpbs speeds~\cite{CommBi2011,AccessRap2013,CommRoh2014,ProceddingRan2014,CommHan2015}. Recently, the advance in mmWave hardware has encouraged studying and applying mmWave for outdoor cellular networks and short distance communication. However, the shortcoming is that mmWave signal may experience an order of magnitude increase in free-space path-loss due to the ten-fold increase in carrier frequency compared to sub-6 GHz frequency bands. Fortunately, the decrease in wavelength leads to a dramatic increase of the number of antenna elements within a given antenna size such that large arrays can provide narrow and high-gain beams to overcome the path-loss~\cite{OnlineYong2010,TVTForenza2007,JSACXu2002,TNSingh2011,MLChang2012,ISSCCHong2015,OnlineMat2011,Standard802.11ad}. Furthermore, large arrays may significantly improve the spectrum efficiency by transmitting simultaneously multiple data streams~\cite{CLMolisch2004,JSACWang2009,TWCXiao2015,TAPHaneda2013,TSPZhang2005}.
+
+Unlike lower frequency MIMO systems, the large arrays combined with high cost and power consumption of the mixed analog/digital signal components makes it difficult to assign an RF chain per antenna, and perform all the signal processing in the baseband. To achieve both the diversity gain and the multiplexing gain in mmWave wireless communication, more recently, the research on the hybrid precoder and combiner have attracted extensive attention from both academia and industry. In such systems, analog beamforming (phase shifters) compensates the large path loss at mmWave bands, while digital beamforming provides the necessary flexibility to perform advanced multiuser MIMO techniques such as multi-streams MIMO. However, the joint design of hybrid precoder and combiner is challenging under a set of practical constraints. Most existing algorithms were designed for the hybrid precoding with fully-connected architecture, where each RF chain is connected to all BS antennas via phase shifters~\cite{TWCAyach2014,TVTKim2015,JSTSPAlk2014,CLLiang2014,TWCAlk2015,TSPLee2015,TVTZhu2016}.
+
+In recent years, with the rapid development of the mobile communications and the ever growing demand for data rate,  the energy consumption problem has become very severe. Particularly with the widespread popularity of smart phones, the problem of battery energy consumption has become a serious constraint for users who wish to experience high-speed data transmission and multimedia services~\cite{WCLI2013,TWCLI2015,TVTLi2015,TCOMHE2013,TSPHE2014}. Li \emph{et al} investigated the energy efficiency (EE) optimization problem using the double auction theory for relay selection networks~\cite{TWCLI2015}. The authors further investigated the EE problem by jointly optimizing the position and serving range of the relay station in~\cite{TVTLi2015}. In~\cite{TCOMHE2013} and~\cite{TSPHE2014}, the authors investigated the EE optimization problem for coordinated multicell multiuser cellular networks. For the conventional digital precoding~\cite{TWCLI2015,TVTLi2015,TCOMHE2013,TSPHE2014}, each antenna requires a dedicated energy-intensive radio frequency (RF) chain (including digital-to-analog converter, up converter, etc), whose energy consumption is a large part (about 250mW per RF chain~\cite{TCOMAmdori2015}) of the total energy consumption for wide bandwidth communication systems.
+
+In this paper, we investigate the energy efficient design of the hybrid precoder and combiner with sub-connected architecture, where each RF chain is connected to only a subset of transmitting antennas, for point-to-point mmWave MIMO wireless communication. The design goal is to maximize the system energy efficiency. We design the analog precoder by resorting the idea of interference alignments. Finally, a two-layer optimization method is designed to solve the problem of interest. The contribution of this paper can be summarized as follows.
+\begin{enumerate}
+\item Inspired by the idea of the interference alignment (IA) for interference channels, the analog precoder and combiner are optimized via the alternating-direction optimization method (ADOM) where the phase shifter can be easily adjusted with an analytical structure.
+\item After the analog precoder and combiner are designed, by regarding the sub-array point-to-point communication system as an interference channel, the digital precoder and combiner based on an effective MIMO channel coefficient are optimized.
+
+\item The convergence of the proposed algorithms is proved based on the monotonic boundary theorem and fractional programming theory.
+
+\item Extensive simulation results are provided to validate the effectiveness of the presented method and to evaluate the energy efficiency performance under various system configurations.
+\end{enumerate}
+
+The remainder of this paper is organized as follows. The system model is described in Section \uppercase\expandafter{\romannumeral2}. In section \uppercase\expandafter{\romannumeral3} an effective optimization algorithm based on IA is proposed. In Section \uppercase\expandafter{\romannumeral4}, numerical evaluations of these algorithms are carried out and conclusions are finally drawn in Section \uppercase\expandafter{\romannumeral5}.
+
+The following notations are used throughout this paper. Bold lowercase and uppercase letters represent column vectors and matrices, respectively. The superscripts $\left(\cdot\right)^{H}$, and $\left(\cdot\right)^{-1}$ represent the conjugate transpose operator, and the matrix inverse, respectively. $\bm{A}\left(:,n\right)$ and $\bm{A}\left(m,n\right)$ represent the $n$th column and the $\left(m{\rm th},n{\rm th}\right)$ element of matrix $\bm{A}$. $\bm{a}\left(i\right)$ is the $i$th entry of $\bm{a}$. $\left\|\bm{A}\right\|_{\mathcal{F}}$ denotes the Euclidean norm for vectors and the Frobenius norm of matrix $\bm{A}$. $\arg\left(a\right)$ denotes the phase of $a$. The probability density function (pdf) of a circular complex Gaussian random vector with mean $\bm{\mu}$ and covariance matrix $\bm{\Sigma}$ is denoted as $\mathcal{CN}\left(\bm{\mu},\bm{\Sigma}\right)$.  $\mathbb{C}$ are the real number field. Expectation is denoted by $\mathbb{E}\left[\cdot\right]$ and the real part of a variable is denoted by $\Re\left(\cdot\right)$.
+
+\section{System Model}
+
+Consider a point-to-point MIMO channel where each transceiver is equipped with a hybrid MIMO processor.  For simplicity, assume that the transceivers have $N_{r}$ transmit/receive RF antenna arrays, where each RF array is fed by a separate RF chain. Each array consists of $N_{RF}$ antenna elements with each connected to one phase shifter. The transmitter has $N_{t}=N_{r}N_{RF}$ antennas and sends $N_{r}$ independent data streams to the receiver which is also equipped with $N_{t}$ antennas and $N_{r}$ RF chains under the assumption of $N_{r}\leq N_{t}$ to assure the feasibility of the degrees of freedom in MIMO channel~\cite{TITGou2010}. The symbols transmitted by the transmitter are processed by a baseband precoder $\bm{F}_{B}$ of dimension $N_{r}\times N_{r}$ and then up-converted through $N_{r}$ RF chains before being precoded by an RF preocder $\bm{F}_{R}$ of dimension $N_{t}\times N_{r}$, as shown in~Fig.~\ref{SplitSystemModel}. It should be pointed out that the baseband precoder $\bm{F}_{B}$ enables both amplitude and phase modifications, while only phase changes can be realized by $\bm{F}_{R}$ as it is implemented using analog phase shifter~\cite{BookFir2010}. The structure of $\bm{F}_{R}$ is given as
+\begin{equation}\label{SplitBeam01}
+\bm{F}_{R}=\begin{bmatrix}
+\bm{f}_{1}&\cdots&\bm{0}\\
+\vdots& \ddots&\vdots\\
+\bm{0}& \cdots&\bm{f}_{N_{r}}\\
+\end{bmatrix},
+\end{equation}
+where $\bm{f}_{k}=\frac{1}{\sqrt{N_{t}}}\left[e^{j\theta_{k,1}},\cdots,e^{j\theta_{k,N_{RF}}}\right]^{T}$ denotes the  $N_{RF}\times 1$ steering vector of phases for the $k$th antenna array (or RF chain) to point at some given azimuth direction.% $\bm{\theta}_{k}$.
+\begin{figure}[h]%[htbp]%here,top, bottom,page
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\includegraphics[width=1\columnwidth,keepaspectratio]{SplitSystemModel.eps}\\
+\caption{Split Hybrid Precoder/Decoder Architecture.}
+\label{SplitSystemModel}
+\end{figure}
+Using these notations, the transmitted signal at the transmitter is denoted as $\bm{x}=\bm{F}_{R}\bm{F}_{B}\bm{s}$, where $\bm{s}\in\mathbb{C}^{N_{r}\times 1}$ is a signal vector of complex information symbol to be transmitted with $\bm{s}\sim\mathcal{CN}\left(\bm{0},\bm{I}_{N_{r}}\right)$\footnote{Due to the fact that the number of spatial data streams only affects the number of the columns of the baseband precoding matrix $\bm{F}_{B}$, our proposed algorithms are still feasible to the case where the number of spatial data streams is less than $N_{r}$.}. For simplicity, considering a narrow block-fading propagation channel~\cite{TWCAyach2014,JSTSPAlk2014}, then the received signal vector at the receiver is then given by
+\begin{equation}\label{SplitBeam02}
+\bm{y}=\bm{H}\bm{F}_{R}\bm{F}_{B}\bm{s}+\bm{n},
+\end{equation}
+where $\bm{n}$ is the vector of i.i.d. $\mathcal{CN}\left(0,\sigma_{n}^{2}\bm{I}_{N_{t}}\right)$, $\bm{H}\in \mathbb{C}^{N_{t}\times N_{t}}$ denotes the channel coefficients between the transmitter and the receiver with the following structure:
+\begin{equation}\label{SplitBeam03}
+\bm{H}=\begin{bmatrix}
+\bm{H}_{1,1}&\cdots&\bm{H}_{1,N_{r}}\\
+\vdots& \ddots&\vdots\\
+\bm{H}_{N_{r},1}& \cdots&\bm{H}_{N_{r},N_{r}}\\
+\end{bmatrix},
+\end{equation}
+where $\bm{H}_{m,n}\in \mathbb{C}^{N_{RF}\times N_{RF}}$, $m,n=1,\cdots,N_{r}$, and $\mathbb{E}\left[\|\bm{H}\|_{\mathcal{F}}^{2}\right]=N_{t}^{2}$. Moreover, to enable precoding, we assume that the channel $\bm{H}$ is known perfectly and instantaneously to both the transmitter and receiver. In practical systems, channel state information (CSI) at the receiver can be obtained via training and subsequently shared with the transmitter via limited feedback~\cite{JSACWang2009,TWCXiao2015,TWCAyach2014,JSTSPAlk2014}. In the same way as the transmitter, the steering vector for the $l$th RF array at the receiver is written as the $N_{RF}\times 1$ vector $\bm{g}_{l}=\frac{1}{\sqrt{N_{t}}}\left[e^{j\vartheta_{l,1}},\cdots,e^{j\vartheta_{l,N_{RF}}}\right]^{T}$, where $\bm{\vartheta}_{l}$ is the azimuth steering direction for the $l$th RF array at the receiver. Thus, the overall RF combiner at the receiver is given by
+\begin{equation}\label{SplitBeam04}
+\bm{G}_{R}=\begin{bmatrix}
+\bm{g}_{1}&\cdots&\bm{0}\\
+\vdots& \ddots&\vdots\\
+\bm{0}& \cdots&\bm{g}_{N_{r}}\\
+\end{bmatrix},
+\end{equation}
+Then, the baseband received signal vector at the receiver can be written as
+\begin{equation}\label{SplitBeam05}
+\widetilde{\bm{s}}=\bm{G}_{B}^{H}\widetilde{\bm{y}}=\bm{G}_{B}^{H}\bm{G}_{R}^{H}\bm{y}
+=\bm{G}_{B}^{H}\bm{G}_{R}^{H}\bm{H}\bm{F}_{R}\bm{F}_{B}\bm{s}+\bm{G}_{B}^{H}\bm{G}_{R}^{H}\bm{n},
+\end{equation}
+where $\bm{G}_{B}\in \mathbb{C}^{N_{r}\times N_{r}}$ is the digital combiner at receiver. When Gaussian symbols are transmitted over the mmWave channel, the spectral efficiency achieved is given by~\cite{JSACGold2003,BookTse2005}
+\begin{subequations}\label{SplitBeam06}
+\begin{align}
+R&=\log_{2}\left(\left|\bm{I}+\bm{R}_{n}^{-1}\bm{G}^{H}\bm{H}\bm{F}
+\bm{F}^{H}\bm{H}^{H}\bm{G}\right|\right)\label{SplitBeam06a}\\
+&=\log_{2}\left(\left|\bm{I}+\sigma_{n}^{-2}\bm{H}\bm{F}\bm{F}^{H}\bm{H}^{H}\right|\right),\label{SplitBeam06b}
+\end{align}
+\end{subequations}
+where $\bm{G}=\bm{G}_{R}\bm{G}_{B}$, $\bm{F}=\bm{F}_{R}\bm{F}_{B}$, $\bm{R}_{n}=\sigma_{n}^{2}\bm{G}^{H}\bm{G}=\sigma_{n}^{2}\bm{G}_{B}^{H}\bm{G}_{R}^{H}\bm{G}_{R}\bm{G}_{B}$. The second equality is based on the
+fact that $\left|\bm{I}+\bm{A}\bm{B}\right|=\left|\bm{I}+\bm{B}\bm{A}\right|$.
+
+
+% The functions $\Lambda_{t}\left(\phi_{m,n}^{t},\theta_{m,n}^{t}\right)$ and $\Lambda_{r}\left(\phi_{m,n}^{r},\theta_{m,n}^{r}\right)$ represent the transmit and receive antenna element gain at the corresponding angles of departure and arrival.
+
+\section{Transceiver Design for Maximizing System Energy Efficiency}\label{TransceiverDesign}
+
+In this section, we design hybrid mmWave precoder and combiner to maximize the system utility function defined as:
+\begin{equation}\label{SplitBeam08}
+\max_{\bm{F}_{R},\bm{F}_{B},\bm{G}_{R},\bm{G}_{B}}\frac{R}{P_{con}}
+~s.t.~\bm{F}_{R}\in \mathcal{F}_{RF}, \bm{G}_{R}\in \mathcal{G}_{RF}, \left\|\bm{F}_{R}\bm{F}_{B}\right\|_{\mathcal{F}}^{2}\leq P,
+\end{equation}
+where $\mathcal{F}_{RF}$ and $\mathcal{G}_{RF}$ are respectively the set of feasible RF precoders at transmitter and receiver, $P_{con}$ is the power consumption at transceiver and given by
+\begin{subequations}\label{SplitBeam09}
+\begin{align}
+&P_{con}=\eta\left\|\bm{F}_{R}\bm{F}_{B}\right\|_{\mathcal{F}}^{2}+P_{T}+P_{R},\\
+&P_{T}=N_{r}\left(P_{tRFC}+P_{DAC}\right)+N_{t}\left(P_{PA}+P_{PS}\right)+P_{BB},\\
+&P_{R}=N_{r}\left(P_{rRFC}+P_{ADC}\right)+N_{t}\left(P_{LNA}+P_{PS}\right)+P_{BB},
+\end{align}
+\end{subequations}
+where $P_{tRFC}$ and $P_{rRFC}$ represent the power consumed by the RF chain at transmitter and receiver, respectively. $P_{DAC}$ and $P_{ADC}$ denote respectively the power consumed by the DAC and ADC. $P_{PA}$, $P_{LNA}$, $P_{PS}$ and $P_{BB}$ denote respectively the power consumed by the power amplifier, the low noise amplifier, the phase shifter, and the baseband processor. $\eta\geq 1$ is a constant which accounts for the inefficiency of the power amplifier~\cite{TWCNg201209}.  Note that $\left\|\bm{F}_{R}\bm{F}_{B}\right\|_{\mathcal{F}}^{2}=\frac{N_{RF}}{N_{t}}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}$, then problem~(\ref{SplitBeam08}) can be rewritten as
+\begin{equation}\label{SplitBeam10}
+\max_{\bm{F}_{R},\bm{F}_{B},\bm{G}_{R},\bm{G}_{B}}\frac{R}{P_{con}}
+~s.t.~\bm{F}_{R}\in \mathcal{F}_{RF}, \bm{G}_{R}\in \mathcal{G}_{RF}, \frac{N_{RF}}{N_{t}}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}\leq P,
+\end{equation}
+and $P_{con}=\eta\frac{N_{RF}}{N_{t}}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}+P_{T}+P_{R}$. Unfortunately, the fraction form of the objective and the non-convex constraints on $\bm{F}_{R}$ and $\bm{G}_{R}$ and the fractional form of the objective lead the optimization to be non-convex~\cite{JstorJagan1966,JstorDink1967} and NP-hard~\cite{TWCNg201209,TCOMHE2013,TSPHE2014}. In other words, it is difficult to find globally optimal solution for problem~(\ref{SplitBeam08}) within polynomial time. In what follows, we will use two steps to solve design the hybrid precoding. First, an alternative optimization RF precoding and combiner scheme is presented using the ideas of the IA used in interference channels~\cite{TITGou2010,TITGoma2011}. Then, for fixed RF precoding and combiner, we further present an optimization algorithm to solve the energy efficiency problem via the relation between the user rate and the minimum mean square error (MMSE)~\cite{TWCChri2008} and the fractional programming theory~\cite{JstorJagan1966,JstorDink1967}.
+
+\subsection{Analog Precoder and Combiner Optimization}
+
+Without considering the digital baseband precoder and combiner, similar to the interference channel, the analog shifters of the transceiver can be regarded as interference channel networks where the design of precoder at each transmitter aims to minimize the interference leaking to other receivers and put all the interference into the same subspace. Different from the conventional design of the IA algorithm~\cite{TITGou2010,TITGoma2011}, the elements of the analog precoder and combiner are subjected to constant-envelop with only changing of the phase making the problem more intractable~\cite{TWCMoh2012}.
+%and that of the combiner at receiver tries to minimize the energy of the interference signal while maximizing the energy of the useful signal
+
+In this subsection we design distributed analog precoder and combiner for the interference channel networks consisted by the analog shifters. In what follows, we start with arbitrary phase shifter and iteratively update phase shifter $\bm{F}_{R}$ and $\bm{G}_{R}$ with aiming to reduce the leakage of interference. The quality of the analog precoder is measured by the power in the leakage interference at each receiver, i.e., the interference power in the received signal after the analog combiner is applied. The total interference leakage at receive sub-array $k$ due to all undesired transmit sub-array ($j\neq k$) is given by
+$$\overrightarrow{I}_{k}=\bm{g}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{k,j}\bm{f}_{j}\bm{f}_{j}^{H}\bm{H}_{k,j}^{H}\bm{g}_{k}.$$
+Similarly, in the reciprocal network,  the total interference leakage at receive sub-array $k$ due to all undesired transmit sub-array ($j\neq k$) is given by
+$$\overleftarrow{I}_{k}=\bm{f}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{j,k}^{H}\bm{g}_{j}\bm{g}_{j}^{H}\bm{H}_{j,k}\bm{f}_{k}.$$
+
+In the sequel, we aim to develop an iterative algorithm alternating between the transmitter and receiver to update their analog phase shifter to minimize their total leakage interference. For receive sub-array $k$, we aim to solve the following optimization problem to obtain the receive phase shifter vector.
+\begin{equation}\label{SplitBeam11}
+\min_{\bm{g}_{k}}\overrightarrow{I}_{k}=\min_{\bm{g}_{k}}\bm{g}_{k}^{H}
+\sum_{j\neq k}^{N_{r}}\bm{H}_{k,j}\bm{f}_{j}\bm{f}_{j}^{H}\bm{H}_{k,j}^{H}
+\bm{g}_{k}.
+\end{equation}
+It is easy to see that the receive sub-array $k$ chooses its phase shifter to minimize the leakage interference due to all undesired
+transmit sub-array ($j\neq k$). Unlike the method used in~\cite{TITGoma2011}, the single eigenvalue decomposition can not be directly used to obtain the phase of the shifter vector. After some basic mathematic manipulation, it is easy to see that the objective in~(\ref{SplitBeam11}) can be expanded as follows
+\begin{equation}\label{SplitBeam12}
+\bm{g}_{k}^{H}
+\sum_{j\neq k}^{N_{r}}\bm{H}_{k,j}\bm{f}_{j}\bm{f}_{j}^{H}\bm{H}_{k,j}^{H}\bm{g}_{k}=
+\left|\bm{g}_{k}\left(l\right)\right|^{2}\overrightarrow{\bm{H}}_{k}\left(l,l\right)+\bm{g}_{k}^{\left(-l\right)H}
+\overrightarrow{\bm{H}}_{k}^{\left(-l,-l\right)}\bm{g}_{k}^{\left(-l\right)}+2\Re\left\{\bm{g}_{k}^{H}
+\left(l\right)\left(\overrightarrow{\bm{H}}_{k}^{\left(-l\right)}\left(:,l\right)\right)^{H}\bm{g}_{k}^{\left(-l\right)}\right\},
+\end{equation}
+where $\overrightarrow{\bm{H}}_{k}=\sum\limits_{j\neq k}^{N_{r}}\bm{H}_{k,j}\bm{f}_{j}\bm{f}_{j}^{H}\bm{H}_{k,j}^{H}$ is a Hermitian positive semidefinite matrix,
+$\bm{g}_{k}^{\left(-l\right)}$ and $\bm{H}_{k}^{\left(-l\right)}\left(:,l\right)$ are a column vector of dimension $\left(N_{RF}-1\right)$ obtained by removing the $l$th entry of $\bm{g}_{k}$ and the $l$th entry of $\overrightarrow{\bm{H}}_{k}\left(:,l\right)$, respectively, $\overrightarrow{\bm{H}}_{k}^{\left(-l,-l\right)}$ is a matrix of dimension $\left(N_{RF}-1\right)\times \left(N_{RF}-1\right)$ obtained by removing the $l$th row and $l$th column of matrix $\overrightarrow{\bm{H}}_{k}$. Note that in~(\ref{SplitBeam12}) the first two item $\left|\bm{g}_{k}\left(l\right)\right|^{2}\overrightarrow{\bm{H}}_{k}\left(l,l\right)$ and $\bm{g}_{k}^{\left(-l\right)H}\overrightarrow{\bm{H}}_{k}^{\left(-l,-l\right)}\bm{g}_{k}^{\left(-l\right)}$ are independent of the phase applied by the $l$th antenna in the $k$th sub-array. It also means that the dependence of the objective of~(\ref{SplitBeam11}) on the phase shift of the $l$th antenna in the $k$th sub-array is fully captured in the third item which can be minimized by anti-phasing $\bm{g}_{k}\left(l\right)$ and $\left(\overrightarrow{\bm{H}}_{k}^{\left(-l\right)}\left(:,l\right)\right)^{H}\bm{g}_{k}^{\left(-l\right)}$. Therefore, to minimize the objective function in~(\ref{SplitBeam11}) with a constant envelope constraint of phase shifter~\cite{TWCAyach2014,JSTSPAlk2014}, all elements of the vector $\bm{g}_{k}$ must satisfy the following optimization condition
+\begin{equation}\label{SplitBeam13}
+\bm{g}_{k}\left(l\right)=\frac{1}{\sqrt{N_{t}}}e^{j\left(\arg\left(\left(\overrightarrow{\bm{H}}_{k}^{\left(-l\right)}
+\left(:,l\right)\right)^{H}\bm{g}_{k}^{\left(-l\right)}\right)-\pi\right)}.
+\end{equation}
+Thus, an algorithm summarized as Algorithm~\ref{SplitBeamRShifterOptimization} is designed to find the optimal array of phase shifts $\bm{g}_{k}$ for fixing $\bm{f}_{j}$ where $\tau$, $\varrho_{\tau}$, and $\varepsilon$ denote respectively the iterative counter, the objective of~(\ref{SplitBeam11}) and the stop threshold.
+\begin{algorithm}
+\caption{Phase Shifter Optimization for Receiver}\label{SplitBeamRShifterOptimization}
+\begin{algorithmic}[1]
+\STATE Let $\tau=0$ and $\varrho_{\tau}=0$, initial the phase shifts of $\bm{g}_{k}$.\label{SplitBeamRShifterOptimization01}
+\FOR {$l = 1$ to $N_{RF}$} \label{SplitBeamRShifterOptimization02}
+\STATE $\bm{g}_{k}\left(l\right)=\frac{1}{\sqrt{N_{t}}}e^{j\left(\arg\left(\left(\overrightarrow{\bm{H}}_{k}^{\left(-l\right)}
+\left(:,l\right)\right)^{H}\bm{g}_{k}^{\left(-l\right)}\right)-\pi\right)}$\\
+\ENDFOR
+\STATE Update the objective of~(\ref{SplitBeam11}) with the updated $\bm{g}_{k}$, and obtain $\varrho_{\tau+1}$.
+\STATE If $\left|\varrho_{\tau+1}-\varrho_{\tau}\right|\leq\varepsilon$, then stop iteration, otherwise let $\tau=\tau+1$ and go to step~\ref{SplitBeamRShifterOptimization02}.
+\end{algorithmic}
+\end{algorithm}
+Note that in Algorithm~\ref{SplitBeamRShifterOptimization}, the mathematical operation includes complex multiplication, complex addition and phase operation. Furthermore, each sub-array can simultaneously update its analog beamforming vector that facilitates parallel hardware implementation.
+
+Similarly, for transmit sub-array $k$, we aim to solve the following optimization problem to obtain the receive phase shifters.
+\begin{equation}\label{SplitBeam14}
+\min_{\bm{f}_{k}}\overleftarrow{I}_{k}=\min_{\bm{f}_{k}}\bm{f}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{j,k}^{H}\bm{g}_{j}\bm{g}_{j}^{H}\bm{H}_{j,k}\bm{f}_{k}.
+\end{equation}
+Likely, the objective in~(\ref{SplitBeam14}) can be expanded as follows
+\begin{equation}\label{SplitBeam15}
+\bm{f}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{j,k}^{H}\bm{g}_{j}\bm{g}_{j}^{H}\bm{H}_{j,k}\bm{f}_{k}=
+\left|\bm{f}_{k}\left(l\right)\right|^{2}\overleftarrow{\bm{H}}_{k}\left(l,l\right)+\bm{f}_{k}^{\left(-l\right)H}
+\overleftarrow{\bm{H}}_{k}^{\left(-l,-l\right)}\bm{f}_{k}^{\left(-l\right)}+2\Re\left\{\bm{f}_{k}^{H}
+\left(l\right)\left(\overleftarrow{\bm{H}}_{k}^{\left(-l\right)}\left(:,l\right)\right)^{H}\bm{f}_{k}^{\left(-l\right)}\right\},
+\end{equation}
+where $\overleftarrow{\bm{H}}_{k}=\sum\limits_{j\neq k}^{N_{r}}\bm{H}_{j,k}^{H}\bm{g}_{j}\bm{g}_{j}^{H}\bm{H}_{j,k}$ is a Hermitian positive semidefinite matrix,
+$\bm{f}_{k}^{\left(-l\right)}$ and $\overleftarrow{\bm{H}}_{k}^{\left(-l\right)}\left(:,l\right)$ are a column vector of dimension $\left(N_{RF}-1\right)$ obtained by removing the $l$th entry of $\bm{f}_{k}$ and the $l$th entry of $\overleftarrow{\bm{H}}_{k}\left(:,l\right)$, respectively, $\overleftarrow{\bm{H}}_{k}^{\left(-l,-l\right)}$ is a matrix of dimension $\left(N_{RF}-1\right)\times \left(N_{RF}-1\right)$ obtained by removing the $l$th row and $l$th column of matrix $\overleftarrow{\bm{H}}_{k}$. Note that in~(\ref{SplitBeam15}) the first two item $\left|\bm{f}_{k}\left(l\right)\right|^{2}\bm{H}_{k}\left(l,l\right)$ and $\bm{f}_{k}^{\left(-l\right)H}\overleftarrow{\bm{H}}_{k}^{\left(-l,-l\right)}\bm{f}_{k}^{\left(-l\right)}$ are independent of the phase applied by the $l$th antenna in the $k$th sub-array. It also means that the dependence of the objective of~(\ref{SplitBeam14}) on the phase shift of the $l$th antenna in the $k$th sub-array is fully captured in the third item which can be minimized by anti-phasing $\bm{f}_{k}\left(l\right)$ and $\left(\overleftarrow{\bm{H}}_{k}^{\left(-l\right)}\left(:,l\right)\right)^{H}\bm{f}_{k}^{\left(-l\right)}$. Therefore, to minimize the objective of~(\ref{SplitBeam14}) subject to the constant envelope constraint of phase shifter, all elements of the vector $\bm{f}_{k}$ must satisfy the optimization condition
+\begin{equation}\label{SplitBeam16}
+\bm{f}_{k}\left(l\right)=\frac{1}{\sqrt{N_{t}}}e^{j\left(\arg\left(\left(\overleftarrow{\bm{H}}_{k}^{\left(-l\right)}
+\left(:,l\right)\right)^{H}\bm{f}_{k}^{\left(-l\right)}\right)-\pi\right)}.
+\end{equation}
+
+Thus, a simple algorithm summarized as Algorithm~\ref{SplitBeamTShifterOptimization} is also designed to find the optimal array of phase shifts $\bm{f}_{k}$ where $\tau$, $\rho_{\tau}$, and $\varepsilon$ denote respectively the iterative counter, the objective of~(\ref{SplitBeam14}) and the stop threshold. In Algorithm~\ref{SplitBeamRShifterOptimization} and Algorithm~\ref{SplitBeamTShifterOptimization}, the major computational complexity comes from Step~\ref{SplitBeamRShifterOptimization02}. For each iteration of Step~\ref{SplitBeamRShifterOptimization02}, it needs $N_{RF}$ complex multiplications, one real number substraction, and phase operation, which can be realized using coordinate rotation digital computer (CORDIC) algorithm~\cite{CofKimar2011}. Therefore, the total computational complexity of Algorithm~\ref{SplitBeamRShifterOptimization} is about $\mathcal{O}\left(4N_{RF}^{2}+N_{RF}+N_{po}\right)$ real operations, where $N_{po}$ denotes the number of real operation occurring in phase operation.
+\begin{algorithm}
+\caption{Phase Shifter Optimization for Transmitter}\label{SplitBeamTShifterOptimization}
+\begin{algorithmic}[1]
+\STATE Let $\tau=0$ and $\rho_{\tau}=0$, initial the phase shifts of $\bm{f}_{k}$.\label{SplitBeamTShifterOptimization01}
+\FOR {$l = 1$ to $N_{RF}$} \label{SplitBeamTShifterOptimization02}
+\STATE $\bm{f}_{k}\left(l\right)=\frac{1}{\sqrt{N_{t}}}e^{j\left(\arg\left(\left(\overleftarrow{\bm{H}}_{k}^{\left(-l\right)}
+\left(:,l\right)\right)^{H}\bm{f}_{k}^{\left(-l\right)}\right)-\pi\right)}$\\
+\ENDFOR
+\STATE Update the objective of~(\ref{SplitBeam14}) with the updated $\bm{f}_{k}$, and obtain $\varrho_{\tau+1}$.
+\STATE If $\left|\rho_{\tau+1}-\rho_{\tau}\right|\leq\varepsilon$, then stop iteration, otherwise let $\tau=\tau+1$ and go to step~\ref{SplitBeamTShifterOptimization02}.
+\end{algorithmic}
+\end{algorithm}
+
+Note that each array at transceiver can concurrently use Algorithm~\ref{SplitBeamRShifterOptimization} or Algorithm~\ref{SplitBeamTShifterOptimization} to update the combiner or precoder for each sub-array of $N_{r}$ sub-arrays. Furthermore, the aforementioned two algorithms only apply the complex multiplier operation and phase operation without needing the matrix multiplier operation and single value decomposition (SVD) operation~\cite{TWCXiao2015,TWCAyach2014,JSTSPAlk2014,TWCAlk2015,TSPLee2015}. Exploiting jointly the aforementioned Algorithm~\ref{SplitBeamRShifterOptimization} and Algorithm~\ref{SplitBeamTShifterOptimization}, an alternative optimization procedure that generates the analog precoder and combiner are summarized as Algorithm~\ref{SplitBeamCShifterOptimization} illustrated in Fig.~\ref{PhaseShifterOptimization}\footnote{Note that each sub-array architecture at receiver can be regarded as a separated receiver, i.e., the proposed algorithm can be applied to the sub-array architecture multiuser networks. In addition, the developed algorithm can be applied in massive MIMO systems, which formulates a high speed point-to-point link. }.
+\begin{figure}[h]%[htbp]%here,top, bottom,page
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\includegraphics[width=1\columnwidth,keepaspectratio]{SplitPhaseOptimization.eps}\\
+\caption{Pictorial representation of the alternative optimization procedure algorithm for phase shifter optimization at transceiver where the receive directions are optimized to minimize interference power at the receivers.}
+\label{PhaseShifterOptimization}
+\end{figure}
+\begin{algorithm}
+\caption{Phase Shifter Optimization for Transmitter}\label{SplitBeamCShifterOptimization}
+\begin{algorithmic}[1]
+\STATE Each transmit sub-array arbitrary generate the analog phase shifter vector.\label{SplitBeamCShifterOptimization01}
+\STATE Using Algorithm~\ref{SplitBeamRShifterOptimization} to update the analog phase shifter vector for each receive sub-array \label{SplitBeamCShifterOptimization02}.
+\STATE Using Algorithm~\ref{SplitBeamTShifterOptimization} to update the analog phase shifter vector for each transmit sub-array.\label{SplitBeamCShifterOptimization03}
+\STATE Repeat step~\ref{SplitBeamCShifterOptimization02} and~\ref{SplitBeamCShifterOptimization03}, until convergence.\label{SplitBeamCShifterOptimization04}
+\end{algorithmic}
+\end{algorithm}
+
+It is not difficult to find that Algorithm~\ref{SplitBeamRShifterOptimization}, Algorithm~\ref{SplitBeamTShifterOptimization}, and Algorithm~\ref{SplitBeamCShifterOptimization} can be extended to design the hybrid precoder and combiner for the multiuser MIMO interference channels with sub-connected architecture~\cite{TWCAlk2015}. In order to show that the converge of Algorithm~\ref{SplitBeamRShifterOptimization} to Algorithm~\ref{SplitBeamCShifterOptimization} can be guaranteed, here, the total interference metric is firstly defined as
+\begin{equation}\label{SplitBeam17}
+I_{Total}=\sum\limits_{k=1}^{N_{r}}\overrightarrow{I}_{k}=\sum\limits_{k=1}^{N_{r}}\bm{g}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{k,j}\bm{f}_{j}\bm{f}_{j}^{H}\bm{H}_{k,j}^{H}\bm{g}_{k}
+=\sum\limits_{k=1}^{N_{r}}\overleftarrow{I}_{k}=\sum\limits_{k=1}^{N_{r}}\bm{f}_{k}^{H}\sum_{j\neq k}^{N_{r}}\bm{H}_{j,k}^{H}\bm{g}_{j}\bm{g}_{j}^{H}\bm{H}_{j,k}\bm{f}_{k}.
+\end{equation}
+
+\begin{proposition}\label{SplitBeamPros01}
+The sequences produced by Algorithm~\ref{SplitBeamRShifterOptimization}, Algorithm~\ref{SplitBeamTShifterOptimization} and Algorithm~\ref{SplitBeamCShifterOptimization} all are a monotonically non-increasing objective and always converge.
+\end{proposition}
+\begin{proof}
+For given $\bm{F}_{R}$, Algorithm~\ref{SplitBeamRShifterOptimization} aims to minimize the interference received by each receive sub-array $k$ via optimizing the receive phase shifter vector, i.e, each update of each receive sub-array $k$ phase shifter vector minimizes the objective of problem~(\ref{SplitBeam11}). It also means that the iterative procedure generates a non-increasing sequence which is lower bounded by the minimum singular value of $\overrightarrow{\bm{H}}_{k}$. Thus, the convergence of Algorithm~\ref{SplitBeamRShifterOptimization} is guaranteed by the monotonic boundary sequence theorem~\cite{Bibby1974}. Similarly, the conclusion also holds for Algorithm~\ref{SplitBeamTShifterOptimization}. Furthermore, it is easy to see that the total interference $I_{Total}$ sequence generated by Algorithm~\ref{SplitBeamCShifterOptimization} is also non-increasing sequence and the convergence of Algorithm~\ref{SplitBeamCShifterOptimization} is also guaranteed by the monotonic boundary sequence theorem~\cite{Bibby1974}.
+\end{proof}
+
+
+\subsection{Digital Precoder and Combiner Optimization}
+Once the analog precoder $\bm{F}_{R}$ and combiner $\bm{G}_{R}$ are obtained, the channel coefficient between the transmitter and receiver becomes an equivalent $N_{r}\times N_{r}$ MIMO channel and can be rewritten as
+\begin{equation}\label{SplitBeam18}
+\widetilde{\bm{H}}=\bm{G}_{R}^{H}\bm{H}\bm{F}_{R}=\begin{bmatrix}
+\bm{g}_{1}^{H}\bm{H}_{1,1}\bm{f}_{1}&\cdots
+&\bm{g}_{1}^{H}\bm{H}_{1,N_{r}}\bm{f}_{N_{r}}\\
+\vdots& \ddots&\vdots\\
+\bm{g}_{N_{r}}^{H}\bm{H}_{N_{r},1}\bm{f}_{1}& \cdots&\bm{g}_{N_{r}}^{H}\bm{H}_{N_{r},N_{r}}\bm{f}_{N_{r}}\\
+\end{bmatrix}.
+\end{equation}
+While the baseband received signal can be reformulated as $\widetilde{\bm{y}}=\widetilde{\bm{H}}\bm{F}_{B}\bm{s}+\widetilde{\bm{n}}$ where $\widetilde{\bm{n}}=\bm{G}_{R}^{H}\bm{n}$ is the effective additive noise with zero mean and variance $\bm{R}_{\widetilde{n}}=\sigma_{n}^{2}\bm{G}_{R}^{H}\bm{G}_{R}$. Further, the spectral efficiency given by~(\ref{SplitBeam06}) can also be rewritten as
+\begin{subequations}\label{SplitBeam19}
+\begin{align}
+R&=\log_{2}\left(\left|\bm{I}+\bm{R}_{n}^{-1}\bm{G}_{B}^{H}\widetilde{\bm{H}}\bm{F}_{B}
+\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\bm{G}_{B}\right|\right)\label{SplitBeam19a}\\
+&=\log_{2}\left(\left|\bm{I}+\bm{R}_{\widetilde{n}}^{-1}
+\widetilde{\bm{H}}\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\right|\right)\label{SplitBeam19b}.
+\end{align}
+\end{subequations}
+We apply an $Nr\times Nr$ whitening filter $\widetilde{\bm{W}}$ at the receiver, which is
+shown to be related with $\bm{R}_{\widetilde{n}}$ as $\widetilde{\bm{W}}=\bm{R}_{\widetilde{n}}^{-\frac{1}{2}}$~\cite{TWCShim2008,TITPalomar2006}. With this whitening filter, the baseband received signal after post-processing is $\overline{\bm{s}}=\overline{\bm{G}}_{B}^{H}\widetilde{\bm{W}}\widetilde{\bm{y}}=\overline{\bm{G}}_{B}^{H}
+\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}\bm{s}+\overline{\bm{G}}_{B}^{H}\widetilde{\bm{W}}\widetilde{\bm{n}}$. Under the independence assumption of $\bm{n}$'s and $\bm{s}$'s, the MSE matrix can be written as
+\begin{equation}\label{SplitBeam20}
+\begin{split}
+\bm{E}=&\mathbb{E}\left[\left(\overline{\bm{s}}-\bm{s}\right)\left(\overline{\bm{s}}-\bm{s}\right)^{H}\right]
+=\overline{\bm{G}}_{B}^{H}\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\widetilde{\bm{W}}^{H}
+\overline{\bm{G}}_{B}\\
+&+\overline{\bm{G}}_{B}^{H}\widetilde{\bm{W}}\bm{R}_{\widetilde{n}}\widetilde{\bm{W}}^{H}\overline{\bm{G}}_{B}
+-\overline{\bm{G}}_{B}^{H}\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}-\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}
+\widetilde{\bm{W}}^{H}\overline{\bm{G}}_{B}+\bm{I}.
+\end{split}
+\end{equation}
+Combining~(\ref{SplitBeam05}) with~(\ref{SplitBeam20}), we have $\bm{G}_{B}=\widetilde{\bm{W}}^{H}\overline{\bm{G}}_{B}$. Fixing all the transmit precoder $\bm{F}_{B}$ and minimizing MSE lead to the well-known MMSE receiver:
+\begin{equation}\label{SplitBeam21}
+\overline{\bm{G}}_{B}^{mmse}=\left(\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\widetilde{\bm{W}}^{H}+
+\bm{I}\right)^{-1}\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B},
+\end{equation}
+and
+\begin{equation}\label{SplitBeam22}
+\bm{G}_{B}^{mmse}=\widetilde{\bm{W}}^{H}\overline{\bm{G}}_{B}^{mmse}=\left(\widetilde{\bm{H}}\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}+
+\bm{R}_{\widetilde{n}}\right)^{-1}\widetilde{\bm{H}}\bm{F}_{B}.
+\end{equation}
+The corresponding MSE matrix with MMSE combiner is applied can be written as
+\begin{equation}\label{SplitBeam23}
+\begin{split}
+\bm{E}^{mmse}=&\bm{I}-\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\widetilde{\bm{W}}^{H}\left(\widetilde{\bm{W}}\widetilde{\bm{H}}
+\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\widetilde{\bm{W}}^{H}+
+\bm{I}\right)^{-1}\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}\\
+=&\left(\bm{I}+\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\widetilde{\bm{W}}^{H}\widetilde{\bm{W}}\widetilde{\bm{H}}\bm{F}_{B}\right)^{-1}
+=\left(\bm{I}+\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\bm{R}_{\widetilde{\bm{n}}}^{-1}\widetilde{\bm{H}}\bm{F}_{B}\right)^{-1}.
+\end{split}
+\end{equation}
+From (\ref{SplitBeam19b}) and (\ref{SplitBeam23}), it is easy to see that $\log_{2}\left(\left|\left(\bm{E}^{mmse}\right)^{-1}\right|\right)=R$. Now, we resort to solve the following problem~(\ref{SplitBeam24}) to obtain the baseband precoder $\bm{F}_{B}$ and the baseband combiner $\bm{G}_{B}$.
+\begin{equation}\label{SplitBeam24}
+\max_{\bm{F}_{B},\bm{G}_{B},\bm{W}}\frac{-tr\left(\bm{W}\bm{E}\right)+\ln\left(\left|\bm{W}\right|\right)+N_{r}}{P_{con}}\\
+~s.t.~\widetilde{N}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}\leq P.
+\end{equation}
+where $\bm{W}$ is a positive semidefinite weight matrix and $\widetilde{N}=\frac{N_{RF}}{N_{t}}$.
+
+Note that the numerator is concave in each of the optimization variables $\bm{F}_{B}$, $\bm{G}_{B}$, and $\bm{W}$, the denominator is convex with respect to $\bm{F}_{B}$. Therefore, it belongs to the class of the standard fractional programming problem. The research results in~\cite{TSPPal2003,JSACPal2006,TCOMHE2013,TSPHE2014} have shown that the fractional programming problem can be transformed into a parameterized subtractive form by introducing an auxiliary variable, i.e.
+\begin{equation}\label{SplitBeam25}
+\max_{\bm{F}_{B},\bm{G}_{B},\bm{W}}-tr\left(\bm{W}\bm{E}\right)+\ln\left(\left|\bm{W}\right|\right)+N_{r}-\varpi P_{con}\\
+~s.t.~\widetilde{N}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}\leq P.
+\end{equation}
+The existing research on the fractional programming problem have shown that solving the above problem is equivalent to look up a solution of problem~(\ref{SplitBeam25}) such that its objective equals zero and the optimal solution of $\varpi$ can be obtained by using Newton-like method. In what follows, we focus on solve problem~(\ref{SplitBeam25}) with fixed $\varpi$ and propose to use the block coordinate descent method to solve it.  Specially, we maximize the cost function by sequentially fixing two of the three variables $\bm{F}_{B}$, $\bm{G}_{B}$, and $\bm{W}$, and updating the third. It is easily known that the optimal solutions of $\bm{G}_{B}$ and $\bm{W}$ are respectively given by~(\ref{SplitBeam22}) and $\bm{W}^{opt}=\left(\bm{E}^{mmse}\right)^{-1}$~\cite{TWCChri2008}.
+
+For fixed $\bm{G}_{B}$ and $\bm{W}$, the Lagrange function of problem~(\ref{SplitBeam25}) is given as follows
+\begin{equation}\label{SplitBeam26}
+\begin{split}
+\mathcal{L}\left(\bm{F}_{B},\mu\right)=&-tr\left(\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{G}_{B}^{H}\widetilde{\bm{H}}\bm{F}_{B}\right)
+-tr\left(\bm{W}\bm{G}_{B}^{H}\bm{R}_{\widetilde{\bm{n}}}\bm{G}_{B}
+-\bm{W}\bm{G}_{B}^{H}\widetilde{\bm{H}}\bm{F}_{B}\right)\\
+&-tr\left(-\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}+\bm{W}\right)
++\ln\left(\left|\bm{W}\right|\right)+N_{r}\\
+&-\varpi\eta\widetilde{N}\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}-\varpi\left(P_{T}+P_{R}\right)-
+\mu\left(\widetilde{N}tr\left(\bm{F}_{B}^{H}\bm{F}_{B}\right)-P\right),
+\end{split}
+\end{equation}
+where $\mu$ is a Lagrange multiplier associated with the power budget constraint of transmitter. The first-order optimality condition of $\mathcal{L}\left(\bm{F}_{B},\mu\right)$ with respect to $\bm{F}_{B}$ yields
+\begin{equation}\label{SplitBeam27}
+\bm{F}_{B}^{opt}=\left(\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{G}_{B}^{H}\widetilde{\bm{H}}+\widetilde{\mu}\bm{I}\right)^{-1}
+\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W},
+\end{equation}
+where $\widetilde{\mu}=\left(\varpi\eta+\mu\right)\widetilde{N}$ and $\mu\geq 0$ should be chosen such that the complementarity slackness condition of the power budget constraint is satisfied. Let $\bm{F}_{B}\left(\widetilde{\mu}\right)$ denote the right hand of~(\ref{SplitBeam27}). When the matrix $\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{G}_{B}^{H}\widetilde{\bm{H}}$ is invertible and $\widetilde{N}\left|\bm{F}_{B}\left(\varpi\eta\widetilde{N}\right)\right|_{\mathcal{F}}^{2}\leq P$, then $\bm{F}_{B}^{opt}=F_{B}\left(\varpi\eta\widetilde{N}\right)$, otherwise the equality $\widetilde{N}tr\left(\bm{F}_{B}\left(\widetilde{\mu}\right)\bm{F}_{B}\left(\widetilde{\mu}\right)^{H}\right)$ must be held. Let the eigendecomposition of $\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{G}_{B}^{H}\widetilde{\bm{H}}$ be $\bm{\Omega}\bm{\Lambda}\bm{\Omega}^{H}$, then $\widetilde{N}tr\left(\bm{F}_{B}\left(\widetilde{\mu}\right)\bm{F}_{B}\left(\widetilde{\mu}\right)^{H}\right)$ can be equivalent to
+\begin{equation}\label{SplitBeam28}
+\widetilde{N}\sum\limits_{m=1}^{N_{r}}\frac{\bm{\Phi}\left({m,m}\right)}
+{\left(\bm{\Lambda}\left({m,m}\right)+\widetilde{\mu}\right)^{2}}=P,
+\end{equation}
+where $\bm{\Phi}=\bm{\Omega}^{H}\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{W}^{H}\bm{G}_{B}^{H}\widetilde{\bm{H}}\bm{\Omega}$. Note that the optimum $\widetilde{\mu}$ (denoted by $\widetilde{\mu}^{*}$) must be positive in this case and the left-hand side of (\ref{SplitBeam28}) is a decreasing function in $\widetilde{\mu}$ for $\widetilde{\mu}\geq \varpi\eta$ and $\widetilde{\mu}\leqslant \sqrt{\frac{\widetilde{N}}{P}\sum\limits_{m=1}^{N_{r}}\bm{\Phi}\left(m,m\right)}$. Hence, (\ref{SplitBeam28}) can be easily solved using one dimensional search techniques, such as bisection method. Plugging $\widetilde{\mu}^{*}$, the optimal $\bm{F}_{B}^{opt}$ can be obtained.
+
+Thus, a two layer algorithm used to design the digital precoder $\bm{F}_{B}$ and the digital combiner $\bm{G}_{B}$ is summarized as Algorithm~\ref{SplitBeamDigitalBeam} to solve problem~(\ref{SplitBeam24}) where $\varepsilon$ is a stop threshold and $\chi$ denotes the objective of problem~(\ref{SplitBeam25}). At the outer layer of Algorithm~\ref{SplitBeamDigitalBeam}, the auxiliary variable $\varpi$ is optimized via the fractional programming method~\cite{JstorJagan1966,JstorDink1967}. At the inner layer of Algorithm~\ref{SplitBeamDigitalBeam}, due to that the cost function of~\eqref{SplitBeam25} is convex in each of the optimization variables $\bm{F}_{B}$, $\bm{G}_{B}$, and $\bm{W}$, we propose to use the block coordinate descent method to solve~\eqref{SplitBeam25} via alternative iteration method. In other words, \eqref{SplitBeam25} is optimized sequentially via fixing two of the three variables $\bm{F}_{B}$, $\bm{G}_{B}$, and $\bm{W}$, and updating the third.
+\begin{algorithm}
+\caption{Digital Precoder and Combiner Solution}\label{SplitBeamDigitalBeam}
+\begin{algorithmic}[1]
+\STATE Initialize $\varpi=0$.
+%\REPEAT
+\STATE Let $\chi=0$ , and initialize $\bm{F}_{B}$ such that $\widetilde{N}tr\left(\bm{F}_{B}\bm{F}_{B}^{H}\right)=P$ and $\bm{W}=\bm{I}$.\label{SplitBeamDigitalBeamUpdate}
+\REPEAT
+\STATE $\bm{W}'\leftarrow\bm{W}$, $\chi'\leftarrow\chi$
+\STATE $\bm{G}_{B}\leftarrow\left(\widetilde{\bm{H}}\bm{F}_{B}\bm{F}_{B}^{H}\widetilde{\bm{H}}^{H}+
+\bm{R}_{\widetilde{n}}\right)^{-1}\widetilde{\bm{H}}\bm{F}_{B}$
+\STATE $\bm{W}\leftarrow\left(\bm{I}-\bm{G}_{B}^{H}\widetilde{\bm{H}}\bm{F}_{B}\right)^{-1}$
+\STATE $\bm{F}_{B}\leftarrow\left(\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}\bm{G}_{B}^{H}
+\widetilde{\bm{H}}+\widetilde{\mu}^{*}\bm{I}\right)^{-1}\widetilde{\bm{H}}^{H}\bm{G}_{B}\bm{W}$
+\STATE Update the objective of problem~(\ref{SplitBeam25})  and then obtain $\chi$
+\UNTIL{$\left|\chi-\chi'\right|\leq\varepsilon$}
+%\frac{-tr\left(\bm{W}\bm{E}\right)+\ln\left(\left|\bm{W}\right|\right)+N_{r}}{P_{con}}
+\STATE If $\left|\chi\right|\leq\varepsilon$, then output $\bm{G}_{B}$, $\bm{W}$, $\bm{F}_{B}$ and stop iteraion, otherwise let $\varpi\leftarrow \frac{-tr\left(\bm{W}\bm{E}\right)+\ln\left(\left|\bm{W}\right|\right)+N_{r}}{P_{con}}$ and to step~\ref{SplitBeamDigitalBeamUpdate}.
+\end{algorithmic}
+\end{algorithm}
+
+Note that Algorithm~\ref{SplitBeamDigitalBeam} aims to optimize the system energy efficiency and can be used to optimize the spectral efficiency by omitting the outer loop. Furthermore, Algorithm~\ref{SplitBeamDigitalBeam} can also be applied to optimize the digital precoder and combiner without the phase shifter constraints. According to the monotonic boundary theorem and fractional programming theory, it is easy to prove the following proposition~\cite{JstorJagan1966,JstorDink1967,Bibby1974}. The computational complexity analysis is similar with that of the developed algorithms in~\cite{TCOMHE2013,TSPHE2014}.
+\begin{proposition}\label{SplitBeamPros02}
+The sequence produced by Algorithm~\ref{SplitBeamDigitalBeam} is a monotonically non-decreasing objective and always converge.
+\end{proposition}
+\begin{proof}
+Similar to the proof of the convergence of the algorithms developed in~\cite{TCOMHE2013,TSPHE2014}, we can easily conclude that the convergence of Algorithm~\ref{SplitBeamDigitalBeam} is guaranteed.
+\end{proof}
+
+Based on the aforementioned design method of the hybrid precoder and combiner, we can obtain a solution to problem \eqref{SplitBeam10} via alternative optimization method. First, the RF precoder $\bm{F}_{R}$ and the RF combiner $\bm{G}_{R}$ are designed using Algorithm~\ref{SplitBeamCShifterOptimization} aiming to minimize the total interference. Then, the baseband precoder $\bm{F}_{B}$ and the baseband combiner $\bm{G}_{B}$ are designed using Algorithm~\ref{SplitBeamDigitalBeam} aiming to maximize the system energy efficiency.%, which
+
+\section{Numerical Results}
+
+In this paper, we adopt a narrowband clustered channel representation in~\cite{TWCAyach2014}. It is based on the extended Saleh-Valenzuela model~\cite{BookClerkx2013} which has been used for modeling a 60-GHz wireless local area network~\cite{OnlineMat2011} and personal area network~\cite{OnlineYong2010}. This model allows us to accurately capture the mathematical structure presented in mmWave channels. The channel matrix $\bm{H}$ is assumed to be a sum of the contributions of $N_{cl}$ scattering clusters, each of which contribute $N_{ray}$ propagation paths to $\bm{H}$. Therefore, the $\bm{H}$ can be written as
+\begin{equation}\label{SplitBeam07}
+\bm{H}=\frac{N_{t}}{\sqrt{N_{cl}N_{ray}}}\sum\limits_{m=1}^{N_{cl}}\sum\limits_{n=1}^{N_{ray}}\alpha_{m,n}
+\bm{a}_{r}\left(\phi_{m,n}^{r},\theta_{m,n}^{r}\right)\bm{a}_{t}\left(\phi_{m,n}^{t},\theta_{m,n}^{t}\right)^{H},
+\end{equation}
+where $\alpha_{m,n}$ is the complex gain of the $n$th ray in the $m$th scattering cluster and is complex Gaussian random variable with zero mean and variance $\sigma_{\alpha}^{2}$, whereas $\phi_{m,n}^{r}\left(\theta_{m,n}^{r}\right)$ and $\phi_{m,n}^{t}\left(\theta_{m,n}^{t}\right)$ are its azimuth (elevation) angles of arrival and departure (AoA and AoD), respectively. The mean angle associated with each cluster is uniformly distributed over $\left[-\pi, \pi\right)$, and the distribution of the difference between an AoA (AoD) and its mean is Laplacian with angular standard deviation $\sigma_{AS}$~\cite{TVTForenza2007,JSACXu2002,TNSingh2011}. The vector $\bm{a}_{r}\left(\phi_{m,n}^{r},\theta_{m,n}^{r}\right)$ and $\bm{a}_{t}\left(\phi_{m,n}^{t},\theta_{m,n}^{t}\right)$ are the normalized receive and transmit array response vectors at an azimuth (elevation) angle of $\phi_{m,n}^{r}\left(\theta_{m,n}^{r}\right)$ and $\phi_{m,n}^{t}\left(\theta_{m,n}^{t}\right)$, respectively~\cite{TWCAyach2014,JSTSPAlk2014,TWCAlk2015,TSPLee2015,TVTKim2015}.
+
+In our simulations, the propagation environment is model as a $N_{cl} = 8$ cluster environment with $N_{ray} = 10$ rays per cluster with Laplacian distributed azimuth and elevation angles of arrival and departure~\cite{TVTForenza2007,JSACXu2002}. For simplicity of exposition, The inter-element spacing $d$ is assumed to be half wavelength. We compare the performance of the proposed strategy to optimal unconstrained precoding in which a complete antenna array with one RF chain per antenna and the power consumption is
+\begin{subequations}\label{SplitBeam29}
+\begin{align}
+&P_{D}=\eta\left\|\bm{F}_{B}\right\|_{\mathcal{F}}^{2}+P_{DT}+P_{DR},\\
+&P_{DT}=N_{t}\left(P_{tRFC}+P_{DAC}+P_{PA}\right)+P_{BB},\\
+&P_{DR}=N_{t}\left(P_{rRFC}+P_{ADC}+P_{LNA}\right)+P_{BB}.
+\end{align}
+\end{subequations}
+In our simulations, we set $P_{PA}=P_{LNA} = 20$ mW, $P_{DAC}=P_{ADC} = 200$ mW, $P_{PS} = 30$ mW, $P_{tRFC}=P_{rRFC}= 43$ mW and $P_{BB}=300$ mW~\cite{CTWRangan2013,IJSSCYu2010,TMTTLi2013}. For simpicity, the value of the inefficiency of the power amplifier is set to be unit. We assume uniform linear arrays with antenna spacing of $d=\frac{\lambda}{2}$. $\sigma_{n}^{2} =0$ dBm. The variance of the channel
+gains $\sigma_{\alpha}^{2}=1$, and the angular standard deviation (angular spread)
+ $\sigma_{AS}= 5$~\cite{TWCAyach2014,JSTSPAlk2014,TWCAlk2015,TSPLee2015,TVTKim2015}.
+
+
+Fig.~\ref{Alg1ConvergenceTrajectory}, Fig.~\ref{Alg2ConvergenceTrajectory}, and Fig.~\ref{Alg3ConvergenceTrajectory} show the convergence trajectory of Algorithm~\ref{SplitBeamRShifterOptimization}, Algorithm~\ref{SplitBeamTShifterOptimization}, and Algorithm~\ref{SplitBeamCShifterOptimization} for four random channel realizations, respectively. It is illustrated from these figures that the three algorithms converge to a stationary point within $4-5$ iterations. In other words, the proposed algorithms have a fast convergence speed.
+\begin{figure}[h]%[htbp]%here,top, bottom,page
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\includegraphics[width=0.8\columnwidth,keepaspectratio]{Alg1ConvergenceTrajectory.eps}\\
+\caption{Convergence Trajectory of Algorithm~\ref{SplitBeamRShifterOptimization}, $N_{t}=64$, $N_{RF}=8$, $N_{r}=8$, $P=10$dBm.}
+\label{Alg1ConvergenceTrajectory}
+\end{figure}
+
+
+\begin{figure}[h]%[htbp]%here,top, bottom,page
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\includegraphics[width=0.8\columnwidth,keepaspectratio]{Alg2ConvergenceTrajectory.eps}\\
+\caption{Convergence Trajectory of Algorithm~\ref{SplitBeamTShifterOptimization}, $N_{t}=64$, $N_{RF}=8$, $N_{r}=8$, $P=10$dBm.}
+\label{Alg2ConvergenceTrajectory}
+\end{figure}
+
+
+\begin{figure}[h]%[htbp]%here,top, bottom,page
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\includegraphics[width=0.8\columnwidth,keepaspectratio]{Alg3ConvergenceTrajectory.eps}\\
+\caption{Convergence Trajectory of Algorithm~\ref{SplitBeamCShifterOptimization}, $N_{t}=64$, $N_{RF}=8$, $N_{r}=8$, $P=10$dBm.}
+\label{Alg3ConvergenceTrajectory}
+\end{figure}
+
+Fig.~\ref{Alg4ConvergenceTrajectory} shows the convergence behavior of Algorithm~\ref{SplitBeamDigitalBeam} under different allowable transmit power constraint for four random channel realizations. Numerical results also show that Algorithm~\ref{SplitBeamDigitalBeam} can converge to a stationary point within $4-10$ iterations.
+\begin{figure}
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\subfigure[ $P=10$dBm]{
+\label{Alg4ConvergenceTrajectory01}
+\includegraphics[width=0.8\columnwidth]{Alg4ConvergenceTrajectory01.eps}}
+\subfigure[ $P=30$dBm]{
+\label{Alg4ConvergenceTrajectory02}
+\includegraphics[width=0.8\columnwidth]{Alg4ConvergenceTrajectory02.eps}}
+\caption{Convergence Trajectory of Algorithm~\ref{SplitBeamDigitalBeam}, $N_{t}=64$, $N_{RF}=8$, $N_{r}=8$.}
+\label{Alg4ConvergenceTrajectory}
+\end{figure}
+
+Fig.~\ref{EnergyEfficiencyComparison1} and Fig.~\ref{EnergyEfficiencyComparison2} show the average energy efficiency performance of proposed hybrid precoder and combiner scheme compared with digital precoder and combiner scheme under different antenna configurations and different power consumptions of  $P_{tRFC}=P_{rRFC}$ over $1000$ random channel realizations. Numerical results show that the digital precoder as well as combiner scheme outperforms the hybrid precoder and combiner scheme with $N_{t}$ RF chains. In other words, digital precoder and combiner scheme achieves better energy efficiency performance at the cost of higher hardware implementation and more computational complexity and channel estimation and feedback overheads. We can observe that at lower transmit power region, the hybrid precoder and combiner scheme outperforms the digital precoder and combiner schemes in the case of larger number of antennas and larger value of $P_{tRFC}=P_{rRFC}$.
+\begin{figure}
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\subfigure[$P_{tRFC}=P_{rRFC}= 43$ mW]{
+\label{EnergyEfficiencyComparisonI}
+\includegraphics[width=0.8\columnwidth]{EnergyEfficiencyComparisonI.eps}}
+\subfigure[$P_{tRFC}=P_{rRFC}= 430$ mW]{
+\label{EnergyEfficiencyComparisonII}
+\includegraphics[width=0.8\columnwidth]{EnergyEfficiencyComparisonII.eps}}
+\caption{Energy efficiency performance comparison, $N_{t}=16$, $N_{RF}=4$, $N_{r}=4$, $\varepsilon=10^{-4}$.}
+\label{EnergyEfficiencyComparison1}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\captionstyle{flushleft}
+\onelinecaptionstrue
+\subfigure[$P_{tRFC}=P_{rRFC}= 43$ mW]{
+\label{EnergyEfficiencyComparisonIII}
+\includegraphics[width=0.8\columnwidth]{EnergyEfficiencyComparisonIII.eps}}
+\subfigure[$P_{tRFC}=P_{rRFC}= 430$ mW]{
+\label{EnergyEfficiencyComparisonIV}
+\includegraphics[width=0.8\columnwidth]{EnergyEfficiencyComparisonIV.eps}}
+\caption{Energy efficiency performance comparison, $N_{t}=32$, $N_{RF}=8$, $N_{r}=4$, $\varepsilon=10^{-4}$.}
+\label{EnergyEfficiencyComparison2}
+\end{figure}
+
+\section{Conclusions}
+
+In this paper, we investigated the energy efficient design of the hybrid precoder and combiner with sub-connected architecture. A two layer optimization method was presented to solve the problem of interest. First, the analog precoder and combiner were optimized via the ADOM where the phase shifter can be easily adjusted with an analytical structure. Then, the digital precoder and combiner was optimized for an effective MIMO communication systems. The convergence of the proposed algorithms were proven by using the monotonic boundary theorem and fractional programming theory. Extensive simulation results were given to validate the effectiveness of the developed method and evaluate the energy efficiency performance under various circuit power consumption model and system configuration.
+
+%\section*{Appendix}
+%
+%\subsection*{A. Related Proof}
+
+\begin{small}
+\begin{thebibliography}{30}
+\bibitem{WirelessGhosh2010}A. Ghosh, R. Ratasuk, B. Mondal, N. Mangalvedhe, and T. Thomas, ``LTE-Advanced: Next-generation wireless broadband technology," \emph{IEEE Wireless Commun.}, pp. 10-22, Jun. 2010.
+\bibitem{WirelessDamn2011}A. Damnjanovic, J. Montojo, Y.  Wei, T. Ji, T. Luo, M. Vajapeyam, T. Yoo, O. Song, and D. Malladi, ``A survey on 3GPP heterogeneous networks," \emph{IEEE Wireless Commun.}, pp. 10-21, Jun. 2011.
+\bibitem{TITGou2010}T. Gou and S. A. Jafar, ``Degrees of freedom of the $K$ user $M\times N$ MIMO interference channel," \emph{IEEE Trans. Inf. Theory}, vol. 56, no. 12, pp. 6040-6057, Dec. 2010.
+\bibitem{TITGoma2011}K. Gomadam, V. Cadambe, and S. Jafar, ``A distributed numerical approach to interference alignment and applications to wireless interference networks," \emph{IEEE Trans. Inf. Theory}, vol. 57, no. 6, pp. 3309-3322, Jun. 2011.
+\bibitem{WirelssBi2015}S. Bi, C. Ho, and R. Zhang, ``Wireless powered communication: Opportunities and challenges," \emph{IEEE Wireless Commun.},  pp. 117-125, Apr. 2015.
+\bibitem{WirelessPya2015}A. Pyattaev, K. Johnsson, S. Aandreev, and Y. Koucheryavy, ``Communication challenges in high-density deployments of wearable wireless devices," \emph{IEEE Wireless Commun.}, pp. 12-18, Feb. 2015.
+\bibitem{JSACAnd2014}J. Andrews, S. Buzzi, W. Choi, S. Hanly, A. Lozano,A. Soong, and J. Charlie Zhang, ``What will 5G be?" \emph{IEEE J. Sel. Areas Commun.}, vol. 32, no. 6, pp. 1065-1081, Jun. 2014.
+
+\bibitem{CommBi2011}Z. Pi and F. Khan, ``An introduction to millimeter-wave mobile broadband systems," \emph{IEEE Commun. Mag.}, pp. 101-107, Jun. 2011.
+\bibitem{AccessRap2013}T. Rappaport et al., ``Millimeter wave Mobile communications for 5G cellular: It will work!," \emph{IEEE Access}, vol. 1, pp. 335-349, May 2013.
+\bibitem{CommRoh2014}W. Roh, J. Seol, J. Park, B. Lee, J. Lee, Y. Kim, J. Cho, K. Cheun, and F. Aryanfar, ``Millimeter-wave beamforming as an enabling technology for 5G cellular communications: Theoretical feasibility and prototype results," \emph{IEEE Commun. Mag.}, pp. 106-113, Feb. 2014.
+\bibitem{ProceddingRan2014}S. Rangan, T. Rappaport, and E. Erkip, ``Millimeter-wave cellular wireless networks: Potentials and challenges," \emph{Proceedings of the IEEE}, vol. 102, no. 3, pp. 366-385, Mar. 2014.
+\bibitem{CommHan2015}S. Han, C. Lin I, Z. Xu, and C. Rowell, ``Large-scale antenna systems with hybrid analog and digital beamforming for millimeter wave 5G," \emph{IEEE Commun. Mag.}, pp. 186-194, Jan. 2015.
+
+\bibitem{OnlineYong2010}S. Yong, ``TG3c channel modeling sub-committee final report," \emph{IEEE doc. 15-07-0584-01-003c}. [Online]. Available: https://mentor.ieee.org/802.15/documents.
+\bibitem{TVTForenza2007}A. Forenza, D. Love, and R. W. Heath, Jr., ``Simplified spatial correlation models for clustered MIMO channels with different array configurations," \emph{IEEE Trans. Veh. Technol.}, vol. 56, no. 4, pp. 1924-1934, Jul. 2007.
+\bibitem{JSACXu2002}H. Xu, V. Kukshya, and T. Rappaport, ``Spatial and temporal characteristics of 60-GHz indoor channels," \emph{IEEE J. Sel. Areas Commun.}, vol. 20, no. 3, pp. 620-630, Apr. 2002.
+\bibitem{TNSingh2011}S. Singh, R. Mudumbai, and U. Madhow, ``Interference analysis for highly directional 60-GHz mesh networks: the case for rethinking medium access control," \emph{IEEE/ACM Trans. Netw.}, vol. 19, no. 5, pp. 1513-1527, Oct. 2011.
+\bibitem{MLChang2012}P. Chang, S. Su, S. Hsu, W. Cho, and J. Jin, ``An ultra-low-power transformer-feedback P60 GHz low-noise amplifier in 90 nm CMOS?" \emph{IEEE Microw. Compon. Lett.}, vol. 22, no. 4, pp. 197-199, 2012.
+\bibitem{ISSCCHong2015}H. Hong, H. Kang, D. Jo, D. Lee, Y. You, Y. Lee, H. Park, and S. Ryu, ``26.7 A 2.6b/cycle-architecture-based 10b 1JGS/s 15.4mW 4-time-interleaved SAR ADC with a multistep hardware-retirement technique?" in \emph{Solid- State Circuits Conference - (ISSCC), 2015 IEEE International}, pp. 1-3, Feb 2015.
+\bibitem{OnlineMat2011}A. Maltsev et al., ``Channel Models for 60 GHz WLAN Systems," \emph{IEEE doc. 11-09-0334-08-00ad}. [Online]. Available: https://mentor.ieee.org/802.11/documents.
+\bibitem{Standard802.11ad}IEEE 802.11ad, ``IEEE 802.11ad standard-Enhancements for very high throughput in the 60 GHz Band." \emph{IEEE Computer Society}.
+\bibitem{CLMolisch2004}A. Molisch and X. Zhang, ``FFT-based hybrid antenna selection schemes for spatially correlated MIMO channels," \emph{IEEE Commun. Lett.}, vol. 8, no. 1, pp. 36-38, Jan. 2004.
+\bibitem{JSACWang2009}J. Wang, Z. Lan, and C. Pyo, ``Beam codebook based beamforming protocol for multi-Gbps millimeter-wave WPAN systems," \emph{IEEE J. Sel. Areas Commun.}, vol. 27, no. 8, pp. 1390-1399, Oct. 2009.
+
+\bibitem{TAPHaneda2013}K. Haneda, C. Gustafson, and S. Wyne, ``60 GHz spatial radio transmission: Multiplexing or Beamforming?" \emph{IEEE Trans. Antennas and Prop.}, vol. 61, no. 11, pp. 5735-5743, Nov. 2013
+\bibitem{TSPZhang2005}X. Zhang, A. F. Molisch, and S. Y. Kung, ``Variable-phase-shift-based RF baseband codesign for MIMO antenna selection," \emph{IEEE Trans. Signal Process.}, vol. 53, no. 11, pp. 4091-4103, Nov. 2005.
+\bibitem{TWCXiao2015}Z. Xiao, X. Xia, D. Jin, and N. Ge, ``Iterative eigenvalue decomposition and multipath-grouping Tx/Rx joint beamformings for millimeter-wave communications," \emph{IEEE Trans. Wireless Commun.}, vol. 14, no. 3, pp. 1595-1607, Mar. 2015.
+\bibitem{TWCAyach2014}O. Ayach, S. Rajagopal, S. Abu-Surra, Z. Pi, and R. Heath, Jr., ``Spatially sparse precoding in millimeter wave MIMO systems," \emph{IEEE Trans. Wireless Commun.}, vol. 13, no. 3, pp. 1499-1513, Mar. 2014.
+\bibitem{JSTSPAlk2014}A. Alkhateeb, O. E. Ayach, G. Leus, and R. W. Heath Jr., ``Channel estimation and hybrid precoding for millimeter wave cellular systems," \emph{IEEE J. Sel. Topics Signal Process.}, vol. 8, no. 5, pp. 831-846, Oct. 2014.
+\bibitem{CLLiang2014}L. Liang, W. Xu, and X. Dong, ``Low-complexity hybrid precoding in massive multiuser MIMO systems," \emph{IEEE Commun. Letter}, vol. 3, no. 6, pp. 653-656, Dec. 2014.
+\bibitem{TWCAlk2015}A. Alkhateeb, G. Leus, and R. Heath, Jr., ``Limited feedback hybrid precoding for multi-user millimeter wave systems," \emph{IEEE Trans. Wireless Commun.}, vol. 14, no. 11, pp. 6481-6494, Nov. 2015.
+\bibitem{TSPLee2015}Y. Lee, C. Wang, and Y. Huang, ``A hybrid RF/baseband precoding processor based on parallel-index-selection matrix-inversion-bypass simultaneous orthogonal matching pursuit for millimeter wave MIMO systems," \emph{IEEE Trans. Signal Process.}, vol. 63, no. 2, pp. 305-317, Jan 2015.
+\bibitem{TVTKim2015}M. Kim, and Y. Lee, ``MSE-Based hybrid RF/Baseband processing for millimeter-wave communication systems in MIMO interference channels," \emph{IEEE Trans. Veh. Tech.}, vol. 64, no. 6, pp. 2714-2720, Jun. 2015.
+\bibitem{TVTZhu2016}J. Zhu, Wei Xu, Ning Wang, ``Secure massive MIMO systems with limited RF chains," ," \emph{IEEE Trans. Veh. Tech.}, accepted, Oct. 2016.
+\bibitem{WCLI2013}Y. Li, M. Daneshmand, C. Wang, and W. Zhao, ``Energy Efficient Femtocell Networks: Challenges and Opportunities," \emph{IEEE Wireless Commun.}, vol. 20, issue. 6, pp. 99 - 105, Dec. 2013.
+\bibitem{TWCLI2015}Y. Li, C. Liao, Y. Wang, and C. Wang, ``Energy-efficient optimal relay selection in cooperative cellular networks based on double auction," \emph{IEEE Wireless Commun.}, vol. 14, no. 8,  pp. 4093-4104, Aug. 2015.
+\bibitem{TVTLi2015}Y. Li, X. Zhu, C. Liao, C. Wang, and B. Cao, ``Energy efficiency maximization by jointly optimizing the positions and serving range of relay stations in cellular networks," \emph{IEEE Trans. Veh. Technol.}, vol. 64, no. 6, pp. 2551-2560, Jun. 2015.
+\bibitem{TCOMHE2013}S. He, Y. Huang, S. Jin, and L. Yang, ``Coordinated beamforming for energy efficient transmission in multicell multiuser systems," \emph{IEEE Trans. Commun.}, vol. 61, no. 12, pp. 4961-4971, Dec. 2013.
+\bibitem{TSPHE2014}S. He, Y. Huang, L. Yang , and B. Ottersten, ``Coordinated multicell multiuser precoding for maximizing weighted sum energy efficiency," \emph{IEEE Trans. Sig. Proc.}, vol. 62, no. 3, pp. 741-751, Feb. 2014.
+\bibitem{TCOMAmdori2015}P. Amadori and C. Masouros, ``Low RF-complexity millimeter-wave beamspace-MIMO systems by beam selection," \emph{IEEE Trans. Commun.}, vol. 63, no. 6, pp. 2212-2222, Jun. 2015.
+\bibitem{JstorJagan1966}R. Jagannathan, ``On some properties of programming problems in parametric form pertaining to fractional programming," \emph{Management Science,} vol. 12, no. 7, pp. 609-615, Mar. 1966.
+\bibitem{JstorDink1967}W. Dinkelbach, ``On nonlinear fractional programming," \emph{Bulletin of the Australian Mathematical Society}, vol. 13, pp. 492-498, Mar. 1967.
+\bibitem{Bibby1974}J. Bibby, ``Axiomatisations of the average and a further generalisation of monotonic sequences," \emph{Glasgow Mathematical Journal}, vol. 15, pp. 63-65, 1974.
+\bibitem{BookFir2010}E. Firouzjaei, mm-Wave phase shifters and switches, Electrical Engineering and computer Sciences University of California at Berkeley, Technical Report No. UCB/EECS-2010-163, December 16, 2010, http://digitalassets.lib.berkeley.edu/techreports/ucb/text/EECS-2010-163.pdf.
+\bibitem{JSACGold2003}A. Goldsmith, S. Jafar, N. Jindal, and S. Vishwanath, ``Capacity limits of MIMO channels," \emph{IEEE J. Sel. Areas Commun.}, vol. 21, no. 5, pp. 684-702, 2003.
+
+\bibitem{BookTse2005}D. Tse, and P. Viswanath, Fundamentals of Wireless Communication, 1st edition. Cambridge University Press, 2005.
+\bibitem{TWCNg201209}D. Ng, E. Lo, and R. Schober, ``Energy-efficient resource allocation in OFDMA systems with large numbers of base station antennas," \emph{IEEE Trans. Wireless Commun.}, vol. 11, no. 9, pp. 3292-3304, Sep. 2012.
+\bibitem{BookClerkx2013}B. Clerckx and C. Oestges, MIMO Wireless Networks, 2nd ed. New York, NY, USA: Academic, 2013.
+
+\bibitem{TSPPal2003}D. Palomar, J. Cioffi, and M. Lagunas, ``Joint Tx-Rx beamforming design for multicarrier MIMO channels: A unified framework for convex optimization," \emph{IEEE Trans. Signal Process.}, vol. 51, no. 9, pp. 2381-2401, Sep. 2003.
+\bibitem{JSACPal2006}D. Palomar and M. Chiang, ``A tutorial on decomposition methods for network utility maximization," \emph{IEEE J. Sel. Areas Commun.}, vol. 24, no. 8, pp. 1439-1451, Aug. 2006.
+\bibitem{TWCMoh2012}S. Mohammed and E. Larsson, ``Single-user beamforming in large-scale MISO systems with per-antenna constant-envelope constraints: The doughnut channel," \emph{IEEE Trans. Wireless Commun.}, vol. 11, no. 11, pp. 3992-4005, Nov. 2012.
+\bibitem{CofKimar2011}N. Kumar and A. Sappal, ``Coordinate rotation digital computer algorithm: Design and architectures," (IJACSA) International Journal of Advanced Computer Science and Applications, vol. 2, no. 4, 2011.
+\bibitem{TWCShim2008}S. Shim, J. S. Kwak, R. W. Heath, Jr., and J. G. Andrews, ``Block diagonalization for multi-user MIMO with other-cell interference," \emph{IEEE Trans. Wireless Commun.}, vol. 7, no. 7, pp. 2671-2681, July 2008.
+\bibitem{TITPalomar2006}D. Palomar and S. Verdu, ``Gradient of mutual information in linear vector gaussian channels," \emph{IEEE Trans. Inform. Theory}, vol. 52, no. 1, pp. 141-154, Jan. 2006.
+\bibitem{TWCChri2008}S. Christensen, R. Argawal, E. Carvalho, and J. Cioffi, ``Weighted sum-rate maximization using weighted MMSE for MIMO-BC beamforming design," \emph{IEEE Trans. Wireless Commun.}, vol. 7, no. 12, pp. 1-7, Dec. 2008.
+\bibitem{CTWRangan2013}S. Rangan, T. Rappaport, E. Erki, Z. Latinovic, M. R. Akdeniz, and Y. Liu, ``Energy efficient methods for millimeter wave picocellular systems," in \emph{IEEE Communication Theory Workshop}, 2013.
+\bibitem{IJSSCYu2010}Y. Yu, P. Baltus, A. De Graauw, E. Van Der Heijden, C. Vaucher, and A. Van Roermund, ``A 60 GHz phase shifter integrated with LNA and PA in 65 nm CMOS for phased array systems," \emph{IEEE Journal of Solid-State Circuits}, vol. 45, no. 9, pp. 1697-1709, Sep. 2010.
+\bibitem{TMTTLi2013}W. Li, Y. Chiang, J. Tsai, H. Yang, J. Cheng, and T. Huang, ``60-GHz 5-bit phase shifter with integrated VGA phase-error compensation," \emph{IEEE Transactions on Microwave Theory and Techniques}, vol. 61, no. 3, pp. 1224-1235, Mar. 2013.
+
+
+
+\end{thebibliography}
+\end{small}
+
+
+\end{document}

@@ -1,0 +1,653 @@
+% Template for ICASSP-2017 paper; to be used with:
+%          spconf.sty  - ICASSP/ICIP LaTeX style file, and
+%          IEEEbib.bst - IEEE bibliography style file.
+% --------------------------------------------------------------------------
+\documentclass{article}
+
+\usepackage{spconf,amsmath,graphicx}
+
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+
+\usepackage{setspace}
+\usepackage{xspace}
+
+\usepackage{ stmaryrd }
+\usepackage{lineno}
+\usepackage{color}
+\usepackage{url}
+\usepackage{ stmaryrd }
+
+\usepackage{amssymb,color} % define this before the line numbering.
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{soul}
+% Definitions
+
+% function & scalar
+\newcommand{\vf}{v}
+\newcommand{\s}{\mathbf{s}}
+\newcommand{\w}{w}
+\newcommand{\m}{\omega}
+\newcommand{\Rr}{\mathds{R}}
+\newcommand{\Cr}{\mathds{C}}
+
+% vectors
+\newcommand\xx{{x}}
+\newcommand\yy{\mathbf{y}}
+\newcommand\muu{\boldsymbol{\mu}}
+\newcommand\nuu{\boldsymbol{\nu}}
+\newcommand\lmbda{\boldsymbol{\lambda}}
+\newcommand{\vv}{X}
+\newcommand{\dd}{{u}}
+\newcommand{\sv}{\mathbf{s}}
+\newcommand{\Opv}{\boldsymbol{\Phi}}
+\newcommand{\Omv}{\boldsymbol{\Pi}}
+\newcommand{\bphi}{\BBB_{\Phi}}
+\newcommand{\bpi}{\BBB_{\Pi}}
+\newcommand{\wv}{\mathbf{w}}
+\newcommand{\zz}{\boldsymbol{\zeta}}
+\newcommand{\zv}{Z}
+\newcommand{\tev}{{\theta}}
+%\newcommand{\teva}{{\theta}_{[\gamma,L]}}
+%\newcommand{\tevb}{{\theta}_{[L,\eta]}}
+\newcommand{\teva}{{\theta}_{a}}
+\newcommand{\tevb}{{\theta}_{b}}
+\newcommand{\mvpi}{\mathbf{m}_{\Pi}}
+\newcommand{\mv}{\mathbf{m}}
+\newcommand{\rr}{\mathbf{r}}
+\newcommand{\uu}{ U}
+%\newtheorem{proposition}[theoreme]{Propsition}
+
+% Random variables/vectors
+\newcommand{\Z}{\mathrm{Z}}
+\newcommand{\V}{\mathbf{w}}
+\newcommand{\B}{\mathrm{B}_{\Op}}
+\newcommand{\TE}{{\theta}}
+\newcommand{\M}{\mathcal{E}}
+
+% matrix
+
+%\newcommand{\Pm}{\mathbf{P}}
+\newcommand{\Covm}{\boldsymbol{\Gamma}}
+\newcommand{\D}{U}
+\newcommand{\DD}{ U}
+\newcommand{\R}{P}
+\newcommand{\RR}{\mathbf{P}}
+\newcommand{\Q}{Q}
+\newcommand{\QQ}{\mathbf{Q}}
+\newcommand{\G}{ {\hat P}^{\dagger}}
+\newcommand{\GG}{\mathbf{g}}
+\newcommand{\X}{\mathbf{X}}\newcommand{\x}{{X}}
+\newcommand{\Y}{\mathbf{Y}}\newcommand{\y}{Y}
+\newcommand{\XI}{{X}}
+\newcommand{\Zeta}{ C}
+\newcommand{\AAA}{\mathbf{X}} 
+\newcommand{\BBB}{\mathbf{Y}} 
+
+\newcommand{\HD}{\mathbf{H}_D}
+
+
+% Operators
+\newcommand{\Op}{\Phi}
+\newcommand{\Om}{\Pi}
+
+% calligrapaphic
+\newcommand{\Sc}{\mathcal{S}}
+\newcommand{\Tc}{\mathcal{T}}
+\newcommand{\Wc}{\mathcal{W}}
+\newcommand{\Scr}{\mathcal{S}_r}
+\newcommand{\Tcr}{\mathcal{T}_r}
+
+
+% miscellaneaous
+\newcommand{\eg}{\textit{e.g.}, }
+\newcommand{\ie}{\textit{i.e.}, }
+
+% Definitions
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}{Remark}
+\newtheorem{algo}{Algorithm}
+\newtheorem{example}{\it \bf Example}
+\def\suppCH#1{{\footnotesize \color{red}\barre{#1}}}
+\def\remCH#1{{\noindent\color{red}{{\footnotesize [CH: #1]}}}}
+\def\addCH#1{{\noindent\color{red}{#1}}}
+
+\def\suppPH#1{{\footnotesize \color{blue}\barre{#1}}}
+\def\remPH#1{{\noindent\color{blue}{{\footnotesize [PH: #1]}}}}
+\def\addPH#1{{\noindent\color{blue}{#1}}}
+
+% Example definitions.
+% --------------------
+\def\x{{\mathbf x}}
+\def\L{{\cal L}}
+
+% Title.
+% ------
+\title{Optimal Low-Rank Dynamic Mode Decomposition}
+
+%
+% Single address.
+% ---------------
+\name{Patrick H\'eas and C\'edric Herzet}
+\address{INRIA Centre Rennes - Bretagne Atlantique, Campus universitaire de Beaulieu, 35000 Rennes, France}
+%
+% For example:
+% ------------
+%\address{School\\
+%	Department\\
+%	Address}
+%
+% Two addresses (uncomment and modify for two-address case).
+% ----------------------------------------------------------
+%\twoauthors
+%  {A. Author-one, B. Author-two\sthanks{Thanks to XYZ agency for funding.}}
+%	{School A-B\\
+%	Department A-B\\
+%	Address A-B}
+%  {C. Author-three, D. Author-four\sthanks{The fourth author performed the work
+%	while at ...}}
+%	{School C-D\\
+%	Department C-D\\
+%	Address C-D}
+%
+\begin{document}
+%\ninept
+%
+\maketitle
+%
+\begin{abstract}
+Dynamic Mode Decomposition (DMD) has  emerged as a powerful tool for analyzing  the dynamics of non-linear systems from experimental datasets. Recently, several attempts have extended   DMD to the context of low-rank approximations. This extension is of particular interest for reduced-order modeling in various applicative domains, \eg for climate prediction, to study  molecular dynamics or micro-electromechanical devices.    This low-rank  extension takes the form of a non-convex optimization problem. 
+To the best of our knowledge, only  sub-optimal algorithms have been proposed in the literature to compute the solution of this problem. In this paper, we prove that there exists a closed-form optimal solution to this problem and design an effective algorithm to compute it based  on Singular Value Decomposition (SVD). A toy-example illustrates the gain in performance  of  the proposed algorithm compared to  state-of-the-art techniques.
+\end{abstract}
+%
+\begin{keywords}
+Low-Rank Approximations, Reduced-Order Models, Dynamical Mode Decomposition, SVD
+\end{keywords}
+%
+
+\section{Introduction}
+
+
+In many fields of Sciences, one is interested in studying the {spatio-temporal} evolution of a state variable characterized by  a  partial differential equation.  Numerical discretization in space and time leads to a high dimensional system of equations {of the form:} \vspace{-0.cm}
+\begin{align}\label{eq:model_init} 
+ \left\{\begin{aligned}
+& x_{t}= f_t(x_{t-1}) , \\%\mbox{\quad$\forall\, s\in\Sc,t\in\Tc$},
+&x_1={\theta},
+\end{aligned}\right. \vspace{-0.cm}%\\
+\end{align} 
+\noindent
+ {where} each element   of the sequence of state variables  $\{x_t\}_t$ belongs to $\Rr^n$,   $f_t:\Rr^n \to \Rr^n$ with the initial condition  $\theta \in \Rr^n$. % and $\Sc$ and $\Tc$ are some spatial and temporal resolution domain.
+ {Because \eqref{eq:model_init} may correspond to a very high-dimensional system in some applications, computing a trajectory $\{x_t\}_t$ given an initial condition ${\theta}$}  may  lead to a heavy computational load, which may prohibit the direct use of the original high-dimensional system.  
+ 
+The context of uncertainty quantification provides an appealing example. Assume we are interested in characterizing the distribution of  random trajectories generated by \eqref{eq:model_init} with respect to the distribution of the initial condition. A straightforward approach would be to sample the initial condition and run the high-dimensional system. However, in many applicative contexts, it is  impossible to generate enough trajectories  to make accurate approximations with Monte-Carlo techniques.
+
+ As a response to this computational bottleneck,  reduced-order models aim to approximate  the trajectories of the system for a range of regimes determined by a set of initial conditions \cite{2015arXiv150206797C}. 
+ A common approach is to assume that the trajectories of interest are well approximated in a sub-space of $\Rr^n$. In this spirit, many  tractable low-rank approximations of  high-dimensional systems have been proposed in the literature, the most familiar  being  proper orthogonal decomposition (POD)~\cite{9780511622700}, balanced truncation~\cite{Antoulas2005Overview}, Taylor expansions~\cite{ZAMM:ZAMM19830630105} or reduced-basis techniques~\cite{Quarteroni2011Certified}.  Other popular sub-space methods,  such as  linear inverse modeling (LIM)~\cite{penland1993prediction}, principal oscillating patterns (POP)~\cite{Hasselmann88}, or more recently, dynamic mode decomposition (DMD)~\cite{Schmid10,Chen12,Jovanovic12,williams2015data,Tu2014391}, are known as Koopman operator approximations.  
+ 
+In this paper, we  consider the setting where  system \eqref{eq:model_init} is a black-box. In other words, we assume that  we do not know the exact form of $f_t$ in \eqref{eq:model_init} and we only have access to a set of representative trajectories $\{x^i_t\}_{t,i}$, $i=1,...,N$, $t=1,...,T$ so-called \textit{snapshots}, obtained by running the high-dimensional system for $N$ different initial conditions.   
+Moreover, we focus on the low-rank DMD approximation problem studied  in \cite{Chen12,Jovanovic12}.  In a nutshell, these studies provide a procedure for determining  a matrix $ \hat A_k{\in\Rr^{n\times n}}$ of rank $k \ll n$, which substitutes {for} function $f_t$ in \eqref{eq:model_init} {as}
+\begin{align}\label{eq:model_koopman_approx} 
+ \left\{\begin{aligned}
+& \tilde x_{t}=  \hat A_k \tilde  x_{t-1} , \\%\mbox{\quad$\forall\, s\in\Sc,t\in\Tc$},
+&\tilde x_1={\theta},
+\end{aligned}\right. \vspace{-0.cm}%\\
+\end{align} 
+and generates the approximations $\tilde x_{t}\in \Rr^n$ with a low computational effort.  Alternatively, given  $\hat A_k$, and its  $k$ non-zero eigenvalues $\lambda_i \in \Cr,\, i=1 \cdots k$  and associated eigenvectors $\phi_i \in \Cr^n,\, i=1 \cdots k$,  trajectories of  \eqref{eq:model_koopman_approx} can be computed by using the reduced-order model   %\remCH{Je ne suis pas sur de comprendre l'equation ci-dessous. N'est-elle pas uniquement valable si $\hat A_k$ est symetrique?}
+\begin{align}
+\tilde x_{t}=\sum_{i=1}^k \nu_{i,t} \phi_i,\label{eq:koopman1}\quad \nu_{i,t} =  \lambda_i^{t-1} \phi_i^*\theta,
+\end{align} 
+as long as matrix $\hat A_k$ is symmetric. We will assume it is always the case for simplification issues.
+In what follows, we will  refer to the parameters  $\phi_i$ and $\nu_{i,t}\in \Cr$  as  the  \textit{$i$-th low-rank DMD mode and amplitude} at time $t$. 
+
+Matrix $\hat A_k$ targets the solution of the following non-convex optimization problem, which we will refer to as the {\it low-rank DMD approximation problem}
+\begin{align}\label{eq:prob} 
+A_k^\star \in &\argmin_{A:\textrm{rank}(A)\le k}  \sum_{t,i} \| x^i_{t} - A   x^i_{t-1}\|^2_2, %\mbox{\quad$\forall\, s\in\Sc,t\in\Tc$},
+\end{align} 
+where $\|\cdot\|_2$ refers to the $\ell_2$ norm.  
+%Although their %projected DMD approach 
+In order to compute {a} solution $A_k^\star$, the authors in \cite{Chen12,Jovanovic12} propose to rely on the  assumption  of linear dependence of recent snapshots on previous ones. This assumption may  not be reasonable, especially  in the case of non-linear systems.  
+
+
+
+Beyond the reduced modeling context discussed above,   there has been a resurgence of interest for  low-rank solutions of linear matrix equations \cite{recht2010guaranteed}.  This  class of  problems is very large and includes in particular  problem \eqref{eq:prob}. Problems in this class  are generally nonconvex and do not  admit explicit solutions.  Howewer,  important results have arisen at the theoretical  and  algorithmic level, enabling the characterization of the solution for this class of problems by convex relaxation \cite{fazel2002matrix}. Applications concern scenarios such as  low-rank matrix completion, image compression or  minimum order linear system realization, see  \cite{recht2010guaranteed}.  Nevertheless, there exists  certain instances with a very special structure, which admit closed-form solutions \cite{parrilo2000cone,mesbahi1997rank}.  This occurs typically when the solution can be deduced from the  well-known Eckart-Young theorem \cite{eckart1936approximation}. 
+ 
+% \remCH{L'etat de l'art n'est pas satisfaisant. As-tu essaye de faire un lien avec le dernier papier que je t'ai envoye?}
+
+The contribution of this paper is to show that the special structure of problem \eqref{eq:prob} enables the characterization of  an exact closed-form solution  and  an easily implementable solver based on singular value decomposition (SVD). In the case  $k \ge N(T-1)$, the proposed algorithm  computes the solution of \cite{Tu2014391}. %\remCH{Tu ne parles jamais de \cite{Tu2014391} avant, c'est bizarre.}\remCH{Avantage et inconvenient de la methode proposee par rapport a \cite{Tu2014391}?}.  
+More interestingly, for $k < N(T-1)$, \ie in the constrained case, our approach enables to solve exactly the low-rank DMD approximation problem  without 
+ 1) any  assumption of linear dependence,
+ 2) the use of an iterative solver, on the contrary to the approaches proposed in \cite{Chen12,Jovanovic12,fazel2002matrix}. %\remCH{Mise des refs dans le bon ordre}
+
+The paper is organized as follows. In section \ref{sec:stateArt}, we provide a brief review of state-of-the-art techniques to compute low-rank DMD of experimental data. Section \ref{sec:contrib}  details our analytical solution and the algorithm solving \eqref{eq:prob}.  Given this optimal solution, it then presents the  reduced-order model solving  \eqref{eq:model_koopman_approx}. Finally,  a numerical evaluation of the method is presented in {Section}  \ref{sec:numEval} and  concluding remarks are {given} in a last section.
+ 
+ 
+
+\section{State-Of-The-Art Overview}\label{sec:stateArt}
+
+In what follows,  we assume that we have at our disposal  $N$ trajectories of $T$ snapshots.    We will  need in the following some matrix notations. The symbol $\|\cdot\|_F$ and the upper script $\cdot^*$ will respectively refer to the Frobenius norm and the transpose operator. $I_k$ will denote the $k$-dimensional identity matrix. %\remCH{Introduire la definition de la transpose? Dans la suite, tu fais implicitement l'hypothèse que $m\leq n$; il faudrait le dire a ce stade.}
+ Let consecutive elements of the $i$-th snapshot trajectory between time $t_1$ and $t_2$  be  gathered in a matrix   $\XI_{t_1:t_2}^i = (x^i_{t_1},\cdots,x^i_{t_2}),$ and let  two large matrices  $ \AAA, \BBB \in \Rr^{n \times  m} $ with $m=(T-1)N$ be defined as 
+%let  $ C = \BBB\AAA^* \quad \textrm{and}\quad  \bar C= (\AAA\AAA^*)^{\dagger}\AAA\BBB^*,$  with 
+  \begin{align}\label{eq:matrixAB}
+ \AAA = (\XI^1_{1:T-1}, ..., \XI^N_{1:T-1}), \quad 
+ \BBB= ( \XI^1_{2:T}, ...,  \XI^N_{2:T}) .
+ \end{align}
+ Without loss of generality, this work will assume that $m\leq n$ and that $\textrm{rank}(\AAA)=\textrm{rank}(\BBB)=m$.  
+ We introduce the SVD decomposition of a matrix $M\in \Rr^{p \times q }$ with $p\ge q$: $M=W_M\Sigma_M V_M^*$ with $W_M\in \Rr^{p \times q }$, $V_M\in \Rr^{ q \times  q}$ and $\Sigma_M\in \Rr^{q  \times q }$ so that $W_M^*W_M=V_M^*V_M=I_q$ and $\Sigma_M$ is diagonal. The  Moore-Penrose pseudo-inverse of a matrix  $M$  will be defined as 
+ $M^\dagger=V_M\Sigma_M^{-1} W_M^*$.
+% \remCH{Il faudrait que tu definisses la pseudo inverse a partir de la SVD. Tu l'utilises beaucoup dans la suite sans jamais le mentionner explicitement.}
+ 
+With these notations, problem \eqref{eq:prob} can be rewritten as %\remCH{Il manque $\cdot^2$ pour etre equivalent a \eqref{eq:prob}}
+		\begin{align}\label{eq:prob1} 
+		A_k^\star \in &\argmin_{A:\textrm{rank}(A)\le k} \|\BBB -A \AAA \|_F^2.
+		\end{align} 
+		%where  $ \BBB -A \AAA \in \Rr^{n \times m}$ represents a residual.
+
+In what follows, we begin by presenting two state-of-the-art methods which enable to compute an approximation of the solution of problem  \eqref{eq:prob1}.
+%\remCH{Dire qu'on va presenter deux methodes de la litterature qui permettent de calculer une approximation de la solution de \eqref{eq:prob1}.}
+ 
+ \subsection{Projected DMD and Low-Rank Formulation}
+As detailed herafter, the original DMD approach  first proposed in \cite{Schmid10}, so-called \textit{projected} DMD in \cite{Tu2014391}, assumes that columns of $A\AAA$ are in the span of $\AAA $. The assumption is written by the authors in  \cite{Schmid10,Jovanovic12} as the existence of $A^c\in \Rr^{ m \times m}$, the so-called  \textit{companion matrix} of $A$ parametrized by $m$ coefficients, such that%$\BBB = A\AAA =\AAA A^c$,  %\remCH{Phrase non claire; il me semble que le "for $ i=1, \cdots, N$" n'est pas placé au bon endroit.}. 
+%\remCH{L'expression suivante n'est pas une traduction de ton assertion precedente (qui s'ecrit $\BBB = \AAA A^c$). Si tu rajoutes l'hypothese \textbf{additionnelle} que le modele (1) est lineaire alors: $A \AAA = \AAA A^c$ (mais toujours pas (7)...)} 
+ %with $W\in \Rr^{n \times m }$, $V\in \Rr^{ m \times  m}$ and $\Sigma\in \Rr^{m  \times m }$ so that $W^*W=I_m$, $V^*V=I_m$ and $\Sigma$ is diagonal.  
+%By \addCH{subtracting} non-linearities   in  \eqref{eq:model_init}, which are  gathered in a matrix $R\in \Rr^{n \times m} $,   linear dynamics may be (artificially)  isolated \remCH{Je ne trouve pas ce passage super clair.}
+%More generally, we can always write the equality 
+\begin{align}
+%\BBB - R= 
+A \AAA=\AAA  A^c.\label{eq:companion}
+  \end{align} 
+%In the above equality,  the authors  of \cite{Schmid10,Jovanovic12} introduce $A^c\in \Rr^{ m \times m}$, the so-called  \textit{companion matrix} of $A$ parametrized by $m$ coefficients,  and
+ %with $A^c\in \Rr^{ m \times m}$, the so-called  \textit{companion matrix} of $A$ parametrized by $m$ coefficients.
+  We remark that this assumption is in particular valid when the $i$-th snapshot $x^i_T$ can be expressed as a linear combination of the columns of $\XI_{1:T-1}^i $ and when $f_t$ is linear. 
+% with  matrix $R\in \Rr^{n \times m} $ whose columns are orthogonal to those of $\AAA$.  Under the relaxed assumption that columns of $A\AAA$ are in the span of $\AAA $,  there exist a  matrix $A^c$ such that  $R$ vanishes and $A \AAA=\AAA  A^c$.
+  Using the  SVD decomposition $\AAA=W_\AAA\Sigma_\AAA V_\AAA^*$ and noticing $\AAA$ is full rank, we obtain  from \eqref{eq:companion}  a projected representation of $A$ in the basis spanned by the columns of $W_\AAA$,  %\remCH{Les deux equations qui suivent ne m'ont pas l'air correctes}
+\begin{align}\label{eq:DMDassumption}
+ W_\AAA^*AW_\AAA=\tilde A^c,
+\end{align}
+where $ \tilde A^c=\Sigma_\AAA V_\AAA^*A^cV_\AAA\Sigma_\AAA^{-1}\in \Rr^{ m \times  m}.$ %\remCH{Ce dernier passage n'est valide qu'a condition que $\Sigma_\AAA$ soit inversible, donc que $rank(X)=m$. A mentionner!}
+Therefore, the low-rank  formulation in \cite{Jovanovic12} proposes to approach the solution of \eqref{eq:prob1} by determining the $m$ coefficients of matrix $A^c$ which minimize  the Frobenius norm of   the residual $ \BBB -A \AAA $. %, \ie
+%\begin{align}\label{eq:DMDoriginal}
+%\argmin_{A^c: \textrm{rank}(A^c)\le k} \|\BBB -\AAA A^c\|_F,
+%\end{align}
+%which
+This yields after some algebraic manipulations to solve the problem %\remCH{Il faut rajouter un carre}
+\begin{align}\label{eq:DMDSVD}
+\argmin_{ \tilde A^c: \textrm{rank}(\tilde A^c\Sigma_\AAA)\le k} \|W_\AAA^*\BBB V_\AAA - \tilde A^c \Sigma_\AAA\|^2_F.
+\end{align}
+ The Eckart-Young theorem \cite{eckart1936approximation} then provides the optimal  solution  to this problem based  on a  rank-$k$  SVD approximation of matrix $B=W_\AAA^*\BBB V_\AAA$ given by  $W_B\Lambda_BV_B^*$ where $\Lambda_B$ is a diagonal matrix containing only the $k$-largest singular values of $\Sigma_B$ and with zero entries {otherwise}. %  with $U\in \Rr^{m \times k }$, $T\in \Rr^{ m \times  k}$ and $\Lambda\in \Rr^{k  \times k }$ so that $U^*U=I_k$, $T^*T=I_k$ and $\Lambda$ is diagonal.
+  Exploiting the  low-dimensional representation \eqref{eq:DMDassumption}, a reduced-order model for trajectories can then be obtained  by inserting in \eqref{eq:model_koopman_approx} the low-rank approximation  %by substituting  the solution of \eqref{eq:DMDSVD} in  relation \eqref{eq:DMDassumption}
+ \begin{align}\label{eq:projDMD}
+ \hat A_k=W_\AAA W_B\Lambda_BV_B^*\Sigma_\AAA^{-1}W_\AAA^*.
+ \end{align}
+ %\remCH{Confusing: tu utilises la même notation pour la solution de \eqref{eq:prob1} et son approximation ci-dessus.}
+   As an alternative, the authors propose a reduced-order model for trajectories relying on the so-called DMD modes and their amplitudes. These modes are related to the eigenvectors of the solution of \eqref{eq:DMDSVD}.  The amplitudes are  given by solving a convex optimization problem with an iterative gradient-based method, see details in \cite{Jovanovic12}.  
+ 
+\subsection{Non-projected DMD}
+If we remove the low-rank constraint, %, \ie  $k \ge m$,\remCH{Dire plutot, "quand on enleve la contrainte de rang faible". C'est plus explicite que $k\geq m$}
+  \eqref{eq:prob1} becomes a least-squares  problem  
+whose solution is
+\begin{align}\label{eq:exactDMD}
+\hat A_m=\BBB\AAA^{\dagger}=\BBB V_\AAA\Sigma_\AAA^{-1}W_\AAA^*.
+\end{align}
+ Based on the approximation $\hat A_m$, DMD modes and amplitudes serve to  design a   model to reconstruct  trajectories of \eqref{eq:model_koopman_approx}.
+ We note that the DMD modes  are simply given by the eigendecomposition of $\hat A_m$, which can be  {efficiently} %effectively 
+ {computed} using SVD, %assuming the matrix is diagonalisable 
+  as proposed in \cite{Tu2014391}. The {associated} DMD amplitudes can then  easily be derived.  
+
+ It is important to remark that  truncating  to a rank-$k$ the solution of the above  unconstrained minimization problem  will not necessarily yield the solution of \eqref{eq:prob1}. This approach   will generally be  sub-optimal. %By construction, solving 
+%directly the
+%constrained optimization problem \eqref{eq:prob1} will yield to more accurate approximations. 
+However surprisingly, the solution to problem \eqref{eq:prob1}  remain to our knowledge  overlooked in the literature, and no algorithms enabling  non-projected low-rank DMD approximations have yet been proposed.  
+
+
+\section{ The Proposed Approach}\label{sec:contrib}
+
+ 
+
+\subsection{Closed-form Solution to \eqref{eq:prob1}}
+% Inspired by the framework proposed by \textit{Hasselmann} in \cite{Hasselmann88}, we introduce the factorization $ A= \R  \Q^*$ in  \eqref{eq:prob1}, with parameters  $( \R, \Q)\in \Rr^{n \times k} \times \Rr^{n \times k}$ belonging to the admissible set
+% $$\{( \R, \Q)\in \Rr^{n \times k} \times \Rr^{n \times k} |  p_i^*p_i=1 \quad  \textrm{for} \quad  1\le i \le k\},$$
+%where the $p_i$'s denote the columns of   $\R$.
+  Let the columns of matrix  $\R \in \Rr^{n \times k}$  be the real orthonormal  eigenvectors  associated  to the  $k$ largest  eigenvalues  of    matrix  $\BBB\BBB^*.$    
+%not unique since  it is invariant with respect to an arbitrary linear transformation $\R'=\alpha \R$,$\Q'=\alpha^{-1} \Q$, for any non zero scalar $\alpha$. However, we may make the solution   unique by requiring that the columns of $\R=(p_1,...,p_k)$ are suitably normalized, \ie $p_i^*p_i=1$ for  $1\le i \le k$.   
+\begin{theorem}\label{prop22}
+A solution of \eqref{eq:prob1}  is $A_k^\star=\R  \R^*\BBB \AAA^{\dagger}.$
+% \begin{itemize}
+ %\item 
+
+ %\item   $\hat \Q=(\hat q_1 \cdots \hat q_k)$,  with $(\AAA\AAA^*)^{\dagger}\AAA\BBB^*p_j=\hat q_j$, for $j=1,...,k$.
+   %\end{itemize}  
+ \end{theorem}
+This theorem states that \eqref{eq:prob1} can be  simply solved by computing the orthogonal projection of the    unconstrained problem solution \eqref{eq:exactDMD}  onto the subspace spanned by the $k$ first eigenvectors of $\BBB \BBB^*$. A detailed proof is provided in {the technical report associated to this paper \cite{Heas16_DMD}.}  
+
+
+ 
+\subsection{{Efficient} Solver}
+
+The matrix $\BBB\BBB^*$ is  of size $n\times n$.   {Since $n$ is typically very large, t}his prohibits the direct computation of an eigenvalue decomposition. %Moreover, a direct calculation of the pseudo-inverse of the $n\times n$ matrix $\AAA\AAA^*$   is infeasible. 
+The following well-know remark is useful to overcome this difficulty.  \\
+
+\begin{remark}\label{rem:1}
+The   eigenvectors  associated to the $m~\le~n$  non-zero eigenvalues of  matrix  $\BBB\BBB^*\in \Rr^{n \times n}$ with   $ \BBB \in \Rr^{n \times m}$ can be obtained {from} %via
+  the eigenvectors $ V_\BBB=(v_1,...,v_{m}) \in \Rr^{m \times m}$
+%$\{V^N_i\}_{i=1}^{TN}$
+ and eigenvalues  %${\sigma}=(\sigma_1,...,\sigma_{m})$
+ %$\{ \Sigma^N_i\}_{i=1}^{TN}$  
+  of the smaller  matrix $\BBB^*\BBB \in \Rr^{m\times m}$. Indeed,
+  % forming the $TN \times TN$ unitary matrix $  V= ( V^N_1,...,V^N_{TN})$,  
+the SVD  of   a matrix  $ \BBB$ of rank  $m$ is %\remCH{Ca serait bien de faire apparaitre la notation $\Sigma$ que tu utilises par ailleurs}
+$\BBB=  W_\BBB\Sigma_\BBB    V_\BBB^*,$
+ %with $\Sigma_\BBB=\textrm{diag}({\sigma}^{\frac{1}{2}})$ and 
+ where the %$m$-first 
+  columns %$\{w_i\}_{i=1}^S$ 
+  of  matrix  $  W_\BBB \in \Rr^{n \times m} $ are the eigenvectors of $\BBB\BBB^*$. %\remCH{Rajouter "."} %and where $\boldsymbol{\Sigma}=\textrm{diag}(\{ \Sigma^N_i\}_{i=1}^{TN})$. 
+  Since $  V_\BBB$ is unitary, we obtain that the sought vectors are the {first $k$} %$k$ first 
+  columns of  $ W_\BBB$, \ie of $ \BBB  V_\BBB \,\Sigma_\BBB^{-1}.$
+  \end{remark}
+
+
+
+In the light of  this remark, it is straightforward to design Algorithm \ref{algo:1}, which will      compute efficiently  the solution  of \eqref{eq:prob1}  based on  SVDs.
+
+%\remCH{NB: la complexite de l'algo tu proposes scale en $\mathcal{O}(m^3)$ (idem que POD). Quelle est la complexite des autres methodes?} 
+\begin{algorithm}[t]
+\begin{algorithmic}[0]
+\State \textbf{input}: $N$-sample $\{\XI_{1:T}^i\}_{i=1}^N$%, $\delta$ \remCH{changer tolerence par "stopping criterion"}
+\State 1) Form matrix $\AAA$ and $\BBB$ as defined in \eqref{eq:matrixAB}. %, we obtain are able to compute $\mathbf{w}\in \Rr^{m \times m}$ satisfying 
+\State 2) Compute the SVD of $\AAA$. %\remCH{Comme tu n'as pas relie la SVD a la pseudo inverse, on ne comprend pas necessairement pourquoi il faut calculer la SVD de $\AAA$} %(at most) $\ell=m$ eigenvectors composing  the columns of $W_a\in \Rr^{n \times m}$ %\remCH{$W_a$ est une matrice, non? mettre sa dimension?} 
+% and non-zero eigenvalues $\sigma_a\in \Rr^m$ of matrix  $\AAA\AAA^*$ by making the identification  $Z=\AAA$ in Remark \ref{rem:1}. %\ie and  the SVD of matrix $\AAA$ %, we obtain are able to compute $\mathbf{w}\in \Rr^{m \times m}$ satisfying 
+%\begin{align*}
+%\AAA&= W_a \,\begin{pmatrix}\textrm{diag}({\sigma_a}^{\frac{1}{2}})\\ 0_{n-\ell}\end{pmatrix}    V_a ^*.
+%\end{align*}
+\State 3) Compute   the columns of $\R$ using Remark \ref{rem:1}.%\remCH{Il manque probablement la matrice des valeurs propres ici, non?}
+%\State 4) Compute the columns of  $\R$, \ie eigenvectors of matrix $\BBB\AAA^*(\AAA\AAA^*)^{\dagger}\AAA\BBB^*=\BBB W_a  \textrm{diag}({\sigma_a}^{-1})  W_a^*\BBB^*$,  by making the identification  $Z=\BBB W_a \textrm{diag}({\sigma_a}^{-\frac{1}{2}}) $ in Remark \ref{rem:1}. 
+%\State 4) Compute  the columns of  $\hat \Q$, where the $j$-th column for $j=1,...,k$ is given by  $$\hat q_j=  W_a  \,\textrm{diag}({\sigma_a}^{-1}) W_a^*\AAA\BBB^*p_j.$$
+%\remCH{Cette derniere operation peut sans doute encore etre simplifee en utilisant l'expression de la SVD de $\BBB$.}
+\State \textbf{output}: matrix $A_k^\star =\R\R^*\BBB V_\AAA\Sigma_\AAA^{-1}W_\AAA^*$%, $\delta$ \remCH{changer tolerence par "stopping criterion"}
+\end{algorithmic}
+\caption{Solver for \eqref{eq:prob1} \label{algo:1}}
+\end{algorithm}
+
+ 
+\begin{algorithm}[t]
+\begin{algorithmic}[0]
+\State \textbf{input}: matrices $(\R, \Q,\theta)$, with $\Q= (\BBB\AAA^{\dagger})^* \R$
+\State 1) Compute the SVD of matrix  $\Q$.%\ie and  the SVD of matrix $\AAA$ %, we obtain are able to compute $\mathbf{w}\in \Rr^{m \times m}$ satisfying 
+%\begin{align*}
+%\AAA&= W_a \,\begin{pmatrix}\textrm{diag}({\sigma_a}^{\frac{1}{2}})\\ 0_{n-\ell}\end{pmatrix}    V_a ^*.
+%\end{align*}
+%\State 2)  Define matrix   $\tilde  A_k=W_{\Q}^*\R V_{\Q}\Sigma_{\Q} \in \Rr^{m\times m}$.
+\State 2) Solve for $ i=1 \cdots k$ the eigen equation $ \tilde A_k w_i = \lambda_i w_i, $ where  $w_i \in \Cr^m$ and  $\lambda_i \in \Cr$ denote eigenvectors and eigenvalues of $\tilde  A_k=W_{\Q}^*\R V_{\Q}\Sigma_{\Q} \in \Rr^{m\times m}.$
+
+%\State 3) The $i$-th DMD mode corresponding to the eigenvalue $\lambda_i$ is then given by 
+%$$ \phi_i=W_{\Q} w_i.$$
+
+\State \textbf{output}: DMD modes $  \phi_i=W_{\Q} w_i$ and amplitudes $\nu_{i,t} =  \lambda_i^{t-1} \phi_i^*\theta$% for $i=1 \cdots k$%, $\delta$ \remCH{changer tolerence par "stopping criterion"}
+\end{algorithmic}
+\caption{Low-rank DMD modes and amplitudes \label{algo:2}}
+\end{algorithm}
+
+\subsection{Reduced-Order Models}\label{sec:ROM}
+We now discuss the resolution of  the reduced-order model \eqref{eq:model_koopman_approx} given the solution $A_k^\star$ of \eqref{eq:prob1}.
+Trajectories of \eqref{eq:model_koopman_approx} are fully determined  by a $k$-dimensional recursion %. % Indeed, we introduce the adjoint of the pseudo-inverse of  $\R$  given by  $\G=\R(\R^*\R)^{-1}\in \Rr^{n \times k}$. 
+%Furthermore, we choose $\BBB \in  \Rr^{k \times k}$ such that $\hat \Q= (\G)^* \BBB^*$, which implies that $\BBB=\hat \Q^*\R$.  Therefore for given matrices $\R$ and $\hat \Q$, the matrice $\BBB$ is uniquely determined.   
+%Using the latter matrices, the  $n$-dimensional  model \eqref{eq:POPrecHD}  is characterized  by the   k-dimensional  recursion 
+involving the projected variable  $z_t= \R^* \tilde x_t$:
+\begin{equation}\label{eq:GaussLinSystReduced}
+ \left\{\begin{aligned}
+& z_t=\R^*\BBB \AAA^{\dagger}\R  z_{t-1} ,\\
+&z_2=\R^*\BBB \AAA^{\dagger}\theta.  \\
+\end{aligned}\right.
+\end{equation}
+%\remCH{La premiere etape de la recursion n'est pas correcte a mon avis. Il faut plutot definir $z_2 = \R^*\BBB \AAA^{\dagger}\theta$.}
+Then, by multiplying both sides by matrix $\R$,   we  obtain the sought low-rank approximation $\tilde x_{t} = \R  z_t$.
+% We remark that this  straightforward resolution of  \eqref{eq:model_koopman_approx} contrasts with the iterative algorithm proposed by the authors in {\cite{Jovanovic12}}. % to compute  trajectories of  \eqref{eq:model_koopman_approx}. 
+%
+%\begin{algorithm}[t]
+%\begin{algorithmic}[0]
+%\State \textbf{inputs}: matrices $(\R,\hat \Q)$
+%\State 1) Compute the SVD of matrix  $\Q=W\Sigma V^*$,  with $W\in \Rr^{n \times m }$, $V\in \Rr^{ m \times  m}$ and $\Sigma\in \Rr^{m  \times m }$ so that $W^*W=I_{\addCH{m}}$, $V^*V$ and $\Sigma$ is diagonal.%\ie and  the SVD of matrix $\AAA$ %, we obtain are able to compute $\mathbf{w}\in \Rr^{m \times m}$ satisfying 
+%\begin{align*}
+%\AAA&= W_a \,\begin{pmatrix}\textrm{diag}({\sigma_a}^{\frac{1}{2}})\\ 0_{n-\ell}\end{pmatrix}    V_a ^*.
+%\end{align*}
+%\State 2)  Define matrix   $\tilde  A_k=W^*\R V\Sigma \in \Rr^{m\times m}$.
+%\State 3) Compute the $k$ \addCH{first} eigenvectors and eigenvalues of $\tilde  A_k$, writing 
+%$$ \tilde A_k w_i = \lambda_i w_i, \quad i=1,\cdots,k.$$
+%\State 4) The $i$-th DMD mode corresponding to the eigenvalue $\lambda_i$ is then given by 
+%$$ \phi_i=Ww_i.$$
+%
+%\State \textbf{outputs}: DMD modes $ \phi_i$ and eigenvalues $\lambda_i$ for $i=1,\cdots,k$%, $\delta$ \remCH{changer tolerence par "stopping criterion"}
+%\end{algorithmic}
+%\caption{DMD modes and amplitudes \label{algo:2}}
+%\end{algorithm}
+%
+%\remCH{Je ne comprends pas cette section...}
+% An \addCH{alternative} and more common approach is to compute  trajectories of  \eqref{eq:model_koopman_approx} based on low-rank non-projected DMD modes and amplitudes, see \eg \cite{Jovanovic12}. The  DMD modes are  defined as the \addCH{first $k$} %$k$ first 
+% eigenvectors of $\R\hat Q^*$. As detailed in Algorithm \ref{algo:2} and proved in Remark \ref{rem:2},   the eigendecomposition of $\hat \R\hat Q^*$ can be efficiently performed using Algorithm~\ref{algo:2}  based on  SVDs.   It is then easy to  obtain the following  low-rank  approximation of the $j$-th snapshot  $$\tilde x^j_{t}=\sum_{i} \nu_{i,t} \phi_i,\quad \nu_{i,t} = \lambda_i^{t-1} \phi_i^*\tilde x^j_{1},$$
+% where $\nu_{i,t}$ is the  amplitude related to the $i$-th DMD mode  at time $t$. It is interesting to remark that, on the contrary to state-of-the-art methods \cite{Jovanovic12},  the amplitudes are closed-form and no iterative optimization procedure is involved to obtain them. 
+%
+% \begin{remark}\label{rem:2}
+%Each pair $(\phi_i,\lambda_i)$ generated by Algorithm \ref{algo:2}  is one of the $k$ eigenvector/eigenvalue pair of $\hat A_k$.
+%Indeed, by definition we have $\hat A_k = \R V\Sigma W^*.$ Furthermore, $\tilde  A_k=W^*\R V\Sigma$ and  $\phi_i=\frac{1}{\lambda_i}\R V\Sigma w_i$. Therefore, we have  
+%$$\hat A_k \phi_i=%\frac{1}{\lambda_i}\R V\Sigma W^*\R V\Sigma w_i=
+%\R V\Sigma \frac{1}{\lambda_i} \tilde  A_k w_i = \R V\Sigma w_i=\lambda_i \phi_i.$$
+% \end{remark}
+
+Alternatively,  we can employ reduced-order model~\eqref{eq:koopman1}. The parameters of this model, \ie low-rank DMD modes and amplitudes, are efficiently computed without any minimization procedure, in contrast to what is proposed by the author in~{\cite{Jovanovic12}}. Indeed, we  rely on the following remark stating that  DMD modes and amplitudes can be obtained by means of SVDs using  Algorithm \ref{algo:2}. The remark is proved in  the  {technical report  \cite{Heas16_DMD}}.
+ \begin{remark}\label{rem:2}
+Each pair $(\phi_i,\lambda_i)$ generated by Algorithm \ref{algo:2}  is one of the $k$ eigenvector/eigenvalue pair of $A_k^\star$.
+\end{remark}
+% The computation of  low-rank DMD modes and amplitudes is based on SVD is .  % to compute   
+%In this work, the authors propose to build a reduced-order model relying on the low-rank projected {DMD modes} and {DMD amplitudes}. The computation of these two quantities  require to solve a convex minimization problem with standard iterative optimization procedures.
+%Indeed,  the $i$-th DMD mode $\phi_i\in \Cr^n$  is the eigenvector of $\hat \R\hat Q^*$ associated to the $i$-th largest  eigenvalue $\lambda_i \in \Cr$ . As detailed in Algorithm~\ref{algo:2} and proved in Remark~\ref{rem:2},   the eigendecomposition of $\hat \R\hat Q^*$ can be efficiently performed  using  SVDs.  \\
+
+\section{Numerical Evaluation}\label{sec:numEval}\vspace{-0.cm}
+\begin{figure}[t!]
+\centering\vspace{-3.95cm}
+\begin{tabular}{c}
+\includegraphics[width=0.9\columnwidth]{res2.pdf}\vspace{-5.2cm}\\
+\includegraphics[width=0.9\columnwidth]{res1.pdf}\vspace{-5.2cm}\\
+\includegraphics[width=0.9\columnwidth]{res3_NL.pdf}\vspace{-2.75cm}
+\end{tabular}
+\caption{\small Evaluation of error norms $\|\BBB-\hat A_k \AAA\|_F$   as a function of   rank~$k$.   Setting $i)$  {({top})} and $ii)$ (middle)  imply both a linear model but the former satisfies the snapshots linear dependence assumption. Setting $iii)$ {({bottom})} implements a non-linear model. We evaluate 3  algorithms:  {method $a)$} is the proposed optimal algorithm, {method $b)$} provides the rank-$k$ SVD approximation of the unconstrained solution given in \cite{Tu2014391} and {method $c)$} is the low-rank projected DMD method proposed in \cite{Jovanovic12}. See details in Section~\ref{sec:numEval}. \vspace{-0.3cm}\label{fig:1}}
+\end{figure}
+
+In what follows, we evaluate on a toy model the different  approaches for solving the low-rank DMD approximation problem. 
+We consider a high-dimensional space of $n=50$ dimensions, a low-dimensional subspace of $r=30$ dimensions and  $m=40$ snapshots. Let $G$ %\remCH{tu utilises deja la notation $A$ comme variable d'optimisation precedemment.} 
+be a matrix of rank $r$ generated randomly according to  $G=\sum_{i=1}^{r} \xi_i \xi_i^*$, %\remCH{pourquoi consideres tu uniquement des matrices definies positives? Ton systeme est-il stable (quel est le spectre des valeurs propres)?} 
+where entries of $\xi_i$'s are $n$ independent samples of the standard normal distribution.   Let  the initial condition $\theta$ be randomly chosen according to the same distribution.  The snapshots, gathered in matrices $\AAA$ and $\BBB$, are generated using  \eqref{eq:model_init} %from a random initial condition $\theta$ 
+for three  configurations of $f_t$:   \vspace{-0.2cm}
+\begin{itemize}
+\item[$i)$] $f_t(x_{t-1})=G x_{t-1}$, s.t. $\exists A^c$ satisfying $G \AAA=\AAA  A^c$,\vspace{-0.15cm}
+\item[$ii)$]  $f_t(x_{t-1})=G x_{t-1}$,\vspace{-0.15cm}
+\item[$iii)$]  $f_t(x_{t-1})=G x_{t-1}+G \textrm{diag}(x_{t-1})\textrm{diag}(x_{t-1})x_{t-1}$.\vspace{-0.15cm}
+\end{itemize}
+Setting $i)$  corresponds to a linear system satisfying the  assumption  \eqref{eq:companion}, as made in the projected DMD approaches \cite{Schmid10,Jovanovic12}. Setting $ii)$ and $iii)$, do not make this assumption and simulate respectively linear and non-linear dynamical systems.
+We assess three different methods for computing $\hat A_k$: \vspace{-0.1cm}
+\begin{itemize}
+\item[$a)$]  optimal rank-$k$ approximation  given by Algorithm \ref{algo:1},\vspace{-0.1cm}
+\item[$b)$] $k$th-order SVD approximation of  \eqref{eq:exactDMD}, \ie $k$-th order approximation of the rank-$m$ non-projected DMD solution  \cite{Tu2014391},\vspace{-0.1cm}
+\item[$c)$]  rank-$k$ approximation by \eqref{eq:projDMD}, corresponding to the projected DMD approach \cite{Jovanovic12} (or \cite{Schmid10} for $k\ge m$).\vspace{-0.1cm}
+\end{itemize}
+The performance is measured in terms of the error norm $\|\BBB-\hat A_k \AAA\|_F$ with respect to  the rank~$k$. Results for the three settings are displayed in Figure \ref{fig:1}. %\remCH{ca fait un peu bizarre que tu annonces 3 setups et que tu n'en montres que 2.}
+
+As a  first remark, we notice  that the solution provided by Algorithm \ref{algo:1} (method $a$) yields the best results,  in agreement with  {T}heorem~\ref{prop22}. 
+
+Second, in setting  $i)$, the experiments confirm  that when the linearity assumption is valid,  the low-rank projected DMD (method~$c$) achieves the same performance as the optimal solution (method~$a$). Moreover, truncating  the rank-$m$ DMD solution (method~$b$) induces as expected an  increase of the error norm. This deterioration is however moderate in our experiments. 
+
+Then, in  settings $ii)$ and $iii)$ we remark that the behavior of the error norms are  analogous  (up to an order of magnitude).  The {performance} of the projected approach (method~$c$) differs notably from the optimal solution. A significant deterioration is visible for $k>10$. This is the consequence of the non-validity of the assumption made in method~$c$. Nevertheless, we notice that method~$c$ accomplishes a slight gain in performance compared to method~$b$ up to a moderate rank ($k<5$).  
+Besides, we also notice that the error norm of method~$b$  in the case $k<30$ is not optimal. 
+ 
+Finally, as expected, all methods succeed  in properly  characterizing the low-dimensional subspace as soon as $k \ge r$.
+
+
+\section{Conclusion}
+Following recent attempts to characterize an optimal low-rank approximation based on DMD, this paper provides a closed-form solution  to this non-convex optimization problem. To the best of our knowledge,  state-of-the-art methods are all  sub-optimal. The paper further proposes effective algorithms based on SVD to solve this problem and run  reduced-order models. %, making our contribution significant, with  potentially an important impact in applicative domains.
+Our numerical experiments attest that the proposed algorithm is more accurate than state-of-the-art methods. In particular, we illustrate the fact that  simply truncating the full-rank DMD solution, or  exploiting too restrictive assumptions for the approximation subspace is insufficient.   
+ 
+\newpage 
+%\remCH{Il manque des majuscules dans les references a certains endroits.}
+
+
+\section*{Acknowledgements}
+This work was
+supported by the  ``Agence Nationale de la Recherche" through the GERONIMO project (ANR-13-JS03-0002).
+
+\appendix
+%
+%\section{Theorem's proof}
+%
+%
+%We provide hereafter a closed-form solution of  \eqref{eq:prob1} inspired by the partial demonstration in \cite{Hasselmann88}.
+%In what follows,  in order to alleviate notations,  we will %no longer manipulate realizations  $\{x^i_{t}\}_{i,t}$  of a random trajectory. We will 
+%use 
+%%instead 
+%the following notation for the  estimator of an expectation by an arithmetic average.
+%% for  approximations of expectations by an arithmetic average of the $N$   independent and identically realizations.
+% For any measurable function  $\varphi:\mathcal{E}\times \cdots \times \mathcal{E} \to \Rr$, we adopt the notation%,  approximations of expectations will be denoted by
+%$$ \mathbb{ \tilde E}  [\varphi( \x_{t_1:t_2})]= \frac{1}{N}\sum_{i=1}^N \varphi(\x^i_{t_1:t_2}),$$
+%where we have introduced  $\x_{t_1:t_2}$  representing a random trajectory (whose  realizations are  $\{\x^i_{t_1:t_2}\}_{i=1}^N$) constituted by the sequence of random variables $\{x_{t}\}_{t_1}^{t_2}$. 
+%% rather than  employ   a short-hand notation for expectations with respect to random trajectory $\x_{1:T}$ of probabilistic measure $\mu$: 
+%%$$\langle \mu ,\varphi ]  = \mathbb{E}_\mu [\varphi( \x_{1:T})], $$
+%  
+%We begin by showing that any local minimum of problem  \eqref{eq:prob1} for $k=1$, and a fortiori the global minimizer  denoted $(p_{j_1},\hat q_{j_1})$,  satisfies a coupled eigenvalue problem. 
+%From the optimality condition arising from problem \eqref{eq:prob1}, we obtain  that  $(p_{j_1},\hat q_{j_1})$ should satisfy 
+%\begin{equation*}
+% \left\{\begin{aligned}
+%&   \sum_{i=1}^{T-1} \mathbb{ \tilde E}  [ (x_i^*q_{j_1}) (x_{i+1} - p_{j_1}q_{j_1}^*x_{i})] =0,\\
+%& \sum_{i=1}^{T-1} \mathbb{ \tilde E}  [ x_i(p_{j_1}^* (x_{i+1} - p_{j_1}q_{j_1}^*x_{i}))] =0,
+%\end{aligned}\right.\\
+%\end{equation*}
+%where we have assumed integral derivability with respect  to $p_{j_1}$ and $q_{j_1}$ in order to interchange derivatives and expectations. The latter equalities may be rewritten as
+%\begin{equation*}
+% \left\{\begin{aligned}
+%& \mathbb{ \tilde E}  [\x_{2:T}\x_{1:T-1}^*]   q_{j_1}=  \mathbb{ \tilde E}  [\sum_{i=1}^{T-1}(q_{j_1}^* x_{i})^2]  p_{j_1},\\
+%&  \mathbb{ \tilde E}  [\x_{1:T-1}\x_{2:T}^*]   p_{j_1}= \mathbb{ \tilde E}  [\x_{1:T-1}\x_{1:T-1}^*]  (p_{j_1}^*p_{j_1})  q_{j_1},
+%\end{aligned}\right.\\
+%\end{equation*}
+%and by multiplying the second equation by $\mathbb{ \tilde E}  [\x_{1:T-1}\x_{1:T-1}^*] ^{\dagger}$ we obtain two coupled eigenvalue equations
+%\begin{equation}\label{eq:eigenEqs0}
+% \left\{\begin{aligned}
+%&   Cq_{j_1}=  \lambda_{j_1}' p_{j_1},\\
+%&  \bar Cp_{j_1}=   \lambda_{j_1}''  q_{j_1},
+%\end{aligned}\right.\\
+%\end{equation}
+%where 
+%\begin{align}
+%  C&=  \mathbb{ \tilde E}  [ \x_{2:T}\x_{1:T-1}^*]  ,\label{eq:defHasselmann1} \\
+% \bar C&=  \mathbb{ \tilde E}  [ \x_{1:T-1}\x_{1:T-1}^*]] ^{\dagger} \mathbb{ \tilde E}  [ \x_{1:T-1}\x_{2:T}^*] , \label{eq:defHasselmann2} \\
+% \lambda_{j_1}'& = \mathbb{ \tilde E}  [  \sum_{i=1}^{T-1}(q_{j_1}^* X_{i})^2]  ,\label{eq:defHasselmann3} \\
+% \lambda_{j_1}''& = p_{j_1}^*p_{j_1}.\label{eq:defHasselmann4}
+%\end{align}
+%Separation of $p_{j_1}$ and $q_{j_1}$ then yields the pair of eigenvalue equations
+%\begin{equation}\label{eq:coupledEigen0}
+% \left\{\begin{aligned}
+%&   C\bar Cp_{j_1}=  \lambda_{j_1}  p_{j_1},\\
+%&  \bar C Cq_{j_1}=   \lambda_{j_1}  q_{j_1},
+%\end{aligned}\right.\\
+%\end{equation}
+%with the same eigenvalues 
+%\begin{align}\label{eq:defEigenVal}
+%\lambda_{j_1}= \lambda_{j_1}' \lambda_{j_1}'',
+%\end{align}
+% for  $p_{j_1}$ and $q_{j_1}$. We remark in \eqref{eq:coupledEigen0}  that   $  C\bar C$  is a symmetrical, semi-positive definite matrix and  that   $\bar C C$ consists of quadratic products of symmetrical, semi-positive definite matrices. It follows that these matrices are diagonalisable with real and positive  eigenvalues, see \eg \cite[Corrollary 7.6.2]{Horn12}. These eigenvalues are associated to real eigenvectors. Note that  eigenvectors  of $ C\bar C$ are orthogonal, while this is not necessarily the case for the eigenvectors of  $\bar C C$.  
+% 
+%We continue by showing  that the columns  $\{(p_{j_i},\hat q_{j_i});1 \le j_i \le k\}$  of a local minimizer $(\hat \R, \hat \Q)$ of problem  \eqref{eq:prob1}  with an arbitrary $k$  should necessarily satisfy the same  eigenvector equations, \ie the coupled system 
+%\begin{equation}\label{eq:eigenEqs}
+% \left\{\begin{aligned}
+%&   Cq_{j_i}=  \lambda_{j_i}' p_{j_i},\\
+%&  \bar Cp_{j_i}=   \lambda_{j_i}''  q_{j_i},
+%\end{aligned}\right.\\
+%\end{equation}
+%and the decoupled system
+%\begin{equation}\label{eq:coupledEigen}
+% \left\{\begin{aligned}
+%&   C\bar Cp_{j_i}=  \lambda_{j_1}  p_{j_i},\\
+%&  \bar C Cq_{j_i}=   \lambda_{j_1}  q_{j_i}.
+%\end{aligned}\right.
+%\end{equation}
+%  We will 
+%proceed by induction to show that  $(p_{j_i},\hat q_{j_i})$ satisfy \eqref{eq:coupledEigen}. Then in order to satisfy \eqref{eq:eigenEqs}, it will be sufficient to normalize accordingly the $\hat q_{j_i}$'s. 
+%%first show by  induction that the  minimization with respect to $( p_{j_{\ell+1}}, q_{j_{\ell+1}})$ is a couple $(p_{j_{\ell+1}},\hat q_{j_{\ell+1}})$ satisfying the eigenvectors equations \eqref{eq:coupledEigen0} with  lower or equal eigenvalues. Since  $(p_{j_{\ell+1}},\hat q_{j_{\ell+1}})$ is independent of  other conditional minimizers  $(p_{j_{i}},\hat q_{j_{i}})$ for $i \neq \ell+1$, we can  deduce that  the joint minimizer satisfies the same conditions.
+%The induction assumption is that the columns of  a local minimizer of problem  \eqref{eq:prob1}  with  $k=\ell$  denoted  $\hat \R_{j_1:j_\ell} $ and $\hat \Q_{j_1:j_\ell} $  satisfy \eqref{eq:coupledEigen}. % with  lower or equal eigenvalues. 
+%According to the first part of the proof, this hypothesis stands for $k=1$. We then need to show that a local minimizer $(p_{j_{\ell+1}},\hat q_{j_{\ell+1}})$ of the problem with  $k=\ell+1$ where the $\ell$ first columns of  $(\hat \R, \hat \Q)$, \ie $(\hat \R_{j_1:j_\ell},\hat \Q_{j_1:j_\ell}) $  satisfy the induction assumption,  satisfies also  \eqref{eq:coupledEigen}. % with  lower or equal eigenvalues. 
+%Expanding the cost to be minimized with respect to $( p_{j_{\ell+1}}, q_{j_{\ell+1}})$,  we have
+%\begin{align*}
+% &\mathbb{ \tilde E}  [ \| \x_{2:T} - \hat \R_{j_1:j_\ell}\hat \Q_{j_1:j_\ell}^*\x_{1:T-1}- p_{j_{\ell+1}} q_{j_{\ell+1}}^*\x_{1:T-1}\|^2_F] = \mathbb{ \tilde E}  [ \| \x_{2:T} - \hat \R_{j_1:j_\ell}\hat \Q_{j_1:j_\ell}^*\x_{1:T-1}\|^2_F]  \\
+% &\quad\quad\quad  \sum_{t=2}^{T} p_{j_{\ell+1}}^*p_{j_{\ell+1}} \mathbb{ \tilde E}  [ (  q_{j_{\ell+1}}^*x_{t-1})^2 ] -2 p_{j_{\ell+1}}^*\mathbb{ \tilde E}  [ (x_{t} - \hat \R_{j_1:j_\ell}\hat \Q_{j_1:j_\ell}^*x_{t-1})x_{t-1}^* ]  q_{j_{\ell+1}}.
+%\end{align*}
+%From the optimality condition, we obtain after some simple calculation that  $(p_{j_{\ell+1}},\hat q_{j_{\ell+1}})$ should satisfy 
+%\begin{equation*}
+% \left\{\begin{aligned}
+%&  \lambda_{j_{\ell+1}}'p_{j_{\ell+1}}- \sum_{t=2}^{T}  (\mathbb{ \tilde E}  [ x_{t}x_{t-1}^*] - \hat \R_{j_1:j_{\ell}}\hat \Q_{j_1:j_{\ell}}^*\mathbb{ \tilde E}  [ x_{t-1}x_{t-1}^*] )q_{j_{\ell+1}}=0,\\
+%&   \sum_{t=2}^{T} \lambda_{j_{\ell+1}}''  \mathbb{ \tilde E}  [ x_{t-1}x_{t-1}^*]  q_{j_{\ell+1}}- (\mathbb{ \tilde E}  [ x_{t-1}x_{t}^*] - \mathbb{ \tilde E}  [ x_{t-1}x_{t-1}^*]  \hat \Q_{j_1:j_{\ell}} \hat \R_{j_1:j_{\ell}}^*)p_{j_{\ell+1}}=0 ,
+%\end{aligned}\right.\\
+%\end{equation*}
+%where we have used analogous  notations to the one used in \eqref{eq:defHasselmann3} - \eqref{eq:defHasselmann4}. By multiplying the second equation by $\mathbb{ \tilde E}  [\x_{1:T-1}\x_{1:T-1}^*] ^{\dagger}$ we obtain two coupled eigenvalue equations
+%\begin{equation}\label{eq:eigenEqs_ext}
+% \left\{\begin{aligned}
+%&   C'q_{j_{\ell+1}}=  \lambda_{j_{\ell+1}}' p_{j_{\ell+1}},\\
+%&  \bar C'p_{j_{\ell+1}}=   \lambda_{j_{\ell+1}}''  q_{j_{\ell+1}},
+%\end{aligned}\right.\\
+%\end{equation}
+%where  we have introduced the matrices
+%\begin{align}
+%  C'&  = \mathbb{ \tilde E}  [ \x_{2:T}\x_{1:T-1}^*] - \hat \R_{j_1:j_{\ell}}\hat \Q_{j_1:j_{\ell}}^*\mathbb{ \tilde E}  [ \x_{1:T-1}\x_{1:T-1}^*]  ,\label{eq:defHasselmann1_ext} \\
+% \bar C'&=  \mathbb{ \tilde E}  [ \x_{1:T-1}\x_{1:T-1}^*] ^{\dagger} \mathbb{ \tilde E}  [ \x_{1:T-1}\x_{2:T}^*] -  \hat \Q_{j_1:j_{\ell}} \hat \R_{j_1:j_{\ell}}^*, \label{eq:defHasselmann2_ext} 
+%\end{align}
+%Separation of $p_{j_{\ell+1}}$ and $q_{j_{\ell+1}}$ then yields the pair of eigenvalue equations
+%\begin{equation}\label{eq:coupledEigen_ext}
+% \left\{\begin{aligned}
+%&   C'\bar C'p_{j_{\ell+1}}=  \lambda_{j_{\ell+1}}  p_{j_{\ell+1}},\\
+%&  \bar C' C'q_{j_{\ell+1}}=   \lambda_{j_{\ell+1}}  q_{j_{\ell+1}},
+%\end{aligned}\right.\\
+%\end{equation}
+%where we have used a notation analogous to  \eqref{eq:defEigenVal}. By simple linear algebraic manipulation and using \eqref{eq:eigenEqs}, we obtain
+%\begin{equation}\label{eq:matrixRelations}
+% \left\{\begin{aligned}
+% C'\bar C'=&(\mathbf{I}_n- \hat \R_{j_1:j_{\ell}} \textrm{diag}({1/\lambda_{j_{1:\ell}}'' })\hat \R_{j_1:j_{\ell}}^*) C\bar C(\mathbf{I}_n- \hat \R_{j_1:j_{\ell}} \textrm{diag}({1/ \lambda_{j_{1:\ell}}'' })\hat \R_{j_1:j_{\ell}}^*),\\
+%\bar C' C'=&\bar C C - \hat \Q_{j_{1}:j_{\ell}}\textrm{diag}({1/ \lambda_{j_{1:\ell}} })\hat \Q_{j_{1}:j_{\ell}}^* C^* C.
+%\end{aligned}\right.
+%\end{equation}
+%The first equations of \eqref{eq:matrixRelations} shows that  the column of $ C'\bar C'$ are the projection of the columns of $ C\bar C$ onto  the space spanned by the $\ell$ first eigenvectors, \ie the columns of matrix  $\hat \R_{j_1:j_{\ell}}$.  Therefore, the eigenvectors of $ C'\bar C'$ are the  eigenvectors of $ C\bar C$ associated to the $n-\ell$ lowest eigenvalues. This includes in particular  $p_{j_{\ell+1}}$. Besides, by multiplying the second equation of \eqref{eq:matrixRelations}  by any eigenvectors $\hat q_{j_i}$ of $\bar C C$  with $1\le i \le n$,  using  \eqref{eq:eigenEqs} and \eqref{eq:coupledEigen} we obtain 
+%$$\bar C' C'\hat q_{j_i}=
+%\left\{\begin{aligned}
+%(1- 1 / \lambda''_{j_i}) \lambda_{j_i}\hat q_{j_i}, \quad \textrm{for}\quad 1 \le i \le \ell \\
+%\lambda_{j_i}\hat q_{j_i}, \quad \textrm{for}\quad  \ell < i \le n
+%\end{aligned}\right.
+%$$
+%%=(1- 1 / \lambda''_{j_i})\bar C Cq_{j_i}=(1- 1 / \lambda''_{j_i}) \lambda_{j_i}q_{j_i},$$
+%which shows that $\bar C' C'$ and $\bar C C$ possess the same eigenvectors. Therefore, $(p_{j_{\ell+1}},\hat q_{j_{\ell+1}})$ satisfies   \eqref{eq:coupledEigen}, which concludes the proof by induction.
+%  Moreover, note that  in the case $ \lambda''_{j_i} = 1$, the $\ell$ eigenvectors $\{\hat q_{j_i};  1 \le i \le \ell \}$   already   extracted from  matrix $\bar C C$ are associated to  zero  eigenvalues in matrix $\bar C' C'$.  
+%%that the second equation of  \eqref{eq:matrixRelations} shows that 
+%%$\bar C' C'$ is a perturbed version of $\bar C C$, where only  the projection of its column onto the space spanned by the columns of $\hat \Q_{j_{1}:j_{\ell}}$ is disturbed.  Thus, the eigenvectors of $\bar C' C'$  include the set of  eigenvectors of $\bar C C$ associated to the $n-\ell$ lowest eigenvalues.  Since $\hat q_{j_{\ell+1}}$ is orthogonal to the columns of $\hat \Q_{j_{1}:j_{\ell}}$, $\hat q_{j_{\ell+1}}$ must belong to this set. 
+%
+%We finally  show  that the global minimum, \ie a closed-form solution of  \eqref{eq:prob1}, is reached for matrices  $\hat \R=(p_1,..., p_k)$ and $\hat \Q =(\hat q_1,...,\hat q_k)$, whose columns are the eigenvectors associated to the $k$ largest eigenvalues $\{\lambda_j\}_{j=1}^k$ with $\lambda_j\ge \lambda_{j+1}$. Indeed,  by simple calculation and using \eqref{eq:defHasselmann4} we obtain 
+%\begin{align*}
+%& \mathbb{ \tilde E}  [ \| \x_{2:T}- (p_{j_1},...,p_{j_k})  (\hat q_{j_1},...,\hat q_{j_k})^* \x_{1:T-1}\|^2_F] = \sum_{j=j_1}^{j_k}  (\lambda_j'' \mathbb{ \tilde E}  [  \sum_{i=1}^{T-1} (\hat q_j^*x_i)^2]  ) \\
+%&+ \mathbb{ \tilde E}  [  \| \x_{2:T}\|^2_F]  - 2\, \textrm{trace}\left( (p_{j_1},...,p_{j_k})^* \mathbb{ \tilde E}  [ \x_{2:T}\x_{1:T-1}^*]  (\hat q_{j_1},...,\hat q_{j_k}) \right) , 
+%\end{align*} 
+%where each element of the set of indices  $\{j_1,...,j_k\}$ is a  positive integer smaller or equal to $n$. Using  \eqref{eq:eigenEqs}, \eqref{eq:defHasselmann1}, \eqref{eq:defHasselmann3}, and \eqref{eq:defEigenVal}, we obtain
+%\begin{align}\label{eq:derivMin}
+%& \mathbb{ \tilde E}  [ \| \x_{2:T}- (p_{j_1},...,p_{j_k})  (\hat q_{j_1},...,\hat q_{j_k})^* \x_{1:T-1}\|^2_F] \nonumber\\
+%&= \sum_{j=j_1}^{j_k}  \lambda_j+ \mathbb{ \tilde E}  [ \| \x_{2:T}\|^2_F] - 2 \sum_{j=j_1}^{j_k} \, \textrm{trace}[\,(p_{j_1},...,p_{j_k})^*(\lambda'_{j_1}p_{j_1} , \dotsm, \lambda'_{j_k}p_{j_k}) ],\nonumber \\
+%&= \sum_{j=j_1}^{j_k}  \lambda_j+\mathbb{ \tilde E}  [ \| \x_{2:T}\|^2_F]  -2\sum_{j=j_1}^{j_k}  \lambda_j, \nonumber\\
+%&=\mathbb{ \tilde E}  [\| \x_{2:T}\|^2_F]  - \sum_{j=j_1}^{j_k}  \lambda_j.
+%\end{align} 
+%As a result, we have the problem equivalence
+%\begin{align*}
+%\argmin_{(j_1,...,j_k)}  \mathbb{ \tilde E}  [  \| \x_{2:T}- (p_{j_1},...,p_{j_k})  (\hat q_{j_1},...,\hat q_{j_k})^* \x_{1:T-1}\|^2_F] &=\argmax_{(j_1,...,j_k)} \sum_{j=j_1}^{j_k} \lambda_j,
+%\end{align*} 
+%whose solution is the set of indices $\{j_\ell\}_{\ell=1}^k$ where $j_\ell$'s are strictly positive integers smaller or equal to $k$. Besides, we know  that the global minimizer satisfies $j_\ell\neq j_{r}$ for $\ell\neq r$, since otherwise matrix $\hat \R \hat \Q^*$ would be of rank lower than $k$ which, according to \eqref{eq:derivMin}, would imply a greater  error. Note that we are searching an non-order set of indices, so that it is sufficient to choose the minimizing set $(j_1,...,j_k)=(1,...,k)$. \\
+%\remPH{completer et soumettre preuve sur arxiv}
+%\remCH{Les majuscules n'apparaissent pas dans les titres.}
+\bibliographystyle{IEEEbib}
+\bibliography{./bibtex}
+
+\end{document}

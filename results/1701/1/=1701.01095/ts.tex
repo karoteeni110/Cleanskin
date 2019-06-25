@@ -1,0 +1,64 @@
+%!TEX root = /Users/audrey/Dropbox/PhD/MOMAB/ArXiv/Latex/paper.tex
+
+\section{Thompson Sampling}
+\label{sec:ts}
+
+% In this section we use the preference radius to analyze the Thompson sampling (TS)~\cite{Thompson1933} algorithm using multivariate normal (MVN) priors. Recall that TS
+The Thompson sampling (TS)~\cite{Thompson1933} algorithm maintains a posterior distribution $\pi_a(t)$ on the mean $\bsmu_a$ given a prior and the history of observations $\cH_t$. On each episode $t$, one option $\bstheta_a(t)$ is sampled from each posterior distribution $\pi_a(t)$. The algorithm selects $a(t) \in \cO(t)$. Recall that $\cO(t) = \argmax_{a \in \cA} f(\bstheta_a(t))$. Therefore $\Pr[a(t) = a]$ is proportionnal to the posterior probability that $a$ maximizes the preference function given the history $\cH_t$. Let $N_a(t) = \sum_{s = 1}^{t-1} \ind[a(s) = a]$ denote the number of times action $a$ has been played up to episode $t$. Also let
+\begin{align*}
+    \hat \bsmu_{a, t} = \frac{\sum_{s = 1: a(s) = a}^{t-1} \bsz(s)}{N_a(t)}
+    ~\text{and}~
+    \hat \bsSigma_{a, t} = \frac{\sum_{s = 1: a(s) = a}^{t - 1} \big( \bsz(s) - \hat \bsmu_a(t) \big) \big( \bsz(s) - \hat \bsmu_a(t) \big)^\top}{N_a(t) - 1}
+\end{align*}
+respectively denote the empirical mean and covariance, and let $\bsSigma_0$ and $\bsmu_0$ denote priors. For MVN priors, the posterior over $\bsmu_a$ is given by a MVN distribution $\Normal_d (\tilde \bsmu_a(t), \tilde \bsSigma_a(t))$, where
+\begin{align*}
+    \tilde \bsSigma_a(t) = \big( \bsSigma_0^{-1} + N_a(t) \bsSigma_a^{-1} \big)^{-1} ~ \text{and} ~
+    \tilde \bsmu_a(t) = \tilde \bsSigma_a(t) \big( \bsSigma_0^{-1} \bsmu_0 + N_a(t) \bsSigma_a^{-1} \hat \bsmu_a(t) \big)
+\end{align*}
+for the known covariance matrix $\bsSigma_a$. Since assuming that $\bsSigma_a$ is known might be unrealistic in practice, one can consider the non-informative covariance $\bsSigma_a = \bsI_d$. With non-informative priors $\bsmu_0 = \bszero_{d \times 1}$ and $\bsSigma_0 = \bsI_d$,\footnote{$\bszero_{d \times 1}$ indicates a $d$-elements column vector and $\bsI_d$ indicates a $d \times d$ identity matrix.} this corresponds to a direct extension of the one-dimensional TS from Gaussian priors~\cite{Agrawal2013}. Alg.~\ref{alg:mvn_ts} shows the resulting TS procedure from MVN priors.
+
+\begin{algorithm}[t]
+    \begin{algorithmic}[1]
+        \FORALL{episode $t \geq 1$}
+            \FORALL{action $a \in \cA$}
+                \STATE sample $\bstheta_a(t) = \Normal_d \big( (\bsI_d + N_a(t) \bsI_d)^{-1} N_a(T) \hat \bsmu_a(t), (\bsI_d + N_a(t) \bsI_d)^{-1} \big)$
+            \ENDFOR
+            \STATE $\cO(t) = \argmax_{a \in \cA} f(\bstheta_a(t))$
+            \STATE play $a(t) \in \cO(t)$ and observe $\bsz(t)$
+        \ENDFOR
+    \end{algorithmic}
+    \caption{Thompson sampling from MVN priors}
+\label{alg:mvn_ts}
+\end{algorithm}
+
+The following proposition provides general regret bounds for TS from MVN priors. The next theorem specializes these regret bounds for three well known preference function families using the relation between preference radii and the gap, as discussed in previous examples.
+
+\begin{proposition}
+\label{prop:mvn_ts}
+    Assuming $\sigma$-sub-Gaussian noise with $\sigma^2 \leq 1/(4d)$, the expected regret of TS from MVN priors (Alg.~\ref{alg:mvn_ts}) is bounded by
+    \begin{align*}
+        \kR(T)
+        & \leq \sum_{a \in \cA, a \neq \star} \bigg[
+        (C(d) + 4d) (1 + \sigma) \Delta_a \frac{\ln(d T \Delta_a^2)}{\rho_\star^2} + \frac{4}{\Delta_a}
+        + 2 \Delta_a \frac{\ln(d T \Delta_a^2)}{(\rho_a - r_a)^2} \\
+        & \qquad \qquad \quad + 2 \sigma^2 \Delta_a \frac{\ln(d T \Delta_a^2)}{r_a^2} \bigg],
+    \end{align*}
+    where $\rho_\star$, $\rho_a$ are preference radii, $r_a < \rho_a$, and $C(d)$ is such that $e^{-\frac{\sqrt{i}}{\sqrt{18 \pi d \ln i}^d}}\leq \frac{d}{i^2}$ for $i \geq C(d)$ (see Remark~\ref{remark:const_c}).
+\end{proposition}
+
+\begin{theorem}
+\label{thm:mvn_ts}
+    Assume either a linear (Ex.~\ref{ex:linear}), Chebyshev (Ex.~\ref{ex:chebyshev}), or $\epsilon$-constraint (Ex.~\ref{ex:epsilon-constraint}) preference function. Assuming $\sigma$-sub-Gaussian noise with $\sigma^2 \leq 1/(4d)$, the expected regret of TS from MVN priors (Alg.~\ref{alg:mvn_ts}) is bounded by
+    \begin{align*}
+        \kR(T) \leq \sum_{a \in \cA, a \neq \star} \bigg[
+        (8C(d) + 24d + 18 + 72\sigma^2) (1 + \sigma)^2 \frac{\ln(d T \Delta_a^2)}{\Delta_a} + \frac{4}{\Delta_a} \bigg],
+    \end{align*}
+    where $C(d)$ is such that $e^{-\frac{\sqrt{i}}{\sqrt{18 \pi d \ln i}^d}} \leq \frac{d}{i^2}$ for $i \geq C(d)$ (see Remark~\ref{remark:const_c}). This regret bound is of order $\cO(\sqrt{dNT}\ln d + \sqrt{dNT \ln N})$, where $N = |\cA|$. More specifically, for $d \leq \ln N$, it is of order $\cO(\sqrt{dNT \ln N})$.
+\end{theorem}
+
+\begin{remark}
+\label{remark:const_c}
+    For $d = 1$ we can take $C(d) = e^{14}$. For $d = 2$ we can take $C(d) = e^{24}$, for $d = 3$ we can take $C(d) = e^{35}$, and so on for any $d \in \Nat$.
+\end{remark}
+
+For $d = 1$, the order of the regret bounds given by Theorem~\ref{thm:mvn_ts} match the order of the regret bounds for TS from Gaussian priors in the single-objective bandits setting~\cite{Agrawal2013}, assuming $[0, 1]$-bounded outcomes. However we observe that the noise tolerance decreases linearly with the dimension $d$ of the objective space. This means that the more dimensions we have, the less noise we can bear in order for these bounds to hold, \emph{given the provided analysis}. 

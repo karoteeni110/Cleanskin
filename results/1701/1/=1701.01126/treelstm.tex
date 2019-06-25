@@ -1,0 +1,178 @@
+%!TEX root = main.tex
+
+%We assume the node-level meaning representations over the
+%premise tree and the hypothesis tree are provided.
+%In this paper we use the Tree-LSTM model \cite{tai2015improved}
+%to generate this representation. 
+%However, our model is independent to this meaning representation
+%and any high-quality meaning representation is suffice 
+%for us to infer the alignments and entailments.
+
+Here we describe the final building block of our neural model.
+
+In Section~\ref{sec:att}, we did not mention the calculation of the
+meaning representation $\vech_i$ for node $i$ in Equation~\ref{eq:att},
+which represents the semantic meaning of the subtree rooted at node $i$.
+In general, $\vech_i$ should be calculated recursively from the meaning
+representations $\vech_{i,1}$, $\vech_{i,2}$ of its two children 
+if node $i$ is an internal node, otherwise $\vech_i$ should be calculated
+based on the word $\vecx\in\mathbb{R}^d$ in the leaf. 
+\begin{equation}
+\vech_i = f_{\text{MR}}(\vecx_i, \vech_{i,1}, \vech_{i, 2}).
+\label{eq:mr}
+\end{equation}
+
+Similar is Equation~\ref{eq:relcomp}, where the relation $\vece_i$
+is recursively calculated from the relation of its two children, 
+as well as the meaning $\vech_i$
+comparing with the meaning of the premise tree:
+\begin{equation}
+\vece_i
+= f_{\text{rel}}([\vech_i; \sum_{j\in P}\tilde{\veca}_{i,j} \vech_j], \vece_{i, 1}, \vece_{i, 2}).
+\label{eq:rel}
+\end{equation}
+
+Note the resemblance between these two equations, which indicates that
+we can handle them similarly with the same form of composition function
+$f(\cdot)$.
+
+We have various choices for composition function $f$. For example,
+we can use simple RNN functions as in \newcite{socher2013recursive}.
+Alternatively, we can use a convolutional layer to extract features
+from $\vecx_i, \vech_{i, 1}, \vech_{i, 2}$ and use pooling as aggregation 
+to form $\vech_i$. 
+In this paper we choose Tree-LSTM model \cite{tai2015improved}.
+Our model is independent to this composition function
+and any high-quality composition function is sufficient 
+for us to infer the meaning representations and entailments.
+
+Here we use Equation~\ref{eq:mr} as an example. Equation~\ref{eq:rel}
+can be handled similarly.
+Similar to the classical LSTM model \cite{hochreiter1997long}, 
+in the binary Tree-LSTM model of \newcite{tai2015improved}, 
+each tree node has a state represented by a pair of vectors:
+the output vector $\vech\in\mathbb{R}^{1\times k}$, 
+and the memory cell $\vecc\in\mathbb{R}^{1\times k}$,
+where $k$ is the length of the Tree-LSTM
+output representation. We use $\vech$ as the meaning representation
+of the tree node in the attention model.
+The LSTM transition calculates
+ the state $(\vech_i, \vecc_i)$ of node $i$ 
+with leaf word $\vecx_i\in \mathbb{R}^d$,
+and two children with states $(\vech_{i, 1}, \vecc_{i,1})$
+and $(\vech_{i,2}, \vecc_{i,2})$ respectively.
+
+We can abuse the mathematics a little bit, 
+and write the transition at an LSTM unit as a function:
+\[
+[\vech_i; \vecc_i] = \mathrm{LSTM}(\vecx_i, [\vech_{i,1}; \vecc_{i,1}], [\vech_{i,2}; \vecc_{i,2}])
+\label{eq:lstmdef}
+\]
+In practice, we use the above $\mathrm{LSTM}(\cdot, \cdot, \cdot)$ function as $f_{\text{MR}}(\cdot, \cdot, \cdot)$, and $f_{\text{rel}}(\cdot, \cdot, \cdot)$. But we only expose the output $\vech_i$ 
+to the above layers, and keep the memory $\vecc_i$ visible only
+to the $\mathrm{LSTM}(\cdot, \cdot, \cdot)$ function.
+
+Following \newcite{zaremba2014recurrent}, 
+function $\mathrm{LSTM}(\cdot, \cdot, \cdot)$ is summarized by 
+Equations~\ref{eq:treelstm-input}-\ref{eq:treelstm-hidden}:
+\begin{equation}
+\left(
+\begin{array}{c}
+\veci_i\\
+\vecf_{i,1}\\
+\vecf_{i,2}\\
+\veco_{i}\\
+\vecu_{i}
+\end{array}
+\right) = \left(
+\begin{array}{c}
+\sigma\\
+\sigma\\
+\sigma\\
+\sigma\\
+\tanh
+\end{array}
+\right) T_{d+2k, k}
+\left(\begin{array}{c}
+\vecx_i\\
+\vech_{i,1}\\
+\vech_{i,2}
+\end{array}
+\right)
+\label{eq:treelstm-input}
+\end{equation}
+\vspace{-0.7cm}
+\begin{align}
+\vecc_i & = \veci_i \odot \vecu_i + \vecf_{i, 1} \odot \vecc_{i, 1}+ \vecf_{i, 2} \odot \vecc_{i, 2},\label{eq:treelstm-mem}\\
+\vech_i & = \veco_i \odot \tanh(\vecc_i), \label{eq:treelstm-hidden}
+\end{align}
+where $\veci_i$, $\vecf_{i,1}$, $\vecf_{i,2}$, $\veco_i$ represent the
+input gate, two forget gates for two children nodes, 
+and the output gate respectively.
+$T_{d+2k,k}$ is an affine transformation from $\mathbb{R}^{d+2k}$
+to $\mathbb{R}^k$.
+%In our practice, for leaf nodes,
+%both $(\vech_{j, \ell}, \vecc_{j,\ell}), \ell=1,2$ are pairs
+%of zero vectors.
+
+%The above transition equations can be summarized by 
+%Figure~\ref{fig:treelstm} \cite{tai2015improved}.
+
+\newcolumntype{H}{>{\setbox0=\hbox\bgroup}c<{\egroup}@{}}
+\begin{table*}
+\begin{center}
+\small
+\begin{tabular}{c|cccHc}
+Method & $k$ & $\card{\theta}_M$ & Train & Dev. & Test\\
+\hline\hline
+LSTM sent. embedding \cite{bowman2015large} 
+& 100 & 221k & 84.8 & - & 77.6\\ \hline
+Sparse Features + Classifier \cite{bowman2015large} 
+& - & - & 99.7 & - & 78.2\\ \hline
+%LSTM w/ sentences concatenation \cite{rocktaschel2015reasoning} & 
+%116 & 252k &83.5 & 82.1 & 80.9\\ \hline
+LSTM + word-by-word attention \cite{rocktaschel2015reasoning}
+& 100 & 252k & 85.3 & 83.7 & 83.5\\ 
+\hline
+%mLSTM \cite{wang2015learning} & 150 & 544k &91.0 & 86.2 & 85.7\\ 
+%\hline
+mLSTM \cite{wang2015learning} & 300 & 1.9m &92.0 & 86.9 & 86.1\\ 
+\hline
+LSTM-network \cite{cheng2016long} & 450 & 3.4m & 88.5 & - & 86.3\\
+\hline \hline
+
+LSTM sent. embedding (our implement. of \newcite{bowman2015large})&100& 241k &79.0 & 78.9 & 78.4 \\ \hline
+Binary Tree-LSTM (our implementation of \newcite{tai2015improved})& 100& 211k &82.4 & 80.2 & 79.9\\ \hline
+Binary Tree-LSTM + simple RNN w/ attention & 150 & 220k &82.4 & 82.1 & 81.8\\
+\hline
+\hline
+Binary Tree-LSTM + Structured Attention \& Composition & 150 & 0.9m & 87.0 & {\bf 87.3} & 86.4\\
+\hline 
++ dual-attention & 150 & 0.9m & 87.7 & 87.1 & {\bf 87.2}
+\end{tabular}
+\end{center}
+\vspace{-0.2cm}
+\caption{Comparison between our structured model with other existing methods.
+Column $k$ specifies the length of the meaning representations.
+$\card{\theta}_M$ is the number of parameters
+without the word embeddings.
+\label{tab:results}}
+%\vspace{-0.5cm}
+\end{table*}
+
+\iffalse
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{figures/treelstm.pdf}
+\caption{Transitions in one Tree-LSTM unit \protect\cite{tai2015improved}.
+The parent node is denoted with subscript $j$,
+and the children node with $j,1$ and $j,2$.
+At each node, $\vecc$ represents the memory cell, 
+$\vech$ represents the output,
+and $\vecx$ represents the optional meaning representation of the word.
+Some edges are labeled with the corresponding gates 
+controlling the propagation of the information.
+\label{fig:treelstm}}
+\vspace{-0.4cm}
+\end{figure}
+\fi

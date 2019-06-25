@@ -1,0 +1,86 @@
+\subsection{The Single Source Shortest Path problem}\label{sec:app_sssp}
+In Section~\ref{sec:intro} we argued that an efficient multisplit primitive would have helped Davidson et al.~\cite{Davidson:2014:WPG:nourl} in their delta-stepping formulation of the Single Source Shortest Path (SSSP) problem on the GPU\@.
+In this section, we show that by using our multisplit implementation, we can achieve significant speedups in SSSP computation, especially on highly connected graphs with low diameters.
+
+\subsubsection{The Single Source Shortest Path (SSSP) problem}
+Given an arbitrary graph $G = (V, E)$, with non-negative weights assigned to each edge and a source vertex $s\in V$, the SSSP problem finds the minimum cost path from the source to every other vertex in the graph.
+As described in Section~\ref{sec:intro}, Dijkstra's~\cite{Dijkstra:1959:ANO} and Bellman-Ford-Moore's~\cite{Bang-Jensen:2009:DTA} algorithms are two classical approaches to solve the SSSP problem.
+In the former, vertices are organized in a single priority queue and are processed sequentially from the lowest to the highest weight.
+In the latter, for each vertex we process all its neighbors (i.e., processing all edges). This can be done in parallel and is repeated over multiple iterations until convergence.
+Dijkstra is highly work-efficient but essentially sequential and thus unsuitable for parallelization.
+Bellman-Ford-Moore is trivially parallel but does much more work than necessary (especially for highly connected graphs).
+
+As an alternative algorithm between these two extremes (sequential processing of all vertices vs.\ processing all edges in parallel), delta-stepping allows the selective processing of a subset of vertices in parallel~\cite{Meyer:2003:DAP}.
+In this formulation, nodes are put into different buckets (based on their assigned weights) and buckets with smaller weights are processed first.
+Davidson et al.~\cite{Davidson:2014:WPG:nourl} proposed multiple GPU implementations based on the delta-stepping formulation. Their two most prominent implementations were based on a \emph{Near-Far} strategy and a \emph{Bucketing} strategy.
+Both divide vertices into multiple buckets, which can be processed in parallel.
+Both use efficient load-balancing strategies to traverse all vertices within a bucket.
+Both iterate over multiple rounds of processing until convergence is reached.
+The main difference between the two is in the way they organize the vertices to be processed next (work frontiers):
+\begin{description}
+        \item[Near-Far strategy] In this strategy the work queue is prioritized based on a variable splitting distance. In every iteration, only those vertices less than this threshold (the \emph{near set}) are processed. Those falling beyond the threshold are appended to a \emph{far pile}. Elements in the far pile are ignored until work in the near set is completely exhausted.
+        % Since weights are all positive, we can be sure of not visiting any vertex from the far pile while processing the near pile.
+        When all work in the near set is exhausted (this could be after multiple relaxation phases), this strategy increases the splitting distance (by adding an incremental weight $\Delta$ to it) and removes invalid elements from the far pile (those which have been updated with similar distances), finally splitting this resulting set into a new near set and far pile. This process continues until both the near set and far pile are empty (the convergence criterion).
+        \item[Bucketing strategy] In this strategy, vertices are partitioned into various buckets based on their weights (Davidson et al.\ reported the best performance resulted from 10 buckets). This strategy does a more fine-grained classification of vertices compared to Near-Far, resulting in a greater potential reduction in work queue size and hence less work necessary to converge. The downside, however, is the more complicated bucketing process, which due to lack of an efficient multisplit primitive was replaced by a regular radix sort in the original work. As a result of this expensive radix sort overhead, Near-Far was more efficient in practice~\cite{Davidson:2014:WPG:nourl}.
+\end{description}
+
+\subsubsection{Multisplit-SSSP} Now that we have implemented an efficient multisplit GPU primitive in this paper, we can use it in the Bucketing strategy explained above to replace the costly radix sort operation. We call this new Bucketing implementation \emph{Multisplit-SSSP}\@.
+Our Multisplit-SSSP should particularly perform well on highly connected graphs with relatively large out degrees and smaller diameters (such as in social graphs), causing fewer iterations and featuring large enough work fronts to make multisplit particularly useful. However, graphs with low average degrees and large diameters (such as in road networks) require more iterations over smaller work frontiers, resulting in high kernel launch overheads (because of repetitive multisplit usage) without large enough work frontiers to benefit from the efficiency of our multisplit.
+We note that this behavior for different graph types is not limited to our SSSP implementation; GPU graph analytics in general demonstrate their best performance on highly connected graphs with low diameters~\cite{Wang:2016:GAH:nourl}.
+
+\subsubsection{Performance Evaluation}\label{subsubsec:perf_eval_sssp}
+In this part, we quantitatively evaluate the performance of our new Multisplit-SSSP compared to Davidson et al.'s Bucketing and Near-Far approaches.
+Here, we choose a set of graph datasets listed in Table~\ref{table:graphs}.\footnote{All matrices except for rmat are downloaded from University of Florida Sparse Matrix Collection~\cite{Davis:2011:UOF}. Rmat was generated with parameters $(a,b,c,d) = (0.5, 0.1, 0.1, 30)$.}
+For those graphs that are not weighted, we randomly assign a non-negative integer weight between 0 and 1000 to each edge.
+
+Table~\ref{table:sssp_results} shows the convergence time for Near-Far, Bucketing, and Multisplit-SSSP (in million traversed edges per second, MTEPS), with Multisplit-SSSP's speedup against Near-Far.
+Multisplit-SSSP is always better than Bucketing, on both devices and on every graph we tested (up to 9.8x faster on Tesla K40c and 9.1x faster on the GeForce GTX 1080).
+This behavior was expected because of the performance superiority of our multisplit compared to a regular radix-sort (Fig.~\ref{fig:speedup}).
+
+Against Near-Far, our performance gain depends on the type of graph.
+As we expected, on highly connected graphs with low diameters (such as rmat), we achieve up to 1.58x and 2.17x speedup against Near-Far, on the Tesla K40c and GeForce GTX 1080 respectively.
+However, for high diameter graphs such as road networks (e.g., belgium\_osm), we are closer to Near-Far's performance: Multisplit-SSSP is slower than Near-Far on Tesla K40c (0.93x) and marginally faster on GeForce GTX 1080 (1.04x).
+Road graphs have significantly higher diameter and hence more iterations. As a result, the extra overhead in each phase of Multisplit-SSSP on large diameters can become more important than the saved operations due to fewer edge re-relaxations.
+
+\begin{table}
+\centering
+\scriptsize
+% \resizebox{\columnwidth}{!}{
+\begin{tabular}{lccc}
+\toprule
+Graph Name & Vertices & Edges & Avg. Degree  \\
+\midrule
+cit-Patents~\cite{Hall:2001:NPC} & 3.77~M & 16.52~M & 8.8  \\
+flickr~\cite{Davis:2011:UOF}  & 0.82~M & 9.84~M & 24.0 \\
+belgium\_osm~\cite{Kobitzsh:2010:DIMACS}  & 1.44~M & 1.55~M & 2.2  \\
+rmat~\cite{Chakrabarti:2004:RAR} & 0.8~M & 4.8~M & 12.0 \\
+\bottomrule
+\end{tabular}
+% }
+\caption{Datasets used for evaluating our SSSP algorithms.}\label{table:graphs}
+\end{table}
+
+\begin{table}
+\centering \scriptsize
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{l cc ccc | cc ccc}
+\toprule
+& \multicolumn{5}{c}{Tesla K40c (ECC on)} & \multicolumn{5}{c}{GeForce GTX 1080} \\
+\cmidrule(r){2-6}\cmidrule(l){7-11}
+Graph Name & Near-Far & Bucketing & \multicolumn{3}{c}{Multisplit-SSSP} & Near-Far & Bucketing & \multicolumn{3}{c}{Multisplit-SSSP} \\
+\cmidrule(r){1-1} \cmidrule(r){2-2} \cmidrule(r){3-3} \cmidrule(r){4-6} \cmidrule(l){7-7} \cmidrule(l){8-8} \cmidrule(l){9-11}
+-- & time (ms) & time (ms) & time (ms) & MTEPS & speedup & time (ms) & time (ms) & time (ms) & MTEPS & speedup \\
+\midrule
+cit-Patents & 458.4 & 3375.9 & 343.1 & 96.3 & 1.34x & 444.2 & 3143.0 & 346.8 & 95.2 & 1.28x \\
+flickr                          & 96.0 & 163.0 & 64.5 & 305.2 & 1.49x & 66.7 & 111.1 & 36.5 & 539.0 & 1.83x \\
+belgium\_osm    & 561.4 & 3588.0 & 604.5 & 5.12 & 0.93x & 443.8 & 3014.2 & 427.0 & 7.3 & 1.04x \\
+rmat & 20.9 & 28.7 & 13.2 & 727.3 & 1.58x & 12.17 & 14.9 & 5.8 & 1655.2 & 2.17x \\
+\bottomrule
+\end{tabular}
+}
+\caption{Near-Far, Bucketing, and our new Multisplit-SSSP methods over various datasets. Speedups are against the Near-Far strategy (which appears to be always better than the Bucketing strategy).}\label{table:sssp_results}
+\end{table}
+
+% \begin{figure}
+% \caption{Speedup of our Multisplit-SSSP compared to the Near-Far and Bucketing strategies.}\label{fig:sssp_speedup}
+% \end{figure}

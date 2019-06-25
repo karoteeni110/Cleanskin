@@ -1,0 +1,112 @@
+We want to develop a new algorithm to extract the core structural connectivity network, a problem that implies working with different brains. Thus, the first thing we need to do is unify them into a common connectivity model. This allows us to model all brains with graphs in which each node represents a cortical or sub-cortical region, and each edge represents a white matter connection between two regions. We choose the Desikan parcellation~\cite{Desikan2006} to uniformize the brain cortical and sub-cortical regions across subjects.
+
+To compute the connectivity matrices we use a probabilistic tractography algorithm, which outputs one matrix per subject. The resulting matrices represent the existence probability of a connection across parcels in each subject~\cite{Donahue2016}. As these are symmetric, we interpret the matrices as weighted undirected graphs, sharing the node set across subjects.
+
+Formally, we represent a sample of $N$ brain structural networks by $N$ complete weighted graphs $G_{1} = (V, E, w_1), \ldots, G_N = (V, E, w_N)$ with a common node set $V$. We call $G_1,\ldots,G_N$ the \textit{sample graphs}. Each graph $G_i$ corresponds to a subject. Each vertex $v \in V$ represents a cortical or sub-cortical region. Each edge $e\in E=V\times V$ represents a white matter bundle connecting two regions. Finally, the weight $w_i(e)$ is the connection probability for the edge $e$ in the subject $i$ obtained through tractography:
+\begin{equation}\label{all_weights}
+w_1(e), w_2(e), \ldots, w_N(e) \in [0,1] ~ \forall e \in E.
+\end{equation}
+Note that all graphs have the same ordered node set and all of them are complete: an edge weight, or connection probability, $w_i(e)$ of 0 represents an absent connection. Using this formalization we express the general core structural connectivity network problem as follows: find a core graph $G^* = (V^*, E^*)$ densely connected such that $G^*$ keeps the more \emph{relevant} connections $E^*\subseteq E$ in the sample and discards the less \emph{relevant} ones, for some definition of relevance and density. %\todo[author=Demian]{The next sentence is not clear, it needs to be rewritten}
+For simplicity, once we select $E^*$ we can define $V^*$ as
+\begin{equation}
+V^* = \{v \in V : \exists u \in V, (u, v) \in E^*\} ~,
+\end{equation}
+the set of nodes that the edges in $E^*$ cover. Then, we can reduce the problem of finding $G^*$ to find $E^*$ alone.
+
+We want a formalization of relevance that represents the probability that a connection is present across subjects. Thus, we choose to model the group-wise relevance, $w^*(e)$ as the mean existence probability across subjects, factored by the standard deviation of these probabilities. In other words, $w^*(e)$ is the number of standard deviations that the mean existing probability of connection $e$ is larger than $0$. We use $w^*(e)$ as a statistical measure of edge presence across the population. Formally, \begin{equation}\label{weight}
+w^*(e) \triangleq \frac{\overline{w(e)}}{s(e)}\text{ where } \overline{w(e)}\triangleq\sum_{i=1}^N\frac{w_i(e)} N,\, {s(e)}\triangleq  \sqrt{\sum_{i=1}^N \frac{\left(\overline{w(e)}-w_i(e)\right)^2}N}.
+\end{equation}
+
+Note that $w^*(e)$ is the statistic of a hypothesis z-test which assumes a media of 0 for the population weight of $e$. We choose the z-statistic because of the normal distribution's properties, e.g. linearity, even if other distributions, such as Beta distribution, may be more appropriate for modeling the probability. In any case, note that for the purpose of our contribution $w^*$ can be any function $E \rightarrow \mathbb{R}$ which grows with the relevance of the edges in the sample.
+
+We also want a formalization that represents the density of the core subgraph. We use the relationship between the number of edges and the total statistical relevance $w^*$ that those edges sum:
+\begin{equation}\label{alpha}
+\alpha(w^*, E^*) \triangleq \frac{\sum_{e \in E^*} w^*(e)}{|E^*|} ~.
+\end{equation}
+As we want also a sparse outer subgraph, we also define its density:
+\begin{equation}\label{beta}
+\beta(w^*, E^*) \triangleq \frac{\sum_{e \in E \setminus E^*} w^*(e)}{|E^*|} ~.
+\end{equation}
+
+Now we can express our objective informally as: choose $E^*$ such that $\alpha(w^*, E^*)$ (Eq. \ref{alpha}) is large and $\beta(w^*, E^*)$ (Eq. \ref{beta}) small. In accordance to recent evidence on the core network, we also want $G^*$ to be connected. Here, connected means that for every pair of vertices $u, v$ in $V^*$ there is a path of edges in $E^*$ from $u$ to $v$.
+
+Let $\mathcal{E}^{c}$ be the family of sets of edges that induce a connected graph. We now formalize the problem of finding this common graph $G^*$ in two different ways.
+\begin{itemize}
+\item[$\bullet$] The optimization version consists in computing:
+\begin{equation}\label{optimization}
+\max_{E^{*} \in \mathcal{E}^{c}} f(w^*, E^*) = \lambda \alpha(w^*, E^*) - (1-\lambda) \beta(w^*, E^*)
+\end{equation}
+The parameter $\lambda$ (between 0 and 1) can be adjusted to weight the density of the inner and the outer network. Note that if $\lambda = 1$, the solution to (\ref{optimization}) only considers the density of the core network, and if $\lambda = 0$, it only considers the edges excluded of the core network.
+
+\item[$\bullet$] Given $A$ and $B$, the decision version consists in finding $E^* \subseteq \mathcal{E}^{c}$ such that:
+\begin{align}
+\begin{split}\label{decision}
+\alpha(w^*, E^*) &\geq A\\
+\beta(w^*, E^*) &\leq B
+\end{split}
+\end{align}
+
+\end{itemize}
+
+Having formalized the Core Structural Connectivity Network into an optimization and a decision problem, we proceed with one of our main theoretical contributions: proving that the problem is \NP-Complete.
+
+\subsection{CSCN Problem's NP-Completeness}
+We have formalized the problem of the Core Structural Connectivity Network taking into account the density and connectedness of the core subgraph and the sparsity of the outer one. We will now prove that, with this formalization, the problem is \NP-Complete.
+
+\begin{definition}[Core Structural Connectivity Network problem]
+Given $G_1 = (V, E, w_1), G_2 = (V, E, w_2), \ldots, G_N = (V, E, w_N)$ weighted graphs (the \emph{sample graphs}) with a common node set, a complete edges set ($E = V \times V$) and $w_1(e), w_2(e), \ldots, w_N(e) \in \mathbb{R}_{\geq0} ~ \forall e \in E$ weights of their edges, and given $A, B$ real numbers, find $G^* = (V^*, E^*)$ connected graph (the \emph{core graph}) such that
+$$\alpha(w^*, E^*) \geq A$$
+$$\beta(w^*, E^*) \leq B$$
+for $\alpha$ and $\beta$ as defined in Eq.~(\ref{alpha}) and Eq~.(\ref{beta}).
+\end{definition}
+
+\input{proof-steiner.tex}
+
+In Theorem~\ref{the:NP-complete-with-Steiner} we have proved that \PROBLEM~is \NP-complete. Hence, to be able to solve it in reasonable time we need a relaxation to make it tractable or an approximate algorithm for the complete version. In this article we will propose both.
+
+\subsection{Relaxation of the CSCN problem}\label{algorithm_section}
+We proved in the previous section that the connectivity constraint is the main reason of the difficulty of the problem. Without it, it becomes tractable. So we solve, in this section, a relaxed version of problem without the connectivity constraint. Then, we use this solution to approximate the full problem.
+
+\begin{theorem} The decision version of \PROBLEM~without the connectivity constraint is in \P.
+\end{theorem}
+
+
+\begin{algorithm}
+\caption{Maximum edges}
+\label{alg_max_edges}
+\begin{algorithmic}
+\State Compute $w^*(e)$ for each $e \in E$
+\State \Call{Sort}{$E$} \Comment{sorts edges by $w^*$ non-increasingly}
+\ForEach {$e \in E$}
+	\State $E^* \gets E^* \cup {e}$ 
+    \If {$\alpha(w^*, E^*) > A$ and $\beta(w^*, E^*) < B$}
+		\State \Return $True$
+    \EndIf
+\EndFor
+\State \Return $False$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proof}
+Algorithm \ref{alg_max_edges}, in each step $i$, defines $E^*$ as the $i$ maximum weighted edges and tries to use that to fulfill the constraints.
+
+Assume that there exists an $E^*$ that fulfills the constraints. There are two cases: 1) $E^*$ has the $|E^*|$ maximum weighted edges, 2) there are $e_j \in E^*$, $e_k \in E \setminus E^*$ such that $w^*(e_k) \geq w^*(e_j)$.
+In 1), Algorithm \ref{alg_max_edges} will find $E^*$.
+In 2), let $E' = (E^* \cup \{e_k\}) \setminus \{e_j\}$ another subset of $E$. Then
+$$\alpha(w^*, E') = \frac{\sum_{e \in E'} w^*(e)}{|E'|} = \frac{\sum_{e \in E'} w^*(e)}{|E^*|} \geq \frac{\sum_{e \in E^*} w^*(e)}{|E^*|} = \alpha(w^*, E^*) \geq A$$
+because the edges in $E^*$ are the same as the ones in $E'$ except from one that has a larger weight. For the same reason,
+$$\beta(w^*, E') = \frac{\sum_{e \in E \setminus E'} w^*(e)}{|E'|} = \frac{\sum_{e \in E \setminus E'} w^*(e)}{|E^*|} \leq \frac{\sum_{e \in E \setminus E^*} w^*(e)}{|E^*|} = \beta(w^*, E^*) \leq B.$$
+Thus, we found a new subset of $E$ that stills fulfills the constraints. We can do the same process with $E'$ (replace an edge with another one of larger weight) iteratively, always getting subsets that fulfills the constraints, until we cannot do this anymore. At that point we will have a subset that has only the maximum $|E^*|$ edges and fulfills the constraints. Thus, algorithm \ref{alg_max_edges} will find this subset.
+
+We now need to prove algorithm \ref{alg_max_edges} runs in polynomial time in the size of $|E|$. The first operation, computing $w^*(e)$ for each $e$, implies computing the mean and standard deviation for each edge across the population, which can be done in $\mathcal{O}(N)$ per edge (where $N$ is the size of the population). This is $\mathcal{O}(N*|E|)$ for all the edges. The second step, sorting, can be done in $\mathcal{O}(|E|\log{|E|})$.
+
+The main loop runs at most $|E|$ times, and in each loop it adds an edge to $E^*$, computes $\alpha$ and $\beta$ and performs two comparisons. The comparisons can be done in constant time, as the addition to $E^*$ if we use a linked list of edges to represent it. To compute $\alpha$ and $\beta$ it is needed to iterate once again $E$ (the part in $E^*$ for $\alpha$, the part in $E \setminus E^*$ for $\beta$) adding the weights together and then performing two divisions. This can be done in linear time in the size of $E$, and even quicker (constant time) if we optimize it by keeping the values of $\alpha$ and $\beta$ across loops and updating them with the weight of the edge that changed sets. 
+
+Then, algorithm \ref{alg_max_edges} solves the \PROBLEM~in $\mathcal{O}(max(|E|^2, |E|*N)$ or in $\mathcal{O}(|E|*N)$ if a little optimization is used.
+
+\end{proof}
+
+\subsection{Heuristic approach}\label{heuristic}
+In Section~\ref{algorithm_section} we developed  Algorithm~\ref{alg_max_edges} to solve the problem of finding the Core Structural Connectivity Network in polynomial time. However, this algorithm does not guarantee a connected result. We solve the original problem, presented in Section~\ref{problem_section}, by first applying Algorithm~\ref{alg_max_edges} and then modifying the resulting core graph $G^*$ to guarantee its connectedness. This results in an approximate solution for the full problem computable in polynomial time.
+
+To extend $G^*$ into a connected graph we add the necessary edges while decreasing the minimum possible the objective function $f$ defined in Eq.~\ref{optimization}. For this, we use the same approach that Wassermann et al.~\cite{Wassermann2016}. Namely, we make a multigraph $G_{cc}$ with the connected components of $G^*$ as nodes, complete it with all the possible edges between those connected components, and run a Maximum Spanning Tree algorithm. This selects the edges needed to produce a connected subgraph with the maximum possible weight. For the full details, see Wassermann et al.~\cite{Wassermann2016}. This way we get a connected subgraph close to the best possible subgraph, which we obtained using Algorithm~\ref{alg_max_edges}.

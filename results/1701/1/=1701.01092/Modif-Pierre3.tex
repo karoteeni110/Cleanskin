@@ -1,0 +1,1460 @@
+\documentclass[11pt,a4paper]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bbm}
+\title{Inverting the coupling of the signed Gausssian free field with a loop soup}
+\date{}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}[proposition]{Corollary}
+\newtheorem{lemma}[proposition]{Lemma}
+\newtheorem{remark}[proposition]{Remark}
+\newtheorem*{2ndRK}{Generalized second Ray-Knight theorem}
+\newtheorem*{IsoLeJan}{Le Jan's isomorphism}
+\newtheorem*{ExcLoops}{From excursions to loops}
+\newtheorem*{IsoLupu}{Lupu's isomorphism}
+\newtheorem*{IsgFKIsg}{FK-Ising and Ising coupling}
+\newtheorem*{CondAbsGFF}{Conditioning on the absolute value of GFF}
+\newtheorem*{LoopsRC}{Loop soup and random current}
+\newtheorem*{RCFKIsing}{Random current and FK-Ising coupling}
+\newtheorem{definition}{Definition}[section]
+\usepackage[a4paper]{geometry}
+\geometry{hscale=0.75,vscale=0.75,centering}
+%\usepackage{fullpage}
+\usepackage{hyperref}
+
+% Macro Christophe
+
+\def\ccc{{\mathcal C}}
+%\def\indic{{\mathbb 1}}
+\def\R{{\mathbb R}}
+\def\N{{\mathbb N}}
+\def\Z{{\mathbb Z}}
+\def\ooo{{\mathcal{O}}}
+\def\E{{\mathbb{E}}}
+\def\demi{{1\over 2}}
+\def\eee{{\mathcal E}}
+\def\equilaw{{\stackrel{\text{law}}{=}}}
+\def\aaa{\mathcal{A}}
+\def\fff{{\mathcal F}}
+\def\indic{{{\mathbbm 1}}}
+\def\lll{{\mathcal L}}
+\newcommand{\Pb}{\mathbb{P}}
+
+\author{Titus Lupu \and Christophe Sabot \and Pierre Tarrès}
+\address {
+Institute for Theoretical Studies,
+ETH Z\"urich,
+Clausiusstr. 47,
+8092 Z\"urich,
+Switzerland}
+\email
+{titus.lupu@its-eth.ethz.ch}
+
+\address {
+Institut Camille Jordan,
+Université Lyon 1, 
+43 bd. du 11 nov. 1918,
+69622 Villeurbanne cedex,
+France}
+\email
+{sabot@math.univ-lyon1.fr}
+
+\address {CNRS and Universit{\'e} Paris-Dauphine\\
+PSL Research University, Ceremade, UMR 7534\\
+Place du Mar{\'e}chal de Lattre de Tassigny\\
+75775 Paris cedex 16, France\\
+and \\
+Courant Institute of Mathematical Sciences\\ 
+New York, NYU-ECNU \\
+Institute of Mathematical Sciences at NYU Shanghai}
+\email
+{tarres@nyu.edu}
+
+
+\begin{document}
+
+\keywords{Gaussian free field; Ray-Knight identity; self-interacting processes; loop-soups; random currents; Ising model}
+\subjclass[2010]{primary 60J27; 60J55; secondary 60K35; 82B20;
+ 	81T25; 81T60}
+
+\begin{abstract}
+Lupu introduced 
+%in \cite{Lupu2014LoopsGFF}  % pas de citations dans l'abstract
+a coupling between a random walk loop-soup and a Gaussian free field, where the sign of the field is constant on each cluster of loops. This coupling is a signed version of isomorphism theorems relating the square of the GFF to the occupation field of Markovian trajectories. 
+His
+%The 
+construction 
+%in \cite{Lupu2014LoopsGFF} 
+starts with a loop-soup, and by adding additional randomness samples a GFF out of it.
+In this article we provide the inverse construction: starting from a signed free field and using a self-interacting random walk related to this field, we construct a random walk loop-soup. Our construction relies on the previous work by Sabot and Tarrès, which inverts the coupling from the square of the GFF rather than the signed GFF itself.
+As a consequence, we also deduce an inversion of the coupling between the random current and the FK-Ising random cluster models 
+introduced by Lupu and Werner.
+\end{abstract}
+\maketitle
+\section{Introduction}
+\label{SecIntro}
+Let $\mathcal{G}=(V,E)$ be a connected undirected graph, with $V$ at most countable and each vertex $x\in V$ of finite degree. We do not allow self-loops, however the edges might be multiple. Given $e\in E$ an edge, we will denote
+$e_{+}$ and $e_{-}$ its end-vertices, even though $e$ is non-oriented and one can interchange $e_{+}$ and $e_{-}$. 
+Each edge $e\in E$ is endowed with a conductance $W_{e}>0$. There may be a killing measure $\kappa=(\kappa_{x})_{x\in V}$ on vertices. 
+
+We consider $(X_{t})_{t\ge0}$ the \textit{Markov jump processes} on $V$ which being in $x\in V$, jumps along an adjacent edge $e$ with rate $W_{e}$. Moreover if 
+$\kappa_{x}\neq 0$, the process is killed at $x$ with rate $\kappa_{x}$ (the process is not defined after that time). $\zeta$ will denote the time up to which $X_{t}$ is defined. If $\zeta<+\infty$, then either the process has been killed by the killing measure $\kappa$ (and $\kappa \not\equiv 0$) or it has gone off to infinity in finite time 
+(and $V$ infinite). We will assume that the process $X$ is transient, which means, if $V$ is finite, that 
+$\kappa\not\equiv 0$. $\mathbb{P}_{x}$ will denote the law of $X$ started from $x$.
+Let $(G(x,y))_{x,y\in V}$ be the Green function of $X_{t}$:
+\begin{displaymath}
+G(x,y)=G(y,x)=\mathbb{E}_{x}\left[\int_{0}^{\zeta} 1_{\{X_{t}=y\}} dt\right].
+\end{displaymath}
+Let $\mathcal{E}$ be the Dirichlet form defined on functions $f$ on $V$ with finite support:
+\begin{eqnarray}\label{Dirichlet-form}
+\mathcal{E}(f,)=\sum_{x\in V}\kappa_{x} f(x)^{2}+
+\sum_{e\in E}W_e(f(e_{+})-f(e_{-}))^{2}.
+\end{eqnarray}
+$P_{\varphi}$ will be the law of $(\varphi_{x})_{x\in V}$ the centred 
+\textit{Gaussian free field} (GFF) on $V$ with covariance
+$E_{\varphi}[\varphi_{x}\varphi_{y}]=G(x,y)$. In case $V$ is finite, the density of $P_{\varphi}$ is
+\begin{displaymath}
+\dfrac{1}{(2\pi)^{\frac{\vert V\vert}{2}}\sqrt{\det G}}
+\exp\left(-\dfrac{1}{2}\mathcal{E}(f,f)\right)\prod_{x\in V} df_{x}.
+\end{displaymath}
+Given $U$ a finite subset of $V$, and $f$ a function on $U$, $P^{U,f}_{\varphi}$ will denote the law of
+the GFF $\varphi$ conditioned to equal $f$ on $U$.
+$(\ell_{x}(t))_{x\in V, t\in [0,\zeta]}$ will denote the family of local times of $X$:
+\begin{displaymath}
+\ell_{x}(t)=\int_{0}^{t}1_{\{X_{s}=x\}} ds.
+\end{displaymath}
+For all $x\in V$, $u>0$, let
+\begin{displaymath}
+\tau_{u}^{x}=\inf\lbrace t\geq 0; \ell_{x}(t)>u\rbrace.
+\end{displaymath}
+Recall the generalized second Ray-Knight theorem on discrete graphs by Eisenbaum, Kaspi, Marcus, Rosen and Shi \cite{ekmrs} (see also 
+\cite{MarcusRosen2006MarkovGaussianLocTime,Sznitman2012LectureIso}):
+\begin{2ndRK}
+For any $u>0$ and $x_{0}\in V$, 
+\begin{center}
+$\left(\ell_{x}(\tau_{u}^{x_{0}})+\dfrac{1}{2}\varphi_{x}^{2}\right)_{x\in V}$
+under $\mathbb{P}_{x_{0}}(\cdot \vert \tau_{u}^{x_{0}}<\zeta)\otimes P^{\lbrace x_{0}\rbrace,0}_{\varphi}$
+\end{center}
+has the same law as 
+\begin{center}
+$\left(\dfrac{1}{2}\varphi_{x}^{2}\right)_{x\in V}$
+under $P^{\lbrace x_{0}\rbrace,\sqrt{2u}}_{\varphi}$.
+\end{center}
+\end{2ndRK}
+
+Sabot and Tarrès showed in \cite{SabotTarres2015RK} that the so-called ``magnetized'' reverse Vertex-Reinforced Jump Process provides an inversion of the generalized second Ray-Knight theorem, in the sense that it enables to retrieve the law of $(\ell_x(\tau_u^{x_0}), \varphi^2_x)_{x\in V}$ conditioned on $\left(\ell_x(\tau_u^{x_0})+\frac{1}{2}\varphi^2_x\right)_{x\in V}$. The jump rates of that latter process can be interpreted as the two-point functions of the Ising model associated to the time-evolving weights.
+
+However in \cite{SabotTarres2015RK} the link with the Ising model is only implicit, and a natural question is whether Ray-Knight inversion can be described in a simpler form if we enlarge the state space of the dynamics, and in particular include the ``hidden'' spin variables. 
+
+The answer is positive, and goes through an extension  of the Ray-Knight isomorphism introduced by Lupu \cite{Lupu2014LoopsGFF}, which couples the sign of the GFF to the path of the Markov chain. The Ray-Knight inversion will turn out to take a rather simple form  in Theorem \ref{thm-Poisson} of the present paper, where it will be defined not only through the spin variables but also random currents associated to the field though an extra Poisson Point Process. 
+
+The paper is organised as follows. 
+
+In Section \ref{sec:srk} we recall some background on loop soup isomorphisms and on related couplings and state and prove a signed version of generalized second Ray-Knight theorem. We begin in Section \ref{sec:lejan} by a statement of Le Jan's isomorphism which couples the square of the Gaussian Free Field to the loop soups, and recall how the generalized second Ray-Knight theorem can be seen as its Corollary: for more details see \cite{lejan4}. In Subsection \ref{sec:lupu} we state Lupu's isomorphism which extends Le Jan's isomorphism and couples the  sign of the GFF to the loop soups, using  a  cable graph extension of the GFF and Markov Chain. Lupu's isomorphism yields an interesting realisation of the well-known  FK-Ising coupling,  and provides as well a ``Current+Bernoulli=FK'' coupling lemma \cite{lupu-werner}, which occur in the relationship between the discrete and cable graph versions. We briefly recall those couplings in Sections \ref{fkising} and \ref{randomcurrent}, as they are implicit in this paper. In Section \ref{sec:glupu} we state and prove the generalized second Ray-Knight ``version'' of Lupu's isomorphism, which we aim to invert. 
+
+Section \ref{sec:inversion} is devoted to the statements of inversions of those isomorphisms. We state in Section \ref{sec_Poisson} a signed version of the inversion of the generalized second Ray-Knight theorem through an extra Poisson Point Process, namely Theorem \ref{thm-Poisson}. In Section \ref{sec_dicr_time} we provide a discrete-time description of the process, whereas in Section \ref{sec_jump} we yield  an alternative version of that process through jump rates, which can be seen as an annealed version of the first one. We deduce a signed inversion of Le Jan's isomorphism for loop soups in Section \ref{sec:lejaninv}, and an inversion of the coupling of random current with FK-Ising in Section \ref{sec:coupinv}.%We retrieve in Section \ref{sec:back} the so-called ``magnetized'' reverse Vertex-Reinforced Jump Process as a version of %that inversion, annealed as well on the signs of the field. 
+
+Finally Section \ref{sec:proof} is devoted to the proof of Theorem \ref{thm-Poisson}: Section \ref{sec:pfinite} deals with the case of a finite graph without killing measure, and Section \ref{sec:pgen} deduces the proof in the general case.  
+
+\section{Le Jan's and Lupu's isomorphisms}
+\label{sec:srk}
+\subsection{Loop soups and Le Jan's isomorphism}
+\label{sec:lejan}
+The \textit{loop measure} associated to the Markov jump process
+$(X_{t})_{0\leq t<\zeta}$ is defined as follows. Let $\mathbb{P}^{t}_{x,y}$ be the bridge probability measure from 
+$x$ to $y$ in time $t$ (conditionned on $t<\zeta$). Let $p_{t}(x,y)$ be the transition probabilities of 
+$(X_{t})_{0\leq t<\zeta}$. 
+
+Let $\mu_{\rm loop}$ be the measure on time-parametrised nearest-neighbour based loops (i.e. loops with a starting site)
+\begin{displaymath}
+\mu_{\rm loop}=\sum_{x\in V}\int_{t>0}\mathbb{P}^{t}_{x,x} p_{t}(x,x) \dfrac{dt}{t}.
+\end{displaymath}
+The loops will be considered here up to a rotation of parametrisation (with the corresponding pushforward measure induced by $\mu_{\rm loop}$), that is to say a loop $(\gamma(t))_{0\leq t\leq t_{\gamma}}$ will be the same as 
+$(\gamma(T+t))_{0\leq t\leq t_{\gamma}-T}\circ (\gamma(T+t-t_{\gamma}))_{t_{\gamma}-T\leq t\leq t_{\gamma}}$, where $\circ$ denotes the concatenation of paths.
+A \textit{loop soup} of intensity $\alpha>0$, denoted 
+$\mathcal{L}_{\alpha}$, is a Poisson random measure of intensity
+$\alpha \mu_{\rm loop}$. We see it as a random collection of loops in $\mathcal{G}$. Observe that a.s. above each vertex 
+$x\in V$, $\mathcal{L}_{\alpha}$ contains infinitely many trivial "loops" reduced to the vertex $x$. There are also with positive probability non-trivial loop that visit several vertices. 
+
+Let  $L_{.}(\mathcal{L}_{\alpha})$ be the \textit{occupation field} of $\mathcal{L}_{\alpha}$ on $V$ i.e., for all $x\in V$, 
+\begin{displaymath}
+L_x(\mathcal{L}_{\alpha})=
+\sum_{(\gamma(t))_{0\leq t\leq t_{\gamma}}\in\mathcal{L}_{\alpha}}
+\int_{0}^{t_{\gamma}}1_{\{\gamma(t)=x\}} dt.
+\end{displaymath}
+In \cite{LeJan2011Loops} Le Jan shows that for transient Markov jump processes, $L_x(\mathcal{L}_{\alpha})<+\infty$ for all $x\in V$ a.s. For $\alpha=\frac{1}{2}$ he identifies the law of
+$L_.(\mathcal{L}_{\alpha})$:
+\begin{IsoLeJan}
+$L_.(\mathcal{L}_{1/2})=\left(L_x(\mathcal{L}_{1/2})\right)_{x\in V}$ has the same law as
+$\dfrac{1}{2}\varphi^2=\left(\dfrac{1}{2}\varphi_{x}^{2}\right)_{x\in V}$
+under $P_{\varphi}$.
+\end{IsoLeJan}
+
+Let us briefly recall how Le Jan's isomorphism enables one to retrieve the generalized second Ray-Knight theorem stated in Section \ref{SecIntro}: for more details, see for instance \cite{lejan4}. We assume that $\kappa$ is supported by $x_0$: the general case can be dealt with by an argument similar to the proof of Proposition \ref{PropKillingCase}. 
+Let $D=V\setminus\{x_0\}$, and note that the isomorphism in particular implies that $L_.(\mathcal{L}_{1/2})$ conditionally on $L_{x_0}(\mathcal{L}_{1/2})=u$ has the same law as $\varphi^2/2$ conditionally on $\varphi_{x_0}^2/2=u$. 
+
+On the one hand, given the classical energy decomposition, we have $\varphi=\varphi^D+\varphi_{x_0}$, with $\varphi^D$ the GFF associated to the restriction of $\mathcal{E}$ to $D$, where $\varphi^D$ and $\varphi_{x_0}$ are independent. Now $\varphi^2/2$ conditionally on $\varphi_{x_0}^2/2=u$ has the law of $(\varphi^D+\eta\sqrt{2u})^2/2$, where $\eta$ is the sign of $\varphi_{x_0}$, which is independent of $\varphi^D$. But $\varphi^D$ is symmetric, so that the latter also has the law of $(\varphi^D+\sqrt{2u})^2/2$.
+
+On the other hand, the loop soup $\mathcal{L}_{1/2}$ can be decomposed into the two independent loop soups $\mathcal{L}_{1/2}^D$ contained in $D$ and $\mathcal{L}_{1/2}^{(x_0)}$ hitting $x_0$. Now $L_.(\mathcal{L}_{1/2}^D)$ has the law of $(\varphi^D)^2/2$ and  $L_.(\mathcal{L}_{1/2}^{(x_0)})$ conditionally on $L_{x_0}(\mathcal{L}_{1/2}^{(x_0)})=u$ has the law of the occupation field of the Markov chain $\ell(\tau_{u}^{x_{0}})$
+under $\mathbb{P}_{x_{0}}(\cdot \vert \tau_{u}^{x_{0}}<\zeta)$, which enables us to conclude.
+
+\subsection{Lupu's isomorphism}
+\label{sec:lupu}
+As in \cite{Lupu2014LoopsGFF}, we consider the \textit{metric graph} $\tilde{\mathcal{G}}$ associated to $\mathcal{G}$. Each edge $e$ is replaced by a continuous line of length 
+$\frac{1}{2}W_{e}^{-1}$. 
+
+The GFF $\varphi$ on $\mathcal{G}$ with law $P_\varphi$ can be extended to a GFF $\tilde{\varphi}$ on $\tilde{\mathcal{G}}$ as follows. Given $e\in E$, one considers inside $e$ a conditionally independent Brownian bridge, actually a bridge of a $\sqrt{2} \times$ 
+\textit{standard Brownian motion}, of length $\frac{1}{2}W_{e}^{-1}$, with end-values
+$\varphi_{e_{-}}$ and $\varphi_{e_{+}}$. This provides a continuous field on the metric graph which satisfies the spatial Markov property. 
+
+Similarly one can define a standard Brownian motion $(B^{\tilde{\mathcal{G}}})_{0\le t\le \tilde{\zeta}}$ on $\tilde{\mathcal{G}}$, whose trace on $\mathcal{G}$ indexed by the local times at $V$ has the same law as the Markov process $(X_t)_{t\ge0}$ on $V$ with jump rate $W_e$ to an adjacent edge $e$ up to time $\zeta$, as explained in Section 2 of \cite{Lupu2014LoopsGFF}. One can associate a measure on time-parametrized continuous loops $\tilde{\mu}$, and let $\tilde{\mathcal{L}}_{\frac{1}{2}}$ be the Poisson Point Process of loops of intensity $\tilde{\mu}/2$: the discrete-time loops $\mathcal{L}_{\frac{1}{2}}$ can be obtained from $\tilde{\mathcal{L}}_{\frac{1}{2}}$ by taking the print of the latter on $V$.
+
+Lupu introduced in \cite{Lupu2014LoopsGFF} an isomorphism linking  the GFF $\tilde{\varphi}$ and the loop soup $\tilde{\mathcal{L}}_{\frac{1}{2}}$ on $\tilde{\mathcal{G}}$. 
+
+\begin{theorem}[Lupu's Isomorphism,\cite{Lupu2014LoopsGFF}]
+\label{thm:Lupu} 
+There is a coupling between the Poisson ensemble of loops $\tilde{\mathcal{L}}_{\frac{1}{2}}$ and $(\tilde{\varphi}_y)_{y\in\tilde{\mathcal{G}}}$ defined above, such that the two following constraints hold: 
+\begin{itemize}
+\item For all $y\in\tilde{\mathcal{G}}$, $L_y(\tilde{{\mathcal{L}}}_{\frac{1}{2}})=\frac{1}{2}\tilde{\varphi}_y^2$
+\item The clusters of loops of $\tilde{\mathcal{L}}_{\frac{1}{2}}$ are exactly the sign clusters of $(\tilde{\varphi}_y)_{y\in\tilde{\mathcal{G}}}$.
+\end{itemize}
+Conditionally on $(|\tilde{\varphi}_y|)_{y\in\tilde{\mathcal{G}}}$, the sign of $\tilde{\varphi}$ on each of its connected components is distributed independently and uniformly in $\{-1,+1\}$. 
+\end{theorem}
+Lupu's isomorphism and the idea of using metric graphs were applied in \cite{Lupu2015ConvCLE} to show that on the discrete half-plane $\mathbb{Z}\times\mathbb{N}$, the scaling limits of outermost boundaries of clusters of loops in loop soups are the Conformal Loop Ensembles $\hbox{CLE}$.
+
+Let $\mathcal{O}(\tilde{\varphi})$ (resp. $\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$) be the set of edges $e\in E$ such that $\tilde{\varphi}$ (resp. $\tilde{\mathcal{L}}_{\frac{1}{2}}$) does not touch $0$ on $e$, in other words such that all the edge $e$ remains in the same sign cluster of $\tilde{\varphi}$ (resp. $\tilde{\mathcal{L}}_{\frac{1}{2}}$). Let $\mathcal{O}(\mathcal{L}_{\frac{1}{2}})$ be the set of edges $e\in E$ that are crossed (i.e. visited consecutively) by the trace of the loops $\mathcal{L}_{\frac{1}{2}}$ on $V$.
+
+In order to translate Lupu's isomorphism back onto the initial graph $\mathcal{G}$, one needs to describe on one hand the distribution of $\mathcal{O}(\tilde{\varphi})$ conditionally on the values of $\varphi$, and on the other hand the distribution of $\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$  conditionally on $\mathcal{L}_{\frac{1}{2}}$ and the cluster of loops $\mathcal{O}(\mathcal{L}_{\frac{1}{2}})$ on the discrete graph $G$. These two distributions are described respectively in Subsections \ref{fkising} and \ref{randomcurrent}, and provide realisations of the  FK-Ising coupling and the ``Current+Bernoulli=FK'' coupling lemma \cite{lupu-werner}.
+
+\subsection{The FK-Ising distribution of $\mathcal{O}(\tilde{\varphi})$ conditionally on $|\varphi|$}
+\label{fkising}
+\begin{lemma}
+\label{lem:fki}
+Conditionally on $(\varphi_{x})_{x\in V}$, $(1_{e\in \mathcal{O}(\tilde{\varphi})})_{e\in E}$
+is a family of independent random variables and
+\begin{displaymath}
+\mathbb{P}\left(e\not\in \mathcal{O}(\tilde{\varphi})\vert \varphi\right)=
+\left\lbrace
+\begin{array}{ll}
+1 & \text{if}~ \varphi_{e_{-}}\varphi_{e_{+}}<0,\\ 
+\exp\left(-2W_{e}\varphi_{e_{-}}\varphi_{e_{+}}\right)
+& \text{if}~ \varphi_{e_{-}}\varphi_{e_{+}}>0.
+\end{array} 
+\right.
+\end{displaymath}
+\end{lemma}
+\begin{proof}
+Conditionally on $(\varphi_{x})_{x\in V}$, are constructed as independent Brownian bridges on each edge, so that $(1_{e\in \mathcal{O}(\tilde{\varphi})})_{e\in E}$ are independent random variables, and it follows from the reflection principle that, if $\varphi_{e_{-}}\varphi_{e_{+}}>0$, then 
+$$\mathbb{P}\left(e\not\in \mathcal{O}(\tilde{\varphi})\vert \varphi\right)=\dfrac{\exp\left(-\frac{1}{2}W_{e}(\varphi_{e_{-}}+\varphi_{e_{+}})^{2}\right)}
+{\exp\left(-\frac{1}{2}W_{e}(\varphi_{e_{-}}-\varphi_{e_{+}})^{2}\right)}=\exp\left(-2W_{e}\varphi_{e_{-}}\varphi_{e_{+}}\right).$$
+\end{proof}
+
+Let us now recall how the conditional probability in Lemma \ref{lem:fki} yields a realisation of the FK-Ising coupling. 
+
+ Assume $V$ is finite. Let $(J_{e})_{e\in E}$ be a family of positive weights. An \textit{Ising model} on $V$ with interaction constants $(J_{e})_{e\in E}$ is a
+probability on configuration of spins $({\sigma}_{x})_{x\in V}\in \{+1,-1\}^V$ such that
+\begin{displaymath}
+\mathbb{P}^{\rm Isg}_{J}((\sigma_x)_{x\in V})=
+\dfrac{1}{\mathcal{Z}^{\rm Isg}_{J}}\exp\left(\sum_{e\in E}
+J_{e}\sigma_{e_{+}}\sigma_{e_{-}}\right).
+\end{displaymath}
+An \textit{FK-Ising random cluster model} with weights
+$(1-e^{-2J_{e}})_{e\in E}$ is a random configuration of open (value $1$) and closed
+edges (value $0$) such that
+\begin{displaymath}
+\mathbb{P}^{\rm FK-Isg}_{J}((\omega_{e})_{e\in E})=
+\dfrac{1}{\mathcal{Z}^{\rm FK-Isg}_{J}}
+2^{\sharp~\text{clusters}}
+\prod_{e\in E}(1-e^{-2J_{e}})^{\omega_{e}}(e^{-2J_{e}})^{1-\omega_{e}},
+\end{displaymath}
+where "$\sharp~\text{clusters}$" denotes the number of clusters created by open edges.
+
+The well-known FK-Ising and Ising coupling reads as follows.
+\begin{proposition}[FK-Ising and Ising coupling]
+\label{FK-Ising}
+Given an FK-Ising model, sample on each cluster an independent uniformly distributed spin. The spins are then distributed according to the Ising model. Conversely, given a spins configuration
+$\hat{\sigma}$ following the Ising distribution, consider each edge $e$, such that
+$\hat{\sigma}_{e_{-}}\hat{\sigma}_{e_{+}}<0$, closed, and each edge $e$, such that
+$\hat{\sigma}_{e_{-}}\hat{\sigma}_{e_{+}}>0$ open with probability
+$1-e^{-2J_{e}}$. Then the open edges are distributed according to the FK-Ising model.
+The two couplings between FK-Ising and Ising are the same.
+\end{proposition}
+
+
+Consider the GFF $\varphi$ on $\mathcal{G}$ distributed according to $P_{\varphi}$. Let
+$J_{e}(\vert\varphi\vert)$ be the random interaction constants
+\begin{displaymath}
+J_{e}(\vert\varphi\vert)=W_{e}\vert\varphi_{e_{-}}\varphi_{e_{+}}\vert.
+\end{displaymath}
+
+Conditionally on $\vert\varphi\vert$,
+$(\operatorname{sign}(\varphi_{x}))_{x\in V}$ follows an Ising distribution with interaction constants $(J_{e}(\vert\varphi\vert))_{e\in E}$:
+indeed, the Dirichlet form (\ref{Dirichlet-form}) can be written as
+\begin{displaymath}
+\mathcal{E}(\varphi,\varphi)=\sum_{x\in V}\kappa_{x} \varphi(x)^{2}+
+\sum_{x\in V}(\varphi(x))^2(\sum_{y\sim x} W_{x,y})-
+2\sum_{e\in E}J_e(\vert\varphi\vert) \operatorname{sign}(\varphi(e_{+}))\operatorname{sign}(\varphi(e_{-})).
+\end{displaymath}
+Similarly, when $\varphi\sim P_{\varphi}^{\{x_0\},\sqrt{2u}}$ has boundary condition $\sqrt{2u}\ge 0$ on $x_0$, then $(\operatorname{sign}(\varphi_{x}))_{x\in V}$ has an Ising distribution
+with interaction $(J_{e}(\vert\varphi\vert))_{e\in E}$ and conditioned on $\sigma_{x_0}=+1$.
+
+Now, conditionally on $\varphi$, $\mathcal{O}(\tilde{\varphi})$ has FK-Ising distribution  with weights
+$(1-e^{-2J_{e}(\vert\varphi\vert)})_{e\in E}$. Indeed, the probability for $e\in\mathcal{O}(\tilde{\varphi})$ conditionally on $\varphi$ is $1-e^{-2J_{e}(\vert\varphi\vert)}$,  by Lemma \ref{lem:fki}, as in Proposition \ref{FK-Ising}. 
+
+Note that, given that $\mathcal{O}(\tilde{\varphi})$ has FK-Ising distribution, the fact that the sign of on its connected components is distributed independently and uniformly in $\{-1,1\}$ can be seen either as a consequence of Proposition \ref{FK-Ising}, or from Theorem \ref{thm:Lupu}.
+
+Given $\varphi=(\varphi_x)_{x\in V}$ on the discrete graph $\mathcal{G}$, we introduce in Definition \ref{def_FK-Ising} as the random set of edges which has the distribution of $\mathcal{O}(\tilde{\varphi})$ conditionally on $\varphi=(\varphi_x)_{x\in V}$. 
+\begin{definition}\label{def_FK-Ising}
+We let $\mathcal{O}(\varphi)$ be a random set of edges which has the distribution of $\mathcal{O}(\tilde{\varphi})$ conditionally on $\varphi=(\varphi_x)_{x\in V}$ given by Lemma \ref{lem:fki}.
+\end{definition}
+\subsection{Distribution of $\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$  conditionally on $\mathcal{L}_{\frac{1}{2}}$ }
+\label{randomcurrent}
+The distribution of $\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$  conditionally on $\mathcal{L}_{\frac{1}{2}}$ can be retrieved by  Corollary 3.6 in \cite{Lupu2014LoopsGFF}, which reads as follows. 
+\begin{lemma}[Corollary 3.6 in \cite{Lupu2014LoopsGFF}]
+\label{36} Conditionally on $\mathcal{L}_{\frac{1}{2}}$, the events $e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$, $e\in E\setminus\mathcal{O}(\mathcal{L}_{\frac{1}{2}})$, are independent and have probability
+\begin{equation}
+\label{cp}
+\exp\left(-2 W_{e} \sqrt{L_{e_{+}}(\mathcal{L}_{\frac{1}{2}})L_{e_{-}}(\mathcal{L}_{\frac{1}{2}})}\right).
+\end{equation}
+\end{lemma}
+This result gives rise, together with Theorem \ref{thm:Lupu}, to the following discrete version of Lupu's isomorphism, which is stated without any recourse to the cable graph induced by $\mathcal{G}$. 
+\begin{definition}
+\label{def:out}
+Let $(\omega_{e})_{e\in E}\in\lbrace 0,1\rbrace^{E}$ be a percolation defined as follows: conditionally on $\mathcal{L}_{\frac{1}{2}}$, the random variables 
+$(\omega_{e})_{e\in E}$ are independent, and $\omega_{e}$ equals $0$ with conditional probability given by \eqref{cp}.
+
+Let $\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$ the set of edges:
+\begin{displaymath}
+\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})=\mathcal{O}(\mathcal{L}_{\frac{1}{2}})
+\cup \lbrace e\in E\vert \omega_{e}=1\rbrace.
+\end{displaymath}
+\end{definition}
+\begin{proposition}[Discrete version of Lupu's isomorphism, Theorem 1 bis in \cite{Lupu2014LoopsGFF}]
+\label{PropIsoLupuLoops}
+Given a loop soup $\mathcal{L}_{\frac{1}{2}}$, let $\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$ be as in Definition \ref{def:out}.
+Let $(\sigma_{x})_{x\in V}\in\lbrace -1,+1\rbrace^{V}$ be random spins taking constant values on
+clusters induced by $\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$ 
+($\sigma_{e_{-}}=\sigma_{e_{+}}$ if $e\in \mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$) and such that the values on each cluster, conditional on $\mathcal{L}_{\frac{1}{2}}$ and $\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$, are independent and uniformly distributed. Then
+\begin{displaymath}
+\left(\sigma_{x}\sqrt{2 L_{x}(\mathcal{L}_{\frac{1}{2}})}\right)_{x\in V}
+\end{displaymath}
+is a Gaussian free field distributed according to $P_{\varphi}$.
+\end{proposition}
+
+Proposition \ref{PropIsoLupuLoops}  induces the following coupling between FK-Ising and random currents. 
+
+If $V$ is finite, a \textit{random current model} on $\mathcal{G}$ with weights
+$(J_{e})_{e\in E}$ is a random assignment to each edge $e$ of a non-negative integer
+$\hat{n}_{e}$ such that for all $x\in V$,
+\begin{displaymath}
+\sum_{e~\text{adjacent to}~x}\hat{n}_{e}
+\end{displaymath}
+is even, which is called the \textit{parity condition}. The probability of a configuration
+$(n_{e})_{e\in E}$ satisfying the parity condition is
+\begin{displaymath}
+\mathbb{P}^{\rm RC}_{J}(\forall e\in E, \hat{n}_{e}=n_{e})=
+\dfrac{1}{\mathcal{Z}^{\rm RC}_{J}}\prod_{e\in E}\dfrac{(J_{e})^{n_{e}}}{n_{e}!},
+\end{displaymath}
+where actually $\mathcal{Z}^{\rm RC}_{J}=\mathcal{Z}^{\rm Isg}_{J}$. Let
+\begin{displaymath}
+\mathcal{O}(\hat{n})=\lbrace e\in E\vert \hat{n}_{e}>0\rbrace.
+\end{displaymath}
+The open edges in $\mathcal{O}(\hat{n})$ induce clusters on the graph $\mathcal{G}$.
+
+Given a loop soup $\mathcal{L}_{\alpha}$, we denote by $N_{e}(\mathcal{L}_{\alpha})$ the number of times the loops in $\mathcal{L}_{\alpha}$ cross the nonoriented edge $e\in E$. The transience of the Markov jump process $X$ implies that
+$N_{e}(\mathcal{L}_{\alpha})$ is a.s. finite for all $e\in E$. If $\alpha=\frac{1}{2}$, we have the following identity (see for instance \cite{Werner2015}):
+
+\begin{LoopsRC}
+Assume $V$ is finite and consider the loop soup $\mathcal{L}_{\frac{1}{2}}$. Conditionally on the occupation field $(L_{x}(\mathcal{L}_{\frac{1}{2}}))_{x\in V}$, 
+$(N_{e}(\mathcal{L}_{\frac{1}{2}}))_{e\in E}$ is distributed as a random current model with weights 
+$\left(2W_{e}\sqrt{L_{e_{-}}(\mathcal{L}_{\frac{1}{2}})L_{e_{+}}
+(\mathcal{L}_{\frac{1}{2}})}\right)_{e\in E}$. If $\varphi$ is the GFF on $\mathcal{G}$ given by Le Jan's or Lupu's isomorphism, then these weights are
+$(J_{e}(\vert\varphi\vert))$.
+\end{LoopsRC}
+
+Conditionally on the occupation field 
+$(L_{x}(\mathcal{L}_{\frac{1}{2}}))_{x\in V}$, 
+$\mathcal{O}(\mathcal{L}_{\frac{1}{2}})$ are the edges occupied by a random current and 
+$\mathcal{O}_{+}(\mathcal{L}_{\frac{1}{2}})$ the edges occupied by FK-Ising. 
+Lemma \ref{lem:fki} and Proposition \ref{PropIsoLupuLoops} imply the following coupling, as noted by Lupu and Werner in 
+\cite{lupu-werner}.
+
+\begin{proposition}[Random current and FK-Ising coupling, 
+\cite{lupu-werner}]
+\label{RCFKIsing}
+Assume $V$ is finite. Let $\hat{n}$ be a random current on $\mathcal{G}$ with weights
+$(J_{e})_{e\in E}$. Let $(\omega_{e})_{e\in E}\in\lbrace 0,1\rbrace^{E}$ be an independent percolation, each edge being opened (value $1$) independently with probability 
+$1-e^{-J_{e}}$. Then
+\begin{displaymath}
+\mathcal{O}(\hat{n})\cup\lbrace e\in E\vert \omega_{e}=1\rbrace
+\end{displaymath}
+is distributed like the open edges in an FK-Ising with weights 
+$(1-e^{-2 J_{e}})_{e\in E}$.
+\end{proposition}
+ 
+%\end{IsgFKIsg}
+\subsection{Generalized second Ray-Knight ``version'' of Lupu's isomorphism}\label{sec:glupu}
+We are now in a position to state the coupled version of the second Ray-Knight theorem.
+\begin{theorem}
+\label{Lupu}
+%Assume that the set of vertices $V$ is finite, and 
+%La condition de finitude est ici inutile
+Let $x_{0}\in V$. Let $(\varphi_{x}^{(0)})_{x\in V}$ with distribution $P_{\varphi}^{\lbrace x_{0}\rbrace,0}$, and define $\mathcal{O}(\varphi^{(0)})$ as in Definition \ref{def_FK-Ising}. 
+Let $X$ be an independent Markov jump process started from $x_{0}$. 
+
+Fix $u>0$. If $\tau_{u}^{x_{0}}<\zeta$, we 
+let $\mathcal{O}_{u}$ be the random subset of $E$ which contains $\mathcal{O}(\varphi_{x}^{(0)})$, the edges used by the path $(X_{t})_{0\leq t\leq \tau_{u}^{x_{0}}}$, and additional edges $e$ opened conditionally independently with probability
+\begin{displaymath}
+1-e^{W_{e}\vert\varphi_{e_{-}}^{(0)}\varphi_{e_{+}}^{(0)}\vert - 
+W_{e}\sqrt{(\varphi_{e_{-}}^{(0)2}+2\ell_{e_{-}}(\tau_{u}^{x_{0}}))
+(\varphi_{e_{+}}^{(0)2}+2\ell_{e_{+}}(\tau_{u}^{x_{0}}))}}.
+\end{displaymath}
+We let $\sigma\in\lbrace -1,+1\rbrace^{V}$ be random spins sampled uniformly independently on each cluster induced by
+$\mathcal{O}_{u}$, pinned at $x_0$, i.e. $\sigma_{x_0}=1$, and define
+\begin{displaymath}
+\varphi_{x}^{(u)}:=\sigma_{x}\sqrt{\varphi_{x}^{(0)2}+2\ell_{x}(\tau_{u}^{x_{0}})}.
+\end{displaymath}
+
+Then, conditionally on $\tau_{u}^{x_{0}}<\zeta$, $\varphi^{(u)}$ has  distribution $P_{\varphi}^{\lbrace x_{0}\rbrace,\sqrt{2u}}$, and
+$\mathcal{O}_{u}$ has distribution $\mathcal{O}(\varphi^{(u)})$ conditionally on $\varphi^{(u)}$.
+\end{theorem}
+\begin{remark}
+One consequence of that coupling is that the path $(X_{s})_{s\le \tau_{u}^{x_{0}}}$ stays in the 
+positive connected component of ${x_0}$ for $\varphi^{(u)}$. This yields a coupling between the range
+of the Markov chain and the sign component of $x_{0}$ inside a GFF $P_{\varphi}^{\lbrace x_{0}\rbrace,\sqrt{2u}}$.
+\end{remark}
+
+\noindent{\it Proof of Theorem \ref{Lupu}:~}
+The proof is based on
+\cite{Lupu2014LoopsGFF}.  Let $D=V\setminus\{x_0\}$, and let $\tilde{\mathcal{L}}_{\frac{1}{2}}$ be the loop soup of intensity $1/2$ on the cable graph $\tilde{\mathcal{G}}$, which we decompose into $\tilde{\mathcal{L}}_{\frac{1}{2}}^{(x_0)}$ (resp. $\tilde{\mathcal{L}}_{\frac{1}{2}}^{D}$) the loop soup hitting (resp. not hitting) $x_0$, which are independent. We let $\mathcal{L}_{\frac{1}{2}}$ and $\mathcal{L}_{\frac{1}{2}}^{(x_0)}$ (resp.  $\mathcal{L}_{\frac{1}{2}}^{D}$) be the prints of these loop soups on $V$ (resp. on $D=V\setminus\{x_0\}$). We condition on $L_{x_0}(\mathcal{L}_{\frac{1}{2}})=u$. 
+
+Theorem \ref{thm:Lupu} implies (recall also Definition \ref{def_FK-Ising}) that we can couple $\tilde{\mathcal{L}}_{\frac{1}{2}}^{D}$ with $\varphi^{(0)}$ so that 
+$L_x(\mathcal{L}_{\frac{1}{2}}^{D})=\varphi_x^{(0)2}/2$ for all $x\in V$, and 
+$\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})=\mathcal{O}(\varphi^{(0)})$. 
+
+Define 
+$\varphi^{(u)}=(\varphi^{(u)}_x)_{x\in V}$ from 
+$\tilde{\mathcal{L}}_{\frac{1}{2}}$ by, for all $x\in V$, 
+\begin{equation*}
+\label{abs}
+|\varphi_x^{(u)}|=\sqrt{2L_x(\mathcal{L}_{\frac{1}{2}})}
+\end{equation*}
+and $\varphi_x^{(u)}=\sigma_x|\varphi_x^{(u)}|$, where $\sigma\in\{-1,+1\}^V$ are random spins sampled uniformly independently on each cluster induced by $\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})$, pinned at $x_0$,  i.e. $\sigma_{x_0}=1$. Then, by Theorem \ref{thm:Lupu}, $\varphi^{(u)}$ has distribution $P_{\varphi}^{\lbrace x_{0}\rbrace,\sqrt{2u}}$.
+
+For all $x\in V$, we have
+$$L_x(\tilde{\mathcal{L}}_{\frac{1}{2}})=\frac{\varphi_x^{(0)2}}{2}+L_x(\mathcal{L}_{\frac{1}{2}}^{(x_0)}).$$
+
+On the other hand, conditionally on $L_.(\mathcal{L}_{\frac{1}{2}})$,
+\begin{align*}
+&\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})\,|\,
+e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}^D)\cup\mathcal{O}(\mathcal{L}_{\frac{1}{2}}))
+=\frac{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}))}{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}^D)\cup\mathcal{O}(\mathcal{L}_{\frac{1}{2}}))}=
+\frac{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})\,|\,
+e\not\in\mathcal{O}(\mathcal{L}_{\frac{1}{2}}))}{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}^D)\,|\,
+e\not\in\mathcal{O}(\mathcal{L}_{\frac{1}{2}}))}\\
+&=\frac{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}})\,|\,
+e\not\in\mathcal{O}(\mathcal{L}_{\frac{1}{2}}))}{\mathbb{P}(e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}^D)\,|\,
+e\not\in\mathcal{O}(\mathcal{L}_{\frac{1}{2}}^D))}
+=\exp\left(-W_e\sqrt{L_{e_-}(\mathcal{L}_{\frac{1}{2}})L_{e_+}(\mathcal{L}_{\frac{1}{2}})}
++W_e\sqrt{L_{e_-}(\mathcal{L}_{\frac{1}{2}}^D)L_{e_+}(\mathcal{L}_{\frac{1}{2}}^D)}\right),
+\end{align*}
+where we use in the third equality that the event $e\not\in\mathcal{O}(\tilde{\mathcal{L}}_{\frac{1}{2}}^D)$ is measurable with respect to the $\sigma$-field generated by $\tilde{\mathcal{L}}_{\frac{1}{2}}^D$, which is independent of $\tilde{\mathcal{L}}_{\frac{1}{2}}^{(x_0)}$, and where we use Lemma \ref{36} in the fourth equality, for $\tilde{\mathcal{L}}_{\frac{1}{2}}$ and for $\tilde{\mathcal{L}}_{\frac{1}{2}}^D$. 
+
+We conclude the proof by observing that  $\mathcal{L}_{\frac{1}{2}}^{(x_0)}$ conditionally on $L_{x_0}(\mathcal{L}_{\frac{1}{2}}^{(x_0)})=u$ has the law of the occupation field of the Markov chain $\ell(\tau_{u}^{x_{0}})$
+under $\mathbb{P}_{x_{0}}(\cdot \vert \tau_{u}^{x_{0}}<\zeta)$.
+{\hfill $\Box$}
+\section{Inversion of the signed isomorphism}
+\label{sec:inversion}
+In \cite{SabotTarres2015RK}, Sabot and Tarrès give a new proof of the generalized second Ray-Knight theorem together with a construction that inverts the coupling between the square of a GFF conditioned by its value at a vertex $x_{0}$ and the excursions of the jump process $X$ from and to $x_{0}$. 
+In this paper we are interested in inverting the coupling of Theorem \ref{Lupu} with the signed GFF : more precisely, we want to describe the law of
+$(X_t)_{0\le t\le \tau_u^{x_0}}$ conditionally on $\varphi^{(u)}$. 
+
+We present in section \ref{sec_Poisson}
+an inversion involving an extra Poisson process. We provide in Section \ref{sec_dicr_time} a discrete-time description of the process and in Section \ref{sec_jump} an alternative description via jump rates.  Sections \ref{sec:lejaninv} and \ref{sec:coupinv} are respectively dedicated to a signed inversion of Le Jan's isomorphism for loop soups, and to an inversion of the coupling of random current with FK-Ising.
+
+\subsection{A description via an extra Poisson point process}\label{sec_Poisson}
+%In this section, we give an explicit description of the law of $((X_{s}))_{s\le \tau_{u}^{x_{0}}}$ conditionally on the signed GFF $(\varphi^{(u)})$.
+
+%More start by a description of the process. 
+Let $(\check \varphi_x)_{x\in V}$ be a real function on $V$ such that
+$\check\varphi_{x_0}=+\sqrt{2u}$ for some $u>0$. Set 
+$$
+\check \Phi_x=\vert\check\varphi_x\vert, \;\;\sigma_x=\operatorname{sign}(\check\varphi_x).
+$$
+We define a self-interacting process $(\check X_t, (\check n_e(t))_{e\in E})$ living on $V\times {\mathbb{N}}^E$ as follows.
+The process $\check X$ starts at $\check X(0)=x_0$.
+For $t\ge 0$, we set
+$$
+\check\Phi_x(t)=\sqrt{(\check\Phi_x)^2-2\check\ell_x(t)},\;\;\forall x\in V,\;\;\;\hbox{ and }\;
+J_e(\check\Phi(t))=W_e \check\Phi_{e-}(t)\check\Phi_{e+}(t), \;\; \forall e\in E.
+$$
+where $\check\ell_x(t)=\int_0^t\indic_{\{\check X_s=x\}}ds$ is the local time of the process $\check X$ up to time $t$.
+%$$
+%J_e(\Phi(t))=W_e \Phi_{e-}(t)\Phi_{e+}(t).
+%$$
+Let $(N_e(u))_{u\ge 0}$ be an independent Poisson Point Processes on $\R_+$ with intensity 1, for each edge $e\in E$.
+We set
+$$
+\check n_e(t)=
+\begin{cases} 
+N_e(2J_e(t)), &\hbox{ if } \sigma_{e-}\sigma_{e+}=+1,
+\\
+0, &\hbox{ if } \sigma_{e-}\sigma_{e+}=-1.
+\end{cases}
+$$
+We also denote by $\check \ccc(t)\subset E$ the configuration of edges such that $\check n_e(t)>0$.
+As time increases, the interaction parameters $J_{e}(\check\Phi(t))$ decreases for the edges neighboring $\check X_t$, and at some random times $\check n_e(t)$ may drop
+by 1.
+The process $(\check X_t)_{t\ge 0}$ is defined as the process that jumps only at the times when one of the $\check n_e(t)$ drops by 1, as follows:
+\begin{itemize}
+\item
+if $\check n_e(t)$ decreases by 1 at time $t$, but does not create a new cluster in $\check \ccc_t$, then $\check X_t$ crosses the edge
+$e$ with probability ${1/2}$ or does not move with probability ${1/2}$,
+\item
+if $\check n_e(t)$ decreases by 1 at time $t$, and does create a new cluster in $\check \ccc_t$,
+ then $\check X_t$ moves/or stays with probability 1 on the unique extremity
+of $e$ which is in the cluster of the origin $x_0$ in the new configuration.
+\end{itemize}
+We set
+$$
+\check T:=\inf\{t\ge 0,\;\;  \exists x\in V, \hbox{ s. t. } \check\Phi_x(t)=0\},
+$$
+clearly, the process is well-defined up to time $\check T$.
+\begin{proposition}
+For all $0\le t\le \check T$, $\check X_t$ is in the connected component of $x_0$ of the configuration $\check \ccc(t)$. If $V$ is finite,
+the process ends at $x_0$, i.e. $\check X_{\check T}=x_0$.
+\end{proposition}
+
+\begin{theorem}
+\label{thm-Poisson}
+Assume that $V$ is finite.
+With the notation of Theorem \ref{Lupu}, conditioned on $\varphi^{(u)}=\check\varphi$, $(X_{t})_{t\le \tau_{u}^{x_{0}}}$ has the law
+of $(\check X_{\check T-t})_{0\le t\le \check T}$.
+
+Moreover, conditioned on  $\varphi^{(u)}=\check\varphi$, $(\varphi^{(0)},\mathcal{O}(\varphi^{(0)}))$ has the law of
+$(\sigma'_x\check\Phi_x(\check T), \check\ccc(\check T))$ where $(\sigma'_x)_{x\in V}\in \lbrace -1,+1\rbrace^{V}$ are random spins sampled uniformly independently on 
+each cluster induced by $\check\ccc(\check T)$,
+with the condition that $\sigma'_{x_0}=+1$.
+% the component of $x_0$ has a + sign.
+
+If $V$ is infinite, then $P_{\varphi}^{\lbrace x_{0}\rbrace, \sqrt{2u}}$-a.s.,
+$\check X_t$ (with the initial condition $\check\varphi=\varphi^{(u)}$)
+ends at $x_0$, i.e. $\check T<+\infty$ and $\check X_{\check T}=x_0$. 
+All previous conclusions for the finite case still hold.
+\end{theorem}
+
+\subsection{Discrete time description of the process}
+\label{sec_dicr_time}
+
+We give a discrete time description of the process
+$(\check X_t, (\check n_e(t))_{e\in E})$
+that appears in the previous section.
+Let $t_{0}=0$ and $0<t_{1}<\dots<t_{j}$ be the stopping times when one of the
+stacks $n_e(t)$ decreases by $1$, where $t_{j}$ is the time when one of the stacks is completely depleted. It is elementary to check the following:
+
+\begin{proposition}
+\label{PropDiscrTime}
+The discrete time process
+$(\check X_{t_{i}}, (\check n_e(t_{i}))_{e\in E})_{0\leq i\leq j}$ is a stopped Markov process. The transition from time $i-1$ to $i$ is the following:
+\begin{itemize}
+\item first chose $e$ an edge adjacent to the vertex $\check X_{t_{i-1}}$
+according to a probability proportional to $\check n_e(t_{i-1})$,
+\item decrease the stack $\check n_e(t_{i-1})$ by 1,
+\item
+if decreasing $\check n_e(t_{i-1})$ by 1 does not create a new cluster in 
+$\check \ccc_{t_{i-1}}$, then $\check X_{t_{i-1}}$ crosses the edge
+$e$ with probability ${1/2}$ or does not move with probability ${1/2}$,
+\item
+if decreasing $\check n_e(t_{i-1})$ by 1 does create a new cluster in 
+$\check \ccc_{t_{i-1}}$,
+ then $\check X_{t_{i-1}}$ moves/or stays with probability 1 on the unique extremity of $e$ which is in the cluster of the origin $x_0$ in the new configuration.
+\end{itemize}
+\end{proposition}
+
+\subsection{An alternative description via jump rates}\label{sec_jump}
+We provide an alternative description of the process $(\check X_t, \check \ccc(t))$ that appears in Section \ref{sec_Poisson}.
+
+\begin{proposition}\label{prop-jump}
+The process $(\check X_t, \check\ccc(t))$ defined in section \ref{sec_Poisson} can be alternatively described by its jump rates :
+conditionally on its past at time $t$, if $\check X_t=x$, $y\sim x$ and $\lbrace x,y\rbrace\in \check{\mathcal{C}}(t)$, then
+\begin{itemize}
+\item[(1)]  $\check X$ jumps to $y$ without modification of $\check\ccc(t)$ at rate
+\begin{displaymath}
+W_{x,y}\dfrac{\check\Phi_{y}(t)}{\check\Phi_{x}(t)}
+\end{displaymath}
+\item[(2)]  the edge $\lbrace x,y\rbrace$ is closed in $\check\ccc(t)$ at rate
+\begin{displaymath}
+2W_{x,y}\dfrac{\check\Phi_{y}(t)}{\check\Phi_{x}(t)}
+\left(e^{2W_{x,y}\check\Phi_{x}(t)\check\Phi_{y}(t)}-1\right)^{-1}
+\end{displaymath}
+and, conditionally on that last event:
+
+- if $y$ is connected to
+$x$ in the configuration $\check \ccc(t)\setminus\{x,y\}$, then $\check X$ simultaneously jumps to $y$ with probability $1/2$ and stays at $x$ with probability $1/2$
+
+- otherwise $\check X_t$ moves/or stays with probability 1 on the unique extremity
+of $\{x,y\}$ which is in the cluster of the origin $x_0$ in the new configuration.
+\end{itemize}
+\end{proposition}
+\begin{remark}
+It is clear from this description that the joint process $(\check X_t, \check \ccc(t), \check \Phi(t))$ is Markov process, and well defined up to the time
+$$
+\check T:=\inf\{t\ge 0:\;\;  \exists x\in V, \hbox{ s.t. } \check\Phi_x(t)=0\}.
+$$
+\end{remark}
+
+\begin{remark}
+One can also retrieve the process in Section \ref{sec_Poisson} from the representation in Proposition \ref{prop-jump} as follows.
+Consider the representation of Proposition \ref{prop-jump} on the graph where each edge $e$ is replaced by a large number $N$ of 
+parallel edges with conductance $W_e/N$. Consider now $\check n^{(N)}_{x,y}(t)$ the number of parallel edges that are open in the configuration
+$\check \ccc(t)$ between $x$ and $y$. Then, when $N\to\infty$, $(\check n^{(N)}(t))_{t\ge0}$,  converges in law to 
+$(\check n(t))_{t\ge0}$,  defined in section \ref{sec_Poisson}.
+\end{remark}
+
+\noindent {\it Proof of Proposition \ref{prop-jump}:~}
+Assume $\check X_t=x$, fix $y\sim x$ and let $e=\{x,y\}$. Recall that $\{x,y\}\in\check\ccc(t)$ iff $\check n_e(t)\ge1$.
+
+Let us first prove (1):
+\begin{align*}
+&\Pb\left(\check X\text{ jumps to $y$ on time interval $[t,t+\Delta t]$ without modification of }\check\ccc(t)\,|\,\{x,y\}\in\check\ccc(t)\right)\\
+&=\frac{1}{2}\Pb\left(\check n_e(t)-\check n_e(t+\Delta t)=1,\,\check n_e(t+\Delta t)\ge1\,|\,\check n_e(t)\ge1\right)\\
+&=\frac{1}{2}(2J_e(t)-2J_e(t+\Delta t))+o(\Delta t)=W_{xy}\dfrac{\check\Phi_{y}(t)}{\check\Phi_{x}(t)}\Delta t+o(\Delta t).
+\end{align*}
+Similarly, (2) follows from the following computation:
+\begin{align*}
+&\Pb\left(\{x,y\}\text{ closed in }\check\ccc(t+\Delta t)\,|\,\{x,y\}\in\check\ccc(t)\right)
+=\Pb\left(n_e(t+\Delta t)=0\,|\,\check n_e(t)\ge1\right)\\
+&=\frac{\Pb\left(\check n_e(t)=1,\,\check n_e(t+\Delta t)=0\right)}{\Pb\left(\check n_e(t)\ge1\right)}
+=\frac{e^{-2J_e(t)}2J_e(t)}{1-e^{-2J_e(t)}}(J_e(t)-J_e(t+\Delta t))+o(\Delta t)
+\end{align*}
+{\hfill $\Box$}
+
+We easily deduce from the Proposition \ref{prop-jump} and Theorem \ref{thm-Poisson2} the following alternative inversion of the coupling in Theorem \ref{Lupu}.
+\begin{theorem}\label{thm-jump-rates}
+With the notation of Theorem \ref{Lupu}, conditionally on $(\varphi^{(u)},\mathcal{O}_{u})$, $(X_{t})_{t\le \tau_{u}^{x_{0}}}$ has the law
+of self-interacting process $(\check X_{\check T-t})_{0\le t\le \check T}$ defined by jump rates of Proposition \ref{prop-jump}
+starting with 
+$$
+\check \Phi_x=\sqrt{(\varphi_{x}^{(0)})^2+2\ell_{x}(\tau_{u}^{x_{0}})} \hbox{ and } \check\ccc(0)=\mathcal{O}_{u}.
+$$
+Moreover $(\varphi^{(0)},\mathcal{O}(\varphi^{(0)}))$ has the same law as
+$(\sigma'\check\Phi(T), \check\ccc(\check T))$ where $(\sigma'_x)_{x\in V}$ is a configuration of signs obtained by picking a sign at random independently on
+each connected component of $\check\ccc(T)$, with the condition that the component of $x_0$ has a + sign.
+
+\end{theorem}
+
+%\subsection{Back to the ``magnetized'' reverse Vertex-Reinforced Jump Process in \cite{SabotTarres2015RK}}
+%\label{sec:back}
+\subsection{A signed version of Le Jan's isomorphism for loop soup}
+\label{sec:lejaninv}
+Let us first recall how the loops in $\mathcal{L}_{\alpha}$ are connected to the excursions of the jump process $X$.
+\begin{proposition}[From excursions to loops]
+\label{PropPD}
+Let $\alpha>0$ and $x_{0}\in V$. 
+$L_{x_{0}}(\mathcal{L}_{\alpha})$ is distributed according to a Gamma
+$\Gamma(\alpha, G(x_{0},x_{0}))$ law, where $G$ is the Green's function. Let $u>0$, and consider the path $(X_{t})_{0\leq t\leq \tau_{u}^{x_{0}}}$ conditioned on $\tau_{u}^{x_{0}}<\zeta$. Let $(Y_{j})_{j\geq 1}$ be an independent Poisson-Dirichlet partition $PD(0,\alpha)$ of $[0,1]$. Let $S_{0}=0$ and
+\begin{displaymath}
+S_{j}=\sum_{i=1}^{j}Y_{i}.
+\end{displaymath}
+Let
+\begin{displaymath}
+\tau_{j}= \tau_{u S_{j}}^{x_{0}}.
+\end{displaymath}
+Consider the family of paths
+\begin{displaymath}
+\left((X_{\tau_{j-1}+t})_{0\leq t\leq \tau_{j}-\tau_{j-1}}\right)_{j\geq 1}.
+\end{displaymath}
+It is a countable family of loops rooted in $x_{0}$. It has the same law as the family of all the loops in $\mathcal{L}_{\alpha}$ that visit $x_{0}$, conditioned on $L_{x_0}(\mathcal{L}_{\alpha})=u$.
+\end{proposition}
+
+
+Next we describe how to invert the discrete version fo Lupu's isomorphism Proposition \ref{PropIsoLupuLoops} for the loop-soup in the same way as in Theorem \ref{thm-Poisson}.
+
+Let $(\check \varphi_x)_{x\in V}$ be a real function on $V$ such that
+$\check\varphi_{x_0}=+\sqrt{2u}$ for some $u>0$. Set 
+$$
+\check \Phi_x=\vert\check\varphi_x\vert, \;\;\sigma_x=\operatorname{sign}(\check\varphi_x).
+$$
+
+Let $(x_{i})_{1\leq i\leq\vert V\vert}$ be an enumeration of $V$ (which may be infinite).
+We define by induction the self interacting processes
+$((\check X_{i,t})_{1\leq i\leq\vert V\vert}, 
+(\check n_e(t))_{e\in E})$. 
+$\check{T}_{i}$ will denote the end-time for $\check X_{i,t}$, and
+$\check{T}^{+}_{i}=\sum_{1\leq j\leq i}\check{T}_{j}$.
+By definition, $\check{T}^{+}_{0}=0$.
+$L(t)$ will denote
+\begin{displaymath}
+L_{x}(t):=\sum_{1\leq i\leq\vert V\vert}
+\check{\ell}_{x}(i,0\vee(t-\check{T}^{+}_{i})),
+\end{displaymath}
+where $\check{\ell}_{x}(i,t)$ are the occupation times for
+$\check X_{i,t}$.
+For $t\ge 0$, we set
+$$
+\check\Phi_x(t)=\sqrt{(\check\Phi_x)^2-2L_x(t)},\;\;\forall x\in V,\;\;\;\hbox{ and }\;
+J_e(\check\Phi(t))=W_e \check\Phi_{e-}(t)\check\Phi_{e+}(t), \;\; \forall e\in E.
+$$
+The end-times $\check{T}_{i}$ are defined by inductions as
+\begin{displaymath}
+\check{T}_{i}=\inf\lbrace t\geq 0\vert 
+\check{\Phi}_{\check{X}_{i,t}}(t+\check{T}^{+}_{i-1})=0\rbrace.
+\end{displaymath}
+Let $(N_e(u))_{u\ge 0}$ be independent Poisson Point Processes on $\R_+$ with intensity 1, for each edge $e\in E$.
+We set
+$$
+\check n_e(t)=
+\begin{cases} 
+N_e(2J_e(t)), &\hbox{ if } \sigma_{e-}\sigma_{e+}=+1,
+\\
+0, &\hbox{ if } \sigma_{e-}\sigma_{e+}=-1.
+\end{cases}
+$$
+We also denote by $\check \ccc(t)\subset E$ the configuration of edges such that $\check n_e(t)>0$.
+$\check X_{i,t}$ starts at $x_{i}$.
+For $t\in[\check{T}^{+}_{i-1},\check{T}^{+}_{i}]$,
+\begin{itemize}
+\item
+if $\check n_e(t)$ decreases by 1 at time $t$, but does not create a new cluster in $\check \ccc_t$, then $\check X_{i,t-\check{T}^{+}_{i-1}}$ crosses the edge
+$e$ with probability ${1/2}$ or does not move with probability ${1/2}$,
+\item
+if $\check n_e(t)$ decreases by 1 at time $t$, and does create a new cluster in $\check \ccc_t$,
+ then $\check X_{i,t-\check{T}^{+}_{i-1}}$ moves/or stays with probability 1 on the unique extremity
+of $e$ which is in the cluster of the origin $x_i$ in the new configuration.
+\end{itemize}
+%In this evolution, $\check{T}_{i}^{+}$ denotes the first time
+%$\check{\Phi}_{x_{i}}(t)$ attains $0$.
+
+By induction, using Theorem \ref{thm-Poisson}, we deduce the following:
+
+\begin{theorem}
+\label{ThmPoissonLoopSoup}
+Let $\varphi$ be a GFF on $\mathcal{G}$ with the law $P_{\varphi}$.
+If one sets $\check{\varphi}=\varphi$ in the preceding construction, then
+for all $i\in \lbrace 1,\dots,\vert V\vert\rbrace$,
+$\check{T}_{i}<+\infty$, 
+$\check{X}_{i,\check{T}_{i}} = x_{i}$ and the
+path $(\check{X}_{i,t})_{t\leq\check{T}_{i}}$ has the same law as a concatenation in $x_{i}$ of all the loops in a loop-soup
+$\mathcal{L}_{1/2}$ that visit $x_{i}$, but none of the
+$x_{1},\dots,x_{i-1}$. To retrieve the loops out of each path
+$(\check{X}_{i,t})_{t\leq\check{T}_{i}}$, on has to partition it according to
+a Poisson-Dirichlet partition as in Proposition \ref{PropPD}.
+The coupling between the GFF $\varphi$ and the loop-soup obtained from
+$((\check X_{i,t})_{1\leq i\leq\vert V\vert}, 
+(\check n_e(t))_{e\in E})$ is the same as in Proposition
+\ref{PropIsoLupuLoops}.
+\end{theorem}
+
+\subsection{Inverting the coupling of random current with FK-Ising}
+\label{sec:coupinv}
+By combining Theorem \ref{ThmPoissonLoopSoup} and the discrete time
+description of Section \ref{sec_dicr_time}, and by conditionning on the occupation field of the loop-soup, one deduces an inversion of the coupling 
+of Proposition \ref{RCFKIsing} between the random current and FK-Ising.
+
+We consider that the graph $\mathcal{G}=(V,E)$ and that the edges are endowed with weights $(J_{e})_{e\in E}$. Let
+$(x_{i})_{1\le i\le \vert V\vert}$ be an enumeration of $V$.
+Let $\check{\mathcal{C}}(0)$ be a subset of open edges of $E$.
+Let $(\check{n}_{e}(0))_{e\in E}$ be a family of 
+random integers such that
+$\check{n}_{e}(0)=0$ if $e\not\in\check{\mathcal{C}}(0)$, and
+$(\check{n}_{e}(0)-1)_{e\in\check{\mathcal{C}}(0)}$ 
+are independent Poisson random variables, where 
+$\mathbb{E}[\check{n}_{e}(0)-1]=2J_{e}$.
+
+We will consider a family of discrete time self-interacting processes
+$((\check X_{i,j})_{1\leq i\leq \vert V\vert},
+(\check{n}_{e}(j))_{e\in E})$. $\check X_{i,j}$ starts at $j=0$ at
+$x_{i}$ and is defined up to a integer time $\check{T}_{i}$.
+Let $\check{T}_{i}^{+}=\sum_{1\leq k\leq i}\check{T}_{k}$, with
+$\check{T}_{0}^{+}=0$. The end-times $\check{T}_{i}$ are defined by induction as
+\begin{displaymath}
+\check{T}_{i}=
+\inf\Big\lbrace j\geq 0\Big\vert 
+\sum_{e~\text{edge adjacent to}~\check X_{i,j}}
+\check{n}_{e}(j+\check{T}_{i-1}^{+})=0\Big\rbrace.
+\end{displaymath}
+For $j\geq 1$, $\check{\mathcal{C}}(j)$ will denote
+\begin{displaymath}
+\check{\mathcal{C}}(j)=\lbrace e\in E\vert \check{n}_{e}(j)\geq 1\rbrace,
+\end{displaymath}
+which is consistent with the notation $\check{\mathcal{C}}(0)$.
+
+The evolution is the following. For 
+$j\in \lbrace \check{T}_{i-1}^{+}+1,\dots, \check{T}_{i}^{+}\rbrace$, the transition from time $j-1$ to time $j$ is the following:
+\begin{itemize}
+\item first chose an edge $e$ adjacent to the vertex
+$\check{X}_{i,j-1-\check{T}_{i-1}^{+}}$ with probability proportional to
+$\check{n}_{e}(j-1)$,
+\item decrease the stack $\check{n}_{e}(j-1)$ by 1,
+\item if decreasing $\check{n}_{e}(j-1)$ by 1 does not create a new cluster in  $\check{\mathcal{C}}(j-1)$, then 
+$\check{X}_{i,\cdot}$ crosses $e$ with probability $1/2$ and
+does not move with probability $1/2$.
+\item if decreasing $\check{n}_{e}(j-1)$ by 1 does create a new cluster in  $\check{\mathcal{C}}(j-1)$, then $\check{X}_{i,\cdot}$
+moves/or stays with probability 1 on the unique extremity of $e$ which is in the cluster of the origin $x_{i}$ in the new configuration.
+\end{itemize}
+
+Denote $\hat{n}_{e}$ the number of times the edge $e$ has been crossed, in both directions, by all the walks
+$((\check{X}_{i,j})_{0\le j\le \check{T}_{i}})_{1\le i\le\vert V\vert}$.
+
+\begin{proposition}
+A.s., for all $i\in\lbrace 1,\dots,\vert V\vert\rbrace$,
+$\check{T}_{i}<+\infty$ and $\check{X}_{i,\check{T}_{i}}=x_{i}$. If the initial configuration of open edges
+$\check{\mathcal{C}}(0)$ is random and follows an FK-Ising distribution
+with weights $(1-e^{-2 J_{e}})_{e\in E}$, then the family of integers
+$(\hat{n}_{e})_{e\in E}$ is distributed like a random current with weights
+$(J_{e})_{e\in E}$. Moreover, the coupling between the random current and the FK-Ising obtained this way is the same as the one given by
+Proposition \ref{RCFKIsing}.
+\end{proposition}
+
+
+\section{Proof of theorem \ref{thm-Poisson} }
+\label{sec:proof}
+\subsection{Case of finite graph without killing measure}
+\label{sec:pfinite}
+Here we will assume that $V$ is finite and that the killing measure
+$\kappa\equiv 0$.
+
+In order to prove Theorem \ref{thm-Poisson}, we first enlarge the state space of the process $(X_t)_{t\ge 0}$. We define a process
+$(X_t,(n_e(t)))_{t\ge 0}$ living on the space $V\times {\mathbb N}^E$ as follows. Let 
+$\varphi^{(0)}\sim P_{\varphi}^{\{x_0\},0}$ be a GFF pinned at $x_0$.
+%$\varphi\in \R^V$ be a function on $V$ such that $\varphi_{x_0}=0$.
+Let $\sigma_x=\hbox{sign}(\varphi^{(0)}_x)$ be the signs of the GFF with the convention that $\sigma_{x_0}=+1$.
+The process $(X_t)_{t\ge 0}$ is as usual the Markov Jump process starting at $x_0$ with jump rates $(W_e)$. We set
+\begin{equation}
+\label{Phi-J}
+\Phi_x=\vert\varphi^{(0)}_x\vert, \;\; \Phi(t)=\sqrt{\Phi_x^2+2\ell_x(t)}, \;\;\;\forall x\in V, \;\;\; J_e(\Phi(t))=W_e \Phi_{e-}(t)\Phi_{e+}(t), \;\;\; \forall e\in E.
+\end{equation}
+The initial values $(n_e(0))$ are choosen independently on each edge with distribution
+$$
+n_e(0)\sim
+\begin{cases}
+0,& \hbox{ if $\sigma_{e-}\sigma_{e+}=-1$}
+\\
+\mathcal{P}(2J_e(\Phi)),& \hbox{ if $\sigma_{e-}\sigma_{e+}=+1$}
+\end{cases}
+$$
+where ${\mathcal{P}}(2J_e(\Phi))$ is a Poisson random variable with parameter $2J_e(\Phi)$. Let $((N_e(u))_{u\ge 0})_{e\in E}$ be independent Poisson point processes 
+on $\R_+$ with intensity 1. We define the process $(n_e(t))$ by
+$$
+n_e(t)=n_e(0)+N_e(J_e(\Phi(t)))-N_e(J_e(\Phi))+K_e(t),
+$$
+where $K_e(t)$ is the number of crossings of the edge $e$ by the Markov jump process $X$ before time $t$.
+\begin{remark}
+Note that compared to the process defined in Section \ref{sec_Poisson}, the speed of the Poisson process is related to $J_e(\Phi(t))$ and not $2J_e(\Phi(t))$.
+\end{remark}
+We will use the following notation
+$$
+\ccc(t)=\{e\in E, \;\; n_e(t)>0\}.
+$$
+Recall that $\tau_u^{x_0}=\inf\{t\ge 0, \; \ell_{x_0}(t)=u\}$ for $u>0$. To simplify notation, we will write $\tau_u$ for $\tau_u^{x_0}$ in the sequel.
+We define $\varphi^{(u)}$ by
+$$
+\varphi^{(u)}_x=\sigma_x\Phi(\tau_u), \;\;\; \forall x\in V,
+$$
+where  $(\sigma_x)_{x\in V}\in \lbrace -1,+1\rbrace^{V}$ are random spins sampled uniformly independently on 
+each cluster induced by $\check\ccc(\check T)$ with the condition that $\sigma_{x_0}=+1$.
+
+\begin{lemma}
+\label{end-distrib}
+The random vector $(\varphi^{(0)}, \ccc(0), \varphi^{(u)}, \ccc(\tau_u^{x_0}))$ thus defined has the same distribution
+ as $(\varphi^{(0)}, \ooo(\varphi^{(0)}), \varphi^{(u)}, \ooo_u)$ defined in Theorem \ref{Lupu}.
+\end{lemma}
+\begin{proof}
+It is clear from construction, that $\ccc(0)$ has the same law as $\ooo(\varphi^{(0)})$ (cf Definition \ref{def_FK-Ising}), the FK-Ising configuration coupled with the signs of
+$\varphi^{(0)}$ as in Proposition \ref{FK-Ising}. Indeed, for each edge $e\in E$ such that $\varphi^{(0)}_{e-}\varphi^{(0)}_{e+}>0$, the probability that
+$n_e(0)>0$ is $1-e^{-2J_e(\Phi)}$.
+Moreover, conditionally on $\ccc(0)=\ooo(\varphi^{(0)})$, $\ccc(\tau_u^{x_0})$ has the same law as $\ooo_u$ defined in Theorem \ref{Lupu}. Indeed, $\ccc(\tau_u^{x_0})$
+is the union of the set $\ccc(0)$, the set of edges crossed by the process $(X_u)_{u\le \tau_u^{x_0}}$, and the additional edges such that $N_e(J_e(\tau_u^{x_0}))-N_e(J_e(\Phi))>0$.
+Clearly $N_e(J_e(\tau_u^{x_0}))-N(J_e(\Phi))>0$ independently with probability $1-e^{-(J_e(\Phi(\tau_u^{x_0}))-J_e(\Phi))}$ which coincides with the probability given in
+Theorem \ref{Lupu}. 
+\end{proof}
+
+We will prove the following theorem that, together with Lemma \ref{end-distrib}, contains the statements of both Theorem \ref{Lupu} and \ref{thm-Poisson}.
+\begin{theorem}\label{thm-Poisson2}
+%Let $(\sigma_x)\in \{\pm 1\}^V$ be be obtained by piking random signs on 
+%connected components of ${\mathcal{C}}(\tau_u^{x_0})$ with the convention that the component of $x_0$ has a positive sign.
+%Let
+%$$
+%\varphi^{(u)}_x=\sigma_x \Phi_x(\tau_u^{x_0}).
+%$$
+The random vector $\varphi^{(u)}_x$ is a GFF distributed according to $P_{\varphi}^{\{x_0\},\sqrt{2u}}$.
+% and ${\mathcal{C}}(\tau_u^{x_0})$ is coupled with $(\sigma_x)$ as 
+%FK-Ising configuration with interaction $(J_e(\vert \varphi^{(u)}))$. 
+Moreover, conditionally on $\varphi^{(u)}_x=\check \varphi$, the process 
+$$(X_{t},(n_{e}(t))_{e\in E})_{t\le \tau_u^{x_0}}$$ 
+has the law of the process $(\check X_{\check T-t },(\check n_e(\check T -t))_{e\in E})_{t\le \check T}$
+described in section \ref{sec_Poisson}.
+\end{theorem} 
+\begin{proof}
+{\bf Step 1 :}
+We start by a simple lemma.
+\begin{lemma}\label{distrib-phi-n}
+The distribution of $(\Phi:=\vert \varphi^{(0)}\vert, n_e(0))$ is given by the following formula for any bounded measurable test function $h$
+\begin{multline*}
+\E\left(h(\Phi, n(0))\right)= \\\sum_{(n_e)\in \N^E} \int_{\R_+^{V\setminus\{x_0\}}} d\Phi  h(\Phi, n) 
+%\exp\left(
+e^{-\demi \sum_{x\in V} W_x(\Phi_x)^2-\sum_{e\in E} J_e(\Phi)}
+%\right) 
+\left(\prod_{e\in E}{\frac{(2J_e(\Phi))^{n_e}}{n_e!}}\right)
+2^{\#\ccc(n_e)-1}.
+\end{multline*}
+where the integral is on the set $\{(\Phi_x)_{x\in V}, \;\; \Phi_x>0\; \forall x\neq x_0,\; \Phi_{x_0}=0\}$ and 
+$d\Phi={\frac{\prod_{x\in V\setminus\{x_0\}} d\Phi_x}{\sqrt{2\pi}^{\vert V\vert -1}}}$  
+and $\#\ccc(n)$ is the number of clusters 
+induced by the edges such that $n_e>0$.
+\end{lemma}
+\begin{proof}
+Indeed, by construction, summing on possible signs of $\varphi^{(0)}$, we have
+\begin{eqnarray}
+\nonumber
+&&\E\left(h(\Phi, n(0))\right)
+\\
+\label{int-eee}&=&\sum_{\sigma_x}
+ \sum_{n\ll \sigma_x}
+ \int_{\R_+^{V\setminus\{x_0\}}} d\Phi  h(\Phi, n) e^{-\demi \eee(\sigma\Phi)}\left(\prod_{e\in E, \; \sigma_{e+}\sigma_{e-}=+1} {e^{-2J_e(\Phi)} (2J_e(\Phi))^{n_e}\over n_e!}\right).
+ \end{eqnarray}
+where the first sum is on the set $\{\sigma_x\in \{+1,-1\}^V, \; \sigma_{x_0}=+1\}$ and the second sum is on the set of
+$\{(n_e)\in \N^E, \; n_e=0\hbox{ if $\sigma_{e-}\sigma_{e+}=-1$}\}$ (we write $n\ll \sigma$ to mean that $n_e$ vanishes on the edges
+such that  $\sigma_{e-}\sigma_{e+}=-1$). Since
+\begin{eqnarray*}
+\demi\eee(\sigma \Phi)&=& \demi\sum_{x\in V} W_x (\Phi_x)^2-\sum_{e\in E} J_e(\Phi)\sigma_{e-}\sigma_{e+}.
+\\
+&=&
+ \demi\sum_{x\in V} W_x (\Phi_x)^2+\sum_{e\in E} J_e(\Phi) 
+ -\sum_{\substack{e\in E\\\sigma_{e-}\sigma_{e+}=+1}} 2J_e(\Phi),
+\end{eqnarray*}
+we deduce that the integrand in (\ref{int-eee}) is equal to
+\begin{eqnarray*}
+ && h(\Phi,n) e^{-\demi \eee(\sigma\Phi)}\left(\prod_{e\in E, \; \sigma_{e+}\sigma_{e-}=+1} {e^{-2J_e(\Phi)} (2J_e(\Phi))^{n_e}\over n_e!}\right)
+ \\
+ &=&
+h(\Phi,n)   e^{-\demi \eee(\sigma\Phi)}e^{-\sum_{e\in E, \; \sigma_{e+}\sigma_{e-}=+1} 2J_e(\Phi)}\left(\prod_{e\in E} {(2J_e(\Phi))^{n_e}\over n_e!}\right)
+ \\
+  &=&
+ h(\Phi,n)  e^{-\demi\sum_{x\in V} W_x (\Phi_x)^2-\sum_{e\in E} J_e(\Phi)}\left(\prod_{e\in E} {(2J_e(\Phi))^{n_e}\over n_e!}\right)
+\end{eqnarray*}
+where we used in the first equality that $n_e=0$ on the edges such that  
+$\sigma_{e+}\sigma_{e-}=-1$.
+Thus,
+\begin{eqnarray*}
+&&\E\left(h(\Phi, n(0))\right)
+\\
+&=&
+\sum_{\sigma_x}\sum_{n_e\ll \sigma_x}
+ \int_{\R_+^{V\setminus\{x_0\}}} d\Phi h(\Phi, n) e^{-\demi\sum_{x\in V} W_x (\Phi_x)^2-\sum_{e\in E} J_e(\Phi)}\left(\prod_{e\in E} {(2J_e(\Phi))^{n_e}\over n_e!}\right).
+\end{eqnarray*}
+%where now the first sum is on the full set $(n_e)\in \N^E$ and the second sum is on the set of signs 
+%$(\sigma_x)_{x\in V}$ such that $\sigma_{x_0}=+1$ and such that $\sigma_x$ is constant on connected components induced by the configuration of edges
+%$\{e\in E, \; n_e>0\}$. 
+Inverting the sum on $\sigma$ and $n$ and summing on the number of possible signs which are constant on  clusters induced by the configuration of edges
+$\{e\in E, \; n_e>0\}$,
+we deduce Lemma \ref{distrib-phi-n}.
+\end{proof}
+\noindent{\bf Step 2 :} We denote by $Z_t=(X_t, \Phi(t), n_e(t))$ the process defined previously and by
+$E_{x_0, \Phi, n_0}$ its law with initial condition $(x_0, \Phi, n_0)$. 
+
+We now introduce a process $\tilde Z_t$, which is a "time reversal" of the process $Z_t$. This process will be related to the 
+process defined in section \ref{sec_Poisson} in Step 4, Lemma \ref{RN}.
+
+For $(\tilde n_e)\in \N^E$ and $(\tilde \Phi_x)_{x\in V}$ such that
+$$
+\tilde \Phi_{x_0}=u, \;\; \tilde \Phi_x>0, \;\; \forall x\neq x_0,
+$$
+we define the process $\tilde Z_t=(\tilde X_t, \tilde\Phi(t), \tilde n_e(t))$  with values in $V\times \R_+^V\times \Z^E$  as follows.
+The process $(\tilde X_t)$ is a Markov jump process with jump rates $(W_e)$ (so that $\tilde X\stackrel{\text{law}}{=} X$), and
+$\tilde\Phi(t)$, $\tilde n_e(t)$ are defined by
+\begin{eqnarray}\label{tildePhi}
+\tilde \Phi_x(t)=\sqrt{\tilde \Phi_x^2-2\tilde \ell_x(t)},\;\;\;\forall x\in V,
+\end{eqnarray}
+where $(\tilde\ell_x(t))$ is the local time of the process $\check X$ up to time $t$,
+\begin{eqnarray}\label{tilden}
+\tilde n_e(t)= \tilde n_e-\left(N_e(J_e(\tilde\Phi))-N_e(J_e(\tilde\Phi(t)))\right)-\tilde K_e(t)
+\end{eqnarray}
+where $((N_e(u))_{u\ge 0})_{e\in E}$ are independent Poisson point process on $\R_+$ with intensity 1 for each edge $e$, and 
+$\tilde K_e(t)$ is the number of crossings of the edge $e$ by the process $\tilde X$ before time $t$.
+We set
+\begin{eqnarray}\label{tildeZ}
+\tilde Z_t=(\tilde X_t, (\tilde \Phi_x(t)), (\tilde n_e(t))),
+\end{eqnarray}
+This process is well-defined up to time
+$$
+\tilde T=\inf\left\{t\ge 0, \;\; \exists x\in V\; \tilde \Phi_x(t)=0\right\}.
+$$
+We denote by $\tilde E_{x_0, \tilde\Phi, \tilde n_0}$ its law. Clearly $\tilde Z_t=(\tilde X_t, \tilde\Phi(t), \tilde n_e(t))$ is a Markov process, we will later on make explicit its generator. 
+
+We have the following change of variable lemma.
+\begin{lemma}\label{change-var}
+For all bounded measurable test functions $F,G,H$
+\begin{multline*}
+\sum_{(n_e)\in \N^E} \int d\Phi F(\Phi, n)E_{x_0,\Phi,n}
+\left( G((Z_{\tau_u^{x_0}-t})_{0\le t\le\tau_u^{x_0}})
+H(\Phi(\tau_u^{x_0}), n(\tau_u^{x_0}))\right)=
+\\
+\sum_{(\tilde n_e)\in \N^E} \int d\tilde\Phi H(\tilde\Phi, \tilde n)
+\tilde E_{x_0,\tilde \Phi,\tilde n}
+\Big(\indic_{\{\tilde X_{\tilde T}=x_0,\tilde n_e(\tilde T)\ge 0\; \forall e\in E\}} 
+G((\tilde Z_{t})_{t\le\check T})
+F(\tilde\Phi(\tilde T), \tilde n(\tilde T))\prod_{x\in V\setminus\{x_0\}} {\tilde \Phi_x\over \tilde\Phi_x(\tilde T) }\Big)
+\end{multline*}
+where the integral on the l.h.s. is on the set $\{(\Phi_x)\in \R_+^V, \;\; \Phi_{x_0}=0\}$ with $d\Phi= {\prod_{x\in V\setminus\{x_0\}} d\Phi_x\over \sqrt{2\pi}^{\vert V\vert -1}}$
+and the integral on the r.h.s. is on the set $\{(\tilde\Phi_x)\in \R_+^V, \;\; \tilde\Phi_{x_0}=u\}$ with 
+$d\tilde\Phi= {\prod_{x\in V\setminus\{x_0\}} d\tilde\Phi_x\over \sqrt{2\pi}^{\vert V\vert -1}}$
+\end{lemma}
+\begin{proof} 
+We start from the left-hand side, i.e. the process, $(X_t, n_e(t))_{0\le\le \tau_u^{x_0}}$.
+We define
+$$
+\tilde X_{t}=X_{\tau_u-t},\;\;\; \tilde n_e(t)=n_e(\tau_u-t),
+$$
+and
+$$
+\tilde \Phi_x=\Phi_x(\tau_u),\;\;\;, \tilde\Phi_x(t)=\Phi_x({\tau_u-t}), 
+$$
+(The law of the processes such defined will later be identified with the law of the processes ($\tilde X_t, \tilde \Phi(t),\tilde n(t))$ defined at the beginning of step 2, cf (\ref{tildePhi}) and (\ref{tilden})).
+We also set
+$$
+\tilde K_e(t)= K_e(\tau_u)-K_e(t),
+$$
+which is also the number of crossings of the edge $e$ by the process $\tilde X$, between time 0 and $t$. With these notations we clearly have
+$$
+\tilde \Phi_x(t)=\sqrt{\tilde \Phi_x^2-2\tilde \ell_x(t)},
+$$
+where $\tilde \ell_x(t)=\int_{0}^t\indic_{\{\tilde X_u=x\}} du$ is the local time of $\tilde X$ at time $t$, and
+$$
+\tilde n_e(t)= \tilde n_e(0)+(N_e(J_e(\tilde \Phi(t)))-N_e(J_e(\tilde\Phi(0))))-\tilde K_e(t).
+$$
+By time reversal, the law of $(\tilde X_t)_{0\le s\le \tilde \tau_u}$ is the same as the law of the Markov Jump process $(X_t)_{0\le t\le \tau_u}$, where
+$\tilde \tau_u=\inf\{t\ge 0, \; \tilde\ell_{x_0}(t)=u\}$. Hence, we see that up to the time $\tilde T=\inf\{t\ge 0, \; \exists x\; \tilde\Phi_x(t)=0\}$, the process
+$(\tilde X_t, (\tilde \Phi_x(t))_{x\in V}, (\tilde n_e(t))_{t\le \tilde T}$ has the same law as the process defined at the beginning of step 2.
+
+Then, following \cite{SabotTarres2015RK},  we make the following change of variables conditionally on the processes $(X_t, (N_e(t)))$
+\begin{eqnarray*}
+(\R_+^*)^V\times \N^E&\mapsto& (\R_+^*)^V\times \N^E\\
+((\Phi_x), (n_e)_{e\in E})&\mapsto&
+((\tilde \Phi_x), (\tilde n_e)_{e\in E})
+\end{eqnarray*}
+which is bijective onto the set 
+\begin{multline*}
+\{\tilde\Phi_x, \;\; \tilde\Phi_{x_0}=\sqrt{2u}, \; \check\Phi_x>\sqrt{2\ell_x(\tau_u^{x_0})}\;\;\forall x\neq x_0\} 
+\\\times \{(\tilde n_e),\;\; \tilde n_e\ge K_e(\tau_u)+(N_e(J_e(\tilde \Phi(\tau_u)))-N_e(J_e(\Phi)))\}
+\end{multline*}
+(Note that we always have $\tilde \Phi_{x_0}=\sqrt{2u}$.) The last conditions on $\tilde \Phi$ and $\tilde n_e$ are equivalent to
+the conditions $\tilde X_{\tilde T}=x_0$ and $\tilde n_e(\tilde T)\ge 0$.
+The Jacobian of the change of variable is given by
+$$
+\prod_{x\in V\setminus\{x_0\}} d\Phi_x=\left({\prod_{x\in V\setminus\{x_0\}} {\check\Phi_x\over \Phi_x} }\right)\prod_{x\in V\setminus\{x_0\}} d\check\Phi_x.
+$$
+
+
+\end{proof}
+
+\noindent
+{\bf Step 3:}
+With the notations of Theorem \ref{thm-Poisson2}, we consider the following expectation for $g$ and $h$ bounded measurable test functions
+\begin{eqnarray}\label{test-functions}
+\E\left( g\left(\left(X_{\tau_u-t}, n_e(\tau_u-t)\right)_{0\le t\le \tau_u}\right)h(\varphi^{(u)})\right)
+\end{eqnarray}
+By definition, we have
+$$
+\varphi^{(u)}=\sigma \Phi(\tau_u),
+$$
+where $(\sigma_x)_{x\in V}\in \{\pm 1\}^V$ are random signs sampled uniformly independently on clusters induced by
+$\{e\in E, \; n_e(\tau_u)>0\}$ and conditioned on the fact that $\sigma_{x_0}=+1$.
+Hence, we define for $(\Phi_x)\in \R_+^V$ and $(n_e)\in \N^E$
+\begin{eqnarray}\label{h}
+H(\Phi, n)=2^{-\#\ccc(n)+1} \sum_{\sigma\ll n} h(\sigma \Phi),
+\end{eqnarray}
+where $\sigma\ll n$ means that the signs $(\sigma_x)$ are constant on clusters of $\{ e\in E, \; n_e>0\}$ and such that $\sigma_{x_0}=+1$.
+Hence, setting
+$$
+F(\Phi, n)=e^{-\demi \sum_{x\in V} W_x (\Phi_x)^2-\sum_{e\in E} J_e(\Phi) }\left(\prod_{e\in E} {(2J_e(\Phi))^{n_e}\over n_e!}\right)
+2^{\#\ccc(n_e)-1},
+$$
+$$
+G\left((Z_{\tau_u-t})_{t\le\tau_u}\right)= g\left(\left(X_{\tau_u-t}, n_e(\tau_u-t)\right)_{t\le \tau_u}\right),
+$$
+using lemma \ref{distrib-phi-n} in the first equality and lemma \ref{change-var} in the second equality, we deduce that
+(\ref{test-functions}) is equal to 
+\begin{multline}
+\label{eq-3.3}
+\E\left( G\left((Z_{\tau_u-t})_{0\le t\le \tau_u}\right)H(\Phi(\tau_u), n(\tau_u)))\right)=
+\\
+\sum_{(n_e)\in \N^E} \int
+%_{\R_+^{V\setminus\{x_0\}}}  
+d\Phi
+F(\Phi, n) E_{x_0, \Phi,n}\left(G\left((Z_{\tau_u-t})_{t\le\tau_u}\right)H\left(\Phi(\tau_u, n(\tau_u))\right)\right)
+d\Phi =
+\\
+\sum_{(\tilde n_e)\in \N^E} \int d\tilde\Phi
+%_{\R_+^{V\setminus\{x_0\}}}  
+H\left(\tilde \Phi,\tilde n\right)
+\tilde E_{x_0, \tilde \Phi, \tilde n}\Big(\indic_{\{\tilde X_{\tilde T}=x_0,\tilde n_e(\tilde T)\ge 0\; \forall e\in E\}} 
+F\left(\tilde \Phi(\tilde T) , \tilde n(\tilde T)\right) G\left((\tilde Z_{t})_{t\le\tilde T}\right) \prod_{x\in V\setminus\{x_0\}} {\tilde \Phi_x\over \tilde\Phi_x(\tilde T) }
+\Big)
+% {d\Phi\over \sqrt{2\pi}^{\vert V\vert -1}}.
+\end{multline}
+with notations of Lemma \ref{change-var}.
+%where we note $d\Phi={\prod_{x\in V\setminus\{x_0\}} d\Phi_x\over \sqrt{2\pi}^{\vert V\vert -1}}$.
+
+Let $\tilde\fff_t=\sigma\{\tilde X_s, \; s\le t\}$ be the filtration generated by $\tilde X$. We define the $\tilde \fff$-adapted process
+$\tilde M_t$, defined up to time $\tilde T$ by
+\begin{multline}
+\label{Mart}
+\tilde M_t
+= {F(\tilde \Phi(t), \tilde n(t))\over \prod_{V\setminus\{\tilde X_t\}} \tilde\Phi_x(t) }\indic_{\{\tilde X_t\in \ccc(x_0,\tilde n)\}}\indic_{\{\tilde n_e(t)\ge 0\; \forall e\in E\}}=
+\\
+e^{-\demi \sum_{x\in V} W_x(\tilde \Phi_x(t))^2-\sum_{e\in E} J_e(\tilde\Phi(t)) }
+%+ \demi \sum_{x\in V} (\tilde \Phi_x)^2
+\Big(\prod_{e\in E} {(2J_e(\tilde \Phi(t)))^{\tilde n_e(t)}\over \tilde n_e(t) !}\Big)
+%\left( {\prod_{e\in E} (2J_e(\tilde \Phi))^{\tilde n_e}\over \tilde n_e !}\right)^{-1}
+{2^{\#\ccc(\tilde n_e(t))-1}
+\over \prod_{x\in V\setminus\{\tilde X_t\}} \tilde\Phi_x(t) }\indic_{\{\tilde X_t\in \ccc(x_0,\tilde n(t)),\tilde n_e(t)\ge 0\; \forall e\in E\}}
+%\ccc(\tilde n_e)}
+\end{multline}
+where $\ccc(x_0,\tilde n(t))$ denotes the cluster of the origin $x_0$ induced by the configuration $\ccc(\tilde n(t))$.
+Note that at time $t=\tilde T$, we also have
+\begin{eqnarray}\label{M-T}
+\tilde M_{\tilde T}= {F(\tilde \Phi(\tilde T), \tilde n(\tilde T))\over \prod_{V\setminus\{\tilde x_0\}} \tilde\Phi_x(\tilde T) }\indic_{\{\tilde X_{\tilde T}=x_0}\indic_{\tilde n_e(t)\ge 0\; \forall e\in E\}} 
+\end{eqnarray}
+since $\tilde M_{\tilde T}$ vanishes on the event where $\{\tilde X_{\tilde T}=x\}$, with $x\neq x_0$. Indeed, if $\tilde X_{\tilde T}=x\neq x_0$, then
+$\tilde\Phi_x(\tilde T)=0$ and $J_e(\tilde\Phi(\tilde T))=0$ for $e\in E$ such that $x\in e$. It means that $\tilde M_{\tilde T}$ is equal to
+0 if $\tilde n_{e}(\tilde T)>0$ for some edge $e$ neighboring $x$. Thus, $\tilde M_{\tilde T}$ is null unless $\{x\}$ is a cluster in $\ccc(\tilde n(\tilde T))$.
+Hence, $\tilde M_{\tilde T}=0$ if $x\neq x_0$ since $\tilde M_{\tilde T}$ contains the indicator of the event that $\tilde X_{\tilde T}$ and $x_0$ are in the same cluster. 
+
+Hence, using identities (\ref{eq-3.3}) and (\ref{M-T})
+we deduce that (\ref{test-functions}) is equal to 
+\begin{eqnarray}
+\label{equ-M}
+(\ref{test-functions})&=&
+\sum_{(\tilde n_e)\in \N^E} \int d\tilde\Phi
+%_{\R_+^{V\setminus\{x_0\}}}  
+H\left(\tilde \Phi,\tilde n\right) F\left(\tilde \Phi,\tilde n\right)
+\tilde E_{x_0, \tilde \Phi, \tilde n}\left(
+{\tilde M_{\tilde T}\over \tilde M_0} 
+ G\left((\tilde Z_{t})_{t\le\tilde T}\right)
+\right)
+\end{eqnarray}
+
+\noindent {\bf Step 4 :}
+We denote by $\check Z_t=(\check X_t, \check \Phi_t, \check n(t))$ the process defined in section \ref{sec_Poisson}, which is well defined up to
+stopping time $\check T$, and $\check Z^T_t=\check Z_{t\wedge \check T}$. We denote by $\check E_{x_0, \check \Phi, \check n}$
+the law of the process $\check Z$ conditionnally on the initial value $\check n(0)$, i.e. conditionally on $(N_e(2J(\check\Phi)))=(\check n_e)$.
+The last step of the proof goes through the following lemma.
+\begin{lemma}\label{RN}
+i) Under $\check E_{x_0,\check\Phi,\check n}$, $\check X$ ends at $\check X_{\check T}=x_0$ a.s. and 
+$\check n_e(\check T)\ge 0$ for all $e\in E$.
+
+ii) Let $\tilde P^{\le t}_{x_0,\tilde\Phi,\tilde n}$ and $\check P^{\le t}_{x_0,\check\Phi,\check n}$ be the law
+of the process $(\tilde Z^T_s)_{s\le t}$ and $(\check Z^T_s)_{s\le t}$, then
+$$
+{d\check P^{\le t}_{x_0,\tilde \Phi,\tilde n}\over d\tilde P^{\le t}_{x_0,\tilde \Phi,\check n}}={\tilde M_{t\wedge \tilde T}\over \tilde M_0}.
+$$
+\end{lemma}
+Using this lemma we obtain that in the right-hand side of (\ref{equ-M})
+$$
+\tilde E_{x_0, \tilde \Phi , \tilde n}\left(
+{\tilde M_{\tilde T}\over \tilde M_0} 
+ G\left((\tilde Z_{t})_{t\le\tilde T}\right)\right)=
+ \check E_{x_0, \tilde \Phi , \tilde n}
+ \left(  
+ G\left((\check Z_{t})_{t\le\check T}\right)\right)
+$$
+Hence, we deduce, using formula (\ref{h}) and proceeding as in lemma \ref{distrib-phi-n}, that (\ref{test-functions}) is equal to
+\begin{multline*}
+\label{final}
+\int_{\R^{V\setminus\{x_0\} }} d\tilde\varphi
+%_{\R_+^{V\setminus\{x_0\}}}  
+e^{-\demi \eee(\tilde\varphi)}  h(\tilde \varphi) 
+\sum_{(\tilde n_e)\ll (\tilde \varphi_x)} \left(\prod_{e\in E, \; \tilde\varphi_{e-}\tilde\varphi_{e+}\ge 0} 
+{e^{-2J_e(\vert \tilde \varphi\vert)}(2J_e(\vert \tilde \varphi\vert ))^{\tilde n_e}\over \tilde n_e !}\right) 
+\\\tilde E_{x_0, \vert \tilde \varphi\vert , \tilde n}\left({\tilde M_{\tilde T}\over \tilde M_0} 
+ G\left((\tilde Z_{t})_{t\le\tilde T}\right)\right),
+\end{multline*}
+where the last integral is on the set $\{(\tilde\varphi_x)\in \R^V, \;\; \varphi_{x_0}=u\}$,
+$d\tilde\varphi={\prod_{x\in V\setminus\{x_0\}} d\tilde\varphi_x\over \sqrt{2\pi}^{\vert V\vert -1}}$, and where $(n_e)\ll (\varphi_x)$ means that
+$(\tilde n_e)\in \N^E$ and $\tilde n_e=0$ if $\tilde\varphi_{e-}\tilde\varphi_{e+}\le 0$.
+Finally, we conclude that
+\begin{eqnarray*}
+\E\left[ g\left(\left(X_{\tau_u^{x_0}-t}, n_e(\tau_u^{x_0}-t)\right)_{0\le t\le \tau_u^{x_0}}\right)h(\varphi^{(u)})\right]=
+\E\left[ g\left(\left(\check X_{t}, \check n_e(t)\right)_{0\le t\le \check T}\right)h(\check \varphi)\right]
+\end{eqnarray*}
+where in the right-hand side 
+$\check \varphi\sim P_{\varphi}^{\{x_0\}, \sqrt{2u}} $ 
+is a GFF and $(\check X_t, \check n(t))$ 
+is the process defined in section \ref{sec_Poisson} from the
+GFF $\check \varphi$.
+This exactly means that 
+$\varphi^{(u)} \sim P_{\varphi}^{\{x_0\}, \sqrt{2u}}$ 
+and that
+$$
+\lll\left(\left(X_{\tau_u^{x_0}-t}, n_e(\tau_u^{x_0}-t)\right)_{0\le t\le \tau_u^{x_0}}\; 
+\Big| \; \varphi^{(u)}=\check\varphi\right)= \lll\left(\left(\check X_t, \check n(t)\right)_{t\le \check T}\right).
+$$
+This concludes the proof of Theorem \ref{thm-Poisson2}.
+\end{proof}
+\begin{proof}[Proof of lemma \ref{RN}]
+The generator of the process $\tilde Z_t$ defined in (\ref{tildeZ}) is given, for any bounded and $\mathcal{C}^{1}$ for the second component test function $f$, by 
+\begin{equation}
+\label{tildeL2}
+\begin{split}
+&(\tilde L f)(x,\tilde\Phi,\tilde n)=
+-{1\over \tilde \Phi_x} ({\partial\over \partial \tilde\Phi_x}f)
+(x,\tilde\Phi, \tilde n) +\\
+&
+\sum_{y, \; y\sim x} \left(W_{x,y} \left(f(y,\tilde\Phi,\tilde n-\delta_{\{x,y\}})-f(x,\tilde\Phi,n)\right)+
+W_{x,y} {\tilde \Phi_{y}\over \tilde \Phi_x} \left(f(x,\tilde\Phi, n-\delta_{\{x,y\}})-f(x,\tilde\Phi,n)\right)\right).
+\end{split}
+\end{equation}
+where $ n-\delta_{\{x,y\}}$ is the value obtained by removing 1 from $n$ at edge $\{x,y\}$.
+Indeed, since $\tilde \Phi_x(t)=
+\sqrt{\tilde\Phi_{x}(0)^{2} -2\tilde \ell_x(t)}$, we have 
+\begin{eqnarray}
+\label{deriv-Phi}
+{\partial\over\partial t} \tilde \Phi_x(t)=
+-\indic_{\{\tilde X_t=x\}}{1\over \tilde \Phi_x(t)},
+\end{eqnarray}
+which is explains the first term in the expression. The second term is obvious from the definition of $\tilde Z_t$, and corresponding to the term induced by jumps
+of the Markov process $\tilde X_t$. The last term corresponds to the decrease of $\tilde n$ due to the increase in the process
+$\tilde N_e(\tilde \Phi)-\tilde N_e(\tilde \Phi(t))$. Indeed, on the interval $[t,t+dt]$, the probability that
+$\tilde N_{e}(\tilde \Phi(t))-\tilde N_{e}(\tilde \Phi(t+dt))$
+is equal to 1 is of order
+$$-{\partial\over \partial t} \tilde N_e(\tilde \Phi(t))dt=\indic_{\{\tilde X_t\in e\}}
+ {W_e \tilde \Phi_{\underline e}(t)\tilde\Phi_{\overline e}(t)\over \Phi_{\tilde X_t}(t)^2}dt
+ $$
+using identity (\ref{deriv-Phi}).
+
+Let $\check L$ be the generator of the Markov jump process $\check Z_t=(\check X_t, (\check \Phi_x(t)), (\check n_e(t)))$.
+We have that the generator is equal, for any smooth test function $f$, to
+ % Under $\check E_{x_0, \check \Phi, \check n}$, $\check Z$ is a Markov process with generator
+\begin{eqnarray*}
+&&(\check L f)(x,\Phi, n)=
+-{1\over  \Phi_x} ({\partial\over \partial \Phi_x}f)(x,\Phi,  n) +\\
+&&\demi \sum_{y, \; y\sim x}{ n_{x,y} \over  \Phi_x^2}
+{\indic_{\aaa_1(x,y)}} \left(f(y,\tilde\Phi,n-\delta_{\{x,y\}})+f(x,\tilde\Phi,n-\delta_{\{x,y\}})- 2f(x,\tilde\Phi,n)\right)
+\\
+&&+ \sum_{y, \; y\sim x}{ n_{x,y} \over \Phi_x^2}  \indic_{\aaa_2(x,y)} \left( f(y,\tilde\Phi,n-\delta_{\{x,y\}})- f(x,\tilde\Phi,n)) \right)
+\\
+&&+\sum_{y, \; y\sim x}{n_{x,y} \over \Phi_x^2} 
+ \indic_{\aaa_3(x,y)} \left(f(x,\tilde\Phi,n-\delta_{\{x,y\}}) - f(x,\tilde\Phi,n) \right)
+\end{eqnarray*}
+where 
+$\aaa_{i}(x,y)$ correspond to the following disjoint events
+\begin{itemize}
+\item
+$\aaa_1(x,y)$ if the numbers of connected clusters induced by $n-\delta_{\{x,y\}}$ is the same as that of $\check n$.
+\item
+$\aaa_2(x,y)$ if a new cluster is created in $ n-\delta_{\{x,y\}}$ compared with $\check n$ and if $y$ is in the connected component
+of $x_0$ in the cluster induced by $ n-\delta_{\{x,y\}}$.
+\item
+$\aaa_3(x,y)$ if a new cluster is created in $ n-\delta_{\{x,y\}}$ compared with $n$ and if $x$ is in the connected component
+of $x_0$ in the cluster induced by $ n-\delta_{\{x,y\}}$.
+\end{itemize}
+Indeed, conditionally on the value of $\check n_e(t)=N_e(2J_e(\check\Phi(t)))$ at time $t$, the point process $N_e$ on the interval $[0,  2J_e(\check\Phi(t)))]$ has the law of
+$n_e(t)$ independent points with uniform distribution on $[0,  2J_e(\check\Phi(t)))]$. Hence, the probability that a point lies in the interval 
+$[2J_e(\check\Phi(t+dt))),  2J_e(\check\Phi(t)))]$ is of order 
+$$
+-\check n_e(t) {1\over J_e(\check\Phi(t)))}{\partial\over \partial t} J_e(\check\Phi(t)))  dt= \indic_{\{X_t\in e\}}\;\check n_e(t){1\over \check\Phi_{X_t}(t)^2}dt.
+$$
+We define the function 
+\begin{multline}
+%\label{Theta}
+\nonumber\Theta(x,(\Phi_x),(n_e))=\\
+e^{-\demi \sum_{x\in V}W_x (\Phi_x)^2-\sum_{e\in E} J_e(\Phi) }
+%+ \demi \sum_{x\in V} (\tilde \Phi_x)^2
+\left(\prod_{e\in E} {(2J_e(\Phi))^{n_e}\over n_e !}\right)
+%\left( {\prod_{e\in E} (2J_e(\tilde \Phi))^{\tilde n_e}\over \tilde n_e !}\right)^{-1}
+{2^{\#\ccc(n_e)-1}
+\over \prod_{V\setminus\{x\}} \Phi }\indic_{\{x\in \ccc(x_0,n),
+n_e\ge 0\; \forall e\in E\}},
+\end{multline}
+so that
+$$
+\tilde M_{t\wedge \tilde T}= \Theta(\tilde Z_{t\wedge\tilde T}).
+$$
+To prove the lemma it is sufficient to prove (\cite{ChungWalsh05MP}, Chapter 11) that for any bounded smooth test function $f$
+\begin{eqnarray}\label{LcheckL}
+{1\over \Theta}\tilde L\left(\Theta f\right)= \check L\left(f\right)
+ \end{eqnarray}
+Let us first consider the first term in (\ref{tildeL2}).
+Direct computation gives 
+$$
+\left({1\over \Theta}{1\over \Phi_x}\left({\partial\over\partial \Phi_x} \Theta\right)\right) (x,\Phi,n)= -W_x+\sum_{y\sim x} \left(- W_{x,y}{\Phi_y\over\Phi_x}+n_{x,y}{1\over \Phi_x^2}\right).
+$$
+For the second part, remark that the indicators $\indic_{\{x\in \ccc(x_0,n)\}}$ and $\indic_{\{n_e\ge 0\; \forall e\in E\}}$ imply that 
+$
+\Theta(y,\Phi, n-\delta_{x,y})
+$
+vanishes if $n_{x,y}=0$ or if $y\not\in \ccc(x_0,n-\delta_{x,y})$.
+By inspection of the expression of $\Theta$, we obtain for $x\sim y$,
+\begin{eqnarray*}
+\Theta (y,\Phi, n-\delta_{x,y})&=& \left(\indic_{\{n_{x,y}>0\}} (\indic_{\aaa_1}+2\indic_{\aaa_2}) {n_{x,y}\over 2J_{x,y}(\Phi)}{\Phi_y\over \Phi_x}\right)\Theta(x,\Phi, n) 
+\\
+&=&\left((\indic_{\aaa_1}+2\indic_{\aaa_2}) {n_{x,y}\over 2W_{x,y}}{1\over \Phi_x^2}\right)\Theta(x,\Phi, n).
+\end{eqnarray*}
+Similarly,  for $x\sim y$,
+\begin{eqnarray*}
+\Theta(x,\Phi, n-\delta_{x,y})&=& \left(\indic_{\{n_{x,y}>0\}}(\indic_{\aaa_1}+2\indic_{\aaa_3}){n_{x,y}\over 2J_{x,y}}\right)\Theta(x,\Phi, n)\\
+&=&
+\left((\indic_{\aaa_1}+2\indic_{\aaa_3}) {n_{x,y}\over 2W_{x,y}\Phi_x\Phi_y}\right)\Theta(x,\Phi, n).
+\end{eqnarray*}
+Combining these three identities with the expression (\ref{tildeL2}) we deduce
+\begin{eqnarray*}
+&&{1\over \Theta}\tilde L\left(\Theta f\right)(x,\Phi,n)=\\
+&&
+-{1\over \Phi_x} {\partial\over\partial \Phi_x}f(x,\Phi,n)-\sum_{y\sim x} \left(n_{x,y}{1\over \Phi_x^2}\right)f(x,\Phi,n)
+\\
+&&  +\sum_{y\sim x} (\indic_{\aaa_1}+2\indic_{\aaa_2}) n_{x,y}{1\over 2\Phi_x^2} f(y,  n-\delta_{\{x,y\}},\Phi)+
+\sum_{y\sim x}(\indic_{\aaa_1}+2\indic_{\aaa_3}){1\over 2 \Phi_x^2} f(x, n-\delta_{\{x,y\}},\Phi).
+\end{eqnarray*}
+It exactly coincides with the expression for $\check L$ since $1=\indic_{\aaa_1}+\indic_{\aaa_2}+\indic_{\aaa_3}$.
+\end{proof}
+
+\subsection{General case}
+\label{sec:pgen}
+
+\begin{proposition}
+\label{PropKillingCase}
+The conclusion of
+Theorem \ref{thm-Poisson} still holds
+if the graph $\mathcal{G}=(V,E)$ is finite and the killing measure is non-zero ($\kappa\not\equiv 0$).
+\end{proposition}
+
+\begin{proof}
+Let $h$ be the function on $V$ defined as
+\begin{displaymath}
+h(x)=\mathbb{P}_{x}(X~\text{hits}~x_{0}~\text{before}~\zeta).
+\end{displaymath}
+By definition $h(x_{0})=1$. Moreover, for all 
+$x\in V\setminus\lbrace x_{0}\rbrace$,
+\begin{displaymath}
+-\kappa_{x} h(x)+\sum_{y\sim x}W_{x,y}(h(y)-h(x))=0.
+\end{displaymath}
+Define the conductances
+$W^{h}_{x,y}:=W_{x,y}h(x)h(y)$, and the corresponding jump process $X^{h}$, and the GFF $\varphi_{h}^{(0)}$ and $\varphi_{h}^{(u)}$ with conditions
+$0$ respectively $\sqrt{2u}$ at $x_{0}$. The Theorem \ref{thm-Poisson}
+holds for the graph $\mathcal{G}$ with conductances 
+$(W^{h}_{e})_{e\in E}$ and with zero killing measure. But the process
+$(X^{h}_{t})_{t\leq \tau_{u}^{x_{0}}}$ has the same law as the process
+$(X_{s})_{s\leq \tau_{u}^{x_{0}}}$, conditioned on
+$\tau_{u}^{x_{0}}<\zeta$, after the change of time
+\begin{displaymath}
+dt = h(X_{s})^{-2}ds.
+\end{displaymath}
+This means in particular that for the occupation times,
+\begin{equation}
+\label{EqTimeChange}
+\ell_{x}(t)=h(X_{s})^{-2}\ell_{x}(s).
+\end{equation}
+Moreover, we have the equalities in law 
+\begin{displaymath}
+\varphi_{h}^{(0)}\stackrel{\text{law}}{=}h^{-1}\varphi^{(0)},\qquad
+\varphi_{h}^{(u)}\stackrel{\text{law}}{=}h^{-1}\varphi^{(u)}.
+\end{displaymath}
+Indeed, at the level of energy functions, we have:
+\begin{equation*}
+\begin{split}
+&\mathcal{E}(hf,hf)=
+\sum_{x\in V}\kappa_{x} h(x)^{2}f(x)^{2}+
+\sum_{e}W_{e}(h(e_{+})f(e_{+})-h(e_{-})f(e_{-}))^{2}\\&=
+\sum_{x\in V}[\kappa_{x}h(x)^{2}f(x)^{2}+
+\sum_{y\sim x}W_{x,y}h(y)f(y)(h(y)f(y)-h(x)f(x))]\\
+&=
+\sum_{x\in V}[\kappa_{x}h(x)^{2}f(x)^{2}-
+\sum_{y\sim x}W_{x,y}(h(y)-h(x))h(x)f(x)^{2}]
+-\sum_{\substack{x\in V\\y\sim x}}W_{x,y}h(x)h(y)(f(y)-f(x))f(x)
+\\&=[\kappa_{x_{0}}-
+\sum_{y\sim x_{0}}W_{x_{0},y}(h(y)-1)]f(x_{0})^{2}
++\sum_{e}W_{e}^{h}(h(e_{+})f(e_{+})-h(e_{-})f(e_{-}))^{2}
+\\&= \text{Cste}(f(x_{0}))+\mathcal{E}^{h}(f,f),
+\end{split}
+\end{equation*}
+where $\text{Cste}(f(x_{0}))$ means that this term does not depend of $f$
+once the value of the function at $x_{0}$ fixed.
+
+Let $\check{X}^{h}_{t}$ be the inverse process for the conductances 
+$(W_{e}^{h)_{e\in E}}$ and the initial condition for the field
+$\varphi_{h}^{(u)}$, given by Theorem \ref{thm-Poisson}. 
+By applying the time change
+\ref{EqTimeChange} to the process $\check{X}^{h}_{t}$, we obtain an inverse process for the conductances $W_{e}$ and the field $\varphi^{(u)}$.
+\end{proof}
+
+\begin{proposition}
+\label{PropInfiniteCase}
+Assume that the graph $\mathcal{G}=(V,E)$ is infinite. The killing measure $\kappa$ may be non-zero. Then the conclusion of
+Theorem \ref{thm-Poisson} holds.
+\end{proposition}
+
+\begin{proof}
+Consider an increasing sequence of connected sub-graphs
+$\mathcal{G}_{i}=(V_{i},E_{i})$ of $\mathcal{G}$ which converges to the whole graph. We assume that $V_{0}$ contains $x_{0}$.
+Let $\mathcal{G}_{i}^{\ast}=(V_{i}^{\ast},E_{i}^{\ast})$ be the graph obtained by adding to $\mathcal{G}_{i}$ an abstract vertex
+$x_{\ast}$, and for every edge $\lbrace x,y\rbrace$, where $x\in V_{i}$ and 
+$y\in V\setminus V_{i}$, adding an edge $\lbrace x,x_{\ast}\rbrace$,
+with the equality of conductances 
+$W_{x,x_{\ast}}=W_{x,y}$.
+$(X_{i,t})_{t\geq 0}$ will denote the Markov jump process on 
+$\mathcal{G}_{i}^{\ast}$, started from $x_{0}$. 
+Let $\zeta_{i}$ be the first hitting time of $x_{\ast}$ or the first
+killing time by the measure $\kappa\indic_{V_{i}}$. Let
+$\varphi^{(0)}_{i}$,
+$\varphi^{(u)}_{i}$ will denote the GFFs on $\mathcal{G}_{i}^{\ast}$ with condition $0$ respectively $\sqrt{2u}$ at $x_{0}$, with condition $0$ at 
+$x_{\ast}$, and taking in account the possible killing measure 
+$\kappa\indic_{V_{i}}$. 
+The limits in law of $\varphi^{(0)}_{i}$
+respectively $\varphi^{(u)}_{i}$ are 
+$\varphi^{(0)}$
+respectively $\varphi^{(u)}$.
+
+We consider the process 
+$(\hat{X}_{i,t},(\check{n}_{i,e}(t))_{e\in E_{i}^{\ast}})
+_{0\leq t\leq\check{T}_{i}}$ be the inverse process on
+$\mathcal{G}_{i}^{\ast}$, with initial field $\varphi^{(u)}_{i}$.
+$(X_{i,t})_{t\leq \tau_{i,u}^{x_{0}}}$, conditional on 
+$\tau_{i,u}^{x_{0}}$, has the same law as
+$(\check{X}_{i,\check{T}_{i}-t})_{t\leq \check{T}_{i}}$.
+Taking the limit in law as $i$ tends to infinity, we conclude that
+$(X_{t})_{t\leq \tau_{u}^{x_{0}}}$, conditional on 
+$\tau_{u}^{x_{0}}<+\infty$, has the same law as
+$(\check{X}_{\check{T}-t})_{t\leq \check{T}}$ on the infinite graph
+$\mathcal{G}$. The same for the clusters.
+In particular,
+\begin{multline*}
+\mathbb{P}(\check{T}\leq t, \check{X}_{[0,\check{T}]}~\text{stays in}~V_{j})=
+\lim_{i\to +\infty}
+\mathbb{P}(\check{T}_{i}\leq t, \check{X}_{i,[0,\check{T}_{i}]}~\text{stays in}~V_{j})
+\\=
+\lim_{i\to +\infty}
+\mathbb{P}(\tau_{i,u}^{x_{0}}\leq t, X_{i,[0,\tau_{i,u}^{x_{0}}]}~\text{stays in}~V_{j}\vert \tau_{i,u}^{x_{0}}<\zeta_{i})=
+\mathbb{P}(\tau_{u}^{x_{0}}\leq t, X_{[0,\tau_{u}^{x_{0}}]}
+~\text{stays in}~V_{j}\vert \tau_{u}^{x_{0}} < \zeta),
+\end{multline*}
+where in the first two probabilities we also average by the values of the
+free fields.
+Hence
+\begin{displaymath}
+\mathbb{P}(\check{T}=+\infty~\text{or}~\check{X}_{\check{T}}\neq x_{0})=
+1-\lim_{\substack{t\to +\infty\\ j\to +\infty}}
+\mathbb{P}(\tau_{u}^{x_{0}}\leq t, X_{[0,\tau_{u}^{x_{0}}]}
+~\text{stays in}~V_{j}\vert \tau_{u}^{x_{0}} < \zeta) = 0.
+\end{displaymath}
+\end{proof}
+
+\section*{Acknowledgements}
+
+TL acknowledges the support of Dr. Max Rössler, the Walter Haefner
+Foundation and the ETH Zurich Foundation.
+
+\bibliographystyle{plain}
+\bibliography{ray-knight}
+\end{document}
+
+
+
+
+
