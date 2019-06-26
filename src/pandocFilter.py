@@ -13,11 +13,11 @@ def no_math(k, v, fmt, meta):
     return []
 
 def no_emph(k, v, fmt, meta):
-  def caps(key, value, format, meta):
+  def strs(key, value, format, meta):
     if key == 'Str':
-      return Str(value.upper())
+      return Str(value)
   if k == 'Emph':
-    return walk(v, caps, fmt, meta)
+    return walk(v, strs, fmt, meta)
 
 def no_table(k, v, fmt, meta):
   if k == 'Table':
@@ -34,7 +34,7 @@ def no_cite(k, v, fmt, meta):
 def delist(k, v, fmt, meta):  
   if k == 'OrderedList':
     return v[1]
-  elif k == 'BulletList': # This is ugly but working
+  elif k == 'BulletList':
     paragraphs = v[0]
     for i in v[1:]:
       paragraphs += i

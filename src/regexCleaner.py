@@ -18,29 +18,15 @@ Usage:
 """
 import re, sys
 from os.path import relpath, exists, join, dirname, basename
-from os import remove, mkdir
+from os import remove, mkdir, walk
 from paths import data_path
 from shutil import copyfile
 
-VERBOSE = True
-REPORT_EVERY = 100
+def get_artIDdirs_in_data(dddd):
+    artIDs = next(walk(join(data_path, dddd)))
+    return artIDs[1]
 
-def get_artIDdir(infile):
-    '''
-    infile: input filepath.
-    '''
-    return basename(dirname(infile))
-
-def main(pt_pairs, infile, outfile, logdir):
-    '''
-    pt_pairs: dictionary, in the form of {pattern: subbed_string}. 
-    infile: input filepath. E.g. 'data/1701/*/*.tex'
-    outfile: output filepath. E.g. 'results/1701/XXX/x.tex'
-    logdir: directory path for errlog and problematic files.
-    '''
-    # Read data & handle exceptions
-    ovw_err_log = open(join(dirname(dirname(outfile)),'00error.txt'), 'a')
-
+def searsub(infile, pt_pairs, outfile, errlog):
     with open(infile, mode='r', encoding='utf-8', errors='ignore') as texfile:
         data = texfile.read()
 
@@ -48,8 +34,9 @@ def main(pt_pairs, infile, outfile, logdir):
     for pt in pt_pairs:
         clean_data = re.sub(pt, pt_pairs[pt], data, flags=re.S | re.M | re.I)
 
-    if exists(outfile): # Avoid overwriting
-        ovw_err_log.write('Overwriting err:' + outfile + '\n')
+    if exists(outfile): # Avoid overwriting; should be trivial
+        errlog.write('Overwriting err:' + outfile + '\n')
+        
     else:
         try:
             mkdir(dirname(outfile))
@@ -58,9 +45,22 @@ def main(pt_pairs, infile, outfile, logdir):
         with open(outfile,'w') as out:
             out.write(clean_data)
 
+def main(pt_pairs, inpt, outpt, logdir):
+    '''
+    pt_pairs: dictionary, in the form of {pattern: subbed_string}. 
+    inpt: input file's path. E.g. 'data/1701/*/*.tex'
+    outpt: output file's path. E.g. 'results/1701/XXX/x.tex'
+    logdir: directory path for errlog and problematic files.
+    '''
+    # Read data & handle exceptions
+    ovw_err_log = open(join(dirname(dirname(inpt)),'debib_error.txt'), 'a')
+    searsub(inpt, pt_pairs, outpt, ovw_err_log)
     ovw_err_log.close()
 
-if __name__ == "__main__":
 
-    bib = {r'(\\begin(\*){thebibliography}.*?\\end(\*){thebibliography})':''}
-    main(bib, sys.argv[2], sys.argv[3])
+
+if __name__ == "__main__":
+    VERBOSE = True
+    REPORT_EVERY = 100
+    bib = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
+    main(bib, '/home/yzan/Desktop/try/cluster/=astro-ph0001113/paper.tex', '/home/yzan/Desktop/try/cluster/paper_debib.tex', '/home/yzan/Desktop/try/cluster')
