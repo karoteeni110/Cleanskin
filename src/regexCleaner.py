@@ -21,12 +21,13 @@ from os.path import relpath, exists, join, dirname, basename
 from os import remove, mkdir, walk
 from paths import data_path
 from shutil import copyfile
+import fnmatch
 
 def get_artIDdirs_in_data(dddd):
     artIDs = next(walk(join(data_path, dddd)))
     return artIDs[1]
 
-def searsub(infile, pt_pairs, outfile, errlog):
+def subout(infile, pt_pairs, outfile, errlog):
     with open(infile, mode='r', encoding='utf-8', errors='ignore') as texfile:
         data = texfile.read()
 
@@ -36,7 +37,6 @@ def searsub(infile, pt_pairs, outfile, errlog):
 
     if exists(outfile): # Avoid overwriting; should be trivial
         errlog.write('Overwriting err:' + outfile + '\n')
-        
     else:
         try:
             mkdir(dirname(outfile))
@@ -45,22 +45,59 @@ def searsub(infile, pt_pairs, outfile, errlog):
         with open(outfile,'w') as out:
             out.write(clean_data)
 
-def main(pt_pairs, inpt, outpt, logdir):
-    '''
-    pt_pairs: dictionary, in the form of {pattern: subbed_string}. 
-    inpt: input file's path. E.g. 'data/1701/*/*.tex'
-    outpt: output file's path. E.g. 'results/1701/XXX/x.tex'
+def main(inputdir, subPtDict, errlogpath):
+    """
+    subPtDict: dictionary, in the form of {pattern: subbed_string}. 
+    inputdir: 'data/1701'
     logdir: directory path for errlog and problematic files.
-    '''
+    """
     # Read data & handle exceptions
-    ovw_err_log = open(join(dirname(dirname(inpt)),'debib_error.txt'), 'a')
-    searsub(inpt, pt_pairs, outpt, ovw_err_log)
+    ovw_err_log = open(errlogpath, 'a')
+    for rt, _, fls in walk(inputdir):
+        for itm in fnmatch.filter(fls, '*.tex'):
+            inputpt = join(rt, itm)
+            outputpt = 'results' + inputpt.strip('data').strip('.tex') + '_db.tex'
+            try:
+                subout(inputpt, subPtDict, outputpt, errlogpath)
+            except:
+                copyfile(inputpt, dirname(errlogpath))
+                for i in sys.exc_info():
+                    ovw_err_log.write(str(i)+ ' ')
+                ovw_err_log.write(' \n')
+    ovw_err_log.write('================================ \n')
     ovw_err_log.close()
 
-
-
 if __name__ == "__main__":
-    VERBOSE = True
-    REPORT_EVERY = 100
-    bib = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
-    main(bib, '/home/yzan/Desktop/try/cluster/=astro-ph0001113/paper.tex', '/home/yzan/Desktop/try/cluster/paper_debib.tex', '/home/yzan/Desktop/try/cluster')
+    # VERBOSE, REPORT_EVERY = True, 100
+    dddd = 'data/1701'
+    errlogpath = 'results/%s/log/debibErr.txt' % dddd[-4:]
+    bibPt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
+    try:
+        mkdir(dirname(errlogpath))
+    except FileExistsError:
+        pass
+    main(dddd, bibPt, errlogpath)
+
+
+    """
+    >>> for rt, dirn, fls in walk('1701short'):
+    ...     print(rt)
+    ...     print(dirn, fls)
+    ...     print()
+    ... 
+    1701short
+    ['1701.01247', '1701.01020', '1701.01292'] []
+
+    1701short/1701.01247
+    [] ['withdrawn']
+
+    1701short/1701.01020
+    [] ['withdrawn']
+
+    1701short/1701.01292
+    ['test'] ['withdrawn']
+
+    1701short/1701.01292/test
+    [] ['try']
+
+    """

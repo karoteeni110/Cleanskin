@@ -1,0 +1,173 @@
+%!TEX root = ../wbi.tex
+\section{Dynamics of a Mechanical System}
+\label{sec:background}
+
+This section introduces the mathematical formulation commonly used in the robotics literature  to describe the dynamics of mechanical systems, such as robots.
+Because a precise formulation of the mathematical problem is out of the scope of the present paper, we refer the interested reader to books on dynamics of mechanical systems \cite{Siciliano2009,Featherstone2007,Murray1994} and control systems \cite{Isidori1995,khalil2002} for further readings.
+
+\subsection{Notation}
+Throughout the section we will use the following definitions:
+\begin{itemize}
+    % \item $\mathbb{R}$ denotes the set of real numbers and $e_i \in \mathbb{R}^m$ is the canonical vector, consisting of all zeros but the $i$-th component which is one.
+    \item $\mathcal{I}$ denotes an inertial frame, with its $z$ axis pointing against the gravity. %We denote with $g$ the gravitational constant.
+    \item $1_n \in \mathbb{R}^{n \times n}$ is the identity matrix of size $n$; $0_{m \times n} \in \mathbb{R}^{m \times n}$ is the zero matrix of size $m \times n$ and $0_{n } = 0_{n \times 1}$.
+    \item Given two orientation frames $A$ and $B$, and vectors of coordinates expressed in these orientation frames, i.e. $\prescript{A}{}p$ and $\prescript{B}{}p$, respectively, the rotation matrix 
+    $\prescript{A}{}R_B$ is such that $\prescript{A}{}p = \prescript{A}{}R_B  \prescript{B}{}p$. 
+    \item We denote with $S(x) \in \mathbb{R}^{3 \times 3}$ the skew-symmetric matrix such that $S(x)y = x \times y$, where $\times$ denotes the cross product operator in $\mathbb{R}^3$. 
+\end{itemize}
+
+\subsection{System modelling}
+\label{sec:model}
+We assume that the mechanical model is composed of $n+1$ rigid bodies -- called links -- connected by $n$ joints with one degree of freedom each. In addition, we also assume   that the multi-body system is \emph{free floating}, i.e. none of the links has an \emph{a priori} constant pose with respect to the inertial frame. This implies that  the multi-body system possesses $n~+~6$ degrees of freedom. The 
+configuration space of the multi-body system can then be characterized by the \emph{position} and the \emph{orientation} of a frame attached to a robot's link -- called 
+\emph{base frame} $\mathcal{B}$ -- and the joint configurations. 
+More precisely, the robot configuration can be represented by the 
+triplet 
+\[q = (\prescript{\mathcal{I}}{}p_{\mathcal{B}},\prescript{\mathcal{I}}{}R_{\mathcal{B}},q_j),\] where $(\prescript{\mathcal{I}}{}p_{\mathcal{B}},\prescript{\mathcal{I}}{}R_{\mathcal{B}})$ denotes the origin  and orientation of the \emph{base frame} expressed in the inertial frame, and $q_j$ denotes the \emph{joint angles}. 
+
+% More precisely, the robot configuration space  is defined by
+% \begin{equation*}
+%     \mathbb{Q} = \mathbb{R}^3 \times SO(3) \times \mathbb{R}^n.
+% \end{equation*}
+% An element of the set $\mathbb{Q}$ is then a
+% It is possible to define an operation associated with the set $\mathbb{Q}$ such that this set is a group. More precisely, given two elements $q$ and $\rho$ of the configuration space, the set $\mathbb{Q}$ is a group under the following operation:
+% \begin{IEEEeqnarray}{RCL}
+% \label{eqn:groupOperation}
+% q \cdot \rho = (p_q + p_\rho, R_q R_\rho, q_j + {\rho}_j).
+% \end{IEEEeqnarray}
+% Being the direct product of Lie groups, the set $\mathbb{Q}$ is itself a Lie group.
+The \emph{velocity} of the multi-body system can then be characterized 
+% by the \emph{algebra} $\mathbb{V}$ of $\mathbb{Q}$ defined by:
+%     $\mathbb{V} = \mathbb{R}^3 \times \mathbb{R}^3 \times \mathbb{R}^n$.
+% An element of $\mathbb{V}$ is then a
+by the triplet 
+\[\nu = ( ^\mathcal{I}\dot{ p}_{\mathcal{B}},^\mathcal{I}\omega_{\mathcal{B}},\dot{q}_j),\]
+ where $^\mathcal{I}\omega_{\mathcal{B}}$ is the angular velocity of the base frame expressed w.r.t. the inertial frame, i.e. $^\mathcal{I}\dot{R}_{\mathcal{B}} = S(^\mathcal{I}\omega_{\mathcal{B}})^\mathcal{I}{R}_{\mathcal{B}}$. 
+% It is worth noting that a common choice in the robotics literature is to choose $\mathbb{Q} = SE(3) \times \mathbb{R}^n$, but this would have resulted in a different choice for the base velocity, i.e.
+% the first element of $\nu$ would not have been ${}^\mathcal{I}\dot{p}_B$.
+
+% Although the above digression on the robot configuration space may sound pedantic and marginal, let us observe that the choice of the group operation in~\eqref{eqn:groupOperation} implies that an element $\nu \in \mathbb{V}$ is composed of  $\dot{p}$, i.e. the time derivative of the origin of the floating base frame. Other choices for the group operation would imply a different algebra and, consequently, a different representation of the system's \emph{velocity}.
+
+We also assume that the robot is interacting with the environment through $n_c$ distinct contacts. 
+The application of the Euler-Poincar\'e formalism \cite[Ch. 13.5]{Marsden2010}
+% \footnote{The Euler-Lagrange's formulation can be applied only to mechanical systems evolving in vector spaces. The Euler-Poincar\'e equations, instead, are valid for mechanical systems evolving in arbitrary Lie groups.}
+to the multi-body system  yields the following equations of motion: 
+\begin{align}
+    \label{eq:system_dynamics}
+       {M}(q)\dot{{\nu}} + {C}(q, {\nu}) {\nu} + {G}(q) =  B \tau + \sum_{k = 1}^{n_c} {J}^\top_{\mathcal{C}_k} f_k
+\end{align}
+where ${M} \in \mathbb{R}^{n+6 \times n+6}$ is the mass matrix, ${C} \in \mathbb{R}^{n+6 \times n+6}$ is the Coriolis matrix and ${G} \in \mathbb{R}^{n+6}$ is the gravity term.
+$\tau$ are the internal actuation torques and $B$ is a selector matrix which depends on the available actuation, e.g. in case all joints are actuated it is equal to $B = (0_{n\times 6} , 1_n)^\top$.
+$f_k = [F_i^\top, \mu_i^\top]^\top \in \mathbb{R}^6$, with $F_i, \mu_i \in \mathbb{R}^3$ respectively the force and corresponding moment of the force, denotes an external wrench applied by the environment on the link of the $k$-th contact.
+ % We assume that the application point of the external wrench is associated with a frame $\mathcal{C}_k$, which is attached to the robot's link where the wrench acts on, and has its $z$ axis pointing as the normal of the contact plane. Then,  the external wrench $f_k$ is expressed in a frame whose orientation coincides with that of the inertial frame $\mathcal{I}$, but whose origin is the  origin of $\mathcal{C}_k$, i.e. the application point of the external wrench $f_k$.
+The Jacobian ${J}_{\mathcal{C}_k}= {J}_{\mathcal{C}_k}(q)$ is the map between the robot velocity ${\nu}$ and the linear and angular velocity \[ ^\mathcal{I}v_{\mathcal{C}_k} := (^\mathcal{I}\dot{ p}_{\mathcal{C}_k},^\mathcal{I}\omega_{\mathcal{C}_k})\] of the frame $\mathcal{C}_k$, i.e.
+\begin{align*} 
+^\mathcal{I}v_{\mathcal{C}_k} = {J}_{\mathcal{C}_k}(q) {\nu}.
+\end{align*}
+% The Jacobian has the following structure.
+% \begin{IEEEeqnarray}{RCLRLL}
+% \label{eqn:jacobian}
+% {J}_{\mathcal{C}_k}(q) &=& \begin{bmatrix} {J}_{\mathcal{C}_k}^b(q) & {J}_{\mathcal{C}_k}^j(q)\end{bmatrix} &\in& \mathbb{R}^{6\times n+6}, \IEEEyessubnumber \\
+%  {J}_{\mathcal{C}_k}^b(q) &=&
+%  \begin{bmatrix}
+%  1_3 & -S(\prescript{\mathcal{I}}{}p_{\mathcal{C}_k}-\prescript{\mathcal{I}}{}p_{\mathcal{B}})\\
+%  0_{3\times3} & 1_3 \\
+%  \end{bmatrix} &\in& \mathbb{R}^{6\times6} . \IEEEyessubnumber
+% \end{IEEEeqnarray}
+
+% Lastly, we assume that  rigid contacts may occur between the robot and the environment.
+% The constraint associated with the rigid contact is  modelled as a kinematic constraint that forbids any motion of the frame $\mathcal{C}_k$, i.e. ${J}_{\mathcal{C}_k}(q) {\nu} = 0$.
+
+
+
+\subsection{Control Example} % (fold)
+\label{sub:control_examples}
+
+To illustrate the use of the dynamical model presented in Section \ref{sec:model} we present the classic Proportional Derivative (PD) plus Gravity compensation controller as example.
+% \todo[inline]{ST: I would cut the balancing part altogether, the mathematical details are not useful to understand it when it is referenced in experiments and it hides the point of the paper.}
+% The second one, instead, leverages the full dynamical model of the robot and represent the torque-controlled balancing controller currently implemented on the iCub humanoid robot.
+
+% \subsubsection{PD plus Gravity compensation} % (fold)
+% \label{ssub:pd_plus_gravity_compensation}
+%
+This kind of controller has been usually applied to fully-actuated fixed-base robots.
+Considering the model presented in Section \ref{sec:model} this means that the base frame position and orientation are constant and known a-priori and thus they are not part of the robot state.
+% \todo[inline]{ST: This equation (and the one afterwards) are contradicting the equations in section 2.B . We can either define (q,$\nu$) as the generalized state of the system in section 2.B (without specifying that is composed by a base/joint part) or just zap this redefinition of (q,$\nu$). I vote for the latter.}
+% Because of the fixed-base assumption, the robot configuration vector
+% \[q \equiv q_j \in \mathbb{R}^n. \]
+% Furthermore the velocity and acceleration of the system directly corresponds to respectively the first and second time derivative of the joint configuration, i.e.
+% \begin{align*}
+%     \nu & \equiv \dot{q}_j \equiv \dot{q} \\
+%     \dot{\nu} & \equiv \ddot{q}_j \equiv \ddot{q}.
+% \end{align*}
+% As a consequence, because of the fully-actuated hypothesis, the selector matrix \[B \equiv 1_n.\]
+
+The control objective is the asymptotical stabilization of a desired constant joint configuration $q_j^d$ or equivalently the asymptotical stabilization to zero of the error
+\[\tilde{q}_j := q_j - q_j^d. \]
+The choice of the following control action
+\begin{equation}\label{eq:pd_plus_grav_law}
+    \tau = G_j(q) - K_p \tilde{q}_j - K_d \dot{q}_j
+\end{equation}
+where $K_p, K_d \in \mathbb{R}^{n\times n}$ are the positive definite proportional and derivative gain matrices and $G_j(q) = [0_{n \times 6}
+~1_n]~G(q)$, 
+satisfy the control objective, i.e. the stabilization to zero of $\tilde{q}_j$, and it can be proved by Lyapunov arguments \cite[Sec. 6.5.1]{Siciliano2009}.
+
+% subsubsection pd_plus_gravity_compensation (end)
+
+% \subsubsection{Momentum-based Balancing Control} % (fold)
+% \label{ssub:momentum_based_balancing_control}
+%
+% The momentum-based balancing control is a more complex example of whole-body control for a humanoid robot.
+% In this example we describe a possible implementation of this kind of control, namely the one currently implemented on the iCub humanoid robot.
+% We refer the reader to \cite{nava16} for further details of the controller.
+%
+% We specify two control objectives:
+% \begin{enumerate}[i)]
+%     \item Stabilization to zero of the output function represented by the linear and angular momentum of the robot.
+%     \item Stability of the zero dynamics \cite{Isidori2013369}.
+% \end{enumerate}
+%
+% Denoting with
+% \[H = \begin{bmatrix}
+%     H_\text{lin} \\ H_\text{ang}
+% \end{bmatrix}\in \mathbb{R}^6
+% \]
+% the robot linear and angular momentum, its rate of change depends on the sum of all external forces and torques, and it is obtained as
+% \[\dot{H} = \sum_{i = 1}^{n_c} {}^{\text{CoM}}X_i f_i + m \bar{g}\]
+% where ${}^\text{CoM}X_i \in \mathbb{R}^{6 \times 6}$ is the matrix transforming the corresponding wrench from the application frame to a frame attached to the center of mass with the same orientation of the inertial frame $\mathcal{I}$, $m$ is the robot total mass and $\bar{g} \in \mathbb{R}^6$ is the 6D gravity acceleration vector.
+%
+% By assuming as virtual control inputs the contact wrenches stacked into a single vector
+% \[f = [f_1^\top, \cdots, f_{n_c}^\top]^\top,\] the solution to the following minimization problem
+% \begin{equation}
+%     \label{eq:mom_min}
+%     \begin{aligned}
+%         \minimize_f ~& \norm{\dot{H} - \dot{H}^d}^2 \\
+%         \text{s.t.}~ & A f \leq b
+%     \end{aligned}
+% \end{equation}
+% ensures the stabilization to zero of the error between the robot momentum $H$ and a desired momentum reference $H^d$.
+% The inequality constraints $A f \leq b$ represent friction cone, center of pressure and other constraints on the wrenches.
+%
+%
+% %As previously mentioned, the second objective is responsible to stabilize the zero dynamics of the system resulting from the achievement of the first control objective.
+% %In other words, it
+% The second objective is responsible for constraining the joint variables and avoid internal divergent behaviors.
+% As before, we can specify a minimization problem also for this second task, i.e.
+% \begin{IEEEeqnarray}{rCl}
+%     \label{eq:zero_stab_min}
+%             \minimize_\tau&~ & \norm{\tau - \psi}^2  \IEEEyessubnumber \label{eq:zero_stab_min_cost}\\
+%             \text{s.t.}&& \text{System dynamics -- Eq.}~\eqref{eq:system_dynamics} \notag \label{eq:zero_stab_min_dyn}\\
+%                        && J \dot{\nu} + \dot{J} \nu = 0  \IEEEyessubnumber \label{eq:zero_stab_min_constr}\\
+%                        && \psi := h_j(q, 0) - J^{(j),\top} f  \notag \\
+%                        && \quad\quad - K_p^j(q_j - q_j^r) - K_d^j \dot{q}_j \IEEEyessubnumber \label{eq:zero_stab_min_post}\\
+%                        && \norm{\dot{H} - \dot{H}^d}^2 = \text{solution of }\eqref{eq:mom_min}\IEEEyessubnumber \label{eq:zero_stab_min_hier}
+% \end{IEEEeqnarray}
+% where $J = [J_1^\top, \cdots, J_{n_c}^\top]^\top$ is the stack of the contact Jacobians.
+% Eq.~\eqref{eq:zero_stab_min_constr} is the constraint equation describing the kinematic constraints associated with the contacts.
+% Eq.~\eqref{eq:zero_stab_min_post}, which resembles a PD plus gravity and contact wrenches compensation, plays the role of a desired joint torque reference where $h_j:= C_j(q, 0) +G_j(q)$ and  $J^{(j)}$ denotes the joint space bias term and Jacobian respectively.
+% Finally Eq.\eqref{eq:zero_stab_min_hier} is the hierarchical constraint, i.e. it prevents  the solution of this second problem from changing the optimum of Eq.\eqref{eq:mom_min}.
+%
+%
+% % subsubsection momentum_based_balancing_control (end)
+
+% subsection control_examples (end)
