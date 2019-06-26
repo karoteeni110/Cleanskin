@@ -45,4 +45,4 @@ try:
     mkdir(dirname(sys.argv[2]))
 except FileExistsError:
     pass
-tree.write(sys.argv[2])
+tree.write(sys.argv[2]) #TODO: str can't be written

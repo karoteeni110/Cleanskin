@@ -13,45 +13,40 @@ e.g. '=1701.01278.xml'
 Assumes all the latex file end with ".tex".
 
 Usage:
-    python3 regexCleaner.py debib $INPUT_FILENAME $OUTPUT_FILENAME
-    python3 regexCleaner.py postclean $INPUT_FILENAME $OUTPUT_FILENAME
+    python3 regexCleaner.py $INPUT_FILENAME $OUTPUT_FILENAME
+    python3 regexCleaner.py $INPUT_FILENAME $OUTPUT_FILENAME
 """
 import re, sys
-from os.path import relpath, exists, join, dirname
+from os.path import relpath, exists, join, dirname, basename
 from os import remove, mkdir
 from paths import data_path
+from shutil import copyfile
 
 VERBOSE = True
 REPORT_EVERY = 100
 
-def get_artIDdir_in_data(path, d4):
-    relp = relpath(path, data_path + '/%s' % d4) # '=hep-ph0001171/mu2.tex'
-    artIDdir = relp.split('/')[0] # ['=hep-ph0001171/', 'mu2.tex']
-    return artIDdir
+def get_artIDdir(infile):
+    '''
+    infile: input filepath.
+    '''
+    return basename(dirname(infile))
 
-def main(mode, infile, outfile):
-    bib = {r'(\\begin(\*){thebibliography}.*?\\end(\*){thebibliography})':''}
-    xmlImpurity = {r'((\\\[.*?\\\])|(&#[0-9]+;))':' '} 
-
-    # Set sub mode & collect paths
-    if mode == 'debib':
-        patterns = bib
-    elif mode == 'postclean':
-        patterns = xmlImpurity
-
+def main(pt_pairs, infile, outfile, logdir):
+    '''
+    pt_pairs: dictionary, in the form of {pattern: subbed_string}. 
+    infile: input filepath. E.g. 'data/1701/*/*.tex'
+    outfile: output filepath. E.g. 'results/1701/XXX/x.tex'
+    logdir: directory path for errlog and problematic files.
+    '''
     # Read data & handle exceptions
     ovw_err_log = open(join(dirname(dirname(outfile)),'00error.txt'), 'a')
-    try:
-        with open(infile, mode='r', encoding='utf-8') as texfile:
-            data = texfile.read()
-    except UnicodeDecodeError as e:
-        ovw_err_log.write('Reading data err:' + outfile + '\n')
-        ovw_err_log.write(e.reason + '\n')
-        exit(0)
-    
+
+    with open(infile, mode='r', encoding='utf-8', errors='ignore') as texfile:
+        data = texfile.read()
+
     # Substituting
-    for pt in patterns:
-        clean_data = re.sub(pt, patterns[pt], data, flags=re.S | re.M | re.I)
+    for pt in pt_pairs:
+        clean_data = re.sub(pt, pt_pairs[pt], data, flags=re.S | re.M | re.I)
 
     if exists(outfile): # Avoid overwriting
         ovw_err_log.write('Overwriting err:' + outfile + '\n')
@@ -66,5 +61,6 @@ def main(mode, infile, outfile):
     ovw_err_log.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
-    # print(sys.argv)
+
+    bib = {r'(\\begin(\*){thebibliography}.*?\\end(\*){thebibliography})':''}
+    main(bib, sys.argv[2], sys.argv[3])

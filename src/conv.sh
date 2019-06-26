@@ -15,15 +15,6 @@ convert () {
     -s -o $2
 
 }
-
-cleanXMLChar () {
-    python3 src/regexCleaner.py postclean $1 $2
-}
-
-noRefs () {
-    python3 xmlCleaner.py $1 $2
-}
-
 # =========================
 
 function call_debib {
