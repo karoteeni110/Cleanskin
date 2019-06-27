@@ -45,23 +45,22 @@ def main():
     with open(errlogpt, 'a') as ovw_err_log:
         for rt, _, fls in walk(rootdir):
             TeXes = fnmatch.filter(fls, '*.tex')
-            if len(TeXes) == 0 and basename(rt)[-5:].isdigit:
-                print(basename(rt))
-                
-                # ovw_err_log.write('No TeX at %s \n' % rt)
-                # copytree(rt, outdir + '/' + basename(rt))
-        #     for itm in TeXes:
-        #         inputpt = join(rt, itm)
-        #         outputpt = 'results/' + rootdir[-4:] + '/db/' + itm + '_db.tex'
-        #         try:
-        #             subout(inputpt, outputpt, bibPt)
-        #         except:
-        #             fn = (basename(inputpt))
-        #             copyfile(inputpt, outdir + '/%s_%s' % (dirname(fn), fn))
-        #             for i in sys.exc_info():
-        #                 ovw_err_log.write(str(i)+ ' ')
-        #             ovw_err_log.write(' \n')
-        # ovw_err_log.write('================================ \n')
+            if len(TeXes) == 0 and basename(rt)[-5:].isdigit() and rt != rootdir:
+                ovw_err_log.write('No TeX at %s \n' % rt)
+                copytree(rt, outdir + '/' + basename(rt))
+            for itm in TeXes:
+                inputpt = join(rt, itm)
+                artID = rt.split('/')[2]
+                outputpt = 'results/' + rootdir[-4:] + '/db/' + artID+ '/' + itm + '_db.tex'
+                try:
+                    subout(inputpt, outputpt, bibPt)
+                except:
+                    fn = (basename(inputpt))
+                    copyfile(inputpt, outdir + '/%s_%s' % (dirname(fn), fn))
+                    for i in sys.exc_info():
+                        ovw_err_log.write(str(i)+ ' ')
+                    ovw_err_log.write(' \n')
+        ovw_err_log.write('================================ \n')
 
 if __name__ == "__main__":
     main()
