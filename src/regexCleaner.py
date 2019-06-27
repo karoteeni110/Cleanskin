@@ -27,23 +27,33 @@ def get_artIDdirs_in_data(dddd):
     artIDs = next(walk(join(data_path, dddd)))
     return artIDs[1]
 
-def subout(infile, pt_pairs, outfile, errlog):
-    with open(infile, mode='r', encoding='utf-8', errors='ignore') as texfile:
+def subout(inpath, outpath, pt_pairs):
+    with open(inpath, mode='r', encoding='utf-8', errors='ignore') as texfile:
         data = texfile.read()
 
     # Substituting
     for pt in pt_pairs:
         clean_data = re.sub(pt, pt_pairs[pt], data, flags=re.S | re.M | re.I)
-
-    if exists(outfile): # Avoid overwriting; should be trivial
-        errlog.write('Overwriting err:' + outfile + '\n')
-    else:
         try:
-            mkdir(dirname(outfile))
+            mkdir(dirname(outpath))
         except FileExistsError:
             pass
-        with open(outfile,'w') as out:
+        with open(outpath,'w') as out:
             out.write(clean_data)
+
+def iter_dirs(anotherFunc, extraArgs, rootdir, fnpattern, out_suffix, capture_err_type, errlog_path):
+    errlog = open(errlog_path, 'a')
+    for rt, _, fls in walk(rootdir):
+        for itm in fnmatch.filter(fls, fnpattern):
+            inpath = join(rt, itm)
+            outpath = 'results' +inpath.strip('data').strip('.tex') + out_suffix
+            try:
+                anotherFunc(inpath, outpath, *extraArgs)
+            except capture_err_type:
+                copyfile(inpath, errlog_path)
+                errlog.write()
+
+
 
 def main(inputdir, subPtDict, errlogpath):
     """
@@ -58,7 +68,7 @@ def main(inputdir, subPtDict, errlogpath):
             inputpt = join(rt, itm)
             outputpt = 'results' + inputpt.strip('data').strip('.tex') + '_db.tex'
             try:
-                subout(inputpt, subPtDict, outputpt, errlogpath)
+                subout(inputpt, subPtDict)
             except:
                 copyfile(inputpt, dirname(errlogpath))
                 for i in sys.exc_info():

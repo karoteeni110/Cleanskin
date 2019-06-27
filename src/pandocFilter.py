@@ -34,7 +34,7 @@ def no_cite(k, v, fmt, meta):
 def delist(k, v, fmt, meta):  
   if k == 'OrderedList':
     return v[1]
-  elif k == 'BulletList':
+  elif k == 'BulletList': # This is ugly but working
     paragraphs = v[0]
     for i in v[1:]:
       paragraphs += i
