@@ -15,10 +15,11 @@ Usage:
 """
 import re, sys
 from os.path import relpath, exists, join, dirname, basename
-from os import remove, mkdir, walk
+from os import remove, mkdir, walk, listdir
 from paths import data_path
-from shutil import copyfile
+from shutil import copyfile, copytree
 import fnmatch
+from useFilter import mk_the_dirs
 
 def subout(inpath, outpath, pt_pairs):
     with open(inpath, mode='r', encoding='utf-8', errors='ignore') as texfile:
@@ -33,3 +34,34 @@ def subout(inpath, outpath, pt_pairs):
             pass
         with open(outpath,'w') as out:
             out.write(clean_data)
+
+def main():
+    rootdir = 'data/1701'
+    errlogpt = 'results/%s/errCases_db/dblog.txt' % rootdir[-4:]
+    outdir = dirname(errlogpt)
+    bibPt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
+    mk_the_dirs([outdir])
+
+    with open(errlogpt, 'a') as ovw_err_log:
+        for rt, _, fls in walk(rootdir):
+            TeXes = fnmatch.filter(fls, '*.tex')
+            if len(TeXes) == 0 and basename(rt)[-5:].isdigit:
+                print(basename(rt))
+                
+                # ovw_err_log.write('No TeX at %s \n' % rt)
+                # copytree(rt, outdir + '/' + basename(rt))
+        #     for itm in TeXes:
+        #         inputpt = join(rt, itm)
+        #         outputpt = 'results/' + rootdir[-4:] + '/db/' + itm + '_db.tex'
+        #         try:
+        #             subout(inputpt, outputpt, bibPt)
+        #         except:
+        #             fn = (basename(inputpt))
+        #             copyfile(inputpt, outdir + '/%s_%s' % (dirname(fn), fn))
+        #             for i in sys.exc_info():
+        #                 ovw_err_log.write(str(i)+ ' ')
+        #             ovw_err_log.write(' \n')
+        # ovw_err_log.write('================================ \n')
+
+if __name__ == "__main__":
+    main()

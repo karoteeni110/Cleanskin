@@ -51,8 +51,9 @@ def mk_the_dirs(dirpaths):
 def main():
     rootdir = 'results/1701/db'
     articles = next(walk(rootdir))[1]
-    errFileDir = rootdir + '/errCases'
+    errFileDir = rootdir + '/errCases_fi'
     elp = errFileDir + '/log.txt'
+    
     mk_the_dirs([errFileDir])
 
     with open(elp, 'a') as errlog:
@@ -61,8 +62,8 @@ def main():
             tofile = rootdir + '/opml/' + art + '.xml'
             cmd = pandoc(fromfile, tofile)
             errLog(cmd, fromfile, tofile, errFileDir, errlog)
-
-main()
+if __name__ == "__main__":
+    main()
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
 # pandoc -s -t JSON ../data/nat_orders_revisionv4Amaro.tex > pandoAST.txt # Check the AST of the file
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html
