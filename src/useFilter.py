@@ -65,8 +65,9 @@ def main():
             tofile = rootdir.strip('db') + 'opml/' + art + '.xml'
             cmd = pandoc(fromfile, tofile)
             check_err(cmd, fromfile, tofile, errFileDir, errlog)
+            
 if __name__ == "__main__":
     main()
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
-# pandoc -s -t JSON ../data/nat_orders_revisionv4Amaro.tex > pandoAST.txt # Check the AST of the file
+# pandoc -s -t JSON ../data/nat_orders_revisionv4Amaro.tex > pandoAST.json # Check the AST of the file
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html

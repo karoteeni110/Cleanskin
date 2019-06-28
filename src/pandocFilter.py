@@ -32,15 +32,38 @@ def no_cite(k, v, fmt, meta):
     return []
 
 def delist(k, v, fmt, meta):  
+  '''Illustrative:
+  >>> v == [[elt('Para', 1)], [elt('Para', 1)], ... ] 
+  True
+  '''
+  paras = []
   if k == 'OrderedList':
-    return v[1]
-  elif k == 'BulletList': # This is ugly but working
-    paragraphs = v[0]
-    for i in v[1:]:
-      paragraphs += i
-    return paragraphs
+    _, lstOflsts = v
+    for i in lstOflsts:
+      paras += i
+    return paras
+  elif k == 'BulletList':
+    lstOflsts = v
+    for i in lstOflsts:
+      paras += i
+    return paras
+  
+
+# def block2LongPara(block):
+#   for para in block:
+
 
 actions = [no_math, no_cite, no_emph, no_table, no_image, delist]
 
 if __name__ == "__main__":
   toJSONFilters(actions)
+
+
+# NOTE:
+# {
+# "t":"BulletList",
+# "c":[
+#   [{"t":"Para","c":[{"t":"Str","c":"guidelines"},{"t":"Space"},{"t":"Str","c":"for"},{"t":"Space"}],
+#   [{"t":"Para","c":[{"t":"Str","c":"model"}],{"t":"Space"},{"t":"Str","c":"and"},{"t":"Space"}]
+# ]
+# }
