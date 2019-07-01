@@ -21,6 +21,12 @@ from shutil import copyfile, copytree
 import fnmatch
 from useFilter import mk_the_dirs
 
+rootdir = 'data/0002'
+errlogpt = 'results/%s/errCases_db/dblog.txt' % rootdir[-4:]
+outdir = dirname(errlogpt)
+bibpt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
+
+
 def subout(inpath, outpath, pt_pairs):
     with open(inpath, mode='r', encoding='utf-8', errors='ignore') as texfile:
         data = texfile.read()
@@ -35,11 +41,7 @@ def subout(inpath, outpath, pt_pairs):
         with open(outpath,'w') as out:
             out.write(clean_data)
 
-def main():
-    rootdir = 'data/0002'
-    errlogpt = 'results/%s/errCases_db/dblog.txt' % rootdir[-4:]
-    outdir = dirname(errlogpt)
-    bibPt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
+def main(rootdir, errlogpt, outdir, bibPt):
     mk_the_dirs([outdir])
 
     with open(errlogpt, 'a') as ovw_err_log:
@@ -62,5 +64,7 @@ def main():
                     ovw_err_log.write(' \n')
         ovw_err_log.write('================================ \n')
 
+
 if __name__ == "__main__":
-    main()
+    main(rootdir, errlogpt, outdir, bibpt)
+    
