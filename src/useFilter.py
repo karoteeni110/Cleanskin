@@ -60,10 +60,9 @@ def mk_the_dirs(dirpaths):
         except FileExistsError:
             pass
     
-def main():
-    rootdir = 'results/1701/db'
+def main(rootdir):
     articles = next(walk(rootdir))[1]
-    errFileDir = dirname(rootdir) + 'errCases_opml'
+    errFileDir = dirname(rootdir) + '/errCases_opml'
     elp = errFileDir + '/log.txt'
     
     mk_the_dirs([errFileDir])
@@ -71,12 +70,11 @@ def main():
     with open(elp, 'a') as errlog:
         for art in articles:
             fromfile = rootdir + '/' + art + '/*.tex'
-            tofile = dirname(rootdir) + 'opml/' + art + '.xml'
+            tofile = dirname(rootdir) + '/opml/' + art + '.xml'
             cmd = pandoc(fromfile, tofile)
             check_err(cmd, fromfile, tofile, errFileDir, errlog)
 
-def errcase_redo():
-    rootdir = 'results/1701/errCases_opml'
+def errcase_redo(rootdir):
     articles = next(walk(rootdir))[1]
     errFileDir = rootdir
     elp = errFileDir + '/REDOlog.txt'
@@ -91,7 +89,8 @@ def errcase_redo():
                 check_redo_err(cmd, fromfile, tofile, errFileDir, errlog)
 
 if __name__ == "__main__":
-    errcase_redo()
+    main('results/0001/db')
+    # errcase_redo('results/0001/errCases_opml')
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
 # pandoc -s -t JSON *.tex > pandoAST.json # Check the AST of the file
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html

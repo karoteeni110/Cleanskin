@@ -36,7 +36,7 @@ def subout(inpath, outpath, pt_pairs):
             out.write(clean_data)
 
 def main():
-    rootdir = 'data/1701'
+    rootdir = 'data/0001'
     errlogpt = 'results/%s/errCases_db/dblog.txt' % rootdir[-4:]
     outdir = dirname(errlogpt)
     bibPt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
