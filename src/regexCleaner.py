@@ -36,7 +36,7 @@ def subout(inpath, outpath, pt_pairs):
             out.write(clean_data)
 
 def main():
-    rootdir = 'data/0001'
+    rootdir = 'data/0002'
     errlogpt = 'results/%s/errCases_db/dblog.txt' % rootdir[-4:]
     outdir = dirname(errlogpt)
     bibPt = {r'(\\begin(\*)?{thebibliography}.*?\\end(\*)?{thebibliography})':''}
@@ -44,7 +44,7 @@ def main():
 
     with open(errlogpt, 'a') as ovw_err_log:
         for rt, _, fls in walk(rootdir):
-            TeXes = fnmatch.filter(fls, '*.tex')
+            TeXes = fnmatch.filter(fls, '*.[tT][eE][xX]')
             if len(TeXes) == 0 and basename(rt)[-5:].isdigit() and rt != rootdir:
                 ovw_err_log.write('No TeX at %s \n' % rt)
                 copytree(rt, outdir + '/' + basename(rt))

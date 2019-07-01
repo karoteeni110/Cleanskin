@@ -78,7 +78,6 @@ def errcase_redo(rootdir):
     articles = next(walk(rootdir))[1]
     errFileDir = rootdir
     elp = errFileDir + '/REDOlog.txt'
-    mk_the_dirs([errFileDir])
 
     with open(elp, 'a') as errlog:
         for art in articles:
@@ -89,8 +88,8 @@ def errcase_redo(rootdir):
                 check_redo_err(cmd, fromfile, tofile, errFileDir, errlog)
 
 if __name__ == "__main__":
-    main('results/0001/db')
-    # errcase_redo('results/0001/errCases_opml')
+    # main('results/0002/db')
+    errcase_redo('results/0001/errCases_db')
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
 # pandoc -s -t JSON *.tex > pandoAST.json # Check the AST of the file
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html
