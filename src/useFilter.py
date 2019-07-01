@@ -90,9 +90,9 @@ def errcase_redo():
                 cmd = pandoc(fromfile, tofile)
                 check_redo_err(cmd, fromfile, tofile, errFileDir, errlog)
 
-
 if __name__ == "__main__":
     errcase_redo()
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
-# pandoc -s -t JSON ../data/nat_orders_revisionv4Amaro.tex > pandoAST.json # Check the AST of the file
+# pandoc -s -t JSON *.tex > pandoAST.json # Check the AST of the file
 # pandoc ../data/nat_orders_revisionv4Amaro.tex -f latex -t html -s -o non-filtered.html
+# pandoc *.tex -s -f latex -t opml --filter /home/yzan/Desktop/Cleanskin/src/pandocFilter.py --template=/home/yzan/Desktop/Cleanskin/data/temp.xml -s -o out.xml

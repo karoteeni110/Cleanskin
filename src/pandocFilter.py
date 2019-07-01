@@ -5,7 +5,7 @@ A pandoc filter that aims to:
     Turn emphasized text into ALL CAPS.
 """
 
-from pandocfilters import Math, toJSONFilters, Cite, Para, \
+from pandocfilters import Math, toJSONFilters, Cite, Para, Span, \
   Emph, Str, walk, Table, Image, OrderedList, BulletList, DefinitionList
 
 def no_math(k, v, fmt, meta):
@@ -22,6 +22,9 @@ def no_emph(k, v, fmt, meta):
 def no_table(k, v, fmt, meta):
   if k == 'Table':
     return []
+  # elif k == 'Para':
+  #   sp = v[0] 
+  #   if v[0]['t'] == 'Span' and v[0]['c'][1][0]['t'] == 'Str' and 'l' in v[0]['c'][1][0]['c'].
 
 def no_image(k, v, fmt, meta):
   if k == 'Image':
@@ -47,10 +50,6 @@ def delist(k, v, fmt, meta):
     for i in lstOflsts:
       paras += i
     return paras
-  
-
-# def block2LongPara(block):
-#   for para in block:
 
 
 actions = [no_math, no_cite, no_emph, no_table, no_image, delist]
