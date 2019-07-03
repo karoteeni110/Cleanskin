@@ -16,7 +16,7 @@ def no_emph(k, v, fmt, meta):
   def strs(key, value, format, meta):
     if key == 'Str':
       return Str(value)
-  if k == 'Emph':
+  if k == 'Emph' or 'Strong':
     return walk(v, strs, fmt, meta)
 
 def no_table(k, v, fmt, meta):
