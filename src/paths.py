@@ -1,13 +1,14 @@
-# Get paths to the data and results directories.
+# NEVER MOVE THIS FILE!!!!!!
 from os.path import dirname, join, realpath, basename
 src_path = dirname(realpath(__file__))
 repo_path = dirname(src_path)
 data_path = join(repo_path,'data')
 results_path = join(repo_path, 'results')
 
-def within_results(subdirn):
-    debib_dir = join(results_path, subdirn)
-    return debib_dir
+data0001 = join(data_path, '/0001')
+data0002 = join(data_path, '/0002')
+data1701 = join(data_path, '/1701')
+
 
 if __name__ == "__main__":
     # Check that we are reading the correct file
