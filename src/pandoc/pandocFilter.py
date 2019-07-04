@@ -10,13 +10,13 @@ from pandocfilters import Math, toJSONFilters, Cite, Para, Span, \
 
 def no_math(k, v, fmt, meta):
   if k == 'Math':
-    return []
+    return Str('_')
 
 def no_emph(k, v, fmt, meta):
   def strs(key, value, format, meta):
     if key == 'Str':
       return Str(value)
-  if k == 'Emph' or 'Strong':
+  if k in ['Emph', 'Strong']:
     return walk(v, strs, fmt, meta)
 
 def no_table(k, v, fmt, meta):
@@ -32,7 +32,7 @@ def no_image(k, v, fmt, meta):
 
 def no_cite(k, v, fmt, meta):
   if k == 'Cite' or fmt == 'Latex':
-    return []
+    return Str('_')
 
 def delist(k, v, fmt, meta):  
   '''Illustrative:

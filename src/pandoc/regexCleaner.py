@@ -1,8 +1,6 @@
 """
 Cleans {thebibliography} section before using Pandoc 
-OR 
-the XML characters (e.g. '&#10;', '&amp;') and refs ('\[sec:summery\]') 
-after it.
+
 Output:
 debib: writes out cleaned tex files into /result and rename them in the format
 e.g. '=1701.01278_debib.tex'.
@@ -40,6 +38,16 @@ def subout(inpath, outpath, pt_pairs):
             pass
         with open(outpath,'w') as out:
             out.write(clean_data)
+
+def pick_input(artdir):
+    
+    return None
+
+
+
+
+
+
 
 def main(rootdir, errlogpt, outdir, bibPt):
     mk_the_dirs([outdir])
