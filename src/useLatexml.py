@@ -30,17 +30,10 @@ def trav_data(rootdir, errlog):
                 errlog.write(art_path + '\n' + toptex_err)
                 errlog.write('==================================')
         else:
-            print('SURPRIIIIIIIIIIIIIIIIIIISE!!!!!!!!!!!!!!!!!!!!!')
+            print('You fucked up! hahahahahha')
 
 if __name__ == "__main__":
     errlogpath = join(results_path, 'latexmlLOG.txt')
-    rootdir = data0001
+    rootdir = data1701
     with open(errlogpath, 'a') as errlog:
-        trav_data(rootdir, errlog)
-
-
-
-
-
-errlogpath = join(results_path, 'latexmlErr.txt')
-            
+        trav_data(rootdir, errlog)            
