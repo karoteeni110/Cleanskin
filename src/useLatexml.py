@@ -25,9 +25,9 @@ def trav_data(rootdir, errlog, excluded_arts):
             art_path = join(rootdir, art)
             toptex_fn, toptex_err = pick_toptex(art_path)
             toptex_path = join(art_path, toptex_fn)
-            output_path = join(results_path, 'latexml/0001/%s.xml' % art) # XXX: CHANGE IT
+            output_path = join(results_path, 'latexml/%s.xml' % art) # XXX: CHANGE IT
             if toptex_fn != '': 
-                print(art + ' --> %s of %s' % (ith, len(artdirs) - len(excluded_arts)))
+                print(art + ' --> %s of %s' % (ith+1, len(artdirs)))
                 latexml(toptex_path, output_path)
             else:
                 errlog.write(art_path + '\n' + toptex_err)
@@ -41,7 +41,8 @@ if __name__ == "__main__":
     errlogpath = join(results_path, 'latexmlLOG.txt')
     rootdir = data0001 # XXX: CHANGE IT
     excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0001'))] \
-                            + ['=hep-ex0001041', '=astro-ph0001216'] + ['=astro-ph0002515'] # XXX:CHANGE IT 
+                            + ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
+                                + ['=astro-ph0002515'] # XXX:CHANGE IT 
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
@@ -51,3 +52,6 @@ if __name__ == "__main__":
 
     # 1701: (354+35) 389/414 files
     # Used time: 118.20650404294332 mins
+
+    # 0002: 2364 files
+    # Used time: 3.0506901219818325 hs+
