@@ -37,7 +37,7 @@ def iter_clean(docroot, keeplist):
     for elem in docroot.iter():
         clean_by_tag(elem, keeplist)
 
-def org_p(p):
+def p_text(p):
     """
     Captures all the text between <p> and </p> 
     with skipping all intermediate tags.
@@ -49,11 +49,22 @@ def org_p(p):
         following.append(math.tail.strip('\n')) # following text
     return ''.join(following)
 
-def org_ps(ps):
+def ps_text(ps):
     pstext = []
     for p in ps:
-        pstext.append(org(p))
+        pstext.append(p_text(p))
     return ' '.join(pstext)
+
+def para_textify(para):
+    ps = [elem for elem in list(para) if elem.tag == 'p'] #...
+    para.clear()
+    para.text = ps_text(ps)
+
+def paras_text(paras):
+    parastext = []
+    for para in paras:
+        parastext.append(para.text)
+    return ' '.join(paras_text)
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
@@ -67,16 +78,17 @@ if __name__ == "__main__":
     useless = []
     for child in root:
         if child.tag == 'abstract':
+            # Useful: p
             p = list(child)[0]
             child.clear()
-            child.text = org_p(p)
+            child.text = p_text(p)
 
         elif child.tag == 'para' : 
-            ps = [elem for elem in list(child) if elem.tag == 'p'] #...
-            child.clear()
-            child.text = org_ps(ps)
+            # Useful: p
+            para_textify(child)
 
         elif child.tag == 'section':
+            # Useful: title, para
             paras = []
             for elem in list(child):
                 if elem.tag == 'para':
@@ -85,8 +97,8 @@ if __name__ == "__main__":
                     title = elem
                 else:
                     useless.append((child, elem))
-
-            ps = [elem for elem in list(paras)]
+            child.clear()
+            child.text = paras_text(paras)
         
         else:
             useless.append((root,child))
