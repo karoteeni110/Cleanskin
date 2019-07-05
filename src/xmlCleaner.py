@@ -1,7 +1,9 @@
 import xml.etree.ElementTree as ET
 import sys
+from paths import data_path
+from os.path import join
 
-tree = ET.parse('../data/out.xml')
+tree = ET.parse(join(data_path, 'out.xml'))
 root = tree.getroot()
 
 print(root.tag)
@@ -20,6 +22,5 @@ def ignore_ns(root):
         
 ignore_ns(root)
 
-print(len([elem.attrib for elem in root.iter()]))
-# def no_math(rt):
-#     for math in rt.iter('Math'):
+for child in root:
+    print(child.tag)

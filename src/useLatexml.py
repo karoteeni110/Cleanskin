@@ -25,7 +25,7 @@ def trav_data(rootdir, errlog, excluded_arts):
             art_path = join(rootdir, art)
             toptex_fn, toptex_err = pick_toptex(art_path)
             toptex_path = join(art_path, toptex_fn)
-            output_path = join(results_path, 'latexml/0002/%s.xml' % art)
+            output_path = join(results_path, 'latexml/0001/%s.xml' % art) # XXX: CHANGE IT
             if toptex_fn != '': 
                 print(art + ' --> %s of %s' % (ith, len(artdirs) - len(excluded_arts)))
                 latexml(toptex_path, output_path)
@@ -39,9 +39,9 @@ def trav_data(rootdir, errlog, excluded_arts):
 
 if __name__ == "__main__":
     errlogpath = join(results_path, 'latexmlLOG.txt')
-    rootdir = data0002
-    excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0002'))] \
-                            + ['=hep-ex0001041'] + ['=astro-ph0002515']
+    rootdir = data0001 # XXX: CHANGE IT
+    excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0001'))] \
+                            + ['=hep-ex0001041', '=astro-ph0001216'] + ['=astro-ph0002515'] # XXX:CHANGE IT 
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
