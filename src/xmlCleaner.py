@@ -37,6 +37,24 @@ def iter_clean(docroot, keeplist):
     for elem in docroot.iter():
         clean_by_tag(elem, keeplist)
 
+def org_p(p):
+    """
+    Captures all the text between <p> and </p> 
+    with skipping all intermediate tags.
+
+    Return the concatenated str.
+    """
+    following = [p.text.strip('\n')] # head text
+    for math in list(p):
+        following.append(math.tail.strip('\n')) # following text
+    return ''.join(following)
+
+def org_ps(ps):
+    pstext = []
+    for p in ps:
+        pstext.append(org(p))
+    return ' '.join(pstext)
+
 if __name__ == "__main__":
     # hep-ph0001047.xml
     tree = ET.parse(join(data_path, 'out.xml'))
@@ -44,24 +62,40 @@ if __name__ == "__main__":
 
     ignore_ns(root)
 
+    keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
+         'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+    useless = []
     for child in root:
         if child.tag == 'abstract':
-            # a=[]
-            # for i in list(list(child)[0]):
-            #     if i.tag == 'Math':
-            #         print(i.text == '\n        ')
             p = list(child)[0]
-            following = [p.text.strip('\n')]
-            for math in list(p):
-                following.append(math.tail.strip('\n'))
             child.clear()
-            child.text = ''.join(following)
-                
-            # for text in list(child)[0].itertext():
-            #     print(text)
-            #     print('==========')
-    # keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
-    #     'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+            child.text = org_p(p)
+
+        elif child.tag == 'para' : 
+            ps = [elem for elem in list(child) if elem.tag == 'p'] #...
+            child.clear()
+            child.text = org_ps(ps)
+
+        elif child.tag == 'section':
+            paras = []
+            for elem in list(child):
+                if elem.tag == 'para':
+                    paras.append(elem)
+                elif elem.tag == 'title':
+                    title = elem
+                else:
+                    useless.append((child, elem))
+
+            ps = [elem for elem in list(paras)]
+        
+        else:
+            useless.append((root,child))
+    
+    for par, chi in useless:
+        par.remove(chi)
+
+
+
     # iter_clean(root, keep_taglist)
     tree.write(join(results_path, 'newout.xml'))
     
