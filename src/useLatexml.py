@@ -20,14 +20,14 @@ def pick_toptex(artdir):
 def trav_data(rootdir, errlog, excluded_arts):
     artdirs = listdir(rootdir)
     ct = 0
-    for art in artdirs:
+    for ith, art in enumerate(artdirs):
         if art[-1].isdigit() and art not in excluded_arts: # the folder name of articles should consist of digits
             art_path = join(rootdir, art)
             toptex_fn, toptex_err = pick_toptex(art_path)
             toptex_path = join(art_path, toptex_fn)
-            output_path = join(results_path, 'latexml/0001/%s.xml' % art)
+            output_path = join(results_path, 'latexml/0002/%s.xml' % art)
             if toptex_fn != '': 
-                print(art)
+                print(art + ' --> %s of %s' % (ith, len(artdirs) - len(excluded_arts)))
                 latexml(toptex_path, output_path)
             else:
                 errlog.write(art_path + '\n' + toptex_err)
@@ -39,8 +39,9 @@ def trav_data(rootdir, errlog, excluded_arts):
 
 if __name__ == "__main__":
     errlogpath = join(results_path, 'latexmlLOG.txt')
-    rootdir = data0001
-    excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0001'))] + ['=hep-ex0001041']
+    rootdir = data0002
+    excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0002'))] \
+                            + ['=hep-ex0001041'] + ['=astro-ph0002515']
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
