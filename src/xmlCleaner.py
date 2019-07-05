@@ -43,8 +43,25 @@ if __name__ == "__main__":
     root = tree.getroot()
 
     ignore_ns(root)
-    keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
-        'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
-    iter_clean(root, keep_taglist)
+
+    for child in root:
+        if child.tag == 'abstract':
+            # a=[]
+            # for i in list(list(child)[0]):
+            #     if i.tag == 'Math':
+            #         print(i.text == '\n        ')
+            p = list(child)[0]
+            following = [p.text.strip('\n')]
+            for math in list(p):
+                following.append(math.tail.strip('\n'))
+            child.clear()
+            child.text = ''.join(following)
+                
+            # for text in list(child)[0].itertext():
+            #     print(text)
+            #     print('==========')
+    # keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
+    #     'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+    # iter_clean(root, keep_taglist)
     tree.write(join(results_path, 'newout.xml'))
     

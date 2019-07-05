@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # ParseError at =1701.00987.xml
 
     # {'paragraph', 'tags', 'section', 'subtitle', 'titlepage', 'keywords', 'abstract', 'pagination', 'title', 'TOC', 'note', 'toctitle', 'subsubsection', 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 'date', 'rdf', 'bibliography', 'glossarydefinition', 'chapter', 'proof', 'resource', 'figure', 'creator', 'para', 'subsection', 'acknowledgements', 'theorem'}
-    
+
     # {'paragraph', 'tags', 'section', 'subtitle', 'titlepage', 'keywords', 
     # 'abstract', 'pagination', 'title', 'TOC', 'note', 'toctitle', 'subsubsection', 
     # 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 
