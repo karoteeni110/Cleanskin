@@ -1,10 +1,8 @@
 import xml.etree.ElementTree as ET
 import sys
-from paths import data_path
+from paths import data_path, results_path
 from os.path import join
-# hep-ph0001047.xml
-tree = ET.parse(join(data_path, 'out.xml'))
-root = tree.getroot()
+
 
 def ignore_ns(root):
     for elem in root.iter():
@@ -14,33 +12,39 @@ def ignore_ns(root):
         if i >= 0:
             elem.tag = elem.tag[i+1:]
 
-def clean_rank1(root):
+def clean_by_tag(root, keeplist):
     """
-    XXX: Don't do "change while iterating"!
+    XXX: Don't do "change while iterating"! 
+    https://stackoverflow.com/questions/22817530/elementtree-element-remove-jumping-iteration
+    
+    Removes only the **direct** child elements on the root.
     """
-
-    i=0
+    toberemoved = []
     for child in root:
-        i+=1
-        print(list(root))
-        if child.tag in ['resource', 'pagination']:
-            print('Removed %s' % i, child)
-            root.remove(child)
-            print(list(root))
-            print()
-        else: 
-            print(i, child)
-            print(list(root))
-            print()
+        if child.tag in keeplist:
+            print(child.tag, child.attrib)
+            print([ (ele.tag, ele.attrib) for ele in list(child)])
+            print('========================')
+    #     if child.tag not in keeplist:
+    #         toberemoved.append(child)
+    # for elem in toberemoved:
+    #     root.remove(elem)
 
-ignore_ns(root)
-for i, child in enumerate(root):
-    print(i+1, child)
-print('===========================')
+def iter_clean(docroot, keeplist):
+    """
+    Use `clean_by_tag` iteratively.
+    """
+    for elem in docroot.iter():
+        clean_by_tag(elem, keeplist)
 
-clean_rank1(root)
+if __name__ == "__main__":
+    # hep-ph0001047.xml
+    tree = ET.parse(join(data_path, 'out.xml'))
+    root = tree.getroot()
 
-print('===========================')
-# for i, child in enumerate(root):
-#     print(i+1, child)
-
+    ignore_ns(root)
+    keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
+        'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+    iter_clean(root, keep_taglist)
+    tree.write(join(results_path, 'newout.xml'))
+    
