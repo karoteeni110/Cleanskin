@@ -20,30 +20,24 @@ def flatten_text(root, keeplist=[]):
     """
     XXX: Don't do "change while iterating"! 
     
-    Flatten root: removes all the 'Math' and 'Cite' node in <text> (i.e. param::root), 
-    leaving only text within.
+    Flatten root: skipping all intermediate nodes in the root, 
+    and return the text within.
     """
-    toberemoved = []
     if root.text:
         txt = [root.text.strip('\n')]
     else:
         txt = []
-
     for child in root:
         if child.tag in keeplist and child.text:
             txt.append(child.text)
-        else:
-            toberemoved.append((root, child))
         if child.tail:
             txt.append(child.tail)
-    for rt, chi in toberemoved:
-        rt.remove(chi)
     return ' '.join(txt)
 
 def p_text(p):
     """
-    Captures all the text between <p> and </p> 
-    with skipping all intermediate tags except <text>.
+    Captures all the text in <p>
+    with skipping all intermediate tags except <text> or <note>.
 
     Return the concatenated str.
     """
@@ -110,7 +104,7 @@ def texify_section(secelem):
             paras.append(elem)
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
-        elif elem.tag == 'subsection':
+        elif elem.tag in ('subsection', 'subparagraph'):
             texify_section(elem)
             subsecs.append(elem)
     secelem.clear()
@@ -123,7 +117,8 @@ def texify_section(secelem):
 if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
-    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002110.xml')
+    # XXX:subparagraph case: =hep-th0002024.xml
+    tree = ET.parse('')
     root = tree.getroot()
 
     ignore_ns(root)
@@ -139,19 +134,23 @@ if __name__ == "__main__":
             p = list(child)[0]
             child.clear()
             child.text = p_text(p)
+        elif child.tag == 'note':
+            notetxt = p_text(child)
+            child.clear()
+            child.text = notetxt
         elif child.tag in ('para', 'toctitle', 'titlepage') : 
-            # Useful: p
+            # Useful: p, inline-para
             para_textify(child)
             if not child.text:
                 useless.append((root, child))
-        elif child.tag in ('section', 'paragraph'):
+        elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection
             texify_section(child)
-        else:
+        else: # TOC, 
             useless.append((root,child))
     
     for par, chi in useless:
         par.remove(chi) 
 
-    tree.write(join(results_path, 'newout3.xml'))
+    tree.write(join(results_path, 'subpara.xml'))
     

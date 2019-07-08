@@ -25,7 +25,7 @@ def get_rank1(rootdir, report=False, node=None):
 if __name__ == "__main__":
     travdir = join(results_path, 'latexml/0002')
     # print(get_rank1(travdir))
-    get_rank1(travdir, True, 'titlepage')
+    get_rank1(travdir, True, 'subparagraph')
     # 1701:
     # ParseError at =1701.01158.xml
     # ParseError at =1701.00987.xml
