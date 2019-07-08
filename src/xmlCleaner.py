@@ -83,6 +83,7 @@ def para_textify(para):
         ht = ''
     ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] #...
     para.clear()
+    para.tag = 'para' # turning elements into 'para': toctitle, titlepage
     para.text = ht + ps_text(ps)
 
 def paras_text(paras):
@@ -103,23 +104,26 @@ def get_ttn(ttelem):
     return flatten_text(ttelem)
 
 def texify_section(secelem):
-    paras = []
+    paras, titles, subsecs = [], [], []
     for elem in list(secelem):
         if elem.tag == 'para':
             paras.append(elem)
-        elif elem.tag == 'title':
-            title = get_ttn(elem)
+        elif elem.tag in ('title', 'subtitle'):
+            titles.append((elem.tag, get_ttn(elem)))
         elif elem.tag == 'subsection':
             texify_section(elem)
-            paras.append(elem)
+            subsecs.append(elem)
     secelem.clear()
-    secelem.set('title', title)
+    for title_name,title in titles:
+        secelem.set(title_name, title)
+    for subsec in subsecs:
+        secelem.append(subsec)
     secelem.text = paras_text(paras)
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
-    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=hep-ph0002051.xml')
+    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002110.xml')
     root = tree.getroot()
 
     ignore_ns(root)
@@ -128,12 +132,14 @@ if __name__ == "__main__":
          'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
     useless = []
     for child in root:
-        if child.tag == 'abstract':
+        if child.tag in ('title', 'subtitle','keywords'):
+            pass
+        elif child.tag == 'abstract':
             # Useful: p
             p = list(child)[0]
             child.clear()
             child.text = p_text(p)
-        elif child.tag == 'para' : 
+        elif child.tag in ('para', 'toctitle', 'titlepage') : 
             # Useful: p
             para_textify(child)
             if not child.text:
@@ -147,5 +153,5 @@ if __name__ == "__main__":
     for par, chi in useless:
         par.remove(chi) 
 
-    tree.write(join(results_path, 'newout2.xml'))
+    tree.write(join(results_path, 'newout3.xml'))
     
