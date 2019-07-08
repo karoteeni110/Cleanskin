@@ -65,7 +65,11 @@ def ps_text(ps):
     '''
     pstext = []
     for p in ps:
-        pstext.append(p_text(p))
+        if p.tag == 'p':
+            pstext.append(p_text(p))
+        elif p.tag == 'inline-para':
+            txt = paras_text(list(p))
+            pstext.append(txt)
     return ' '.join(pstext)
 
 def para_textify(para):
@@ -77,7 +81,7 @@ def para_textify(para):
         ht = para.text.strip('\n') # head text
     else:
         ht = ''
-    ps = [elem for elem in list(para) if elem.tag == 'p'] #...
+    ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] #...
     para.clear()
     para.text = ht + ps_text(ps)
 
@@ -88,7 +92,8 @@ def paras_text(paras):
     '''
     for elem in paras:
         if len(list(elem)) != 0:
-            para_textify(elem)
+            if elem.tag == 'para':
+                para_textify(elem)
     return ' '.join([elem.text for elem in paras])
 
 def get_ttn(ttelem):
@@ -113,7 +118,8 @@ def texify_section(secelem):
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
-    tree = ET.parse(join(data_path, 'out.xml'))
+    # tree = ET.parse(join(data_path, 'out.xml'))
+    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=hep-ph0002051.xml')
     root = tree.getroot()
 
     ignore_ns(root)
@@ -127,12 +133,12 @@ if __name__ == "__main__":
             p = list(child)[0]
             child.clear()
             child.text = p_text(p)
-        elif child.tag in ('para', 'paragraph') : 
+        elif child.tag == 'para' : 
             # Useful: p
             para_textify(child)
             if not child.text:
                 useless.append((root, child))
-        elif child.tag == 'section':
+        elif child.tag in ('section', 'paragraph'):
             # Useful: title, para, subsection
             texify_section(child)
         else:
@@ -141,5 +147,5 @@ if __name__ == "__main__":
     for par, chi in useless:
         par.remove(chi) 
 
-    tree.write(join(results_path, 'newout.xml'))
+    tree.write(join(results_path, 'newout2.xml'))
     
