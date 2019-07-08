@@ -44,9 +44,15 @@ def p_text(p):
 
     Return the concatenated str.
     """
-    following = [p.text.strip('\n')] # head text
+    if p.text:
+        following = [p.text.strip('\n')] # head text
+    else:
+        following = []
     for math in list(p):
-        following.append(math.tail.strip('\n')) # following text
+        if math.tail:
+            following.append(math.tail.strip('\n')) # following text
+        else:
+            continue
     return ''.join(following)
 
 def ps_text(ps):
@@ -64,7 +70,7 @@ def paras_text(paras):
     parastext = []
     for para in paras:
         parastext.append(para.text)
-    return ' '.join(paras_text)
+    return ' '.join(parastext)
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
@@ -95,6 +101,8 @@ if __name__ == "__main__":
                     paras.append(elem)
                 elif elem.tag == 'title':
                     title = elem
+                elif elem.tag == 'subsection':
+                    pass #TODO: recursion
                 else:
                     useless.append((child, elem))
             child.clear()
@@ -104,7 +112,7 @@ if __name__ == "__main__":
             useless.append((root,child))
     
     for par, chi in useless:
-        par.remove(chi)
+        par.remove(chi) #????x not in list
 
 
 
