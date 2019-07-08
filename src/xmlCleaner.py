@@ -40,14 +40,6 @@ def flatten_text(root, keeplist=[]):
         rt.remove(chi)
     return ' '.join(txt)
 
-
-def iter_clean(docroot, keeplist):
-    """
-    Use `clean_by_tag` iteratively.
-    """
-    for elem in docroot.iter():
-        flatten_text(elem, keeplist)
-
 def p_text(p):
     """
     Captures all the text between <p> and </p> 
@@ -90,8 +82,12 @@ def para_textify(para):
     para.text = ht + ps_text(ps)
 
 def paras_text(paras):
+    '''
+    Returns elem.text for each element in paras list.
+    If there are other subelem in elem, flatten it with ``para_texify()``.
+    '''
     for elem in paras:
-        if elem.tag == 'para':
+        if len(list(elem)) != 0:
             para_textify(elem)
     return ' '.join([elem.text for elem in paras])
 
@@ -145,8 +141,5 @@ if __name__ == "__main__":
     for par, chi in useless:
         par.remove(chi) 
 
-
-
-    # iter_clean(root, keep_taglist)
     tree.write(join(results_path, 'newout.xml'))
     
