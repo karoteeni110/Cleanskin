@@ -114,11 +114,28 @@ def texify_section(secelem):
         secelem.append(subsec)
     secelem.text = paras_text(paras)
 
+def texify_chapter(chapelem):
+    paras, subsecs = [], []
+    for elem in list(chapelem):
+        if elem.tag == 'para':
+            paras.append(elem)
+        elif elem.tag == 'toctitle':
+            title = flatten_text(elem)
+        elif elem.tag in ('subsection', 'subparagraph', 'section'):
+            texify_section(elem)
+            subsecs.append(elem)
+    chapelem.clear()
+    chapelem.set('title', title)
+    for subsec in subsecs:
+        chapelem.append(subsec)
+    chapelem.text = paras_text(paras)
+
+
 if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    tree = ET.parse('')
+    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002410.xml')
     root = tree.getroot()
 
     ignore_ns(root)
@@ -126,6 +143,7 @@ if __name__ == "__main__":
     keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
          'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
     useless = []
+    
     for child in root:
         if child.tag in ('title', 'subtitle','keywords'):
             pass
@@ -146,11 +164,13 @@ if __name__ == "__main__":
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection
             texify_section(child)
+        elif child.tag == 'chapter':
+            texify_chapter(child)
         else: # TOC, 
             useless.append((root,child))
     
     for par, chi in useless:
         par.remove(chi) 
 
-    tree.write(join(results_path, 'subpara.xml'))
+    tree.write(join(results_path, 'chapter.xml'))
     
