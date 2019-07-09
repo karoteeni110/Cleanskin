@@ -4,6 +4,9 @@ from os import listdir
 import xml.etree.ElementTree as ET
 
 def get_rank1(rootdir, report=False, node=None):
+    '''
+    Collect all the possible direct children of <document>.
+    '''
     rank1 = []
     for fn in listdir(rootdir):
         fpath = join(rootdir, fn)
@@ -23,9 +26,9 @@ def get_rank1(rootdir, report=False, node=None):
 
 
 if __name__ == "__main__":
-    travdir = join(results_path, 'latexml/0002')
+    travdir = join(results_path, 'latexml/1701')
     # print(get_rank1(travdir))
-    get_rank1(travdir, True, 'chapter')
+    get_rank1(travdir)
     # 1701:
     # ParseError at =1701.01158.xml
     # ParseError at =1701.00987.xml

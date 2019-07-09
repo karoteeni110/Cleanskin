@@ -9,6 +9,8 @@ data0001 = join(data_path, '0001')
 data0002 = join(data_path, '0002')
 data1701 = join(data_path, '1701')
 
+errcase_path = join(results_path, 'latexml/errcp')
+
 
 if __name__ == "__main__":
     # Check that we are reading the correct file

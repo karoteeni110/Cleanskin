@@ -2,7 +2,7 @@ from subprocess import run, PIPE
 from shutil import copyfile, copytree, rmtree
 from os import walk, mkdir, stat, remove, listdir
 from os.path import basename, dirname, exists, join
-from paths import data0001, data0002, data1701, results_path
+from paths import data0001, data0002, data1701, results_path, errcase_path
 import time
 
 def latexml(from_fpath, to_fpath):
@@ -12,7 +12,7 @@ def latexml(from_fpath, to_fpath):
     return a
 
 def pick_toptex(artdir):
-    a = run('if cd %s ;then ls -hS *.{tex,ltx}; fi' % artdir,
+    a = run('if cd %s ;then ls -hS *.{tex,TEX,LTX}; fi' % artdir,
             shell=True, stdout=PIPE, stderr=PIPE, executable='/bin/bash')
     out, err = a.stdout.decode('utf-8').split('\n')[0], a.stderr.decode('utf-8')
     return [out, err]
@@ -26,20 +26,25 @@ def trav_data(rootdir, errlog, excluded_arts):
             toptex_fn, toptex_err = pick_toptex(art_path)
             toptex_path = join(art_path, toptex_fn)
             output_path = join(results_path, 'latexml/%s.xml' % art) # XXX: CHANGE IT
+            if exists(output_path):
+                print('File exists. Skip %s' % toptex_path)
             if toptex_fn != '': 
                 print(art + ' --> %s of %s' % (ith+1, len(artdirs)))
                 latexml(toptex_path, output_path)
             else:
                 errlog.write(art_path + '\n' + toptex_err)
                 errlog.write('================================== \n')
+                err_art_dest = join(results_path, 'errcp/%s' % art)
+                print('Err occurs. Cp %s to %s' % (art, err_art_dest) )
+                copytree(art_path, err_art_dest)
 
         else:
             ct+=1
             print('Skipped art %s of %s' % (ct, len(excluded_arts)))
 
 if __name__ == "__main__":
-    errlogpath = join(results_path, 'latexmlLOG.txt')
-    rootdir = data0001 # XXX: CHANGE IT
+    errlogpath = join(results_path, 'errcase_redo.txt')
+    rootdir = errcase_path # XXX: CHANGE IT
     excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0001'))] \
                             + ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
                                 + ['=astro-ph0002515'] # XXX:CHANGE IT 

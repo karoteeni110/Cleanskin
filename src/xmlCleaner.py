@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
 import sys
 from paths import data_path, results_path
-from os.path import join
+from os.path import join, basename
+from shutil import copy, copytree
 
 
 def ignore_ns(root):
@@ -135,15 +136,21 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    tree = ET.parse('/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002410.xml')
-    root = tree.getroot()
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002410.xml'
+    errcasepath = join(results_path, 'latexml/errcp')
+    try:
+        tree = ET.parse(xmlpath)
+        root = tree.getroot()
+        ignore_ns(root)
+    except ET.ParseError:
+        print('cp ParseError at %s' % xmlpath)
+        copy(xmlpath, join(errcasepath, basename(xmlpath)))
 
-    ignore_ns(root)
 
     keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
          'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
     useless = []
-    
+
     for child in root:
         if child.tag in ('title', 'subtitle','keywords'):
             pass

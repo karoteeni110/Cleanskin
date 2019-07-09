@@ -1,17 +1,8 @@
 from shutil import move
 from os import walk, listdir, rename
-from useFilter import mk_the_dirs
 from regexCleaner import subout, bibpt
 
-mk_the_dirs(['./notext'])
 artdirs = next(walk('.'))[1]
-
-def normalize_fname(ext, original_name, new_name):
-    if ext == 'ltx':
-        new_name = new_name[:-3] + 'tex'
-    elif ext == 'latex':
-        new_name = new_name[:-5] + 'tex'
-    rename(original_name, new_name)
 
 for artdir in artdirs:
     if artdir[-1].isdigit():
