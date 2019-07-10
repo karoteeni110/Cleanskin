@@ -31,15 +31,17 @@ def mv_pdf_artdir(errart, dst):
     """
     fs = listdir(errart)
     ext = [f.split('.')[-1].lower() for f in fs]
-    if set(ext) <= set(['ps', 'html', 'pdf', 'eps', 'cry', 'gif', 'jpg','doc', 'htm']) \
+    if set(ext) <= set(['ps', 'html', 'pdf', 'eps', 'cry', 'gif', 'jpg','doc', 'htm', 'cls']) \
         or fs[0] == 'withdrawn':
         print('MV %s to %s: no tex' % (errart, dst) )
         move(errart, dst)
+
+
 
 if __name__ == "__main__":
     # logpt = join(results_path, 'latexml/outError.txt')
     # get_srcpath(logpt)
 
     for i in listdir(errcase_path):
-        if i[-1].isdigit(): # if ``i``` is directory
+        if i[-1].isdigit(): # if ``i`` is directory
             mv_pdf_artdir(join(errcase_path, i), join(errcase_path, 'notex'))
