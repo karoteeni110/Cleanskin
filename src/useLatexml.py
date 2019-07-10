@@ -26,11 +26,13 @@ def trav_data(rootdir, errlog, excluded_arts):
             toptex_fn, toptex_err = pick_toptex(art_path)
             toptex_path = join(art_path, toptex_fn)
             output_path = join(results_path, 'latexml/%s.xml' % art) # XXX: CHANGE IT
-            if exists(output_path):
-                print('File exists. Skip %s' % toptex_path)
+            
             if toptex_fn != '': 
                 print(art + ' --> %s of %s' % (ith+1, len(artdirs)))
-                latexml(toptex_path, output_path)
+                if exists(output_path):
+                    print('File exists. Skip %s' % toptex_path)
+                else:
+                    latexml(toptex_path, output_path)
             else:
                 errlog.write(art_path + '\n' + toptex_err)
                 errlog.write('================================== \n')
@@ -43,9 +45,9 @@ def trav_data(rootdir, errlog, excluded_arts):
             print('Skipped art %s of %s' % (ct, len(excluded_arts)))
 
 if __name__ == "__main__":
-    errlogpath = join(results_path, 'errcase_redo.txt')
+    errlogpath = join(results_path, 'latexml/logs/errcase_redo.txt')
     rootdir = errcase_path # XXX: CHANGE IT
-    excluded_arts = [i[:-4] for i in listdir(join(results_path,'latexml/0001'))] \
+    excluded_arts = [i[:-4] for i in listdir(results_path, 'latexml') if i[:-4] == '.xml'] \
                             + ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
                                 + ['=astro-ph0002515'] # XXX:CHANGE IT 
     
