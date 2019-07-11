@@ -125,6 +125,7 @@ def texify_chapter(chapelem):
         elif elem.tag in ('subsection', 'subparagraph', 'section'):
             texify_section(elem)
             subsecs.append(elem)
+            elem.tag = 'section'
     chapelem.clear()
     chapelem.set('title', title)
     for subsec in subsecs:
