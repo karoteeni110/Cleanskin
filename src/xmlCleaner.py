@@ -19,10 +19,16 @@ def ignore_ns(root):
 
 def flatten_text(root, keeplist=[]):
     """
-    XXX: Don't do "change while iterating"! 
+    TODO: ``keeplist``
+    XXX: Seems it overlaps with ``para_textify()``; delete this?
     
-    Flatten root: skipping all intermediate nodes in the root, 
-    and return the text within.
+    Flatten root: extract the beginning, in-between and ending text in ``root``, where:
+    beginning text: ``root.text``
+    in-between text: ``[child.text+child.tail for child in root]``
+    end text: the last ``child.tail``
+
+    XXX:  Assumes child nodes don't have deeper structure.
+
     """
     if root.text:
         txt = [root.text.strip('\n')]
@@ -31,27 +37,27 @@ def flatten_text(root, keeplist=[]):
     for child in root:
         if child.tag in keeplist and child.text:
             txt.append(child.text)
-        if child.tail:
+        if child.tail: 
             txt.append(child.tail)
     return ' '.join(txt)
 
 def p_text(p):
     """
-    Captures all the text in <p>
-    with skipping all intermediate tags except <text> or <note>.
+    Captures all the text within <p> and its trailing,
+    skipping all intermediate tags except <text> and <note>.
 
     Return the concatenated str.
     """
     if p.text:
-        following = [p.text.strip('\n')] # head text
+        txt = [p.text.strip('\n')] # head text
     else:
-        following = []
+        txt = []
     for child in list(p):
-        if child.tag == 'text': # pass list!
-            following.append(flatten_text(child))
+        if child.tag in ['text', 'note']: # pass list!
+            txt.append(flatten_text(child))
         if child.tail:
-            following.append(child.tail.strip('\n'))
-    return ' '.join(following)
+            txt.append(child.tail.strip('\n'))
+    return ' '.join(txt)
 
 def ps_text(ps):
     '''
@@ -65,6 +71,8 @@ def ps_text(ps):
         elif p.tag == 'inline-para':
             txt = paras_text(list(p))
             pstext.append(txt)
+        if p.tail:
+            pstext.append(p.tail)
     return ' '.join(pstext)
 
 def para_textify(para):
@@ -73,13 +81,15 @@ def para_textify(para):
     and pass <p>s to ps_text(). 
     '''
     if para.text:
-        ht = para.text.strip('\n') # head text
+        txt = para.text.strip('\n') # head text
     else:
-        ht = ''
+        txt = ''
     ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] #...
+    txt += ps_text(ps)
+    
     para.clear()
-    para.tag = 'para' # turning elements into 'para': toctitle, titlepage
-    para.text = ht + ps_text(ps)
+    para.tag = 'para' # Change element tags to 'para': toctitle, titlepage
+    para.text = txt
 
 def paras_text(paras):
     '''
@@ -122,7 +132,7 @@ def texify_chapter(chapelem):
             paras.append(elem)
         elif elem.tag == 'toctitle':
             title = flatten_text(elem)
-        elif elem.tag in ('subsection', 'subparagraph', 'section'):
+        elif elem.tag in ('subsection', 'subparagraph', 'section', 'subsubsection'):
             texify_section(elem)
             subsecs.append(elem)
             elem.tag = 'section'
@@ -137,7 +147,7 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/0002/=astro-ph0002410.xml'
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0001248.xml'
     errcasepath = join(results_path, 'latexml/errcp')
     try:
         tree = ET.parse(xmlpath)
@@ -157,9 +167,7 @@ if __name__ == "__main__":
             pass
         elif child.tag == 'abstract':
             # Useful: p
-            p = list(child)[0]
-            child.clear()
-            child.text = p_text(p)
+            para_textify(child)
         elif child.tag == 'note':
             notetxt = p_text(child)
             child.clear()
@@ -180,5 +188,5 @@ if __name__ == "__main__":
     for par, chi in useless:
         par.remove(chi) 
 
-    tree.write(join(results_path, 'chapter.xml'))
+    tree.write(join(results_path, 'mostcommon.xml'))
     
