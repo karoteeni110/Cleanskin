@@ -6,19 +6,19 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 import pickle
     
-def get_rank1(fpath): 
+def get_rank1tags(fpath): 
     rank1nodes = []           
     try:
         tree = ET.parse(fpath)
         root = tree.getroot()
-        ignore_ns(root)
-        elemlst = [elem.tag for elem in root.findall('./*')] # get rid of namespace
+        ignore_ns(root) # get rid of namespace
+        elemlst = [elem.tag for elem in root.findall('./*')] 
         rank1nodes.extend(elemlst)
     except ET.ParseError:
         print('ParseError at',fpath)
     return frozenset(rank1nodes)
 
-def get_all_rank1(rootdir=None, report_every=100, newpkl=None, oldpkl=None):
+def get_rank1tags_freqdist(rootdir=None, report_every=100, newpkl=None, oldpkl=None):
     '''
     Collect all the possible direct children of <document>.
     '''
@@ -28,9 +28,9 @@ def get_all_rank1(rootdir=None, report_every=100, newpkl=None, oldpkl=None):
         for i, fn in enumerate(listdir(rootdir)):
             fpath = join(rootdir, fn)
             if fn[-3:] == 'xml': 
-                nodesetlst.append(get_rank1(fpath))
+                nodesetlst.append(get_rank1tags(fpath))
             if (i+1) % report_every == 0:
-                print('File %s of %s collected.' % (i+1, len(listdir(rootdir))))
+                print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
         rank1nodes = Counter(nodesetlst)
         if newpkl:
             with open(newpkl, 'wb') as f:
@@ -66,7 +66,11 @@ def show_examplefile(rootdir, tagname, rank1only=True):
             print('Found %s in %s' % (tagname, fpath))
             
 
-def check_children(parent_tag, fpath):
+def check_childrentags(parent_tag, fpath):
+    '''
+    Returns the frozenset of all the tags of nodes that are the direct children 
+    of nodes with tag ``parent_tag``.
+    '''
     direct_children_tags = []           
     try:
         tree = ET.parse(fpath)
@@ -74,20 +78,21 @@ def check_children(parent_tag, fpath):
         ignore_ns(root) # get rid of namespace
         child_taglst = [child.tag for child in root.findall('.//%s/*' % parent_tag)] 
         direct_children_tags.extend(child_taglst)
+        return frozenset(direct_children_tags)
     except ET.ParseError:
         print('ParseError at',fpath)
-    return frozenset(direct_children_tags)
+    
 
-def check_children_iter(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
+def get_childrentag_freqdist(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
     if not oldpkl:
         nodesetlst = []
         print('Collecting doc infos....')
         for i, fn in enumerate(listdir(rootdir)):
             fpath = join(rootdir, fn)
             if fn[-3:] == 'xml': 
-                nodesetlst.append(check_children(parent_tag, fpath))
+                nodesetlst.append(check_childrentags(parent_tag, fpath))
             if (i+1) % report_every == 0:
-                print('File %s of %s collected.' % (i+1, len(listdir(rootdir))))
+                print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
         node_freqdist = Counter(nodesetlst)
         if newpkl:
             with open(newpkl, 'wb') as f:
@@ -96,18 +101,17 @@ def check_children_iter(rootdir, parent_tag, report_every=100, newpkl=None, oldp
         node_freqdist = pickle.load(open(oldpkl, 'rb'))
     return node_freqdist
 
-
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
     pklpath = join(data_path, '1stnodes.pkl')
-    nodes = get_all_rank1(rootdir, oldpkl=pklpath)
-    # show_most_common(nodes,20)
-    # show_examplefile(rootdir, ['resource', 'abstract', 'section', 'title', 'creator', 'bibliography'])
-    # show_examplefile(rootdir, ['para', 'title', 'creator', 'resource', 'ERROR', 'section', 'abstract'])
+    rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
+    # show_most_common(rank1tags_freqdist, 20)
 
-    # fd_pkl = join(data_path, 'paraChildren.pkl')
-    # freqdist = check_children_iter(rootdir, 'para', oldpkl=fd_pkl)
-    # show_most_common(freqdist, 20)
+    # show_examplefile(rootdir, '', )
+    
+    fd_pkl = join(data_path, 'abstractChildren.pkl')
+    freqdist = get_childrentag_freqdist(rootdir, 'abstract', newpkl=fd_pkl)
+    show_most_common(freqdist, 20)
 
 
 
