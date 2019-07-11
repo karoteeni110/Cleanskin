@@ -71,13 +71,12 @@ def check_childrentags(parent_tag, fpath):
     Returns the frozenset of all the tags of nodes that are the direct children 
     of nodes with tag ``parent_tag``.
     '''
-    direct_children_tags = []           
+   
     try:
         tree = ET.parse(fpath)
         root = tree.getroot()
         ignore_ns(root) # get rid of namespace
-        child_taglst = [child.tag for child in root.findall('.//%s/*' % parent_tag)] 
-        direct_children_tags.extend(child_taglst)
+        direct_children_tags = [child.tag for child in root.findall('.//%s/*' % parent_tag)] 
         return frozenset(direct_children_tags)
     except ET.ParseError:
         print('ParseError at',fpath)
@@ -101,6 +100,22 @@ def get_childrentag_freqdist(rootdir, parent_tag, report_every=100, newpkl=None,
         node_freqdist = pickle.load(open(oldpkl, 'rb'))
     return node_freqdist
 
+# def all_childtags(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
+#     if not oldpkl:
+#         nodesetlst = []
+#         print('Collecting doc infos....')
+#         for i, fn in enumerate(listdir(rootdir)):
+#             fpath = join(rootdir, fn)
+#             if fn[-3:] == 'xml': 
+#                 nodesetlst.append(check_childrentags(parent_tag, fpath))
+#             if (i+1) % report_every == 0:
+#                 print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
+
+def all_childtags(freqdist):
+    mergeset = set().union(*(frozens for frozens in freqdist))
+    print(mergeset)
+
+
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
     pklpath = join(data_path, '1stnodes.pkl')
@@ -110,9 +125,9 @@ if __name__ == "__main__":
     # show_examplefile(rootdir, '', )
     
     fd_pkl = join(data_path, 'abstractChildren.pkl')
-    freqdist = get_childrentag_freqdist(rootdir, 'abstract', newpkl=fd_pkl)
-    show_most_common(freqdist, 20)
-
+    freqdist = get_childrentag_freqdist(rootdir, 'abstract', oldpkl=fd_pkl)
+    # show_most_common(freqdist, 20)
+    all_childtags(freqdist)
 
 
 
