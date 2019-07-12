@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     for child in root:
         if child.tag in ('title', 'subtitle','keywords', 'acknowledgements', 'bibliography'):
-            pass
+            continue
         elif child.tag == 'abstract':
             # Useful children: p, description, quote, inline-para, section, itemize
             # TODO: description, quote, inline-para, section, itemize
@@ -180,11 +180,11 @@ if __name__ == "__main__":
             if not child.text:
                 useless.append((root, child))
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
-            # Useful: title, para, subsection
+            # Useful: title, para, subsection, acknowledgements(?)
             texify_section(child)
         elif child.tag == 'chapter':
             texify_chapter(child)
-        else: # child.tag in
+        else: # Remove <creator>, <date>, <resource>, ...
             useless.append((root,child))
     
     for par, chi in useless:

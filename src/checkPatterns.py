@@ -14,9 +14,11 @@ def get_rank1tags(fpath):
         ignore_ns(root) # get rid of namespace
         elemlst = [elem.tag for elem in root.findall('./*')] 
         rank1nodes.extend(elemlst)
+        return frozenset(rank1nodes)
     except ET.ParseError:
         print('ParseError at',fpath)
-    return frozenset(rank1nodes)
+        return frozenset()
+    
 
 def get_rank1tags_freqdist(rootdir=None, report_every=100, newpkl=None, oldpkl=None):
     '''
@@ -43,9 +45,10 @@ def show_most_common(counterdict, first):
     for st, ct in counterdict.most_common(first):
         print(ct, list(st))
 
-def show_examplefile(rootdir, tagname, rank1only=True):
+def show_examplefile(rootdir, tagname):
     '''
     Show example files that contain the tags in ``tagname``.
+    ``tagname`` is part of the XPath parameter of 'findall' function: './_tagname_'
     '''
     for fn in listdir(rootdir):
         fpath = join(rootdir, fn)
@@ -54,10 +57,7 @@ def show_examplefile(rootdir, tagname, rank1only=True):
                 tree = ET.parse(fpath)
                 root = tree.getroot()
                 ignore_ns(root)
-                if rank1only:
-                    elem = root.findall(tagname)
-                else:
-                    elem = root.findall('.//%s'% tagname)
+                elem = root.findall('./%s' % tagname)
             except ET.ParseError:
                 print('ParseError at',fpath)
                 elem = []
@@ -80,6 +80,7 @@ def check_childrentags(parent_tag, fpath):
         return frozenset(direct_children_tags)
     except ET.ParseError:
         print('ParseError at',fpath)
+        return frozenset()
     
 
 def get_childrentag_freqdist(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
@@ -100,34 +101,24 @@ def get_childrentag_freqdist(rootdir, parent_tag, report_every=100, newpkl=None,
         node_freqdist = pickle.load(open(oldpkl, 'rb'))
     return node_freqdist
 
-# def all_childtags(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
-#     if not oldpkl:
-#         nodesetlst = []
-#         print('Collecting doc infos....')
-#         for i, fn in enumerate(listdir(rootdir)):
-#             fpath = join(rootdir, fn)
-#             if fn[-3:] == 'xml': 
-#                 nodesetlst.append(check_childrentags(parent_tag, fpath))
-#             if (i+1) % report_every == 0:
-#                 print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
-
-def all_childtags(freqdist):
-    mergeset = set().union(*(frozens for frozens in freqdist))
+def show_all_childtags(freqdist):
+    mergeset = set().union(*freqdist)
     print(mergeset)
 
 
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
-    pklpath = join(data_path, '1stnodes.pkl')
-    rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
+    # pklpath = join(data_path, '1stnodes.pkl')
+    # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
 
-    # show_examplefile(rootdir, '', )
+    # show_examplefile(rootdir, 'abstract/itemize')
     
-    fd_pkl = join(data_path, 'abstractChildren.pkl')
-    freqdist = get_childrentag_freqdist(rootdir, 'abstract', oldpkl=fd_pkl)
+    fd_pkl = join(data_path, 'sectionChildren.pkl')
+    freqdist = get_childrentag_freqdist(rootdir, 'section', newpkl=fd_pkl)
     # show_most_common(freqdist, 20)
-    all_childtags(freqdist)
+    
+    # show_all_childtags(freqdist)
 
 
 
