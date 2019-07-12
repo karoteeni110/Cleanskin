@@ -182,37 +182,17 @@ def texify_abstract(abs):
         elif elem.tag == 'quote':
             pass
     abs.clear()
-    abs.text = txt# break, pagination, ERROR, equation, ...
+    abs.text = txt # ignore: break, pagination, ERROR, equation, ...
             
-
-        
-
-if __name__ == "__main__":
-    # hep-ph0001047.xml
-    # tree = ET.parse(join(data_path, 'out.xml'))
-    # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0001248.xml'
-    errcasepath = join(results_path, 'latexml/errcp')
-    try:
-        tree = ET.parse(xmlpath)
-        root = tree.getroot()
-        ignore_ns(root)
-    except ET.ParseError:
-        print('cp ParseError at %s' % xmlpath)
-        copy(xmlpath, join(errcasepath, basename(xmlpath)))
-
-
-    keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
-         'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+def clean(root):
     useless = []
-
     for child in root:
         if child.tag in ('title', 'subtitle','keywords', 'acknowledgements', 'bibliography'):
             continue
         elif child.tag == 'abstract':
             # Useful children: p, 
             # description, quote, inline-para, section, itemize
-            para_textify(child)
+            texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, 
             # subsubsection, subparagraph, proof(?), acknowledgements(?)
@@ -235,6 +215,27 @@ if __name__ == "__main__":
     
     for par, chi in useless:
         par.remove(chi) 
+        
 
-    tree.write(join(results_path, 'mostcommon.xml'))
+if __name__ == "__main__":
+    # hep-ph0001047.xml
+    # tree = ET.parse(join(data_path, 'out.xml'))
+    # XXX:subparagraph case: =hep-th0002024.xml
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0001248.xml'
+    # xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0002442.xml'
+    errcasepath = join(results_path, 'latexml/errcp')
+    try:
+        tree = ET.parse(xmlpath)
+        root = tree.getroot()
+        ignore_ns(root)
+    except ET.ParseError:
+        print('cp ParseError at %s' % xmlpath)
+        copy(xmlpath, join(errcasepath, basename(xmlpath)))
+
+    # keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
+    #      'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
+    # useless = []
+
+    clean(root)
+    tree.write(join(results_path, 'test.xml'))
     

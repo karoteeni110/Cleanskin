@@ -73,7 +73,6 @@ def check_childrentags(parent_tag, fpath):
 
 
     '''
-   
     try:
         tree = ET.parse(fpath)
         root = tree.getroot()
