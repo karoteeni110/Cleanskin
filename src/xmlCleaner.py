@@ -57,6 +57,9 @@ def p_text(p):
             txt.append(flatten_text(child))
         if child.tail:
             txt.append(child.tail.strip('\n'))
+    if p.tail:
+        txt.append(p.tail)
+    
     return ' '.join(txt)
 
 def ps_text(ps):
@@ -109,6 +112,9 @@ def get_ttn(ttelem):
     return flatten_text(ttelem)
 
 def texify_section(secelem):
+    # Useful: title, para, subsection, subsubsection, 
+    # subparagraph, proof(?), acknowledgements(?)
+    # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem(?)
     paras, titles, subsecs = [], [], []
     for elem in list(secelem):
         if elem.tag == 'para':
@@ -124,6 +130,9 @@ def texify_section(secelem):
     for subsec in subsecs:
         secelem.append(subsec)
     secelem.text = paras_text(paras)
+
+def itemize_text(itemize_elem):
+    return ''
 
 def texify_chapter(chapelem):
     paras, subsecs = [], []
@@ -142,6 +151,41 @@ def texify_chapter(chapelem):
         chapelem.append(subsec)
     chapelem.text = paras_text(paras)
 
+def enum_text(enum):
+    return ''
+
+def inlinepara_text(inlinepara):
+    # TODO: check!!
+    return paras_text(list(inlinepara))
+
+def texify_abstract(abs):
+    '''
+    Collect the text at the beginning, within subelements and their trailing to ``txt``,
+    clear the element,
+    and finally, set the text to ``txt``.
+    '''
+    if abs.text:
+        txt = abs.text
+    else:
+        txt = ''
+    for elem in list(abs):
+        if elem.tag == 'p':
+            txt += ' ' + p_text(elem)
+        elif elem.tag == 'itemize':
+            txt += ' ' + itemize_text(elem)
+        elif elem.tag == 'enumerate':
+            txt += ' ' + enum_text(elem) 
+        elif elem.tag == 'inline-para':
+            txt += ' ' + inlinepara_text(elem)
+        elif elem.tag == 'description':
+            pass
+        elif elem.tag == 'quote':
+            pass
+    abs.clear()
+    abs.text = txt# break, pagination, ERROR, equation, ...
+            
+
+        
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
@@ -166,9 +210,14 @@ if __name__ == "__main__":
         if child.tag in ('title', 'subtitle','keywords', 'acknowledgements', 'bibliography'):
             continue
         elif child.tag == 'abstract':
-            # Useful children: p, description, quote, inline-para, section, itemize
-            # TODO: description, quote, inline-para, section, itemize
+            # Useful children: p, 
+            # description, quote, inline-para, section, itemize
             para_textify(child)
+        elif child.tag in ('section', 'paragraph', 'subparagraph'):
+            # Useful: title, para, subsection, 
+            # subsubsection, subparagraph, proof(?), acknowledgements(?)
+            # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem(?)
+            texify_section(child)
         elif child.tag == 'note':
             # Useful children: p
             notetxt = p_text(child)
@@ -179,12 +228,9 @@ if __name__ == "__main__":
             para_textify(child)
             if not child.text:
                 useless.append((root, child))
-        elif child.tag in ('section', 'paragraph', 'subparagraph'):
-            # Useful: title, para, subsection, acknowledgements(?)
-            texify_section(child)
         elif child.tag == 'chapter':
             texify_chapter(child)
-        else: # Remove <creator>, <date>, <resource>, ...
+        else: # Remove <creator>, <date>, <resource>, ... <thereom>(?)
             useless.append((root,child))
     
     for par, chi in useless:
