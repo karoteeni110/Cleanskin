@@ -229,7 +229,7 @@ def clean(root):
         elif child.tag in ('para', 'toctitle', 'titlepage') : 
             # Useful: p, inline-para
             texify_para(child)
-            if not child.text:
+            if not child.text: # If it's empty, remove
                 useless.append((root, child))
             child.tag = 'para'
         elif child.tag == 'chapter':
@@ -249,8 +249,8 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0001248.xml'
-    # xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=astro-ph0002442.xml'
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00097.xml'
+
     errcasepath = join(results_path, 'latexml/errcp')
     try:
         tree = ET.parse(xmlpath)
