@@ -1,8 +1,16 @@
 # !/bin/bash
-dddd='1701'
 
-if cd /home/yzan/Desktop/try/$dddd ; then
+# Decompresses the tarballs in $dir, keeping the original structure
+# PDFs are also kept in folder.
+# Cannot extract withdrawn articles.
+# To check the articles that don't show (usually caused by withdrawn articles), use src/checkdiff.py
+
+dddd='1701'
+dir='/home/yzan/Desktop/try/1701_002'
+
+if cd $dir ; then
   pwd
+fi
 else
   echo 'Could not change directory! Aborting.' 1>&2
   exit 1

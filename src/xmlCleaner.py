@@ -134,28 +134,22 @@ def texify_section(secelem):
 def itemize_text(itemize_elem):
     return ''
 
-def texify_chapter(chapelem):
-    paras, subsecs = [], []
+def clean_chapter(chapelem):
     for elem in list(chapelem):
         if elem.tag == 'para':
-            paras.append(elem)
+            para_textify(elem)
         elif elem.tag == 'toctitle':
             title = flatten_text(elem)
         elif elem.tag in ('subsection', 'subparagraph', 'section', 'subsubsection'):
             texify_section(elem)
-            subsecs.append(elem)
             elem.tag = 'section'
-    chapelem.clear()
+    chapelem.attrib = dict()
     chapelem.set('title', title)
-    for subsec in subsecs:
-        chapelem.append(subsec)
-    chapelem.text = paras_text(paras)
 
 def enum_text(enum):
     return ''
 
 def inlinepara_text(inlinepara):
-    # TODO: check!!
     return paras_text(list(inlinepara))
 
 def texify_abstract(abs):
@@ -208,8 +202,9 @@ def clean(root):
             para_textify(child)
             if not child.text:
                 useless.append((root, child))
+            child.tag = 'para'
         elif child.tag == 'chapter':
-            texify_chapter(child)
+            clean_chapter(child)
         else: # Remove <creator>, <date>, <resource>, ... <thereom>(?)
             useless.append((root,child))
     
