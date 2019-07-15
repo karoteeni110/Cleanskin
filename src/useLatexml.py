@@ -48,9 +48,9 @@ def trav_data(rootdir, errlog, outdir, excluded_dirs=None):
                         # print(cmd.stdout.decode('utf-8'))
                         errlog.write(art_path + '\n' + cmd.stdout.decode('utf-8'))
                         errlog.write('================================== \n')
-                else:
+                else: # Skip extracted articles
                     print('File exists. Skip %s' % toptex_path)
-                    #pass
+                    
             else: # Articles that are not in LaTex
                 err_art_dest = join(errcase_path, 'notex/%s' % art)
                 print('Tex not found. Cp %s to %s' % (art, err_art_dest) )
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     rootdir = data1701 # XXX: CHANGE IT
     outdir = join(results_path, 'latexml')
     excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
-                    + ['=astro-ph0002515']
+                    + ['=astro-ph0002515'] + ['=1701.00636']
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
