@@ -1,7 +1,7 @@
 """
-`texify_*` funcs flatten the argument. Elements after ``texify`` wouldn't have child nodes.
-`clean_*` funcs may keeps some subelements as the argument's child.
-`*_text`s collect and return the text within the argument without doing any change to it.
+`texify_*` funcs flatten the argument and returns None. Elements after ``texify`` wouldn't have child nodes.
+`clean_*` funcs may keeps some subelements as the argument's child. Returns None.
+`*_text`s collect and return the text within the argument without doing any change to it. Returns str.
 """
 
 import xml.etree.ElementTree as ET
@@ -23,73 +23,28 @@ def ignore_ns(root):
         if i >= 0:
             elem.tag = elem.tag[i+1:]
 
-def flatten_text(root, keeplist=[]):
-    """
-    TODO: ``keeplist``
-    XXX: Seems it overlaps with ``texify_para()``; delete this?
-    
-    Flatten root: extract the beginning, in-between and ending text in ``root``, where:
-    beginning text: ``root.text``
-    in-between text: ``[child.text+child.tail for child in root]``
-    end text: the last ``child.tail``
-
-    XXX:  Assumes child nodes don't have deeper structure.
-
-    """
-    if root.text:
-        txt = [root.text.strip('\n')]
+def opening(elem):
+    if elem.text:
+        return elem.text
     else:
-        txt = []
-    for child in root:
-        if child.tag in keeplist and child.text:
-            txt.append(child.text)
-        if child.tail: 
-            txt.append(child.tail)
-    return ' '.join(txt)
+        return ''
 
-def p_text(p):
-    """
-    Captures all the text within <p> and its trailing,
-    skipping all intermediate tags except <text> and <note>.
+# def flatten_text(root):
+#     """
+#     Extracts the beginning, in-between and ending text in ``root``,
+#     skipping _all_ deep text in the intermediate elements.
 
-    Return the concatenated str.
-    """
-    if p.text:
-        txt = [p.text.strip('\n')] # head text
-    else:
-        txt = []
-    for child in list(p):
-        if child.tag in ('text', 'note'): # should be trivial
-            txt.append(flatten_text(child))
-        if child.tail:
-            txt.append(child.tail.strip('\n'))
-    if p.tail:
-        txt.append(p.tail)
-    
-    return ' '.join(txt)
+#     """
+#     txt = opening(root)
+#     for child in root:
+#         if child.text:
+#             txt += ' ' + child.text
+#         if child.tail: 
+#             txt += ' ' + child.tail
+#     return txt
 
-def itemize_text(itemize_elem):
-    return ''
-
-# def ps_text(ps):
-#     '''
-#     XXX: seperate <inline-para>
-#     Iterating ps (a list of <p> elements), passing them to p_text
-#     and return a str.
-#     '''
-#     pstext = []
-#     for p in ps:
-#         if p.tag == 'p': # should be trivial
-#             pstext.append(p_text(p))
-#         if p.tail:
-#             pstext.append(p.tail)
-#     return ' '.join(pstext)
 def inlinepara_text(inpara):
-    if inpara.text:
-        txt = inpara.text
-    else:
-        txt = ''
-    
+    txt = opening(inpara)
     for elem in list(inpara):
         if elem.tag == 'para':
             texify_para(elem)
@@ -97,8 +52,52 @@ def inlinepara_text(inpara):
         elif elem.tag == 'theorem':
             clean_section(elem)
             txt += elem.text
-        
+        elif elem.tag == 'float':
+            txt += float_text(elem)
+    return txt
 
+def p_text(p):
+    """
+    Captures all the text within <p> and its trailing,
+    skipping all intermediate tags except <text>, <note> and <inline-para>.
+
+    Return the concatenated str.
+    """
+    txt = opening(p)
+    for child in list(p):
+        if child.tag in ('text', 'note'): # TODO: child.text?????
+            txt += ' ' + p_text(child)
+        elif child.tag == 'inline-para':
+            txt += ' ' + inlinepara_text(child)
+        elif child.text:
+            txt += ' ' + child.text
+
+        if child.tail:
+            txt += ' ' + child.tail
+    if p.tail:
+        txt += ' ' + p.tail
+    return txt
+
+def itemize_text(itemize_elem):
+    pass
+
+def listing_text(lsting):
+    txt = opening(lsting)
+    for elem in list(lsting):
+        if elem.tag == 'listingline':
+            txt += p_text(elem)
+    txt += lsting.tail
+    return txt
+
+def float_text(flt):
+    # results/latexml/=1701.00757.xml
+    txt = opening(flt)
+    for elem in list(flt):
+        if elem.tag == 'listing':
+            txt += listing_text(elem)
+        elif elem.tag in ('toccaption', 'caption'):
+            txt += p_text(elem)
+    return txt
 
 def texify_para(para):
     '''
@@ -107,13 +106,7 @@ def texify_para(para):
 
     Useful subelements: <p>
     '''
-    if para.text:
-        txt = para.text.strip('\n') # head text
-    else:
-        txt = ''
-    # ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] # trailing text included
-    # txt += ps_text(ps)
-    
+    txt = opening(para)
     for p in list(para):
         if p.tag == 'p':
             txt += p_text(p) 
@@ -126,40 +119,40 @@ def texify_para(para):
     para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
 
-# def paras_text(paras):
-#     '''
-#     Returns elem.text for each element in paras list.
-#     If there are other subelem in elem, flatten it with ``para_texify()``.
-#     '''
-#     for elem in paras:
-#         if len(list(elem)) != 0:
-#             if elem.tag == 'para':
-#                 texify_para(elem)
-#     return ' '.join([elem.text for elem in paras])
-
 def get_ttn(ttelem):
     '''
     Get title str from title element.
     '''
-    return flatten_text(ttelem)
-
+    return p_text(ttelem)
 
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
     # keeps subelements like <sections> after texifying them.
 
-    # Useful: title, para, subsection, subsubsection, 
-    # subparagraph, proof(?), acknowledgements(?)
-    # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem
-    paras, titles, subsecs = [], [], []
+    # Useful: title, para, subsection, subsubsection, theorem, subparagraph, 
+    # proof, acknowledgements, paragraph, bibliography, note, float, indexmark(?)
+    txt, titles, subsecs = [], [], []
     for elem in list(secelem):
         if elem.tag == 'para':
-            paras.append(elem)
+            texify_para(elem)
+            txt.append(elem.text)
+        elif elem.tag == 'float':
+            txt.append(float_text(elem))
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
         elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof'):
             clean_section(elem)
-            elem.tag = 'subsection'
+            elem.tag = 'subsection' # uniform tag
+            subsecs.append(elem)
+        elif elem.tag == 'paragraph':
+            pass
+        elif elem.tag == 'note': 
+            txt = p_text(elem)
+            elem.clear()
+            elem.text = txt
+        elif elem.tag in ('acknowledgements', 'bibliography'):
+            elem.clear()
+            elem.tag = 'backmatter'
             subsecs.append(elem)
 
     secelem.clear()
@@ -167,14 +160,14 @@ def clean_section(secelem):
         secelem.set(title_name, title)
     for subsec in subsecs:
         secelem.append(subsec)
-    secelem.text = paras_text(paras)
+    secelem.text = ' '.join(txt)
 
 def clean_chapter(chapelem):
     for elem in list(chapelem):
         if elem.tag == 'para':
             texify_para(elem)
         elif elem.tag == 'toctitle':
-            title = flatten_text(elem)
+            title = p_text(elem)
         elif elem.tag in ('subsection', 'subparagraph', 'section', 'subsubsection'):
             clean_section(elem)
             elem.tag = 'section'
@@ -214,7 +207,9 @@ def clean(root):
     useless = []
     for child in root:
         if child.tag in ('title', 'subtitle','keywords'):
-            continue
+            content = p_text(child) # clear <break>
+            child.clear()
+            child.text = content
         elif child.tag in ('acknowledgements', 'bibliography'):
             child.clear()
         elif child.tag == 'abstract':
@@ -223,8 +218,8 @@ def clean(root):
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, 
-            # subsubsection, subparagraph, proof(?), acknowledgements(?)
-            # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem
+            # subsubsection, subparagraph, acknowledgements(?)
+            # paragraph, bibliography(?), note, float, indexmark(?), theorem
             clean_section(child)
         elif child.tag == 'note':
             # Useful children: p
@@ -239,6 +234,10 @@ def clean(root):
             child.tag = 'para'
         elif child.tag == 'chapter':
             clean_chapter(child)
+        elif child.tag in ('theorem', 'proof'):
+            clean_section(child)
+            child.tag = 'section'
+
         else: # Remove <creator>, <date>, <resource>, ... <theorem>(?)
             useless.append((root,child))
     

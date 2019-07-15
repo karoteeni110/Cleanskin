@@ -118,7 +118,7 @@ if __name__ == "__main__":
     # 125 ['resource', 'bibliography', 'title', 'abstract', 'creator', 'date', 'section']
     # 124 ['para', 'resource', 'bibliography', 'title', 'figure', 'abstract', 'creator', 'date', 'classification']
 
-    show_examplefile(rootdir, '/p/inline-para/float')
+    show_examplefile(rootdir, '/section/note')
     
     elemname = 'inlinepara'
     fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
