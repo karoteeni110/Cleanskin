@@ -27,7 +27,7 @@ def trav_data(rootdir, errlog, outdir, excluded_dirs=None):
     a) is in TeX format: 
            ==> processed by latexml (output => /outdir/ )
         or ==> in ``excluded_dirs`` (latexml hangs when processing it): cp to /excluded
-    b) not in TeX format:
+    b) not in TeX format: 
     '''
     dirs = listdir(rootdir)
     
@@ -68,8 +68,8 @@ if __name__ == "__main__":
     errlogpath = join(results_path, 'latexml/logs/log.txt')
     rootdir = data1701 # XXX: CHANGE IT
     outdir = join(results_path, 'latexml')
-    excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
-                    + ['=astro-ph0002515'] + ['=1701.00636']
+    excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] + ['=astro-ph0002515'] \
+                     + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', '=1701.01161']
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:

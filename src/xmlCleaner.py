@@ -20,7 +20,7 @@ def ignore_ns(root):
 def flatten_text(root, keeplist=[]):
     """
     TODO: ``keeplist``
-    XXX: Seems it overlaps with ``para_textify()``; delete this?
+    XXX: Seems it overlaps with ``texify_para()``; delete this?
     
     Flatten root: extract the beginning, in-between and ending text in ``root``, where:
     beginning text: ``root.text``
@@ -78,20 +78,20 @@ def ps_text(ps):
             pstext.append(p.tail)
     return ' '.join(pstext)
 
-def para_textify(para):
+def texify_para(para):
     '''
-    Collect all the <p> between <para> & </para>, 
-    and pass <p>s to ps_text(). 
+    Collects all the <p>s and extract the text from them.
+    Clears all the content in the element, and set the text to ``text``. 
     '''
     if para.text:
         txt = para.text.strip('\n') # head text
     else:
         txt = ''
-    ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] #...
+    ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] # trailing text included
     txt += ps_text(ps)
     
     para.clear()
-    para.tag = 'para' # Change element tags to 'para': toctitle, titlepage
+    para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
 
 def paras_text(paras):
@@ -102,7 +102,7 @@ def paras_text(paras):
     for elem in paras:
         if len(list(elem)) != 0:
             if elem.tag == 'para':
-                para_textify(elem)
+                texify_para(elem)
     return ' '.join([elem.text for elem in paras])
 
 def get_ttn(ttelem):
@@ -111,10 +111,16 @@ def get_ttn(ttelem):
     '''
     return flatten_text(ttelem)
 
-def texify_section(secelem):
+def theorem_text(theorem):
+    pass
+
+def clean_section(secelem):
+    # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
+    # keeps subelements like <sections> after texifying them.
+
     # Useful: title, para, subsection, subsubsection, 
     # subparagraph, proof(?), acknowledgements(?)
-    # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem(?)
+    # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem
     paras, titles, subsecs = [], [], []
     for elem in list(secelem):
         if elem.tag == 'para':
@@ -122,8 +128,10 @@ def texify_section(secelem):
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
         elif elem.tag in ('subsection', 'subparagraph'):
-            texify_section(elem)
+            clean_section(elem)
             subsecs.append(elem)
+        elif elem.tag == 'theorem':
+            pass
     secelem.clear()
     for title_name,title in titles:
         secelem.set(title_name, title)
@@ -137,11 +145,11 @@ def itemize_text(itemize_elem):
 def clean_chapter(chapelem):
     for elem in list(chapelem):
         if elem.tag == 'para':
-            para_textify(elem)
+            texify_para(elem)
         elif elem.tag == 'toctitle':
             title = flatten_text(elem)
         elif elem.tag in ('subsection', 'subparagraph', 'section', 'subsubsection'):
-            texify_section(elem)
+            clean_section(elem)
             elem.tag = 'section'
     chapelem.attrib = dict()
     chapelem.set('title', title)
@@ -152,17 +160,17 @@ def enum_text(enum):
 def inlinepara_text(inlinepara):
     return paras_text(list(inlinepara))
 
-def texify_abstract(abs):
+def texify_abstract(ab):
     '''
     Collect the text at the beginning, within subelements and their trailing to ``txt``,
     clear the element,
     and finally, set the text to ``txt``.
     '''
-    if abs.text:
-        txt = abs.text
+    if ab.text:
+        txt = ab.text
     else:
         txt = ''
-    for elem in list(abs):
+    for elem in list(ab):
         if elem.tag == 'p':
             txt += ' ' + p_text(elem)
         elif elem.tag == 'itemize':
@@ -175,8 +183,8 @@ def texify_abstract(abs):
             pass
         elif elem.tag == 'quote':
             pass
-    abs.clear()
-    abs.text = txt # ignore: break, pagination, ERROR, equation, ...
+    ab.clear()
+    ab.text = txt # ignore: break, pagination, ERROR, equation, ...
             
 def clean(root):
     useless = []
@@ -190,8 +198,8 @@ def clean(root):
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, 
             # subsubsection, subparagraph, proof(?), acknowledgements(?)
-            # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem(?)
-            texify_section(child)
+            # paragraph, bibliography(?), note, proof(?), float(?), indexmark(?), theorem
+            clean_section(child)
         elif child.tag == 'note':
             # Useful children: p
             notetxt = p_text(child)
@@ -199,13 +207,13 @@ def clean(root):
             child.text = notetxt
         elif child.tag in ('para', 'toctitle', 'titlepage') : 
             # Useful: p, inline-para
-            para_textify(child)
+            texify_para(child)
             if not child.text:
                 useless.append((root, child))
             child.tag = 'para'
         elif child.tag == 'chapter':
             clean_chapter(child)
-        else: # Remove <creator>, <date>, <resource>, ... <thereom>(?)
+        else: # Remove <creator>, <date>, <resource>, ... <theorem>(?)
             useless.append((root,child))
     
     for par, chi in useless:
