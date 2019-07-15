@@ -118,10 +118,10 @@ if __name__ == "__main__":
     # 125 ['resource', 'bibliography', 'title', 'abstract', 'creator', 'date', 'section']
     # 124 ['para', 'resource', 'bibliography', 'title', 'figure', 'abstract', 'creator', 'date', 'classification']
 
-    show_examplefile(rootdir, '/theorem')
+    show_examplefile(rootdir, '/p/inline-para/float')
     
-    elemname = 'section'
-    fd_pkl = join(data_path, '%sTopChildren.pkl' % elemname)
+    elemname = 'inlinepara'
+    fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
     freqdist = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))

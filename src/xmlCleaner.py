@@ -1,3 +1,9 @@
+"""
+`texify_*` funcs flatten the argument. Elements after ``texify`` wouldn't have child nodes.
+`clean_*` funcs may keeps some subelements as the argument's child.
+`*_text`s collect and return the text within the argument without doing any change to it.
+"""
+
 import xml.etree.ElementTree as ET
 import sys
 from paths import data_path, results_path
@@ -53,7 +59,7 @@ def p_text(p):
     else:
         txt = []
     for child in list(p):
-        if child.tag in ['text', 'note']: # pass list!
+        if child.tag in ('text', 'note'): # should be trivial
             txt.append(flatten_text(child))
         if child.tail:
             txt.append(child.tail.strip('\n'))
@@ -62,48 +68,74 @@ def p_text(p):
     
     return ' '.join(txt)
 
-def ps_text(ps):
-    '''
-    Iterating ps (a list of <p> elements), passing them to p_text
-    and return a str.
-    '''
-    pstext = []
-    for p in ps:
-        if p.tag == 'p':
-            pstext.append(p_text(p))
-        elif p.tag == 'inline-para':
-            txt = paras_text(list(p))
-            pstext.append(txt)
-        if p.tail:
-            pstext.append(p.tail)
-    return ' '.join(pstext)
+def itemize_text(itemize_elem):
+    return ''
+
+# def ps_text(ps):
+#     '''
+#     XXX: seperate <inline-para>
+#     Iterating ps (a list of <p> elements), passing them to p_text
+#     and return a str.
+#     '''
+#     pstext = []
+#     for p in ps:
+#         if p.tag == 'p': # should be trivial
+#             pstext.append(p_text(p))
+#         if p.tail:
+#             pstext.append(p.tail)
+#     return ' '.join(pstext)
+def inlinepara_text(inpara):
+    if inpara.text:
+        txt = inpara.text
+    else:
+        txt = ''
+    
+    for elem in list(inpara):
+        if elem.tag == 'para':
+            texify_para(elem)
+            txt += elem.text
+        elif elem.tag == 'theorem':
+            clean_section(elem)
+            txt += elem.text
+        
+
 
 def texify_para(para):
     '''
     Collects all the <p>s and extract the text from them.
     Clears all the content in the element, and set the text to ``text``. 
+
+    Useful subelements: <p>
     '''
     if para.text:
         txt = para.text.strip('\n') # head text
     else:
         txt = ''
-    ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] # trailing text included
-    txt += ps_text(ps)
+    # ps = [elem for elem in list(para) if elem.tag in ('p', 'inline-para')] # trailing text included
+    # txt += ps_text(ps)
     
+    for p in list(para):
+        if p.tag == 'p':
+            txt += p_text(p) 
+        if p.tag == 'inline-para':
+            txt += inlinepara_text(p)
+        if p.tag == 'itemize':
+            txt += itemize_text(p)
+
     para.clear()
     para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
 
-def paras_text(paras):
-    '''
-    Returns elem.text for each element in paras list.
-    If there are other subelem in elem, flatten it with ``para_texify()``.
-    '''
-    for elem in paras:
-        if len(list(elem)) != 0:
-            if elem.tag == 'para':
-                texify_para(elem)
-    return ' '.join([elem.text for elem in paras])
+# def paras_text(paras):
+#     '''
+#     Returns elem.text for each element in paras list.
+#     If there are other subelem in elem, flatten it with ``para_texify()``.
+#     '''
+#     for elem in paras:
+#         if len(list(elem)) != 0:
+#             if elem.tag == 'para':
+#                 texify_para(elem)
+#     return ' '.join([elem.text for elem in paras])
 
 def get_ttn(ttelem):
     '''
@@ -111,8 +143,6 @@ def get_ttn(ttelem):
     '''
     return flatten_text(ttelem)
 
-def theorem_text(theorem):
-    pass
 
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
@@ -127,20 +157,17 @@ def clean_section(secelem):
             paras.append(elem)
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
-        elif elem.tag in ('subsection', 'subparagraph'):
+        elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof'):
             clean_section(elem)
+            elem.tag = 'subsection'
             subsecs.append(elem)
-        elif elem.tag == 'theorem':
-            pass
+
     secelem.clear()
     for title_name,title in titles:
         secelem.set(title_name, title)
     for subsec in subsecs:
         secelem.append(subsec)
     secelem.text = paras_text(paras)
-
-def itemize_text(itemize_elem):
-    return ''
 
 def clean_chapter(chapelem):
     for elem in list(chapelem):
@@ -156,9 +183,6 @@ def clean_chapter(chapelem):
 
 def enum_text(enum):
     return ''
-
-def inlinepara_text(inlinepara):
-    return paras_text(list(inlinepara))
 
 def texify_abstract(ab):
     '''
@@ -189,8 +213,10 @@ def texify_abstract(ab):
 def clean(root):
     useless = []
     for child in root:
-        if child.tag in ('title', 'subtitle','keywords', 'acknowledgements', 'bibliography'):
+        if child.tag in ('title', 'subtitle','keywords'):
             continue
+        elif child.tag in ('acknowledgements', 'bibliography'):
+            child.clear()
         elif child.tag == 'abstract':
             # Useful children: p, 
             # description, quote, inline-para, section, itemize

@@ -69,7 +69,7 @@ if __name__ == "__main__":
     rootdir = data1701 # XXX: CHANGE IT
     outdir = join(results_path, 'latexml')
     excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] + ['=astro-ph0002515'] \
-                     + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', '=1701.01161']
+                     + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', '=1701.01161', '=1701.00689']
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
