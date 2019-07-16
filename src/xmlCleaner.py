@@ -48,7 +48,7 @@ def p_text(p, keeplist=[]):
 
     Return the concatenated str.
     """
-    txt = opening(p)
+    txt = opening(p)    
     for child in list(p):
         if child.tag in ('text', 'note'): # TODO: text: sometimes marks a seperate
             txt += ' ' + p_text(child)
@@ -163,6 +163,32 @@ def clean_chapter(chapelem):
 def enum_text(enum):
     return ''
 
+def item_text(item):
+    txt = opening(item)
+    for elem in list(item):
+        if elem.tag == 'tags': 
+            for tag in list(elem):
+                for i in list(tag):
+                    if i.tag == 'text':
+                        txt += ' ' + i.text + ':'
+        elif elem.tag == 'para':
+            texify_para(elem)
+            txt += elem.text
+    if item.tail:
+        txt += ' ' + item.tail
+    return txt
+
+def descrip_text(des):
+    txt = opening(des)
+    for elem in list(des):
+        if elem.tag == 'item': # should be trivial
+            txt += ' ' + item_text(elem)
+        if elem.tail:
+            txt += elem.tail
+    if des.tail:
+        txt += ' ' + des.tail
+    return txt
+
 def texify_abstract(ab):
     '''
     Collect the text at the beginning, within subelements and their trailing to ``txt``,
@@ -183,7 +209,7 @@ def texify_abstract(ab):
         elif elem.tag == 'inline-para':
             txt += ' ' + inlinepara_text(elem)
         elif elem.tag == 'description':
-            pass
+            txt += ' ' + descrip_text(elem)
         elif elem.tag == 'quote':
             pass
     ab.clear()
@@ -203,8 +229,7 @@ def clean(root):
             # description, quote, inline-para, section, itemize
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
-            # Useful: title, para, subsection, 
-            # subsubsection, subparagraph, acknowledgements
+            # Useful: title, para, subsection, subsubsection, subparagraph, acknowledgements
             # paragraph, bibliography(?), note, float, indexmark(?), theorem
             clean_section(child)
             child.tag = 'section'
@@ -225,7 +250,7 @@ def clean(root):
             clean_section(child)
             child.tag = 'section'
 
-        else: # Remove <creator>, <date>, <resource>, ... <theorem>(?)
+        else: # Remove <creator>, <date>, <resource>, ...
             useless.append((root,child))
     
     for par, chi in useless:
@@ -236,7 +261,7 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00540.xml'
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00547.xml'
 
     errcasepath = join(results_path, 'latexml/errcp')
     try:
@@ -252,5 +277,5 @@ if __name__ == "__main__":
     # useless = []
 
     clean(root)
-    tree.write(join(results_path, 'sec-subsubsec.xml'))
+    tree.write(join(results_path, 'ab-description.xml'))
     
