@@ -5,7 +5,7 @@
 """
 
 import xml.etree.ElementTree as ET
-import sys
+import sys, re
 from paths import data_path, results_path
 from os.path import join, basename
 from shutil import copy, copytree
@@ -53,7 +53,7 @@ def p_text(p, keeplist=[]):
             txt += ' ' + p_text(child)
         if child.tag == 'inline-para':
             txt += ' ' + inlinepara_text(child)
-        elif child.tag in keeplist and child.text: # check this
+        elif child.tag in keeplist and child.text: # default: Skips all intermediate elements
             txt += ' ' + child.text
         if child.tail:
             txt += ' ' + child.tail
@@ -82,6 +82,12 @@ def float_text(flt):
         txt += ' ' + flt.tail
     return txt
 
+def get_ttn(ttelem):
+    '''
+    Get title str from title element.
+    '''
+    return p_text(ttelem).strip()
+
 def texify_para(para):
     '''
     Collects all the <p>s and extract the text from them.
@@ -104,11 +110,48 @@ def texify_para(para):
     para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
 
-def get_ttn(ttelem):
-    '''
-    Get title str from title element.
-    '''
-    return p_text(ttelem).strip()
+def item_text(item):
+    # Useful: <tags>, <para>
+    txt = opening(item)
+    for elem in list(item):
+        if elem.tag == 'tags': 
+            for tag in list(elem):
+                for i in list(tag):
+                    if i.tag == 'text':
+                        txt += ' ' + i.text + ':'
+        elif elem.tag == 'para':
+            texify_para(elem)
+            txt += elem.text
+    if item.tail:
+        txt += ' ' + item.tail
+    return txt
+
+def descrip_text(des): 
+    # Useful: item
+    txt = opening(des)
+    for elem in list(des):
+        if elem.tag == 'item': # should be trivial
+            txt += ' ' + item_text(elem)
+        if elem.tail:
+            txt += elem.tail
+    if des.tail:
+        txt += ' ' + des.tail
+    return txt
+
+def quote_text(quote):
+    txt = opening(quote)
+    for elem in list(quote):
+        if elem.tag == 'p':
+            txt += ' ' + p_text(elem)
+        elif elem.tag == 'quote':
+            txt += ' ' + quote_text(elem)
+        elif elem.tag == 'listing':
+            txt += ' ' + listing_text(elem)
+        elif elem.tag == 'description':
+            txt += ' ' + descrip_text(elem)
+    if quote.tail:
+        txt += ' ' + quote.tail
+    return txt
 
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
@@ -159,49 +202,6 @@ def clean_chapter(chapelem):
             elem.tag = 'section'
     chapelem.attrib = dict()
     chapelem.set('title', title)
-
-def item_text(item):
-    # Useful: <tags>, <para>
-    txt = opening(item)
-    for elem in list(item):
-        if elem.tag == 'tags': 
-            for tag in list(elem):
-                for i in list(tag):
-                    if i.tag == 'text':
-                        txt += ' ' + i.text + ':'
-        elif elem.tag == 'para':
-            texify_para(elem)
-            txt += elem.text
-    if item.tail:
-        txt += ' ' + item.tail
-    return txt
-
-def descrip_text(des): 
-    # Useful: item
-    txt = opening(des)
-    for elem in list(des):
-        if elem.tag == 'item': # should be trivial
-            txt += ' ' + item_text(elem)
-        if elem.tail:
-            txt += elem.tail
-    if des.tail:
-        txt += ' ' + des.tail
-    return txt
-
-def quote_text(quote):
-    txt = opening(quote)
-    for elem in list(quote):
-        if elem.tag == 'p':
-            txt += ' ' + p_text(elem)
-        elif elem.tag == 'quote':
-            txt += ' ' + quote_text(elem)
-        elif elem.tag == 'listing':
-            txt += ' ' + listing_text(elem)
-        elif elem.tag == 'description':
-            txt += ' ' + descrip_text(elem)
-    if quote.tail:
-        txt += ' ' + quote.tail
-    return txt
     
 def texify_abstract(ab):
     '''
@@ -231,33 +231,34 @@ def clean(root):
             content = p_text(child) # clear <break>
             child.clear()
             child.text = content
-        elif child.tag in ('acknowledgements', 'bibliography'):
-            child.clear()
         elif child.tag == 'abstract':
             texify_abstract(child)
-        elif child.tag in ('section', 'paragraph', 'subparagraph'):
-            # Useful: title, para, subsection, subsubsection, subparagraph, acknowledgements
-            # paragraph, bibliography(?), note, float, indexmark(?), theorem
+        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection'):
             clean_section(child)
             child.tag = 'section'
+        elif child.tag in ('para', 'toctitle', 'titlepage') : 
+            # Useful: p, inline-para XXX: post-process!
+            texify_para(child)
+            if child.text == None or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
+                useless.append((root, child))
+            child.tag = 'para'
         elif child.tag == 'note':
             # Useful children: p
             notetxt = p_text(child)
             child.clear()
             child.text = notetxt
-        elif child.tag in ('para', 'toctitle', 'titlepage') : 
-            # Useful: p, inline-para
-            texify_para(child)
-            if not child.text: # If it's empty, remove
-                useless.append((root, child))
-            child.tag = 'para'
-        elif child.tag == 'chapter':
+        elif child.tag == 'glossarydefinition':
+            pass
+        
+        elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
+            child.tag = 'chapter'
         elif child.tag in ('theorem', 'proof'):
             clean_section(child)
             child.tag = 'section'
-
-        else: # Remove <creator>, <date>, <resource>, ...
+        elif child.tag in ('acknowledgements', 'bibliography', 'appendix', 'creator', 'index', 'date', 'float'):
+            child.clear()
+        else: # Remove <figure>, <part>, <classification>, <table>, <ERROR>, <appendix>, <TOC>, <pagination>, <rdf>, <tags>
             useless.append((root,child))
     
     for par, chi in useless:
