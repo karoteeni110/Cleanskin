@@ -12,8 +12,7 @@ from shutil import copy, copytree
 
 def ignore_ns(root):
     '''
-    Clean namespace in the node's tag. 
-    Should be called in the first place.
+    Clean namespace in the node's tag. Should be called in the first place.
     '''
     for elem in root.iter():
         if not hasattr(elem.tag, 'find'):
@@ -209,6 +208,8 @@ def texify_abstract(ab):
     Collect the text at the beginning, within subelements and their trailing to ``txt``,
     clear the element,
     and finally, set the text to ``txt``.
+    
+    Useful children: p, description, quote, inline-para, section, itemize
     '''
     txt = opening(ab)
     for elem in list(ab):
@@ -219,7 +220,7 @@ def texify_abstract(ab):
         elif elem.tag == 'inline-para':
             txt += ' ' + inlinepara_text(elem)
         elif elem.tag == 'quote':
-            pass
+            txt += ' ' + quote_text(elem)
     ab.clear()
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
             
@@ -233,7 +234,6 @@ def clean(root):
         elif child.tag in ('acknowledgements', 'bibliography'):
             child.clear()
         elif child.tag == 'abstract':
-            # Useful children: p, description, quote, inline-para, section, itemize
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, subsubsection, subparagraph, acknowledgements

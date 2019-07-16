@@ -68,7 +68,8 @@ if __name__ == "__main__":
     errlogpath = join(results_path, 'latexml/logs/log.txt')
     rootdir = data1701 # XXX: CHANGE IT
     outdir = join(results_path, 'latexml')
-    excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] + ['=astro-ph0002515'] \
+    excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
+                      + ['=astro-ph0002515', '=hep-th0002028'] \
                      + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', \
                          '=1701.01161', '=1701.00689', '=1701.00635', '=1701.00763']
     
