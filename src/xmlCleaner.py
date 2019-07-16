@@ -105,7 +105,6 @@ def texify_para(para):
             txt += ' ' + descrip_text(p)
         elif p.tag == 'quote':
             txt += ' ' + quote_text(p)
-
     para.clear()
     para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
@@ -247,23 +246,34 @@ def clean(root):
             notetxt = p_text(child)
             child.clear()
             child.text = notetxt
-        elif child.tag == 'glossarydefinition':
-            pass
-        
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
-        elif child.tag in ('theorem', 'proof'):
+        elif child.tag in ('theorem', 'proof'): # XXX: merge into other secs?
             clean_section(child)
             child.tag = 'section'
-        elif child.tag in ('acknowledgements', 'bibliography', 'appendix', 'creator', 'index', 'date', 'float'):
+        elif child.tag in ('acknowledgements', 'bibliography', 'appendix', \
+                        'creator', 'index', 'date', 'float', 'glossarydefinition'):
             child.clear()
-        else: # Remove <figure>, <part>, <classification>, <table>, <ERROR>, <appendix>, <TOC>, <pagination>, <rdf>, <tags>
+            child.tag = 'backmatter'
+        else: # Remove <figure>, <classification>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
             useless.append((root,child))
     
     for par, chi in useless:
         par.remove(chi) 
         
+def warning(root):
+    skip = False
+    tags = [elem.tag for elem in list(root)]
+    cp2path = ''
+    if 'abstract' not in tags:
+        print('No abstract in the doc. Cp xml to %s' % cp2path)
+        skip = True
+    elif 'section' not in tags:
+        if 'chapter' not in tags:
+            print('No section in the doc. Cp xml to %s' % cp2path)
+            skip = True
+    return skip
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
