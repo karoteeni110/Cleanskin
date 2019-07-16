@@ -115,7 +115,9 @@ def clean_section(secelem):
     # keeps subelements like <sections> after texifying them.
 
     # Useful: title, para, subsection, subsubsection, theorem, subparagraph, 
-    # proof, acknowledgements, paragraph, bibliography, note, float, indexmark(?)
+    # proof, acknowledgements, paragraph, bibliography, note, float
+
+    # Ignore: indexmark, figure, bibitem, TOC, tags, toctitle, table, pagination, ERROR
     txt, titles, subsecs = [], [], []
     for elem in list(secelem):
         if elem.tag == 'para':
@@ -125,7 +127,7 @@ def clean_section(secelem):
             txt.append(float_text(elem))
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
-        elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph'):
+        elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph', 'subsubsection'):
             clean_section(elem)
             if elem.tag in ('theorem', 'proof'):
                 elem.set('title', elem.tag)
@@ -137,7 +139,6 @@ def clean_section(secelem):
             elem.text = txt
         elif elem.tag in ('acknowledgements', 'bibliography'):
             elem.clear()
-            elem.tag = 'backmatter'
             subsecs.append(elem)
 
     secelem.clear()
@@ -203,9 +204,10 @@ def clean(root):
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, 
-            # subsubsection, subparagraph, acknowledgements(?)
+            # subsubsection, subparagraph, acknowledgements
             # paragraph, bibliography(?), note, float, indexmark(?), theorem
             clean_section(child)
+            child.tag = 'section'
         elif child.tag == 'note':
             # Useful children: p
             notetxt = p_text(child)
@@ -234,7 +236,7 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00097.xml'
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00540.xml'
 
     errcasepath = join(results_path, 'latexml/errcp')
     try:
@@ -250,5 +252,5 @@ if __name__ == "__main__":
     # useless = []
 
     clean(root)
-    tree.write(join(results_path, 'test.xml'))
+    tree.write(join(results_path, 'sec-subsubsec.xml'))
     

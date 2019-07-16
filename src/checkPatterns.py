@@ -113,36 +113,17 @@ if __name__ == "__main__":
     # pklpath = join(data_path, '1stnodes.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
-    # 200 ['resource', 'bibliography', 'title', 'abstract', 'creator', 'section']
-    # 136 ['para', 'resource', 'title', 'abstract', 'creator', 'section', 'ERROR']
-    # 125 ['resource', 'bibliography', 'title', 'abstract', 'creator', 'date', 'section']
-    # 124 ['para', 'resource', 'bibliography', 'title', 'figure', 'abstract', 'creator', 'date', 'classification']
-
-    # show_examplefile(rootdir, '/section/note')
+    
+    show_examplefile(rootdir, '/section/subsubsection')
     
     elemname = 'section'
     fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
     freqdist = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
-    show_most_common(freqdist, 20)
-    print(all_childtags(freqdist))
+    # show_most_common(freqdist, 20)
+    # print(all_childtags(freqdist))
 
 
 
-    # elemname = 'section'
-    # fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
-    # section = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
-
-    # elemname = 'paragraph'
-    # fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
-    # paragraph = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
-    # print(all_childtags(section) - all_childtags(paragraph))
-    
-
-
-
-    # 1701:
-    # ParseError at =1701.01158.xml
-    # ParseError at =1701.00987.xml
 
     # RANK 1:
     # {'paragraph', 'tags', 'section', 'subtitle', 'titlepage', 'keywords', 'abstract', 'pagination', 'title', 'TOC', 'note', 'toctitle', 'subsubsection', 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 'date', 'rdf', 'bibliography', 'glossarydefinition', 'chapter', 'proof', 'resource', 'figure', 'creator', 'para', 'subsection', 'acknowledgements', 'theorem'}
