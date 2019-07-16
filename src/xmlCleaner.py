@@ -33,12 +33,12 @@ def inlinepara_text(inpara):
     for elem in list(inpara):
         if elem.tag == 'para':
             texify_para(elem)
-            txt += elem.text
+            txt += ' ' + elem.text
         elif elem.tag == 'theorem':
             clean_section(elem)
-            txt += elem.text
+            txt += ' ' + elem.text
         elif elem.tag == 'float':
-            txt += float_text(elem)
+            txt += ' ' + float_text(elem)
     return txt
 
 def p_text(p, keeplist=[]):
@@ -50,28 +50,25 @@ def p_text(p, keeplist=[]):
     """
     txt = opening(p)    
     for child in list(p):
-        if child.tag in ('text', 'note'): # TODO: text: sometimes marks a seperate
+        if child.tag in ('note', 'text'):
             txt += ' ' + p_text(child)
-        elif child.tag == 'inline-para':
+        if child.tag == 'inline-para':
             txt += ' ' + inlinepara_text(child)
-        elif child.tag in keeplist and child.text:
+        elif child.tag in keeplist and child.text: # check this
             txt += ' ' + child.text
-
         if child.tail:
             txt += ' ' + child.tail
     if p.tail:
         txt += ' ' + p.tail
     return txt
 
-def itemize_text(itemize_elem):
-    pass
-
 def listing_text(lsting):
     txt = opening(lsting)
     for elem in list(lsting):
         if elem.tag == 'listingline':
-            txt += p_text(elem)
-    txt += lsting.tail
+            txt += ' ' + p_text(elem)
+    if lsting.tail:
+        txt += ' ' + lsting.tail
     return txt
 
 def float_text(flt):
@@ -79,9 +76,11 @@ def float_text(flt):
     txt = opening(flt)
     for elem in list(flt):
         if elem.tag == 'listing':
-            txt += listing_text(elem)
+            txt += ' ' + listing_text(elem)
         elif elem.tag in ('toccaption', 'caption'):
-            txt += p_text(elem)
+            txt += ' ' + p_text(elem)
+    if flt.tail:
+        txt += ' ' + flt.tail
     return txt
 
 def texify_para(para):
@@ -94,11 +93,13 @@ def texify_para(para):
     txt = opening(para)
     for p in list(para):
         if p.tag == 'p':
-            txt += p_text(p) 
-        if p.tag == 'inline-para':
-            txt += inlinepara_text(p)
-        if p.tag == 'itemize':
-            txt += itemize_text(p)
+            txt += ' ' + p_text(p) 
+        elif p.tag == 'inline-para':
+            txt += ' ' + inlinepara_text(p)
+        elif p.tag in ('itemize', 'description'):
+            txt += ' ' + descrip_text(p)
+        elif p.tag == 'quote':
+            txt += ' ' + quote_text(p)
 
     para.clear()
     para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
@@ -160,10 +161,8 @@ def clean_chapter(chapelem):
     chapelem.attrib = dict()
     chapelem.set('title', title)
 
-def enum_text(enum):
-    return ''
-
 def item_text(item):
+    # Useful: <tags>, <para>
     txt = opening(item)
     for elem in list(item):
         if elem.tag == 'tags': 
@@ -178,7 +177,8 @@ def item_text(item):
         txt += ' ' + item.tail
     return txt
 
-def descrip_text(des):
+def descrip_text(des): 
+    # Useful: item
     txt = opening(des)
     for elem in list(des):
         if elem.tag == 'item': # should be trivial
@@ -189,27 +189,35 @@ def descrip_text(des):
         txt += ' ' + des.tail
     return txt
 
+def quote_text(quote):
+    txt = opening(quote)
+    for elem in list(quote):
+        if elem.tag == 'p':
+            txt += ' ' + p_text(elem)
+        elif elem.tag == 'quote':
+            txt += ' ' + quote_text(elem)
+        elif elem.tag == 'listing':
+            txt += ' ' + listing_text(elem)
+        elif elem.tag == 'description':
+            txt += ' ' + descrip_text(elem)
+    if quote.tail:
+        txt += ' ' + quote.tail
+    return txt
+    
 def texify_abstract(ab):
     '''
     Collect the text at the beginning, within subelements and their trailing to ``txt``,
     clear the element,
     and finally, set the text to ``txt``.
     '''
-    if ab.text:
-        txt = ab.text
-    else:
-        txt = ''
+    txt = opening(ab)
     for elem in list(ab):
         if elem.tag == 'p':
             txt += ' ' + p_text(elem)
-        elif elem.tag == 'itemize':
-            txt += ' ' + itemize_text(elem)
-        elif elem.tag == 'enumerate':
-            txt += ' ' + enum_text(elem) 
+        elif elem.tag in ('itemize', 'description', 'enumerate'):
+            txt += ' ' + descrip_text(elem)
         elif elem.tag == 'inline-para':
             txt += ' ' + inlinepara_text(elem)
-        elif elem.tag == 'description':
-            txt += ' ' + descrip_text(elem)
         elif elem.tag == 'quote':
             pass
     ab.clear()
@@ -225,8 +233,7 @@ def clean(root):
         elif child.tag in ('acknowledgements', 'bibliography'):
             child.clear()
         elif child.tag == 'abstract':
-            # Useful children: p, 
-            # description, quote, inline-para, section, itemize
+            # Useful children: p, description, quote, inline-para, section, itemize
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph'):
             # Useful: title, para, subsection, subsubsection, subparagraph, acknowledgements
@@ -261,7 +268,7 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=1701.00547.xml'
+    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=math-ph0002040.xml'
 
     errcasepath = join(results_path, 'latexml/errcp')
     try:
@@ -277,5 +284,5 @@ if __name__ == "__main__":
     # useless = []
 
     clean(root)
-    tree.write(join(results_path, 'ab-description.xml'))
+    tree.write(join(results_path, 'quote.xml'))
     

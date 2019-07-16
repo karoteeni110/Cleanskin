@@ -70,8 +70,6 @@ def check_childrentags(parent_tag, fpath):
     '''
     Returns the frozenset of all the tags of nodes that are the direct children 
     of nodes with tag ``parent_tag``.
-
-
     '''
     try:
         tree = ET.parse(fpath)
@@ -114,13 +112,13 @@ if __name__ == "__main__":
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     
-    show_examplefile(rootdir, '/description')
+    show_examplefile(rootdir, '/quote/quote')
     
-    elemname = 'section'
-    fd_pkl = join(data_path, '%sChildren.pkl' % elemname)
+    elemname = '/quote'
+    fd_pkl = join(data_path, '%sChildren.pkl' % elemname.strip('/'))
     freqdist = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
-    # show_most_common(freqdist, 20)
-    # print(all_childtags(freqdist))
+    show_most_common(freqdist, 20)
+    print(all_childtags(freqdist))
 
 
 
