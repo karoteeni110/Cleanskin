@@ -109,7 +109,7 @@ def get_ttn(ttelem):
     '''
     Get title str from title element.
     '''
-    return p_text(ttelem)
+    return p_text(ttelem).strip()
 
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
