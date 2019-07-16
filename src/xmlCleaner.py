@@ -10,7 +10,6 @@ from paths import data_path, results_path
 from os.path import join, basename
 from shutil import copy, copytree
 
-
 def ignore_ns(root):
     '''
     Clean namespace in the node's tag. 
@@ -29,20 +28,6 @@ def opening(elem):
     else:
         return ''
 
-# def flatten_text(root):
-#     """
-#     Extracts the beginning, in-between and ending text in ``root``,
-#     skipping _all_ deep text in the intermediate elements.
-
-#     """
-#     txt = opening(root)
-#     for child in root:
-#         if child.text:
-#             txt += ' ' + child.text
-#         if child.tail: 
-#             txt += ' ' + child.tail
-#     return txt
-
 def inlinepara_text(inpara):
     txt = opening(inpara)
     for elem in list(inpara):
@@ -56,7 +41,7 @@ def inlinepara_text(inpara):
             txt += float_text(elem)
     return txt
 
-def p_text(p):
+def p_text(p, keeplist=[]):
     """
     Captures all the text within <p> and its trailing,
     skipping all intermediate tags except <text>, <note> and <inline-para>.
@@ -65,11 +50,11 @@ def p_text(p):
     """
     txt = opening(p)
     for child in list(p):
-        if child.tag in ('text', 'note'): # TODO: child.text?????
+        if child.tag in ('text', 'note'): # TODO: text: sometimes marks a seperate
             txt += ' ' + p_text(child)
         elif child.tag == 'inline-para':
             txt += ' ' + inlinepara_text(child)
-        elif child.text:
+        elif child.tag in keeplist and child.text:
             txt += ' ' + child.text
 
         if child.tail:
@@ -140,12 +125,12 @@ def clean_section(secelem):
             txt.append(float_text(elem))
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
-        elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof'):
+        elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph'):
             clean_section(elem)
+            if elem.tag in ('theorem', 'proof'):
+                elem.set('title', elem.tag)
             elem.tag = 'subsection' # uniform tag
             subsecs.append(elem)
-        elif elem.tag == 'paragraph':
-            pass
         elif elem.tag == 'note': 
             txt = p_text(elem)
             elem.clear()
