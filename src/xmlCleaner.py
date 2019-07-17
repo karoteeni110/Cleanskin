@@ -265,7 +265,7 @@ def clean(root):
 def warning(root):
     skip = False
     tags = [elem.tag for elem in list(root)]
-    cp2path = ''
+    cp2path = '' # TODO
     if 'abstract' not in tags:
         print('No abstract in the doc. Cp xml to %s' % cp2path)
         skip = True
