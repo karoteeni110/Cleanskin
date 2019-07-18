@@ -6,8 +6,9 @@
 
 import xml.etree.ElementTree as ET
 import sys, re
-from paths import data_path, results_path
+from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
 from os.path import join, basename
+from os import listdir
 from shutil import copy, copytree
 
 def ignore_ns(root):
@@ -152,6 +153,10 @@ def quote_text(quote):
         txt += ' ' + quote.tail
     return txt
 
+def texify(elem, elemtext):
+    elem.clear()
+    elem.text = elemtext
+
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
     # keeps subelements like <sections> after texifying them.
@@ -160,13 +165,15 @@ def clean_section(secelem):
     # proof, acknowledgements, paragraph, bibliography, note, float
 
     # Ignore: indexmark, figure, bibitem, TOC, tags, toctitle, table, pagination, ERROR
-    txt, titles, subsecs = [], [], []
+    # txt, titles, subsecs = [], [], []
+    titles = []
     for elem in list(secelem):
         if elem.tag == 'para':
             texify_para(elem)
-            txt.append(elem.text)
+            # txt.append(elem.text)
         elif elem.tag == 'float':
-            txt.append(float_text(elem))
+            # txt.append(float_text(elem))
+            texify(elem, float_text(elem))
         elif elem.tag in ('title', 'subtitle'):
             titles.append((elem.tag, get_ttn(elem)))
         elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph', 'subsubsection'):
@@ -174,23 +181,29 @@ def clean_section(secelem):
             if elem.tag in ('theorem', 'proof'):
                 elem.set('title', elem.tag)
             elem.tag = 'subsection' # uniform tag
-            subsecs.append(elem)
+            # subsecs.append(elem)
         elif elem.tag == 'note': 
-            txt = p_text(elem)
-            elem.clear()
-            elem.text = txt
+            texify(elem, p_text(elem))
+            # notetxt = p_text(elem)
+            # elem.clear()
+            # elem.text = notetxt
         elif elem.tag in ('acknowledgements', 'bibliography'):
             elem.clear()
-            subsecs.append(elem)
+            # subsecs.append(elem)
+        else:
+            secelem.remove(elem)
 
-    secelem.clear()
+    # secelem.clear()
     for title_name,title in titles:
         secelem.set(title_name, title)
-    for subsec in subsecs:
-        secelem.append(subsec)
-    secelem.text = ' '.join(txt)
+    
+    # TODO: concatenate adjacent text nodes (<para>s)
+    # for subsec in subsecs:
+    #     secelem.append(subsec)
+    # secelem.text = ' '.join(txt)
 
 def clean_chapter(chapelem):
+    title = None
     for elem in list(chapelem):
         if elem.tag == 'para':
             texify_para(elem)
@@ -200,7 +213,8 @@ def clean_chapter(chapelem):
             clean_section(elem)
             elem.tag = 'section'
     chapelem.attrib = dict()
-    chapelem.set('title', title)
+    if title:
+        chapelem.set('title', title)
     
 def texify_abstract(ab):
     '''
@@ -238,7 +252,7 @@ def clean(root):
         elif child.tag in ('para', 'toctitle', 'titlepage') : 
             # Useful: p, inline-para XXX: post-process!
             texify_para(child)
-            if child.text == None or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
+            if child.text == None :# or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
                 useless.append((root, child))
             child.tag = 'para'
         elif child.tag == 'note':
@@ -262,38 +276,41 @@ def clean(root):
     for par, chi in useless:
         par.remove(chi) 
         
-def warning(root):
-    skip = False
+def postcheck(root, errlog):
+    skip, a, b = False, 'Abstract absent', 'Section absent'
     tags = [elem.tag for elem in list(root)]
-    cp2path = '' # TODO
     if 'abstract' not in tags:
-        print('No abstract in the doc. Cp xml to %s' % cp2path)
+        print(a + ': ' + xmlpath)
+        errlog.write(xmlpath + ' \n' + a + '\n ================================== \n')
         skip = True
     elif 'section' not in tags:
         if 'chapter' not in tags:
-            print('No section in the doc. Cp xml to %s' % cp2path)
+            print(b + ': ' + xmlpath)
+            errlog.write(xmlpath + ' \n' + b + '\n ================================== \n')
             skip = True
     return skip
+
+def get_root(xmlpath):
+    tree = ET.parse(xmlpath)
+    root = tree.getroot()
+    ignore_ns(root)
+    return tree, root
 
 if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmlpath = '/home/local/yzan/Desktop/Cleanskin/results/latexml/=math-ph0002040.xml'
+    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    with open(cleanlog_path, 'w') as cleanlog:
+        for xml in xmls:
+            xmlpath = join(rawxmls_path, xml)
+            try:
+                tree, root = get_root(xmlpath)
+            except ET.ParseError:
+                print('Skipped: ParseError at %s' % xmlpath)
+                continue
+            clean(root)
+            if not postcheck(root, cleanlog):
+                tree.write(join(cleanedxml_path, xml))
 
-    errcasepath = join(results_path, 'latexml/errcp')
-    try:
-        tree = ET.parse(xmlpath)
-        root = tree.getroot()
-        ignore_ns(root)
-    except ET.ParseError:
-        print('cp ParseError at %s' % xmlpath)
-        copy(xmlpath, join(errcasepath, basename(xmlpath)))
-
-    # keep_taglist = ['title', 'abstract', 'section', 'subsection', 'chapter', \
-    #      'paragraph', 'subparagraph', 'para', 'p' ,'note', ]
-    # useless = []
-
-    clean(root)
-    tree.write(join(results_path, 'quote.xml'))
     
