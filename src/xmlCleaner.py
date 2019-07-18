@@ -230,26 +230,31 @@ def texify_abstract(ab):
 def clean(root):
     toremove = []
     for child in root:
-        if child.tag in ('title', 'subtitle','keywords', 'note', 'acknowledgements', 'classification'):
-            texify(child, p_text(child))
+        if child.tag in ('title', 'subtitle', 'keywords', 'note', 'acknowledgements', 'classification', 'date'):
+            # itertext with skipping subelements
+            texify(child, p_text(child)) 
         elif child.tag == 'abstract':
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix'):
             clean_section(child)
             if child.tag != 'appendix':
                 child.tag = 'section'
-        elif child.tag in ('para', 'titlepage', 'creator', 'glossarydefinition') : 
-            # Useful: p, inline-para XXX: post-process!
-            texify_para(child)
+        elif child.tag in ('para', 'creator', 'glossarydefinition'): 
+            # Collect text with skipping sub-subelements
+            texify_para(child) 
             if child.text in (None, ''): # If empty, remove
                 toremove.append(child)
+        elif child.tag == 'titlepage':
+            texify_para(child)
+            #TODO: seprate sections
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
         elif child.tag in ('theorem', 'proof'):
             clean_section(child)
-            child.tag = 'section'
-        elif child.tag in ('bibliography', 'index', 'date', 'float', 'toctitle'):
+        elif child.tag == 'float':
+            texify(child, float_text(child))
+        elif child.tag in ('bibliography', 'index', 'toctitle'):
             child.clear()
         else: # Remove <figure>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
             toremove.append(child)

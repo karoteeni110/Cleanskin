@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     
-    show_examplefile(rootdir, 'glossarydefinition')
+    show_examplefile(rootdir, 'index')
     
     elemname = 'glossarydefinition/*'
     fd_pkl = join(data_path, 'glossaryChildren.pkl')
