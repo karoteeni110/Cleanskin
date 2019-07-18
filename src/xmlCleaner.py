@@ -30,7 +30,7 @@ def opening(elem):
 
 def inlinepara_text(inpara):
     txt = opening(inpara)
-    for elem in list(inpara):
+    for elem in inpara:
         if elem.tag == 'para':
             texify_para(elem)
             txt += ' ' + elem.text
@@ -49,7 +49,7 @@ def p_text(p, keeplist=[]):
     Return the concatenated str.
     """
     txt = opening(p)    
-    for child in list(p):
+    for child in p:
         if child.tag in ('note', 'text'):
             txt += ' ' + p_text(child)
         if child.tag == 'inline-para':
@@ -64,7 +64,7 @@ def p_text(p, keeplist=[]):
 
 def listing_text(lsting):
     txt = opening(lsting)
-    for elem in list(lsting):
+    for elem in lsting:
         if elem.tag == 'listingline':
             txt += ' ' + p_text(elem)
     if lsting.tail:
@@ -74,7 +74,7 @@ def listing_text(lsting):
 def float_text(flt):
     # results/latexml/=1701.00757.xml
     txt = opening(flt)
-    for elem in list(flt):
+    for elem in flt:
         if elem.tag == 'listing':
             txt += ' ' + listing_text(elem)
         elif elem.tag in ('toccaption', 'caption'):
@@ -97,7 +97,7 @@ def texify_para(para):
     Useful subelements: <p>
     '''
     txt = opening(para)
-    for p in list(para):
+    for p in para:
         if p.tag == 'p':
             txt += ' ' + p_text(p) 
         elif p.tag == 'inline-para':
@@ -113,10 +113,10 @@ def texify_para(para):
 def item_text(item):
     # Useful: <tags>, <para>
     txt = opening(item)
-    for elem in list(item):
+    for elem in item:
         if elem.tag == 'tags': 
-            for tag in list(elem):
-                for i in list(tag):
+            for tag in elem:
+                for i in tag:
                     if i.tag == 'text':
                         txt += ' ' + i.text + ':'
         elif elem.tag == 'para':
@@ -129,7 +129,7 @@ def item_text(item):
 def descrip_text(des): 
     # Useful: item
     txt = opening(des)
-    for elem in list(des):
+    for elem in des:
         if elem.tag == 'item': # should be trivial
             txt += ' ' + item_text(elem)
         if elem.tail:
@@ -140,7 +140,7 @@ def descrip_text(des):
 
 def quote_text(quote):
     txt = opening(quote)
-    for elem in list(quote):
+    for elem in quote:
         if elem.tag == 'p':
             txt += ' ' + p_text(elem)
         elif elem.tag == 'quote':
@@ -154,8 +154,10 @@ def quote_text(quote):
     return txt
 
 def texify(elem, elemtext):
-    elem.clear()
-    elem.text = elemtext
+    if elemtext != None:
+        elem.clear()
+        elem.text = elemtext
+
 
 def clean_section(secelem):
     # Clear the ``secelem`` and set <title> as `attrib`, <para>s into `text`,
@@ -166,36 +168,27 @@ def clean_section(secelem):
 
     # Ignore: indexmark, figure, bibitem, TOC, tags, toctitle, table, pagination, ERROR
     # txt, titles, subsecs = [], [], []
-    titles = []
-    for elem in list(secelem):
+    secelem.attrib.clear()
+    uselesses = []
+    for elem in secelem:
         if elem.tag == 'para':
             texify_para(elem)
-            # txt.append(elem.text)
         elif elem.tag == 'float':
-            # txt.append(float_text(elem))
             texify(elem, float_text(elem))
-        elif elem.tag in ('title', 'subtitle'):
-            titles.append((elem.tag, get_ttn(elem)))
+        elif elem.tag  == 'title': # in ('title', 'subtitle'):
+            secelem.set(elem.tag, get_ttn(elem))
+            uselesses.append(elem)
         elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph', 'subsubsection'):
             clean_section(elem)
-            if elem.tag in ('theorem', 'proof'):
-                elem.set('title', elem.tag)
-            elem.tag = 'subsection' # uniform tag
-            # subsecs.append(elem)
         elif elem.tag == 'note': 
             texify(elem, p_text(elem))
-            # notetxt = p_text(elem)
-            # elem.clear()
-            # elem.text = notetxt
-        elif elem.tag in ('acknowledgements', 'bibliography'):
-            elem.clear()
-            # subsecs.append(elem)
+        # elif elem.tag in ('acknowledgements', 'bibliography'):
+        #     elem.clear()
         else:
-            secelem.remove(elem)
-
-    # secelem.clear()
-    for title_name,title in titles:
-        secelem.set(title_name, title)
+            uselesses.append(elem)
+    
+    for useless in uselesses:
+        secelem.remove(useless)
     
     # TODO: concatenate adjacent text nodes (<para>s)
     # for subsec in subsecs:
@@ -204,7 +197,7 @@ def clean_section(secelem):
 
 def clean_chapter(chapelem):
     title = None
-    for elem in list(chapelem):
+    for elem in chapelem:
         if elem.tag == 'para':
             texify_para(elem)
         elif elem.tag == 'toctitle':
@@ -212,7 +205,7 @@ def clean_chapter(chapelem):
         elif elem.tag in ('subsection', 'subparagraph', 'section', 'subsubsection'):
             clean_section(elem)
             elem.tag = 'section'
-    chapelem.attrib = dict()
+    chapelem.attrib.clear()
     if title:
         chapelem.set('title', title)
     
@@ -225,7 +218,7 @@ def texify_abstract(ab):
     Useful children: p, description, quote, inline-para, section, itemize
     '''
     txt = opening(ab)
-    for elem in list(ab):
+    for elem in ab:
         if elem.tag == 'p':
             txt += ' ' + p_text(elem)
         elif elem.tag in ('itemize', 'description', 'enumerate'):
@@ -238,12 +231,10 @@ def texify_abstract(ab):
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
             
 def clean(root):
-    useless = []
+    toremove = []
     for child in root:
-        if child.tag in ('title', 'subtitle','keywords'):
-            content = p_text(child) # clear <break>
-            child.clear()
-            child.text = content
+        if child.tag in ('title', 'subtitle','keywords', 'note'):
+            texify(child, p_text(child))
         elif child.tag == 'abstract':
             texify_abstract(child)
         elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection'):
@@ -252,33 +243,27 @@ def clean(root):
         elif child.tag in ('para', 'toctitle', 'titlepage') : 
             # Useful: p, inline-para XXX: post-process!
             texify_para(child)
-            if child.text == None :# or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
-                useless.append((root, child))
             child.tag = 'para'
-        elif child.tag == 'note':
-            # Useful children: p
-            notetxt = p_text(child)
-            child.clear()
-            child.text = notetxt
+            if child.text == None or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
+                toremove.append(child)
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
-        elif child.tag in ('theorem', 'proof'): # XXX: merge into other secs?
+        elif child.tag in ('theorem', 'proof'):
             clean_section(child)
             child.tag = 'section'
         elif child.tag in ('acknowledgements', 'bibliography', 'appendix', \
                         'creator', 'index', 'date', 'float', 'glossarydefinition'):
             child.clear()
-            child.tag = 'backmatter'
         else: # Remove <figure>, <classification>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
-            useless.append((root,child))
+            toremove.append(child)
+    for i in toremove:
+        root.remove(i)
     
-    for par, chi in useless:
-        par.remove(chi) 
         
 def postcheck(root, errlog):
     skip, a, b = False, 'Abstract absent', 'Section absent'
-    tags = [elem.tag for elem in list(root)]
+    tags = [elem.tag for elem in root]
     if 'abstract' not in tags:
         print(a + ': ' + xmlpath)
         errlog.write(xmlpath + ' \n' + a + '\n ================================== \n')
@@ -301,6 +286,7 @@ if __name__ == "__main__":
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmls = ['=math-ph0002040.xml']
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
