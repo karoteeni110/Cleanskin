@@ -41,7 +41,7 @@ def inlinepara_text(inpara):
             txt += ' ' + float_text(elem)
     return txt
 
-def p_text(p, keeplist=[]):
+def p_text(p, dontskip=[]):
     """
     Captures all the text within <p> and its trailing,
     skipping all intermediate tags except <text>, <note> and <inline-para>.
@@ -50,11 +50,11 @@ def p_text(p, keeplist=[]):
     """
     txt = opening(p)    
     for child in p:
-        if child.tag in ('note', 'text', 'emph'):
+        if child.tag in ('p', 'note', 'text', 'emph'):
             txt += ' ' + p_text(child)
         if child.tag == 'inline-para':
             txt += ' ' + inlinepara_text(child)
-        elif child.tag in keeplist and child.text: # default: Skips all intermediate elements
+        elif child.tag in dontskip and child.text: # get text from simple elems in ``dontskip``
             txt += ' ' + child.text
         if child.tail:
             txt += ' ' + child.tail
@@ -93,12 +93,10 @@ def texify_para(para):
     '''
     Collects all the <p>s and extract the text from them.
     Clears all the content in the element, and set the text to ``text``. 
-
-    Useful subelements: <p>
     '''
     txt = opening(para)
     for p in para:
-        if p.tag == 'p':
+        if p.tag in ('p', 'note', 'text', 'personname', 'glossaryphrase') :
             txt += ' ' + p_text(p) 
         elif p.tag == 'inline-para':
             txt += ' ' + inlinepara_text(p)
@@ -106,8 +104,7 @@ def texify_para(para):
             txt += ' ' + descrip_text(p)
         elif p.tag == 'quote':
             txt += ' ' + quote_text(p)
-    para.clear()
-    para.tag = 'para' # Change the element tag to 'para': toctitle, titlepage
+    para.clear() # Change the element tag to 'para': toctitle, titlepage
     para.text = txt
 
 def item_text(item):
