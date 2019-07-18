@@ -50,7 +50,7 @@ def p_text(p, keeplist=[]):
     """
     txt = opening(p)    
     for child in p:
-        if child.tag in ('note', 'text'):
+        if child.tag in ('note', 'text', 'emph'):
             txt += ' ' + p_text(child)
         if child.tag == 'inline-para':
             txt += ' ' + inlinepara_text(child)
@@ -233,18 +233,18 @@ def texify_abstract(ab):
 def clean(root):
     toremove = []
     for child in root:
-        if child.tag in ('title', 'subtitle','keywords', 'note'):
+        if child.tag in ('title', 'subtitle','keywords', 'note', 'acknowledgements', 'classification'):
             texify(child, p_text(child))
         elif child.tag == 'abstract':
             texify_abstract(child)
-        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection'):
+        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix'):
             clean_section(child)
-            child.tag = 'section'
-        elif child.tag in ('para', 'toctitle', 'titlepage') : 
+            if child.tag != 'appendix':
+                child.tag = 'section'
+        elif child.tag in ('para', 'titlepage', 'creator', 'glossarydefinition') : 
             # Useful: p, inline-para XXX: post-process!
             texify_para(child)
-            child.tag = 'para'
-            if child.text == None or re.match(r'^[\w+]+$', child.text) == None: # If empty, remove
+            if child.text in (None, ''): # If empty, remove
                 toremove.append(child)
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
@@ -252,10 +252,9 @@ def clean(root):
         elif child.tag in ('theorem', 'proof'):
             clean_section(child)
             child.tag = 'section'
-        elif child.tag in ('acknowledgements', 'bibliography', 'appendix', \
-                        'creator', 'index', 'date', 'float', 'glossarydefinition'):
+        elif child.tag in ('bibliography', 'index', 'date', 'float', 'toctitle'):
             child.clear()
-        else: # Remove <figure>, <classification>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
+        else: # Remove <figure>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
             toremove.append(child)
     for i in toremove:
         root.remove(i)
@@ -286,7 +285,7 @@ if __name__ == "__main__":
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=math-ph0002040.xml']
+    xmls = ['=1701.00981.xml']
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
@@ -297,6 +296,6 @@ if __name__ == "__main__":
                 continue
             clean(root)
             if not postcheck(root, cleanlog):
-                tree.write(join(cleanedxml_path, xml))
-
+                # tree.write(join(cleanedxml_path, xml))
+                tree.write(join(results_path, 'creator&glossary.xml'))
     
