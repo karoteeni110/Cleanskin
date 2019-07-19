@@ -186,11 +186,6 @@ def clean_section(secelem):
     
     for useless in uselesses:
         secelem.remove(useless)
-    
-    # TODO: concatenate adjacent text nodes (<para>s)
-    # for subsec in subsecs:
-    #     secelem.append(subsec)
-    # secelem.text = ' '.join(txt)
 
 def clean_chapter(chapelem):
     title = None
@@ -235,12 +230,12 @@ def clean(root):
             texify(child, p_text(child)) 
         elif child.tag == 'abstract':
             texify_abstract(child)
-        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix'):
+        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof'):
             clean_section(child)
-            if child.tag != 'appendix':
+            if child.tag not in ('appendix', 'theorem', 'proof'):
                 child.tag = 'section'
         elif child.tag in ('para', 'creator', 'glossarydefinition'): 
-            # Collect text with skipping sub-subelements
+            # Collect text with skipping subsubelements
             texify_para(child) 
             if child.text in (None, ''): # If empty, remove
                 toremove.append(child)
@@ -250,13 +245,9 @@ def clean(root):
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
-        elif child.tag in ('theorem', 'proof'):
-            clean_section(child)
-        elif child.tag == 'float':
-            texify(child, float_text(child))
         elif child.tag in ('bibliography', 'index', 'toctitle'):
             child.clear()
-        else: # Remove <figure>, <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
+        else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
             toremove.append(child)
     for i in toremove:
         root.remove(i)
@@ -287,7 +278,7 @@ if __name__ == "__main__":
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00981.xml']
+    # xmls = ['=1701.00981.xml']
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
@@ -298,6 +289,6 @@ if __name__ == "__main__":
                 continue
             clean(root)
             if not postcheck(root, cleanlog):
-                # tree.write(join(cleanedxml_path, xml))
-                tree.write(join(results_path, 'creator&glossary.xml'))
+                tree.write(join(cleanedxml_path, xml))
+                # tree.write(join(results_path, 'creator&glossary.xml'))
     
