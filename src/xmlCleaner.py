@@ -10,6 +10,7 @@ from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedx
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
+import time
 
 def ignore_ns(root):
     '''
@@ -241,7 +242,7 @@ def clean(root):
             texify(child, p_text(child)) 
         elif child.tag == 'abstract':
             texify_abstract(child)
-        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof'):
+        elif child.tag in ('section', 'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection'):
             clean_section(child)
             if child.tag not in ('appendix', 'theorem', 'proof'):
                 child.tag = 'section'
@@ -264,21 +265,23 @@ def clean(root):
     
         
 def postcheck(root, errlog):
-    skip = False
+    err = False
     secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     for title in secdict:
         seclst = secdict[title]
         if len(seclst) == 0: # If there is no such a node
-            skip = True
-        for sec in seclst:
-            if sec.itertext()==None or ''.join(sec.itertext()) == '': # If the section is empty
-                skip = True
-        if skip:
-                print(title + ' absent: ' + xmlpath)
-                errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
-    if not skip:
+            err = True
+            print(title + ' absent: ' + xmlpath)
+            errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
+        else:
+            for sec in seclst:
+                if sec.itertext()==None or ''.join(sec.itertext()) == '': # If the section is empty
+                    err = True
+                    print(title + ' absent: ' + xmlpath)
+                    errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
+                    
+    if not err:
         errlog.write(xmlpath + ' \n' + 'OK' + '\n ================================== \n')
-    return skip
             
 def get_root(xmlpath):
     tree = ET.parse(xmlpath)
@@ -292,6 +295,8 @@ if __name__ == "__main__":
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     # xmls = ['=1701.00077.xml']
+    
+    begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
@@ -302,7 +307,8 @@ if __name__ == "__main__":
                 cleanlog.write(xmlpath + ' \n' + 'xml.etree ParseError \n' + '================================== \n')
                 continue
             clean(root)
-            if not postcheck(root, cleanlog):
-                tree.write(join(cleanedxml_path, xml))
+            postcheck(root, cleanlog)
+            tree.write(join(cleanedxml_path, xml))
                 # tree.write(join(results_path, 'bib.xml'))
-    
+    t = time.time() - begin
+    print(len(xmls) + 'files in %s mins' % t/60 )
