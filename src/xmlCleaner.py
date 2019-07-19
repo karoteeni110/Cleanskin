@@ -226,7 +226,7 @@ def bib_text(bib):
     txt = ''
     for elem in bib.iter():
         if elem.tag == 'bibblock':
-            txt += ' ' + elem.text
+            txt += ' ' + p_text(elem)
         elif elem.tag == 'para':
             texify_para(elem)
             txt += ' ' + elem.text
@@ -257,9 +257,7 @@ def clean(root):
             child.tag = 'chapter'
         elif child.tag == 'bibliography':
             texify(child, bib_text(child))
-        elif child.tag in ('index', 'toctitle'):
-            child.clear()
-        else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
+        else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>, <index>, <toctitle>
             toremove.append(child)
     for i in toremove:
         root.remove(i)
@@ -278,6 +276,8 @@ def postcheck(root, errlog):
         if skip:
                 print(title + ' absent: ' + xmlpath)
                 errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
+    if not skip:
+        errlog.write(xmlpath + ' \n' + 'OK' + '\n ================================== \n')
     return skip
             
 def get_root(xmlpath):
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00077.xml']
+    # xmls = ['=1701.00077.xml']
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
@@ -303,6 +303,6 @@ if __name__ == "__main__":
                 continue
             clean(root)
             if not postcheck(root, cleanlog):
-                # tree.write(join(cleanedxml_path, xml))
-                tree.write(join(results_path, 'bib.xml'))
+                tree.write(join(cleanedxml_path, xml))
+                # tree.write(join(results_path, 'bib.xml'))
     
