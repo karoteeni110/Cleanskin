@@ -221,7 +221,18 @@ def texify_abstract(ab):
             txt += ' ' + quote_text(elem)
     ab.clear()
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
-            
+
+def bib_text(bib):
+    txt = ''
+    for elem in bib.iter():
+        if elem.tag == 'bibblock':
+            txt += ' ' + elem.text
+        elif elem.tag == 'para':
+            texify_para(elem)
+            txt += ' ' + elem.text
+    bib.clear()
+    bib.text = txt
+
 def clean(root):
     toremove = []
     for child in root:
@@ -234,6 +245,8 @@ def clean(root):
             clean_section(child)
             if child.tag not in ('appendix', 'theorem', 'proof'):
                 child.tag = 'section'
+            if child.get('title', None) == 'abstract':
+                child.tag = 'abstract'
         elif child.tag in ('para', 'creator', 'glossarydefinition'): 
             # Collect text with skipping subsubelements
             texify_para(child) 
@@ -241,11 +254,12 @@ def clean(root):
                 toremove.append(child)
         elif child.tag == 'titlepage':
             texify_para(child)
-            #TODO: seprate sections
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
-        elif child.tag in ('bibliography', 'index', 'toctitle'):
+        elif child.tag == 'bibliography':
+            texify(child, bib_text(child))
+        elif child.tag in ('index', 'toctitle'):
             child.clear()
         else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>
             toremove.append(child)
@@ -254,17 +268,28 @@ def clean(root):
     
         
 def postcheck(root, errlog):
-    skip, a, b = False, 'Abstract absent', 'Section absent'
-    tags = [elem.tag for elem in root]
-    if 'abstract' not in tags:
-        print(a + ': ' + xmlpath)
-        errlog.write(xmlpath + ' \n' + a + '\n ================================== \n')
-        skip = True
+    skip = False
+    secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
+    for title in secdict:
+        seclst = secdict[title]
+        if len(seclst) == 0: # If there is no such a node
+            skip = True
+        for sec in seclst:
+            if sec.itertext()==None or ''.join(sec.itertext()) == '': # If the section is empty
+                skip = True
+        if skip:
+                print(title + ' absent: ' + xmlpath)
+                errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
+    return skip
+            
+
+
+    if len(abstract):
+        
     elif 'section' not in tags:
         if 'chapter' not in tags:
-            print(b + ': ' + xmlpath)
-            errlog.write(xmlpath + ' \n' + b + '\n ================================== \n')
-            skip = True
+            
+    for 
     return skip
 
 def get_root(xmlpath):
@@ -278,7 +303,7 @@ if __name__ == "__main__":
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmls = ['=1701.00981.xml']
+    xmls = ['=1701.00077.xml']
     with open(cleanlog_path, 'w') as cleanlog:
         for xml in xmls:
             xmlpath = join(rawxmls_path, xml)
@@ -289,6 +314,6 @@ if __name__ == "__main__":
                 continue
             clean(root)
             if not postcheck(root, cleanlog):
-                tree.write(join(cleanedxml_path, xml))
-                # tree.write(join(results_path, 'creator&glossary.xml'))
+                # tree.write(join(cleanedxml_path, xml))
+                tree.write(join(results_path, 'bib.xml'))
     
