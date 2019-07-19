@@ -250,8 +250,6 @@ def clean(root):
         elif child.tag in ('para', 'creator', 'glossarydefinition'): 
             # Collect text with skipping subsubelements
             texify_para(child) 
-            if child.text in (None, ''): # If empty, remove
-                toremove.append(child)
         elif child.tag == 'titlepage':
             texify_para(child)
         elif child.tag in ('chapter', 'part'):
@@ -301,6 +299,7 @@ if __name__ == "__main__":
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
                 print('Skipped: ParseError at %s' % xmlpath)
+                cleanlog.write(xmlpath + ' \n' + 'xml.etree ParseError \n' + '================================== \n')
                 continue
             clean(root)
             if not postcheck(root, cleanlog):
