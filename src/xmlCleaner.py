@@ -282,16 +282,6 @@ def postcheck(root, errlog):
                 errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
     return skip
             
-
-
-    if len(abstract):
-        
-    elif 'section' not in tags:
-        if 'chapter' not in tags:
-            
-    for 
-    return skip
-
 def get_root(xmlpath):
     tree = ET.parse(xmlpath)
     root = tree.getroot()
