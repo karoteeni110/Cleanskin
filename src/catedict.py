@@ -26,8 +26,9 @@ def merge_dicts(dict1, dict2):
             dict1[k] = dict2[k]
     return dict1
 
-for txt in listdir(cate_path):
-    txtpath = join(cate_path, txt)
-    c2a, a2c = get_dicts(txtpath)
+if __name__ == "__main__":
+    for txt in listdir(cate_path):
+        txtpath = join(cate_path, txt)
+        c2a, a2c = get_dicts(txtpath)
 
 

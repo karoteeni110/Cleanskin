@@ -318,4 +318,5 @@ if __name__ == "__main__":
                 # tree.write(join(results_path, 'bib.xml'))
     t = time.time() - begin
     t = t/60
-    print(len(xmls), ' files in %s mins' % t)
+    print(len(xmls), 'files in %s mins' % t)
+    # 5575 files in 2.3635379592577617 mins
