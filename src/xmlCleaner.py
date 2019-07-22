@@ -267,21 +267,27 @@ def clean(root):
 def postcheck(root, errlog):
     err = False
     secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
+    errlog.write(xmlpath + ' \n')
     for title in secdict:
-        seclst = secdict[title]
-        if len(seclst) == 0: # If there is no such a node
+        elems = secdict[title]
+        if len(elems) == 0: # If no node
             err = True
             print(title + ' absent: ' + xmlpath)
-            errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
-        else:
-            for sec in seclst:
-                if sec.itertext()==None or ''.join(sec.itertext()) == '': # If the section is empty
+            errlog.write(title + ' absent. ')
+        else: # If the node exists but is empty
+            i = 0
+            while i<= len(elems)-1 :
+                if elems[i].itertext() == None or ''.join(elems[i].itertext()) == '':
                     err = True
-                    print(title + ' absent: ' + xmlpath)
-                    errlog.write(xmlpath + ' \n' + title + ' absent' + '\n ================================== \n')
-                    
+                    print('Empty: ' + title + xmlpath)
+                    errlog.write('Empty ' + title + '. ')
+                    break
+                else:
+                    i += 1
+                                     
     if not err:
-        errlog.write(xmlpath + ' \n' + 'OK' + '\n ================================== \n')
+        errlog.write('OK.')
+    errlog.write('\n ================================== \n')
             
 def get_root(xmlpath):
     tree = ET.parse(xmlpath)
@@ -311,4 +317,5 @@ if __name__ == "__main__":
             tree.write(join(cleanedxml_path, xml))
                 # tree.write(join(results_path, 'bib.xml'))
     t = time.time() - begin
-    print(len(xmls) + 'files in %s mins' % t/60 )
+    t = t/60
+    print(len(xmls), ' files in %s mins' % t)
