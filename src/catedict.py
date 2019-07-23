@@ -2,10 +2,11 @@ from paths import cate_path, results_path, cleanlog_path
 from os import listdir
 from os.path import basename, join
 from collections import defaultdict
-import pickle   
+import pickle 
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
+errtypes = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent'}
 
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
@@ -74,9 +75,10 @@ def count_case(cleaner_results, errtype):
 
 def show_errtype_stats():
     cleaner_results = read_xmlcleaner_log()
-    for et in {'Empty abstract', 'Empty secs', 'OK', 'secs absent', 'ParseError', 'abstract absent'}:
-        a = count_case(cleaner_results, et)
-        print(et, a)
+    print(len(cleaner_results), 'xmls in all')
+    print()
+    for err in errtypes:
+        print(err, count_case(cleaner_results, err))
 
     # Empty secs 453
     # abstract absent 1167
@@ -85,9 +87,42 @@ def show_errtype_stats():
     # Empty abstract 44
     # ParseError 16
 
+def id2dictkey(artid):
+    # TODO
+    return artid
+
+def count_errcates():
+    cleaner_results = read_xmlcleaner_log()
+    err_counter = {}
+
+    # Initialize the counter for each error type
+    for errtype in errtypes: 
+        err_counter[errtype] = defaultdict(int)
+    
+    # Traverse articles
+    for artid, errs in cleaner_results:
+        # TODO: convert ``artid`` into recognizable format for ``art2cates`` 
+        cates = art2cates[id2dictkey(artid)]
+        for err in errs:
+            for cate in cates:
+                err_counter[err][cate] += 1
+    return err_counter
+
+def show_err_distrib():
+    distrib = count_errcates()
+    for err in distrib:
+        if err != 'OK':
+            print(err+':')
+            for cate in distrib[err]:
+                count = distrib[err][cate]
+                # if count > 1:
+                print(cate, count)
+            print()
+
 if __name__ == "__main__":
-    # cate2arts, art2cates = read_pkls()
-    # cleaner_results = read_xmlcleaner_log()
-    show_errtype_stats()
+    cate2arts, art2cates = read_pkls()
+    clean_results = read_xmlcleaner_log()
+    # show_errtype_stats()
+    show_err_distrib()
 
 

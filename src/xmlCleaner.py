@@ -266,8 +266,12 @@ def clean(root):
         
 def postcheck(root, errlog):
     err = False
-    secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     errlog.write(xmlpath + ' \n')
+
+    if 'para' in [elem.tag for elem in root]:
+        err = True
+        errlog.write('External paras. ')
+    secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     for title in secdict:
         elems = secdict[title]
         if len(elems) == 0: # If no node
@@ -284,7 +288,7 @@ def postcheck(root, errlog):
                     break
                 else:
                     i += 1
-                                     
+                                    
     if not err:
         errlog.write('OK. ')
     errlog.write('\n ================================== \n')
