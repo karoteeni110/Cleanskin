@@ -276,14 +276,14 @@ def postcheck(root, errlog):
         elems = secdict[title]
         if len(elems) == 0: # If no node
             err = True
-            print(title + ' absent: ' + xmlpath)
+            # print(title + ' absent: ' + xmlpath)
             errlog.write(title + ' absent. ')
         else: # If the node exists but is empty
             i = 0
             while i<= len(elems)-1 :
                 if elems[i].itertext() == None or ''.join(elems[i].itertext()) == '':
                     err = True
-                    print('Empty ' + title + ' :' + xmlpath)
+                    # print('Empty ' + title + ' :' + xmlpath)
                     errlog.write('Empty ' + title + '. ')
                     break
                 else:

@@ -6,7 +6,8 @@ import pickle
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
-errtypes = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent'}
+err2arts_path = join(results_path, 'err2arts.pkl')
+errtypes = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent', 'External paras'}
 
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
@@ -46,7 +47,12 @@ def get_pkls():
     dump_dicts(cate2arts, art2cates)
 
 def read_pkls():
-    return pickle.load(open(cate2arts_path,'rb')), pickle.load(open(art2cates_path, 'rb'))
+    a, b, c = open(cate2arts_path,'rb'), open(art2cates_path, 'rb'), open(err2arts_path, 'rb')
+    d1, d2, d3 = pickle.load(a), pickle.load(b), pickle.load(c)
+    a.close()
+    b.close()
+    c.close()
+    return d1, d2, d3
 
 def pe_generator(f):
     artid = basename(f.readline()[:-2])[:-4].strip('=')
@@ -66,9 +72,18 @@ def read_xmlcleaner_log():
             pe_pair = pe_generator(log)
     return cleaner_results
 
+def get_err2arts_dict():
+    cleaner_results = read_xmlcleaner_log()
+    d = defaultdict(list)
+    for artid, errmsgs in cleaner_results:
+        for err in errmsgs:
+            d[err].append(artid)
+    return d
+
 def count_case(cleaner_results, errtype):
     '''
-    Error types: {'Empty abstract', 'Empty secs', 'OK', 'secs absent', 'ParseError', 'abstract absent'}
+    Error types: {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent', 'External paras'}
+
     '''
     # return set(i for _, msg in cleaner_results for i in msg) 
     return sum(1 for _, errmsg in cleaner_results if errtype in errmsg)
@@ -80,12 +95,7 @@ def show_errtype_stats():
     for err in errtypes:
         print(err, count_case(cleaner_results, err))
 
-    # Empty secs 453
-    # abstract absent 1167
-    # secs absent 1110
-    # OK 3151
-    # Empty abstract 44
-    # ParseError 16
+
 
 def id2dictkey(artid):
     # TODO
@@ -108,21 +118,37 @@ def count_errcates():
                 err_counter[err][cate] += 1
     return err_counter
 
-def show_err_distrib():
+def show_errtype_cates():
     distrib = count_errcates()
     for err in distrib:
         if err != 'OK':
             print(err+':')
+            errlst = []
             for cate in distrib[err]:
-                count = distrib[err][cate]
+                errlst.append((cate, distrib[err][cate]))
                 # if count > 1:
-                print(cate, count)
+            print(sorted(errlst, key=lambda x:x[1]))
             print()
 
 if __name__ == "__main__":
-    cate2arts, art2cates = read_pkls()
+    cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
+    print(err2arts['Empty abstract'])
     # show_errtype_stats()
-    show_err_distrib()
+    # show_errtype_cates()
 
+
+    # 5575 xmls in all
+
+    # ParseError 16
+    # Empty abstract 44
+    # Empty secs 453
+    # secs absent 1110
+    # External paras 2885
+    # OK 1906
+    # abstract absent 1167
+
+    # TODO: 
+    # 1. Solve the main problem:
+    # 2. Distinguish true negative & false negative?
 
