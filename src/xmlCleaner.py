@@ -279,14 +279,14 @@ def postcheck(root, errlog):
             while i<= len(elems)-1 :
                 if elems[i].itertext() == None or ''.join(elems[i].itertext()) == '':
                     err = True
-                    print('Empty: ' + title + xmlpath)
+                    print('Empty ' + title + ' :' + xmlpath)
                     errlog.write('Empty ' + title + '. ')
                     break
                 else:
                     i += 1
                                      
     if not err:
-        errlog.write('OK.')
+        errlog.write('OK. ')
     errlog.write('\n ================================== \n')
             
 def get_root(xmlpath):
@@ -310,7 +310,7 @@ if __name__ == "__main__":
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
                 print('Skipped: ParseError at %s' % xmlpath)
-                cleanlog.write(xmlpath + ' \n' + 'xml.etree ParseError \n' + '================================== \n')
+                cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
                 continue
             clean(root)
             postcheck(root, cleanlog)
