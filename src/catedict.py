@@ -7,7 +7,7 @@ import pickle
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
 err2arts_path = join(results_path, 'err2arts.pkl')
-errtypes = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent', 'External paras'}
+ERRTYPES = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent', 'External paras'}
 
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
@@ -88,7 +88,7 @@ def count_case(cleaner_results, errtype):
     # return set(i for _, msg in cleaner_results for i in msg) 
     return sum(1 for _, errmsg in cleaner_results if errtype in errmsg)
 
-def show_errtype_stats():
+def show_errtype_stats(errtypes=ERRTYPES):
     cleaner_results = read_xmlcleaner_log()
     print(len(cleaner_results), 'xmls in all')
     print()
@@ -106,7 +106,7 @@ def count_errcates():
     err_counter = {}
 
     # Initialize the counter for each error type
-    for errtype in errtypes: 
+    for errtype in ERRTYPES: 
         err_counter[errtype] = defaultdict(int)
     
     # Traverse articles
@@ -118,7 +118,7 @@ def count_errcates():
                 err_counter[err][cate] += 1
     return err_counter
 
-def show_errtype_cates():
+def show_errtype_cates(errtypes=ERRTYPES):
     distrib = count_errcates()
     for err in distrib:
         if err != 'OK':
@@ -133,9 +133,9 @@ def show_errtype_cates():
 if __name__ == "__main__":
     cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
-    print(err2arts['Empty abstract'])
-    # show_errtype_stats()
-    # show_errtype_cates()
+    # print(err2arts['Empty abstract'])
+    # show_errtype_stats(['Empty abstract'])
+    show_errtype_cates(['Empty abstract'])
 
 
     # 5575 xmls in all
@@ -151,4 +151,6 @@ if __name__ == "__main__":
     # TODO: 
     # 1. Solve the main problem:
     # 2. Distinguish true negative & false negative?
+    #       Solve empty abstracts & empty secs
+    # 3. Solve external paras [!!]
 
