@@ -13,7 +13,7 @@ def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
     with open(txtpath, 'r') as f:
         for line in f.readlines():
-            artid, catelist = line.split()[0], line.split()[1].split(',')
+            artid, catelist = line.split()[0], [cate.split('.')[0] for cate in line.split()[1].split(',')] # Remove subclass
             art2catedict[artid] = art2catedict[artid].union(set(catelist))
             for cate in catelist:
                 cate2artsdict[cate].add(artid)
@@ -97,7 +97,7 @@ def show_errtype_stats(errtypes=ERRTYPES):
 
 
 
-def id2dictkey(artid):
+def fn2dictkey(artid):
     # TODO
     return artid
 
@@ -112,7 +112,7 @@ def count_errcates():
     # Traverse articles
     for artid, errs in cleaner_results:
         # TODO: convert ``artid`` into recognizable format for ``art2cates`` 
-        cates = art2cates[id2dictkey(artid)]
+        cates = art2cates[fn2dictkey(artid)]
         for err in errs:
             for cate in cates:
                 err_counter[err][cate] += 1
