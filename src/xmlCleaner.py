@@ -278,9 +278,6 @@ def postcheck(root, errlog):
     err = False
     errlog.write(xmlpath + ' \n')
 
-    if 'para' in [elem.tag for elem in root]:
-        err = True
-        errlog.write('External paras. ')
     secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     for title in secdict:
         elems = secdict[title]
