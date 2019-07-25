@@ -224,6 +224,8 @@ def texify_abstract(ab):
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
 
 def clean_titlepage(doc, titlepage):
+    '''Extract abstract and move the element to within <document>
+    '''
     abstract = titlepage.find('abstract')
     if abstract:
         texify_abstract(abstract)

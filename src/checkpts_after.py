@@ -95,8 +95,6 @@ def show_errtype_stats(errtypes=ERRTYPES):
     for err in errtypes:
         print(err, count_case(cleaner_results, err))
 
-
-
 def fn2dictkey(artid):
     # TODO
     return artid
@@ -134,8 +132,8 @@ if __name__ == "__main__":
     cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
     # print(err2arts['Empty abstract'])
-    # show_errtype_stats(['Empty abstract'])
-    show_errtype_cates(['Empty abstract'])
+    show_errtype_stats()
+    # show_errtype_cates(['Empty abstract'])
 
 
     # 5575 xmls in all

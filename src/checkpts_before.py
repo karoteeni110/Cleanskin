@@ -114,11 +114,11 @@ if __name__ == "__main__":
     # print(all_childtags(rank1tags_freqdist))
     # show_examplefile(rootdir, 'titlepage')
     
-    elemname = 'titlepage/*'
-    fd_pkl = join(results_path, 'titlepageChildren.pkl')
-    freqdist = get_childrentag_freqdist(rootdir, elemname, oldpkl=fd_pkl)
-    show_most_common(freqdist, 20)
-    # print(all_childtags(freqdist))
+    elemname = '/abstract/..'
+    fd_pkl = join(results_path, 'abstractParent.pkl')
+    freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
+    # show_most_common(freqdist, 20)
+    print(all_childtags(freqdist))
 
 
 

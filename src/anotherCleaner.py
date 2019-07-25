@@ -11,33 +11,37 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'ERROR', 'pa
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource']):
     """Remove useless elements with keeping the trailing texts
     """
-    rmlist = []
+    # rmlist = []
     for tag in tags:
-        parents = root.findall('.//%s/..' % tag)
-        for parent in parents:
-            if parent:
-                child = parent.findall(tag)
-                rmlist.append((parent, child))
-    for p,children in rmlist:
-        for child in children:
-            p.remove(child)
+        elems = root.findall('.//%s' % tag)
+        for elem in elems: 
+            txt = elem.tail
+            elem.clear()
+            elem.tag = 'p'
+            elem.text = txt
+    #     for parent in parents:
+    #         if parent:
+    #             child = parent.findall(tag)
+    #             rmlist.append((parent, child))
+    # for p,children in rmlist:
+    #     for child in children:
+    #         p.remove(child)
 
 # def getparent(elem):
 #     return elem.findall('..')
 
 def texify(root):
+    keeplist = ['title', 'abstract', 'section', 'creator', 'keywords', 'titlepage', 'para', 'chapter', 'bibliography', \
+                    'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection']
     toremove = []
     for elem in root:
-        if elem.tag in ['title', 'abstract', 'section', 'creator', 'keywords', 'titlepage', 'para', 'chapter', 'bibliography', \
-                    'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection']:
+        if elem.tag in keeplist:
             txt = ''.join(elem.itertext()) # TODO: move titles
             title, subtitle = elem.find('title'), elem.find('subtitle')
-            if title != None:
-                print(''.join(title.itertext()))
+            
             elem.clear()
             elem.text = txt
             for t in [title, subtitle]:
-                print(elem, t)
                 if t != None:
                     elem.set(t.tag, ''.join(t.itertext()))
         else:
@@ -58,7 +62,7 @@ if __name__ == "__main__":
             # cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
             continue
         remove_useless(root)
-        # texify(root)
+        texify(root)
         tree.write(join(results_path, xml))
 
     
