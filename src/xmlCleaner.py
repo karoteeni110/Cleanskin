@@ -281,20 +281,16 @@ def postcheck(root, errlog):
     secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     for title in secdict:
         elems = secdict[title]
-        if len(elems) == 0: # If no node
+        if len(elems) == 0: # If element not found
             err = True
             # print(title + ' absent: ' + xmlpath)
             errlog.write(title + ' absent. ')
         else: # If the node exists but is empty
-            i = 0
-            while i<= len(elems)-1 :
-                if elems[i].itertext() == None or ''.join(elems[i].itertext()) == '':
+            for elem in elems:
+                if ''.join(elem.itertext()) == '':
                     err = True
                     # print('Empty ' + title + ' :' + xmlpath)
                     errlog.write('Empty ' + title + '. ')
-                    break
-                else:
-                    i += 1
                                     
     if not err:
         errlog.write('OK. ')
@@ -310,8 +306,8 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=hep-ph0002094.xml']
+    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmls = ['=hep-ph0002094.xml']
     
     begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
@@ -325,8 +321,8 @@ if __name__ == "__main__":
                 continue
             clean(root)
             postcheck(root, cleanlog)
-            # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(results_path, xml))
+            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(results_path, xml))
     t = time.time() - begin
     t = t/60
     print(len(xmls), 'files in %s mins' % t)
