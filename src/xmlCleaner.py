@@ -201,10 +201,6 @@ def clean_chapter(chapelem):
     chapelem.attrib.clear()
     if title:
         chapelem.set('title', title)
-
-def clean_titlepage(ttp):
-    pass
-
     
 def texify_abstract(ab):
     '''
@@ -227,9 +223,12 @@ def texify_abstract(ab):
     ab.clear()
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
 
-def reshape_tp(doc, titlepage):
+def clean_titlepage(doc, titlepage):
     abstract = titlepage.find('abstract')
-    texify_abstract(abstract)
+    if abstract:
+        texify_abstract(abstract)
+        titlepage.remove(abstract)
+        doc.insert(3,abstract)
     texify_para(titlepage)
 
 def bib_text(bib):
@@ -261,7 +260,7 @@ def clean(root):
             # Collect text with skipping subsubelements
             texify_para(child) 
         elif child.tag == 'titlepage':
-            reshape_tp(root, child)
+            clean_titlepage(root, child)
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
