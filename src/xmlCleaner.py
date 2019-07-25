@@ -178,10 +178,10 @@ def clean_section(secelem):
             uselesses.append(elem)
         elif elem.tag in ('subsection', 'subparagraph', 'theorem', 'proof', 'paragraph', 'subsubsection'):
             clean_section(elem)
-        elif elem.tag == 'note': 
+        elif elem.tag in ('note', 'acknowledgement'): 
             texify(elem, p_text(elem))
-        # elif elem.tag in ('acknowledgements', 'bibliography'):
-        #     elem.clear()
+        elif elem.tag == 'bibliography':
+            texify(elem, bib_text)
         else:
             uselesses.append(elem)
     
@@ -201,6 +201,10 @@ def clean_chapter(chapelem):
     chapelem.attrib.clear()
     if title:
         chapelem.set('title', title)
+
+def clean_titlepage(ttp):
+    pass
+
     
 def texify_abstract(ab):
     '''
@@ -222,6 +226,11 @@ def texify_abstract(ab):
             txt += ' ' + quote_text(elem)
     ab.clear()
     ab.text = txt # ignore: break, pagination, ERROR, equation, ...
+
+def reshape_tp(doc, titlepage):
+    abstract = titlepage.find('abstract')
+    texify_abstract(abstract)
+    texify_para(titlepage)
 
 def bib_text(bib):
     txt = ''
@@ -252,13 +261,13 @@ def clean(root):
             # Collect text with skipping subsubelements
             texify_para(child) 
         elif child.tag == 'titlepage':
-            texify_para(child)
+            reshape_tp(root, child)
         elif child.tag in ('chapter', 'part'):
             clean_chapter(child)
             child.tag = 'chapter'
         elif child.tag == 'bibliography':
             texify(child, bib_text(child))
-        else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>, <index>, <toctitle>
+        else: # Remove <figure>, <float> <table>, <ERROR>, <TOC>, <pagination>, <rdf>, <tags>, <index>, <toctitle>, <tags>
             toremove.append(child)
     for i in toremove:
         root.remove(i)
@@ -303,8 +312,8 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
-    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmls = ['=1701.00077.xml']
+    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmls = ['=hep-ph0002094.xml']
     
     begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
@@ -318,8 +327,8 @@ if __name__ == "__main__":
                 continue
             clean(root)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
-                # tree.write(join(results_path, 'bib.xml'))
+            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(results_path, xml))
     t = time.time() - begin
     t = t/60
     print(len(xmls), 'files in %s mins' % t)

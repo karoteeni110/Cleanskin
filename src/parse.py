@@ -11,10 +11,12 @@ _, root = get_root(path)
 # print(len(root))
 secdict = dict()
 for sec in root:
-    if sec.get('title', None): # is a <section>
-        secdict[sec.attrib['title']] = ''.join(sec.itertext())
-    else: # is not a <section>
-        secdict[sec.tag] = ''.join(sec.itertext())
+    # 
+    secdict[sec.tag] = (sec.attrib, sec.)
+    # if sec.get('title', None): # is a <section>
+    #     secdict[sec.attrib['title']] = ''.join(sec.itertext())
+    # else: # is not a <section>
+    #     secdict[sec.tag] = ''.join(sec.itertext())
 
 for i in secdict:
     print(i, secdict[i])

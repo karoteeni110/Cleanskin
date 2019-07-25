@@ -111,11 +111,11 @@ if __name__ == "__main__":
     pklpath = join(results_path, '1stnodes_after.pkl')
     rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
-    print(all_childtags(rank1tags_freqdist))
-    # show_examplefile(rootdir, 'index')
+    # print(all_childtags(rank1tags_freqdist))
+    show_examplefile(rootdir, 'titlepage')
     
-    # elemname = 'bibliography/*'
-    # fd_pkl = join(data_path, 'bibChildren.pkl')
+    # elemname = 'titlepage'
+    # fd_pkl = join(results_path, 'bibChildren.pkl')
     # freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
