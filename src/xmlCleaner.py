@@ -285,12 +285,18 @@ def postcheck(root, errlog):
             err = True
             # print(title + ' absent: ' + xmlpath)
             errlog.write(title + ' absent. ')
-        else: # If the node exists but is empty
-            for elem in elems:
-                if ''.join(elem.itertext()) == '':
-                    err = True
-                    # print('Empty ' + title + ' :' + xmlpath)
-                    errlog.write('Empty ' + title + '. ')
+            continue
+        
+        # If the node exists but is empty
+        for elem in elems:
+            try:
+                txt = ''.join(elem.itertext()) 
+            except TypeError:
+                print([chunk for chunk in elem.itertext()])
+            if txt == '':
+                err = True
+                # print('Empty ' + title + ' :' + xmlpath)
+                errlog.write('Empty ' + title + '. ')
                                     
     if not err:
         errlog.write('OK. ')
@@ -306,12 +312,14 @@ if __name__ == "__main__":
     # hep-ph0001047.xml
     # tree = ET.parse(join(data_path, 'out.xml'))
     # XXX:subparagraph case: =hep-th0002024.xml
+    VERBOSE, REPORT_EVERY = True, 100
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     # xmls = ['=hep-ph0002094.xml']
     
     begin = time.time()
+
     with open(cleanlog_path, 'w') as cleanlog:
-        for xml in xmls:
+        for i, xml in enumerate(xmls):
             xmlpath = join(rawxmls_path, xml)
             try:
                 tree, root = get_root(xmlpath)
@@ -323,6 +331,12 @@ if __name__ == "__main__":
             postcheck(root, cleanlog)
             tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, xml))
+
+
+            if VERBOSE:
+                if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
+                    print('%s of %s collected.' % (i+1, len(xmls)))
+
     t = time.time() - begin
     t = t/60
     print(len(xmls), 'files in %s mins' % t)

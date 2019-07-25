@@ -7,8 +7,14 @@ from shutil import copy, copytree
 import time
 from xmlCleaner import ignore_ns, get_root, get_ttn
 
-def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'ERROR', 'pagination', 'rdf', 'index', \
-                    'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource']):
+
+keeplist = ['title', 'abstract', 'section', 'creator', 'keywords', 'titlepage', 'para', 'chapter', 'bibliography', \
+                    'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection']
+may_contain_subsecs = ['section', 'chapter', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
+
+
+def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
+                    'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
     """Remove useless elements with keeping the trailing texts
     """
     # rmlist = []
@@ -19,39 +25,29 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'ERROR', 'pa
             elem.clear()
             elem.tag = 'p'
             elem.text = txt
-    #     for parent in parents:
-    #         if parent:
-    #             child = parent.findall(tag)
-    #             rmlist.append((parent, child))
-    # for p,children in rmlist:
-    #     for child in children:
-    #         p.remove(child)
-
-# def getparent(elem):
-#     return elem.findall('..')
 
 def texify(root):
-    keeplist = ['title', 'abstract', 'section', 'creator', 'keywords', 'titlepage', 'para', 'chapter', 'bibliography', \
-                    'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection']
     toremove = []
-    for elem in root:
-        if elem.tag in keeplist:
-            txt = ''.join(elem.itertext()) # TODO: move titles
-            title, subtitle = elem.find('title'), elem.find('subtitle')
-            
-            elem.clear()
-            elem.text = txt
+    for rank1elem in root:
+        if rank1elem.tag in keeplist:
+            # TODO: if there is no subsection -type elements
+            txt = ''.join(rank1elem.itertext())
+            title, subtitle = rank1elem.find('title'), rank1elem.find('subtitle')
+            rank1elem.clear()
+            rank1elem.text = txt
             for t in [title, subtitle]:
                 if t != None:
-                    elem.set(t.tag, ''.join(t.itertext()))
+                    rank1elem.set(t.tag, ''.join(t.itertext()))
+            if rank1elem.tag in may_contain_subsecs and rank1elem.get('title', None):
+                rank1elem.tag = 'section'
         else:
-            toremove.append(elem)
+            toremove.append(rank1elem) # Don't modify 
     for i in toremove:
         root.remove(i)
 
 if __name__ == "__main__":
     # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=hep-ph0001264.xml']
+    xmls = ['=math0001145.xml']
 
     for xml in xmls:
         xmlpath = join(rawxmls_path, xml)
