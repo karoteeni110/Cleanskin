@@ -9,7 +9,7 @@ import time
 
 keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition']
-sec_tags = ['chapter', 'part','section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
+sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 useful_attribs = ['title', 'subtitle']
 
 def ignore_ns(root):
