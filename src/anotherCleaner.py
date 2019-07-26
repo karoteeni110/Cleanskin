@@ -5,7 +5,7 @@ from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
 import time
-from xmlCleaner import ignore_ns, get_root, get_ttn
+from xmlCleaner import get_root, postcheck
 
 
 keeplist = ['title', 'abstract', 'creator', 'keywords', 'para', 'theorem', 'proof', 'appendix', 'bibliography', 'titlepage']
@@ -77,6 +77,7 @@ def extract_abst(doc, titlepage):
     if abstract:
         titlepage.remove(abstract)
         doc.insert(3,abstract)
+        flatten_elem(abstract)
 
 def clean(root):
     toremove = []
@@ -102,18 +103,29 @@ def clean(root):
             print(p, c)
 
 if __name__ == "__main__":
-    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=math0001145.xml']
-
-    for xml in xmls:
-        xmlpath = join(rawxmls_path, xml)
-        try:
-            tree, root = get_root(xmlpath)
-        except ET.ParseError:
-            print('Skipped: ParseError at %s' % xmlpath)
-            # cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
-            continue
-        clean(root)
-        tree.write(join(results_path, xml))
-
+    VERBOSE, REPORT_EVERY = True, 100
+    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmls = ['=hep-ph0002094.xml']
     
+    begin = time.time()
+
+    with open(cleanlog_path, 'w') as cleanlog:
+        for i, xml in enumerate(xmls):
+            xmlpath = join(rawxmls_path, xml)
+            try:
+                tree, root = get_root(xmlpath)
+            except ET.ParseError:
+                print('Skipped: ParseError at %s' % xmlpath)
+                cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
+                continue
+            clean(root)
+            postcheck(root, cleanlog)
+            tree.write(join(results_path, xml))
+
+            if VERBOSE:
+                if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
+                    print('%s of %s collected.' % (i+1, len(xmls)))
+
+    t = time.time() - begin
+    t = t/60
+    print(len(xmls), 'files in %s mins' % t)
