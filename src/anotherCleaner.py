@@ -7,8 +7,9 @@ from shutil import copy, copytree
 import time
 
 
-keeplist = ['title', 'abstract', 'creator', 'keywords', 'para', 'theorem', 'proof', 'appendix', 'bibliography', 'titlepage']
-sec_tags = ['section', 'chapter', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
+keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', \
+            'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition']
+sec_tags = ['chapter', 'part','section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 useful_attribs = ['title', 'subtitle']
 
 def ignore_ns(root):
@@ -45,7 +46,7 @@ def flatten_elem(elem):
     elem.text = txt
 
 def is_section(elem):
-    if elem.tag in sec_tags and have_title(elem):
+    if elem.tag in sec_tags or have_subsec(elem):
         return True
     else:
         return False    
@@ -70,14 +71,15 @@ def clean_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.
     Should be called first
     """
-    title_elems = []
+    to_remove = []
     for title_parent in root.findall('.//title/..'):
         title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
         for t in [title, subtitle]:
-            if t != None:
+            if t != None and title_parent.tag != 'document':
                 title_parent.set(t.tag, ''.join(t.itertext()))
-                title_elems.append((title_parent, title))
-    for p,c in title_elems:
+                to_remove.append((title_parent, title))
+
+    for p,c in to_remove:
         p.remove(c)
 
 def extract_abst(doc, titlepage):
@@ -94,7 +96,7 @@ def clean(root):
     remove_useless(root)
     clean_titles(root)
     for rank1elem in root:  # 1st pass
-        if rank1elem.tag in keeplist: # if element in ``keeplist``, texify it; remove otherwise
+        if rank1elem.tag in keeplist: # titles, abstracts, 
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
             flatten_elem(rank1elem)
@@ -103,6 +105,7 @@ def clean(root):
             if 'section' in rank1elem.tag:
                 rank1elem.tag = 'section'
             clean_sec(rank1elem)
+
         else:
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 

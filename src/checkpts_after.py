@@ -118,7 +118,7 @@ def count_errcates():
 
 def show_errtype_cates(errtypes=ERRTYPES):
     distrib = count_errcates()
-    for err in distrib:
+    for err in errtypes:
         if err != 'OK':
             print(err+':')
             errlst = []
@@ -132,8 +132,8 @@ if __name__ == "__main__":
     cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
     # print(err2arts['Empty abstract'])
-    show_errtype_stats()
-    # show_errtype_cates(['Empty abstract'])
+    # show_errtype_stats()
+    show_errtype_cates(['Empty abstract'])
 
 
     # 5575 xmls in all
@@ -146,6 +146,18 @@ if __name__ == "__main__":
     # OK 1906
     # abstract absent 1167
 
+
+    # anotherCleaner.py
+    5575 xmls in all
+
+    # Empty secs 84
+    # OK 3263
+    # ParseError 16
+    # External paras 0
+    # abstract absent 1013
+    # Empty abstract 44
+    # secs absent 1499
+    
     # TODO: 
     # 1. Solve the main problem:
     # 2. Distinguish true negative & false negative?
