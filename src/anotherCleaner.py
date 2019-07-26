@@ -8,10 +8,9 @@ import time
 from xmlCleaner import ignore_ns, get_root, get_ttn
 
 
-keeplist = ['title', 'abstract', 'section', 'creator', 'keywords', 'titlepage', 'para', 'chapter', 'bibliography', \
-                    'paragraph', 'subparagraph', 'subsection', 'appendix', 'theorem', 'proof', 'subsubsection']
-sec_tags = ['section', 'chapter', 'subsection', 'subsubsection', 'paragraph', 'subpragraph', 'appendix', 'bibliography']
-
+keeplist = ['title', 'abstract', 'creator', 'keywords', 'para', 'theorem', 'proof', 'appendix', 'bibliography', 'titlepage']
+sec_tags = ['section', 'chapter', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
+useful_attribs = ['title', 'subtitle']
 
 def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
@@ -27,8 +26,12 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.text = txt
 
 def flatten_elem(elem):
+    oldatt = elem.attrib
     txt = ''.join(elem.itertext())
     elem.clear()
+    for useful_attrib in useful_attribs:
+        if oldatt.get(useful_attrib, None):
+            elem.set(useful_attrib, oldatt[useful_attrib])
     elem.text = txt
 
 def is_section(elem):
@@ -45,10 +48,7 @@ def clean_sec(sec):
             flatten_elem(subelem)
 
 def have_title(elem):
-    if elem.findall('title') != []:
-        return True
-    else:
-        return False
+    return elem.get('title', False)
 
 def have_subsec(elem):
     for subelem in elem:
@@ -70,26 +70,28 @@ def clean_titles(root):
     for p,c in title_elems:
         p.remove(c)
 
-
+def extract_abst(doc, titlepage):
+    '''Extract abstract and move the element to within <document>
+    '''
+    abstract = titlepage.find('abstract')
+    if abstract:
+        titlepage.remove(abstract)
+        doc.insert(3,abstract)
 
 def clean(root):
     toremove = []
     remove_useless(root)
-    clean_titles(root)  
+    clean_titles(root)
     for rank1elem in root:  # 1st pass
         if rank1elem.tag in keeplist: # if element in ``keeplist``, texify it; remove otherwise
-            if have_subsec(rank1elem):
-                for subelem in rank1elem:
-                    if subelem.tag in sec_tags:
-                        clean_sec(subelem)
-                    else:
-                        flatten_elem(rank1elem)
-
-            elif rank1elem.tag in sec_tags: # sec that don't have subsecs 
-                clean_sec(rank1elem)
+            if rank1elem.tag == 'titlepage':
+                extract_abst(root, rank1elem)
+            flatten_elem(rank1elem)
+                
+        elif is_section(rank1elem):
+            if 'section' in rank1elem.tag:
                 rank1elem.tag = 'section'
-            else:
-                flatten_elem(rank1elem)
+            clean_sec(rank1elem)
         else:
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
