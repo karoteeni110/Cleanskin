@@ -6,7 +6,7 @@ from paths import data0001, data0002, data1701, results_path, errcase_path
 import time
 
 def latexml(from_fpath, to_fpath):
-    cmd = 'latexml --destination=%s --noparse --nocomments --quiet %s 2>&1' % (to_fpath, from_fpath)
+    cmd = 'latexml --destination=%s --noparse --nocomments --quiet %s' % (to_fpath, from_fpath)
     try:
         run(cmd, shell=True, stderr=PIPE, check=True, timeout=120)
     except TimeoutExpired:
@@ -71,9 +71,9 @@ def trav_data(artdir_path_list, errlog, outdir):
 if __name__ == "__main__":
     errlogpath = join(results_path, 'test_runtime.txt') # join(results_path, 'latexml/logs/log.txt')
     rootdir = data1701 # XXX: CHANGE IT
-    # artdir_path_list = [join(rootdir, dirname) for dirname in listdir(rootdir)]
-    artdir_path_list = [join(rootdir, '=' + dirname) for dirname in ['1701.00576', '1701.00204', '1701.01046']]
-    outdir = results_path # join(results_path, 'latexml')
+    artdir_path_list = [join(rootdir, dirname) for dirname in listdir(rootdir)]
+    # artdir_path_list = [join(rootdir, '=' + dirname) for dirname in ['1701.00576', '1701.00204', '1701.01046']]
+    outdir = join(results_path, 'latexml')
     # excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
     #                   + ['=astro-ph0002515', '=hep-th0002028'] \
     #                  + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', \
