@@ -7,7 +7,7 @@ import pickle
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
 err2arts_path = join(results_path, 'err2arts.pkl')
-ERRTYPES = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent', 'External paras'}
+ERRTYPES = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent'}
 
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
@@ -95,6 +95,10 @@ def show_errtype_stats(errtypes=ERRTYPES):
     for err in errtypes:
         print(err, count_case(cleaner_results, err))
 
+def check_true_negative():
+    pass 
+    # show_errtype_stats()
+
 def fn2dictkey(artid):
     # TODO
     return artid
@@ -128,12 +132,19 @@ def show_errtype_cates(errtypes=ERRTYPES):
             print(sorted(errlst, key=lambda x:x[1]))
             print()
 
+def show_errtype_arts(errtypes=ERRTYPES):
+    for err in errtypes:
+        if err != 'OK':
+            print(err+':')
+            print(err2arts[err])
+            print()
+
 if __name__ == "__main__":
     cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
-    # print(err2arts['Empty abstract'])
+    show_errtype_arts(['secs absent'])
     # show_errtype_stats()
-    show_errtype_cates(['Empty abstract'])
+    # show_errtype_cates(['Empty abstract'])
 
 
     # 5575 xmls in all
@@ -142,22 +153,20 @@ if __name__ == "__main__":
     # Empty abstract 44
     # Empty secs 453
     # secs absent 1110
-    # External paras 2885
     # OK 1906
     # abstract absent 1167
 
 
     # anotherCleaner.py
-    5575 xmls in all
+    # 5575 xmls in all
 
     # Empty secs 84
     # OK 3263
     # ParseError 16
-    # External paras 0
     # abstract absent 1013
     # Empty abstract 44
     # secs absent 1499
-    
+
     # TODO: 
     # 1. Solve the main problem:
     # 2. Distinguish true negative & false negative?

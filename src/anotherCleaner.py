@@ -91,6 +91,16 @@ def extract_abst(doc, titlepage):
         doc.insert(3,abstract)
         flatten_elem(abstract)
 
+def rename_rank1secs(rank1elem):
+    if 'section' in rank1elem.tag:
+        rank1elem.tag = 'section'
+    elif rank1elem.tag in ('chapter', 'part'):
+        for elem in rank1elem:
+            if is_section(elem):
+                elem.tag = 'section' 
+        rank1elem.tag = 'chapter'
+        
+
 def clean(root):
     toremove = []
     remove_useless(root)
@@ -102,8 +112,7 @@ def clean(root):
             flatten_elem(rank1elem)
                 
         elif is_section(rank1elem):
-            if 'section' in rank1elem.tag:
-                rank1elem.tag = 'section'
+            rename_rank1secs(rank1elem)
             clean_sec(rank1elem)
 
         else:
@@ -113,7 +122,7 @@ def clean(root):
         try:
             p.remove(c)
         except ValueError:
-            print(p, c)
+            continue
 
 def postcheck(root, errlog):
     err = False
@@ -122,6 +131,10 @@ def postcheck(root, errlog):
     secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
     for title in secdict:
         elems = secdict[title]
+
+        if title == 'secs' and elems == []:
+            elems = root.findall('./chapter/section')
+
         if len(elems) == 0: # If element not found
             err = True
             # print(title + ' absent: ' + xmlpath)
