@@ -26,14 +26,23 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.tag = 'p'
             elem.text = txt
 
-def flatter_elem(elem):
+def flatten_elem(elem):
     txt = ''.join(elem.itertext())
     elem.clear()
     elem.text = txt
 
+def is_section(elem):
+    if elem.tag in sec_tags and have_title(elem):
+        return True
+    else:
+        return False    
+
 def clean_sec(sec):
     for subelem in sec:
-        flatter_elem(subelem)
+        if is_section(subelem):
+            clean_sec(subelem)
+        else:
+            flatten_elem(subelem)
 
 def have_title(elem):
     if elem.findall('title') != []:
@@ -43,45 +52,53 @@ def have_title(elem):
 
 def have_subsec(elem):
     for subelem in elem:
-        if subelem.tag in sec_tags and have_title(subelem):
+        if is_section(subelem):
             return True
     return False
 
-def texify(root):
-    toremove = []
+def clean_titles(root):
+    """Set all the <title>s as the parent node's attribute and remove it from the parent.
+    Should be called first
+    """
+    title_elems = []
+    for title_parent in root.findall('.//title/..'):
+        title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
+        for t in [title, subtitle]:
+            if t != None:
+                title_parent.set(t.tag, ''.join(t.itertext()))
+                title_elems.append((title_parent, title))
+    for p,c in title_elems:
+        p.remove(c)
 
+
+
+def clean(root):
+    toremove = []
+    remove_useless(root)
+    clean_titles(root)  
     for rank1elem in root:  # 1st pass
         if rank1elem.tag in keeplist: # if element in ``keeplist``, texify it; remove otherwise
-
-            
             if have_subsec(rank1elem):
                 for subelem in rank1elem:
                     if subelem.tag in sec_tags:
                         clean_sec(subelem)
                     else:
-                        flatter_elem(rank1elem)
+                        flatten_elem(rank1elem)
 
             elif rank1elem.tag in sec_tags: # sec that don't have subsecs 
                 clean_sec(rank1elem)
                 rank1elem.tag = 'section'
             else:
-                flatter_elem(rank1elem)
+                flatten_elem(rank1elem)
         else:
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
-    for title_parent in root.findall('.//title/..'): # 2nd pass
-        title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
-        for t in [title, subtitle]:
-            if t != None:
-                title_parent.set(t.tag, ''.join(t.itertext()))
-                toremove.append((title_parent, title))
-
-    
     for p, c in toremove:
         try:
             p.remove(c)
         except ValueError:
             print(p, c)
+
 if __name__ == "__main__":
     # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     xmls = ['=math0001145.xml']
@@ -94,8 +111,7 @@ if __name__ == "__main__":
             print('Skipped: ParseError at %s' % xmlpath)
             # cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
             continue
-        remove_useless(root)
-        texify(root)
+        clean(root)
         tree.write(join(results_path, xml))
 
     
