@@ -6,10 +6,9 @@ from paths import data0001, data0002, data1701, results_path, errcase_path
 import time
 
 def latexml(from_fpath, to_fpath):
-    cmd = 'latexml --destination=%s --noparse --nocomments --quiet\
-        %s 2>&1' % (to_fpath, from_fpath)
+    cmd = 'latexml --destination=%s --noparse --nocomments --quiet %s 2>&1' % (to_fpath, from_fpath)
     try:
-        run(cmd, shell=True, stderr=PIPE, check=True, timeout=60)
+        run(cmd, shell=True, stderr=PIPE, check=True, timeout=120)
     except TimeoutExpired:
         return 'Process too long.'
     except CalledProcessError as e:
@@ -27,7 +26,7 @@ def copyart(errart_path, dest):
     if not exists(dest):
         copytree(errart_path, dest)
 
-def trav_data(rootdir, errlog, outdir):
+def trav_data(artdir_path_list, errlog, outdir):
     '''
     Traverse all article directories in ``rootdir``, 
     getting the largest .tex / .ltx file converted to XMLs with latexml.
@@ -38,10 +37,9 @@ def trav_data(rootdir, errlog, outdir):
            ==> processed by latexml (output => /outdir/ )
     b) is not TeX: 
     '''
-    dirs = listdir(rootdir)
     
-    for ith, art in enumerate(dirs):
-        art_path = join(rootdir, art)
+    for ith, art_path in enumerate(artdir_path_list):
+        art = basename(art_path)
 
         if art[-1].isdigit(): # the folder name of articles should consist of digits
             toptex_fn = pick_toptex(art_path)
@@ -50,7 +48,7 @@ def trav_data(rootdir, errlog, outdir):
 
             if toptex_fn != '': 
                 if not exists(output_path): # Avoid overwriting
-                    print(art + ' --> %s of %s' % (ith+1, len(dirs)))
+                    print(art + ' --> %s of %s' % (ith+1, len(artdir_path_list)))
                     msg = latexml(toptex_path, output_path)
                     if msg != None: # If returns error message: copy data & write log
                         # err_art_dest = join(errcase_path, 'excluded/%s' % art)
@@ -71,9 +69,11 @@ def trav_data(rootdir, errlog, outdir):
 
 
 if __name__ == "__main__":
-    errlogpath = join(results_path, 'latexml/logs/log.txt')
+    errlogpath = join(results_path, 'test_runtime.txt') # join(results_path, 'latexml/logs/log.txt')
     rootdir = data1701 # XXX: CHANGE IT
-    outdir = join(results_path, 'latexml')
+    # artdir_path_list = [join(rootdir, dirname) for dirname in listdir(rootdir)]
+    artdir_path_list = [join(rootdir, '=' + dirname) for dirname in ['1701.00576', '1701.00204', '1701.01046']]
+    outdir = results_path # join(results_path, 'latexml')
     # excluded_arts = ['=hep-ex0001041', '=astro-ph0001216', '=astro-ph0001480'] \
     #                   + ['=astro-ph0002515', '=hep-th0002028'] \
     #                  + ['=1701.00636', '=1701.00146', '=1701.00177', '=1701.01284', '=1701.00785', \
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     
     start = time.time()
     with open(errlogpath, 'a') as errlog:
-        trav_data(rootdir, errlog, outdir)          
+        trav_data(artdir_path_list, errlog, outdir)          
     end = (time.time() - start)/3600
     print('Used time: %s hs' % end)
 

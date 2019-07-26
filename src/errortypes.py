@@ -74,10 +74,10 @@ def read_xmlcleaner_log():
 
 def get_err2arts_dict():
     cleaner_results = read_xmlcleaner_log()
-    d = defaultdict(list)
+    d = defaultdict(set)
     for artid, errmsgs in cleaner_results:
         for err in errmsgs:
-            d[err].append(artid)
+            d[err].add(artid)
     return d
 
 def count_case(cleaner_results, errtype):
@@ -133,6 +133,7 @@ def show_errtype_cates(errtypes=ERRTYPES):
             print()
 
 def show_errtype_arts(errtypes=ERRTYPES):
+    err2arts = get_err2arts_dict()
     for err in errtypes:
         if err != 'OK':
             print(err+':')
@@ -140,9 +141,8 @@ def show_errtype_arts(errtypes=ERRTYPES):
             print()
 
 if __name__ == "__main__":
-    cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
-    show_errtype_arts(['secs absent'])
+    show_errtype_arts(['Empty secs'])
     # show_errtype_stats()
     # show_errtype_cates(['Empty abstract'])
 
@@ -160,12 +160,12 @@ if __name__ == "__main__":
     # anotherCleaner.py
     # 5575 xmls in all
 
-    # Empty secs 84
-    # OK 3263
     # ParseError 16
+    # secs absent 1109
     # abstract absent 1013
     # Empty abstract 44
-    # secs absent 1499
+    # OK 3273
+    # Empty secs 455
 
     # TODO: 
     # 1. Solve the main problem:
