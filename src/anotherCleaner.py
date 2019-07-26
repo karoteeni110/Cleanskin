@@ -5,12 +5,22 @@ from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
 import time
-from xmlCleaner import get_root, postcheck
 
 
 keeplist = ['title', 'abstract', 'creator', 'keywords', 'para', 'theorem', 'proof', 'appendix', 'bibliography', 'titlepage']
 sec_tags = ['section', 'chapter', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 useful_attribs = ['title', 'subtitle']
+
+def ignore_ns(root):
+    '''
+    Clean namespace in the node's tag. Should be called in the first place.
+    '''
+    for elem in root.iter():
+        if not hasattr(elem.tag, 'find'):
+            continue
+        i = elem.tag.find('}')
+        if i >= 0:
+            elem.tag = elem.tag[i+1:]
 
 def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
@@ -102,6 +112,40 @@ def clean(root):
         except ValueError:
             print(p, c)
 
+def postcheck(root, errlog):
+    err = False
+    errlog.write(xmlpath + ' \n')
+
+    secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
+    for title in secdict:
+        elems = secdict[title]
+        if len(elems) == 0: # If element not found
+            err = True
+            # print(title + ' absent: ' + xmlpath)
+            errlog.write(title + ' absent. ')
+            continue
+        
+        # If the node exists but is empty
+        for elem in elems:
+            try:
+                txt = ''.join(elem.itertext()) 
+            except TypeError:
+                print([chunk for chunk in elem.itertext()])
+            if txt == '':
+                err = True
+                # print('Empty ' + title + ' :' + xmlpath)
+                errlog.write('Empty ' + title + '. ')
+                                    
+    if not err:
+        errlog.write('OK. ')
+    errlog.write('\n ================================== \n')
+            
+def get_root(xmlpath):
+    tree = ET.parse(xmlpath)
+    root = tree.getroot()
+    ignore_ns(root)
+    return tree, root
+
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
@@ -120,11 +164,11 @@ if __name__ == "__main__":
                 continue
             clean(root)
             postcheck(root, cleanlog)
-            tree.write(join(results_path, xml))
+            tree.write(join(cleanedxml_path, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
-                    print('%s of %s collected.' % (i+1, len(xmls)))
+                    print('%s of %s ...' % (i+1, len(xmls)))
 
     t = time.time() - begin
     t = t/60
