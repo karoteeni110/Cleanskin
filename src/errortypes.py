@@ -166,10 +166,3 @@ if __name__ == "__main__":
     # Empty abstract 44
     # OK 3273
     # Empty secs 455
-
-    # TODO: 
-    # 1. Solve the main problem:
-    # 2. Distinguish true negative & false negative?
-    #       Solve empty abstracts & empty secs
-    # 3. Solve external paras [!!]
-

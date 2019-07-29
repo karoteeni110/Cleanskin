@@ -124,6 +124,15 @@ def clean(root):
         except ValueError:
             continue
 
+def is_empty(elem):
+    try:
+        txt = ''.join(elem.itertext())
+        if txt == '':
+            return True
+    except TypeError:
+        print([chunk for chunk in elem.itertext()])
+    return False
+
 def postcheck(root, errlog):
     err = False
     errlog.write(xmlpath + ' \n')
@@ -143,11 +152,12 @@ def postcheck(root, errlog):
         
         # If the node exists but is empty
         for elem in elems:
-            try:
-                txt = ''.join(elem.itertext()) 
-            except TypeError:
-                print([chunk for chunk in elem.itertext()])
-            if txt == '':
+            if is_empty(elem):
+            # try:
+            #     txt = ''.join(elem.itertext()) 
+            # except TypeError:
+            #     print([chunk for chunk in elem.itertext()])
+            # if txt == '':
                 err = True
                 # print('Empty ' + title + ' :' + xmlpath)
                 errlog.write('Empty ' + title + '. ')

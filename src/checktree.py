@@ -1,5 +1,5 @@
 from paths import results_path, data_path
-from xmlCleaner import ignore_ns
+from newCleaner import ignore_ns
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
