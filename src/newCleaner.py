@@ -127,7 +127,7 @@ def clean(root):
 def is_empty(elem):
     try:
         txt = ''.join(elem.itertext())
-        if txt == '':
+        if txt.strip() == '':
             return True
     except TypeError:
         print([chunk for chunk in elem.itertext()])

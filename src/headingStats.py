@@ -20,6 +20,9 @@ def get_headings(xmlpath):
     secdict = {'section':[], 'chapter': []}
     for elem in root:
         if is_section(elem) and not is_empty(elem):
+            if get_title(elem) == '':
+                print(elem, xmlpath)
+
             secdict['section'].append(get_title(elem))
         elif elem.tag == 'chapter':
             secdict['chapter'].append(get_title(elem)) 
@@ -50,6 +53,7 @@ def show_heading_stats():
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     rootdir = cleanedxml_path
-    xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
+    # xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
+    xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/cleaned_xml/=astro-ph0001424.xml']
     print(count_headings(xmlpath_list).most_common(80))
     # [('introduction', 3480), ('', 2093), ('conclusions', 888), ('conclusion', 530), ('acknowledgments', 527)]

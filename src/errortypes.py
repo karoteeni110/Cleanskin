@@ -140,9 +140,20 @@ def show_errtype_arts(errtypes=ERRTYPES):
             print(err2arts[err])
             print()
 
+def is_title(elem):
+    pass
+
+def have_title(sec):
+    pass
+
+def show_false_neg():
+    all_nosec = get_err2arts_dict()['secs absent']
+    false_nosec = ''
+    print('Detected titles: %s of %s' % (len(false_nosec), len(all_nosec)))
+
 if __name__ == "__main__":
     clean_results = read_xmlcleaner_log()
-    show_errtype_arts(['Empty secs'])
+    show_errtype_arts(['secs absent'])
     # show_errtype_stats()
     # show_errtype_cates(['Empty abstract'])
 
