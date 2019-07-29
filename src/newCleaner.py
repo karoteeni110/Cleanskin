@@ -4,6 +4,7 @@ from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedx
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
+from unicodedata import normalize
 import time
 
 
@@ -67,6 +68,9 @@ def have_subsec(elem):
             return True
     return False
 
+def normalize_txt(txt):
+    return normalize('NFKD', txt).lower().strip()
+
 def clean_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.
     Should be called first
@@ -76,7 +80,7 @@ def clean_titles(root):
         title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
         for t in [title, subtitle]:
             if t != None and title_parent.tag != 'document':
-                title_parent.set(t.tag, ''.join(t.itertext()))
+                title_parent.set(t.tag, normalize_txt(''.join(t.itertext())))
                 to_remove.append((title_parent, title))
 
     for p,c in to_remove:

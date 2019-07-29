@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import pickle
-from os.path import join
+from os.path import join, basename
 from os import listdir
 from newCleaner import get_root, is_section, is_empty
 from paths import results_path, cleanedxml_path
@@ -18,10 +18,11 @@ def get_headings(xmlpath):
     """
     _, root = get_root(xmlpath)
     secdict = {'section':[], 'chapter': []}
+    empty_sec_arts = set()
     for elem in root:
         if is_section(elem) and not is_empty(elem):
             if get_title(elem) == '':
-                print(elem, xmlpath)
+                empty_sec_arts.add(basename(xmlpath))
 
             secdict['section'].append(get_title(elem))
         elif elem.tag == 'chapter':
@@ -29,6 +30,7 @@ def get_headings(xmlpath):
             for subelem in elem:
                 if is_section(subelem) and not is_empty(subelem):
                     secdict['section'].append(get_title(subelem))
+    print(empty_sec_arts)
     return secdict
 
 def count_headings(xmlpath_list):
@@ -53,7 +55,7 @@ def show_heading_stats():
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     rootdir = cleanedxml_path
-    # xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
-    xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/cleaned_xml/=astro-ph0001424.xml']
+    xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
+    # xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/cleaned_xml/=astro-ph0001424.xml']
     print(count_headings(xmlpath_list).most_common(80))
     # [('introduction', 3480), ('', 2093), ('conclusions', 888), ('conclusion', 530), ('acknowledgments', 527)]

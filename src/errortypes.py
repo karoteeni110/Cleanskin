@@ -2,6 +2,7 @@ from paths import cate_path, results_path, cleanlog_path
 from os import listdir
 from os.path import basename, join
 from collections import defaultdict
+from newCleaner import get_root, normalize_txt
 import pickle 
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
@@ -43,10 +44,10 @@ def get_pkls():
         txtpath = join(cate_path, txt)
         c2a, a2c = get_dicts(txtpath)
         cate2arts, art2cates = merge_dicts(cate2arts, c2a), merge_dicts(art2cates, a2c)
-    # print(cate2arts['astro-ph'])
-    dump_dicts(cate2arts, art2cates)
+    # print(categet_ph'])
+    dump_dicts(cget_2cates)
 
-def read_pkls():
+def read_pkls():get_
     a, b, c = open(cate2arts_path,'rb'), open(art2cates_path, 'rb'), open(err2arts_path, 'rb')
     d1, d2, d3 = pickle.load(a), pickle.load(b), pickle.load(c)
     a.close()
@@ -95,10 +96,6 @@ def show_errtype_stats(errtypes=ERRTYPES):
     for err in errtypes:
         print(err, count_case(cleaner_results, err))
 
-def check_true_negative():
-    pass 
-    # show_errtype_stats()
-
 def fn2dictkey(artid):
     # TODO
     return artid
@@ -143,13 +140,19 @@ def show_errtype_arts(errtypes=ERRTYPES):
 def is_title(elem):
     pass
 
-def have_title(sec):
-    pass
+def have_title(xmlpath):
+    _, root = get_root(xmlpath)
+    for elem in root:
+        content = ''.join(elem.itertext())
+        if 'introduction' in normalize_txt(content):
+            return True
+    return False
 
 def show_false_neg():
     all_nosec = get_err2arts_dict()['secs absent']
     false_nosec = ''
-    print('Detected titles: %s of %s' % (len(false_nosec), len(all_nosec)))
+    print('Detected titles: %s in %s' % (len(false_nosec), len(all_nosec)))
+    print()
 
 if __name__ == "__main__":
     clean_results = read_xmlcleaner_log()
