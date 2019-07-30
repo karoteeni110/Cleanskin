@@ -1,11 +1,11 @@
 '''
-Organize special-case XMLs so that they can be cleaned by ``xmlCleaner.py``
+Extract sectional structures in the xml
 '''
 import xml.etree.ElementTree as ET
 import sys
 from paths import data_path, results_path, data0001, data0002, data1701
 from os.path import join, basename
-from xmlCleaner import ignore_ns
+from newCleaner import get_root
 
 def mv_secs_in_abstract(root):
     # abstract/section in ``=hep-th0002028.xml``

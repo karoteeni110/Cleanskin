@@ -1,7 +1,7 @@
-from paths import cate_path, results_path, cleanlog_path, cleanedxml_path
+from paths import cate_path, results_path, cleanlog_path, cleanedxml_path, rawxmls_path
 from os import listdir
 from os.path import basename, join, exists
-from collections import defaultdict
+from collections import defaultdict, Counter
 from newCleaner import get_root, normalize_txt
 import pickle 
 
@@ -14,7 +14,8 @@ def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
     with open(txtpath, 'r') as f:
         for line in f.readlines():
-            artid, catelist = line.split()[0], [cate.split('.')[0] for cate in line.split()[1].split(',')] # Remove subclass
+            artid = line.split()[0].replace('/','')
+            catelist = [cate.split('.')[0] for cate in line.split()[1].split(',')] # Remove subclass
             art2catedict[artid] = art2catedict[artid].union(set(catelist))
             for cate in catelist:
                 cate2artsdict[cate].add(artid)
@@ -37,23 +38,22 @@ def dump_dicts(cate2arts, art2cates):
         pickle.dump(art2cates, d2)
     print('art2cates -- dumped.')
 
-def get_pkls():
+def get_latest_pkls():
     cate2arts, art2cates = defaultdict(set), defaultdict(set)
     for txt in listdir(cate_path):
         print('Collecting: %s' % txt)
         txtpath = join(cate_path, txt)
         c2a, a2c = get_dicts(txtpath)
         cate2arts, art2cates = merge_dicts(cate2arts, c2a), merge_dicts(art2cates, a2c)
-    # print(categet_ph'])
-    dump_dicts(cget_2cates)
+    dump_dicts(cate2arts, art2cates)
 
 def read_pkls():
     a, b, c = open(cate2arts_path,'rb'), open(art2cates_path, 'rb'), open(err2arts_path, 'rb')
-    d1, d2, d3 = pickle.load(a), pickle.load(b), pickle.load(c)
+    cate2arts, art2cates, err2arts = pickle.load(a), pickle.load(b), pickle.load(c)
     a.close()
     b.close()
     c.close()
-    return d1, d2, d3
+    return cate2arts, art2cates, err2arts
 
 def pe_generator(f):
     artid = basename(f.readline()[:-2])[:-4].strip('=')
@@ -96,9 +96,9 @@ def show_errtype_stats(errtypes=ERRTYPES):
     for err in errtypes:
         print(err, count_case(cleaner_results, err))
 
-def fn2dictkey(artid):
-    # TODO
-    return artid
+# def fn2dictkey(artid):
+#     # TODO
+#     return artid
 
 def count_errcates():
     cleaner_results = read_xmlcleaner_log()
@@ -111,7 +111,7 @@ def count_errcates():
     # Traverse articles
     for artid, errs in cleaner_results:
         # TODO: convert ``artid`` into recognizable format for ``art2cates`` 
-        cates = art2cates[fn2dictkey(artid)]
+        cates = art2cates[artid]
         for err in errs:
             for cate in cates:
                 err_counter[err][cate] += 1
@@ -144,9 +144,13 @@ def have_title(xmlpath):
     _, root = get_root(xmlpath)
     for elem in root:
         content = ''.join(elem.itertext())
-        if 'Introduction' in content and elem.tag != 'bibliography':
+        if 'introduction' in content.lower() and elem.tag != 'bibliography' and elem.get('title', '').lower() != 'references':
             return True
     return False
+
+def collect_intro_patterns(nosec_art_pathlist):
+    for art in nosec_art_pathlist:
+        art = get_root
 
 def show_false_neg():
     all_nosec = get_err2arts_dict()['secs absent']
@@ -154,17 +158,26 @@ def show_false_neg():
     for art in all_nosec:
         path = join(cleanedxml_path, '='+ art + '.xml')
         if exists(path):
-            if have_title(path):
+            if not have_title(path):
                 false_nosec.append(art)
         else:
             print('not found:', art)
     print('Detected titles: %s in %s' % (len(false_nosec), len(all_nosec)))
+
+    s = []
     for i in false_nosec:
-        print(join(cleanedxml_path, '='+ i + '.xml'))
+        if art2cates[i] != set():
+            s.extend(art2cates[i])
+    ct = Counter(s)
+    print(ct.most_common(50))
+        # print(join(rawxmls_path, '='+ i + '.xml'))
     # print(false_nosec)
 
 if __name__ == "__main__":
+    # get_latest_pkls()
+    cate2arts, art2cates, err2arts = read_pkls()
     clean_results = read_xmlcleaner_log()
+    # print(cate2arts['hep-th'])
     # show_errtype_arts(['secs absent'])
     show_false_neg()
     # show_errtype_stats()

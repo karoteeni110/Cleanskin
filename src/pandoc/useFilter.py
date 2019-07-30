@@ -90,7 +90,7 @@ def errcase_redo(rootdir):
 if __name__ == "__main__":
     # main('results/0002/db')
     # errcase_redo('results/0001/errCases_db')
-    errcase_redo('results/1701/errCases_db')
+    # errcase_redo('results/1701/errCases_db')
 
 # pandoc -s ../data/nat_orders_revisionv4Amaro.tex -o paper.html
 # pandoc -s -t JSON *.tex > pandoAST.json # Check the AST of the file

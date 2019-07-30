@@ -14,7 +14,7 @@ def get_title(elem):
 def get_headings(xmlpath):
     """Returns a dict. 
     keys: 'section', 'chapter'
-    keys: list of section titles
+    values: list of section titles
     """
     _, root = get_root(xmlpath)
     secdict = {'section':[], 'chapter': []}
@@ -30,7 +30,7 @@ def get_headings(xmlpath):
             for subelem in elem:
                 if is_section(subelem) and not is_empty(subelem):
                     secdict['section'].append(get_title(subelem))
-    print(empty_sec_arts)
+    # print(empty_sec_arts)
     return secdict
 
 def count_headings(xmlpath_list):
