@@ -3,7 +3,7 @@ from os import listdir
 from os.path import basename, join, exists
 from collections import defaultdict, Counter
 from newCleaner import get_root, normalize_txt
-import pickle 
+import pickle, re
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
@@ -110,7 +110,6 @@ def count_errcates():
     
     # Traverse articles
     for artid, errs in cleaner_results:
-        # TODO: convert ``artid`` into recognizable format for ``art2cates`` 
         cates = art2cates[artid]
         for err in errs:
             for cate in cates:
@@ -148,6 +147,14 @@ def have_title(xmlpath):
             return True
     return False
 
+def is_sec_in_latex(latexpath):
+    with open(latexpath, 'r', encoding='utf-8', errors='ignore') as f:
+        tex = f.read()
+        if re.search(r'[Ii]ntroduction', tex):
+            return True
+        else:
+            return False
+
 def collect_intro_patterns(nosec_art_pathlist):
     for art in nosec_art_pathlist:
         art = get_root
@@ -158,7 +165,7 @@ def show_false_neg():
     for art in all_nosec:
         path = join(cleanedxml_path, '='+ art + '.xml')
         if exists(path):
-            if not have_title(path):
+            if is_sec_in_latex(path):
                 false_nosec.append(art)
         else:
             print('not found:', art)
@@ -166,12 +173,14 @@ def show_false_neg():
 
     s = []
     for i in false_nosec:
-        if art2cates[i] != set():
-            s.extend(art2cates[i])
+        cate = art2cates[i]
+        s.extend(cate)
     ct = Counter(s)
     print(ct.most_common(50))
-        # print(join(rawxmls_path, '='+ i + '.xml'))
-    # print(false_nosec)
+    # Articles where 'introdution' is not detected:
+    # [('cond-mat', 398), ('hep-ph', 153), ('hep-th', 92), ('quant-ph', 83), ('math', 61), ('astro-ph', 59), ('physics', 53), ('gr-qc', 46), ('nucl-th', 39), ('hep-ex', 37), 
+    # ('nlin', 23), ('math-ph', 23), ('hep-lat', 18), ('nucl-ex', 18), ('cs', 10), ('q-bio', 6), ('q-fin', 4), ('stat', 2)]
+        
 
 if __name__ == "__main__":
     # get_latest_pkls()
