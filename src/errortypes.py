@@ -1,6 +1,6 @@
-from paths import cate_path, results_path, cleanlog_path
+from paths import cate_path, results_path, cleanlog_path, cleanedxml_path
 from os import listdir
-from os.path import basename, join
+from os.path import basename, join, exists
 from collections import defaultdict
 from newCleaner import get_root, normalize_txt
 import pickle 
@@ -47,7 +47,7 @@ def get_pkls():
     # print(categet_ph'])
     dump_dicts(cget_2cates)
 
-def read_pkls():get_
+def read_pkls():
     a, b, c = open(cate2arts_path,'rb'), open(art2cates_path, 'rb'), open(err2arts_path, 'rb')
     d1, d2, d3 = pickle.load(a), pickle.load(b), pickle.load(c)
     a.close()
@@ -144,19 +144,29 @@ def have_title(xmlpath):
     _, root = get_root(xmlpath)
     for elem in root:
         content = ''.join(elem.itertext())
-        if 'introduction' in normalize_txt(content):
+        if 'Introduction' in content and elem.tag != 'bibliography':
             return True
     return False
 
 def show_false_neg():
     all_nosec = get_err2arts_dict()['secs absent']
-    false_nosec = ''
+    false_nosec = []
+    for art in all_nosec:
+        path = join(cleanedxml_path, '='+ art + '.xml')
+        if exists(path):
+            if have_title(path):
+                false_nosec.append(art)
+        else:
+            print('not found:', art)
     print('Detected titles: %s in %s' % (len(false_nosec), len(all_nosec)))
-    print()
+    for i in false_nosec:
+        print(join(cleanedxml_path, '='+ i + '.xml'))
+    # print(false_nosec)
 
 if __name__ == "__main__":
     clean_results = read_xmlcleaner_log()
-    show_errtype_arts(['secs absent'])
+    # show_errtype_arts(['secs absent'])
+    show_false_neg()
     # show_errtype_stats()
     # show_errtype_cates(['Empty abstract'])
 
