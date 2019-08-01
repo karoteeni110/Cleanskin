@@ -16,6 +16,9 @@ errcase_path = join(results_path, 'latexml/errcp')
 cleanedxml_path = join(results_path, 'cleaned_xml')
 cleanlog_path = join(results_path, 'cleaned_xml/logs/cleanlog.txt')
 
+no_sec_latex_path = join(results_path, 'no_section_latex')
+no_sec_xml = join(results_path, 'no_section_xml')
+
 if __name__ == "__main__":
     # Check that we are reading the correct file
     print('src', src_path)

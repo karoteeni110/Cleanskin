@@ -1,8 +1,11 @@
-from paths import cate_path, results_path, cleanlog_path, cleanedxml_path, rawxmls_path
+from paths import cate_path, results_path, cleanlog_path, cleanedxml_path, rawxmls_path, \
+    data0001, data0002, data1701, no_sec_latex_path, no_sec_xml
 from os import listdir
-from os.path import basename, join, exists
+from os.path import basename, join, exists, dirname
 from collections import defaultdict, Counter
+from shutil import copyfile, copytree
 from newCleaner import get_root, normalize_txt
+from useLatexml import pick_toptex
 import pickle, re
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
@@ -136,10 +139,7 @@ def show_errtype_arts(errtypes=ERRTYPES):
             print(err2arts[err])
             print()
 
-def is_title(elem):
-    pass
-
-def have_title(xmlpath):
+def have_intro_in_xml(xmlpath):
     _, root = get_root(xmlpath)
     for elem in root:
         content = ''.join(elem.itertext())
@@ -147,25 +147,44 @@ def have_title(xmlpath):
             return True
     return False
 
-def is_sec_in_latex(latexpath):
+def have_sec_in_latex(latexpath):
     with open(latexpath, 'r', encoding='utf-8', errors='ignore') as f:
         tex = f.read()
-        if re.search(r'[Ii]ntroduction', tex):
+        if re.search(r'introduction', tex, flags=re.I):
             return True
         else:
             return False
 
-def collect_intro_patterns(nosec_art_pathlist):
-    for art in nosec_art_pathlist:
-        art = get_root
+def art2latexpath(art):
+    if '1701' in art:
+        artpath = join(data1701, '='+art)
+    elif '0001' in art:
+        artpath = join(data0001, '='+art)
+    elif '0002' in art:
+        artpath = join(data0002, '='+art)
+    return join(artpath, pick_toptex(artpath))
+
+def art2latexdirpath(art):
+    return dirname(art2latexpath(art))
+
+def art2dirtyxmlpath(art):
+    return join(rawxmls_path, '=' + art + '.xml')
+
+def art2cleanxmlpath(art):
+    return join(cleanedxml_path, '=' + art + '.xml')
 
 def show_false_neg():
     all_nosec = get_err2arts_dict()['secs absent']
     false_nosec = []
     for art in all_nosec:
-        path = join(cleanedxml_path, '='+ art + '.xml')
+        # path = art2latexpath(art) 
+        path = art2cleanxmlpath(art)
+        
         if exists(path):
-            if is_sec_in_latex(path):
+            if have_sec_in_latex(path):
+                print(path)
+                continue
+
                 false_nosec.append(art)
         else:
             print('not found:', art)
@@ -174,13 +193,30 @@ def show_false_neg():
     s = []
     for i in false_nosec:
         cate = art2cates[i]
-        s.extend(cate)
+        s.append(frozenset(cate))
     ct = Counter(s)
     print(ct.most_common(50))
-    # Articles where 'introdution' is not detected:
+    # print(sum(n for t, n in ct.most_common(50)))
+    # Articles where 'introdution' is not detected: 
+    # Detected titles: 732 in 1109
+    # [('cond-mat', 331), ('hep-ph', 139), ('hep-th', 71), ('quant-ph', 70), ('astro-ph', 59), ('math', 52), ('physics', 47), ('gr-qc', 43), ('nucl-th', 39), ('hep-ex', 34), 
+    # ('nlin', 21), ('math-ph', 19), ('nucl-ex', 17), ('hep-lat', 15), ('cs', 8), ('q-bio', 5), ('stat', 2), ('q-fin', 1)]
+    
+    # Detected no titles: 843 in 1109
     # [('cond-mat', 398), ('hep-ph', 153), ('hep-th', 92), ('quant-ph', 83), ('math', 61), ('astro-ph', 59), ('physics', 53), ('gr-qc', 46), ('nucl-th', 39), ('hep-ex', 37), 
     # ('nlin', 23), ('math-ph', 23), ('hep-lat', 18), ('nucl-ex', 18), ('cs', 10), ('q-bio', 6), ('q-fin', 4), ('stat', 2)]
         
+def cp_errtypefiles(errtype, destdirpath):
+    all_errfiles = get_err2arts_dict()[errtype]
+    for art in all_errfiles:
+        path = art2dirtyxmlpath(art)
+        if exists(path):
+            try:
+                copyfile(path, join(destdirpath, basename(path)))
+            except FileExistsError as e:
+                print(e)
+                continue
+
 
 if __name__ == "__main__":
     # get_latest_pkls()
@@ -189,6 +225,7 @@ if __name__ == "__main__":
     # print(cate2arts['hep-th'])
     # show_errtype_arts(['secs absent'])
     show_false_neg()
+    # cp_errtypefiles('secs absent', destdirpath=no_sec_xml)
     # show_errtype_stats()
     # show_errtype_cates(['Empty abstract'])
 

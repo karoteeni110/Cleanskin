@@ -38,6 +38,7 @@ def mv_pdf_artdir(errart, dst):
 
 
 
+
 if __name__ == "__main__":
     # logpt = join(results_path, 'latexml/outError.txt')
     # get_srcpath(logpt)
