@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
 from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
+from abstractFromMeta import add_abstract
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -127,6 +128,8 @@ def clean(root):
             p.remove(c)
         except ValueError:
             continue
+
+    add_abstract(root)
 
 def is_empty(elem):
     try:
