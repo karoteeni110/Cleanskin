@@ -73,7 +73,7 @@ def normalize_txt(txt):
 
 def clean_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.
-    Should be called first
+    Should be called first.
     """
     to_remove = []
     for title_parent in root.findall('.//title/..'):

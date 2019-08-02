@@ -8,7 +8,7 @@ from os.path import join, basename
 from newCleaner import get_root
 from errortypes import have_intro_in_xml
 
-def get_title_features(root):
+def get_introelem_features(introelem):
     pass
 
 # def get_parent_

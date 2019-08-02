@@ -181,9 +181,9 @@ def show_false_neg():
         path = art2cleanxmlpath(art)
         
         if exists(path):
-            if have_sec_in_latex(path):
-                print(path)
-                continue
+            if True: # not have_sec_in_latex(path):
+                # print(path)
+                # continue
 
                 false_nosec.append(art)
         else:
@@ -193,7 +193,7 @@ def show_false_neg():
     s = []
     for i in false_nosec:
         cate = art2cates[i]
-        s.append(frozenset(cate))
+        s.extend(cate))
     ct = Counter(s)
     print(ct.most_common(50))
     # print(sum(n for t, n in ct.most_common(50)))
