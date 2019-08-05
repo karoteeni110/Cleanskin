@@ -4,16 +4,23 @@ from paths import metadatas_path
 from os import listdir
 from os.path import join
 
+def url2artid(url):
+    urlid = url.split('/')[-2:]
+    if urlid[0] == 'abs':
+        return urlid[1]
+    else:
+        return urlid[0] + urlid[1]
+
 def read_metaxml(meta_xmlpath):
     _, root = get_root(meta_xmlpath)
     id2abstract = {}
     for article in root:
-        urlid = article.find('url').text.split('/')[-1]
+        artid = url2artid(article.find('url').text)
         abstract = article.find('abstract').text
-        if urlid not in id2abstract:
-            id2abstract[urlid] = abstract
+        if artid not in id2abstract:
+            id2abstract[artid] = abstract
         else:
-            print('Repeat article: %s' % urlid)
+            print('Repeat article: %s' % artid)
     return id2abstract
 
 def get_urlid2abstract(metadirpath = metadatas_path):
@@ -23,6 +30,8 @@ def get_urlid2abstract(metadirpath = metadatas_path):
         cate_id2abstract = read_metaxml(cate_meta_path) 
         id2abstract.update(cate_id2abstract)
     return id2abstract
+
+
 
 def fn2urlid(fname):
     return 0

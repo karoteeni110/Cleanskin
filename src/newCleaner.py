@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
 from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
-from abstractFromMeta import add_abstract
+from abstractFromMeta import get_urlid2abstract, fn2urlid
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -105,6 +105,10 @@ def rename_rank1secs(rank1elem):
                 elem.tag = 'section' 
         rank1elem.tag = 'chapter'
 
+def add_meta_abstract(docroot, artid):
+    abst = id2abstract[arturlid]
+    docroot.set('abstract', abst)
+
 def clean(root):
     toremove = []
     remove_useless(root)
@@ -127,8 +131,6 @@ def clean(root):
             p.remove(c)
         except ValueError:
             continue
-
-    add_abstract(root)
 
 def is_empty(elem):
     try:
@@ -180,6 +182,7 @@ def get_root(xmlpath):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
+
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     # xmls = ['=hep-ph0002094.xml']
     
