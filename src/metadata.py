@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from paths import metadatas_path
 from os import listdir
 from os.path import join
-import time
+import time, re
 
 def url2artid(url):
     urlid = url.split('/')[-2:]
@@ -11,19 +11,22 @@ def url2artid(url):
     else:
         return urlid[0] + urlid[1] # 0001, 0002
 
+def demath(abstract):
+    return re.sub(r'\$.*?\$', ' ', abstract, flags=re.M | re.S) # multi-line | dot-match-all
+
 def read_metaxml(meta_xmlpath):
     root = ET.parse(meta_xmlpath).getroot()
     id2meta = {}
     for article in root:
         artid = url2artid(article[5].text)
-        abstract, cates = article[3].text, article[-1].text
+        abstract, cates = demath(article[3].text), article[-1].text
         id2meta[artid] = {'abstract': abstract, 'categories': cates}
     return id2meta
 
 def get_urlid2meta(metadirpath = metadatas_path):
     id2meta = {}
     begin = time.time()
-    for metaxml in ['Astrophysics.xml']: # listdir(metadirpath):
+    for metaxml in listdir(metadirpath): # ['Astrophysics.xml']:
         print('Reading', metaxml, '...')
         cate_meta_path = join(metadirpath, metaxml)
         ith_id2meta = read_metaxml(cate_meta_path) 

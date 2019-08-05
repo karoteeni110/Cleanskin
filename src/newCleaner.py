@@ -15,8 +15,7 @@ sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph'
 useful_attribs = ['title', 'subtitle']
 
 def ignore_ns(root):
-    '''
-    Clean namespace in the node's tag. Should be called in the first place.
+    '''Clean namespace in the node's tag. Should be called in the first place.
     '''
     for elem in root.iter():
         if not hasattr(elem.tag, 'find'):
@@ -39,6 +38,8 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.text = txt
 
 def flatten_elem(elem):
+    """Remove all the subelements; keeps only text
+    """
     oldatt = elem.attrib
     txt = ''.join(elem.itertext())
     elem.clear()
@@ -70,6 +71,8 @@ def have_subsec(elem):
     return False
 
 def normalize_txt(txt):
+    """Remove Unicode strings
+    """
     return normalize('NFKD', txt).lower().strip()
 
 def clean_titles(root):
