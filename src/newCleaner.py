@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
 from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
-from abstractFromMeta import get_urlid2meta
+from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -193,7 +193,7 @@ def add_abstract_from_meta(docroot, fname):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=hep-ph0002094.xml']
+    xmls = ['=1701.00086.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()

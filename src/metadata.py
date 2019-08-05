@@ -23,7 +23,7 @@ def read_metaxml(meta_xmlpath):
 def get_urlid2meta(metadirpath = metadatas_path):
     id2meta = {}
     begin = time.time()
-    for metaxml in listdir(metadirpath):
+    for metaxml in ['Astrophysics.xml']: # listdir(metadirpath):
         print('Reading', metaxml, '...')
         cate_meta_path = join(metadirpath, metaxml)
         ith_id2meta = read_metaxml(cate_meta_path) 
@@ -34,5 +34,5 @@ def get_urlid2meta(metadirpath = metadatas_path):
     return id2meta
 
 if __name__ == "__main__":
-    print(get_urlid2abstract()['astro-ph0001020'])
+    print(get_urlid2meta()['astro-ph0001020'])
     
