@@ -104,7 +104,6 @@ def rename_rank1secs(rank1elem):
             if is_section(elem):
                 elem.tag = 'section' 
         rank1elem.tag = 'chapter'
-        
 
 def clean(root):
     toremove = []
