@@ -194,8 +194,9 @@ def add_abstract_from_meta(docroot, fname):
     artid = fname2artid(fname)
     try:
         metadata = id2meta[artid]
-    except KeyError:
+    except KeyError as e:
         metadata = []
+        print('Metadata not found:', e)
     for attr in metadata:
         docroot.set(attr, metadata[attr])
 
