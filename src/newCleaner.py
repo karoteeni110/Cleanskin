@@ -229,3 +229,6 @@ if __name__ == "__main__":
     t = time.time() - begin
     t = t/60
     print(len(xmls), 'files in %s mins' % t)
+
+    # With metadata:
+    # 5163 files in 5.117709136009216 mins
