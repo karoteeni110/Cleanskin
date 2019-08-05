@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
 from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
-from abstractFromMeta import get_urlid2abstract
+from abstractFromMeta import get_urlid2meta
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -110,7 +110,7 @@ def clean(root):
     remove_useless(root)
     clean_titles(root)
     for rank1elem in root:  # 1st pass
-        if rank1elem.tag in keeplist: # titles, abstracts, 
+        if rank1elem.tag in keeplist: # titles, abstracts, ..
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
             flatten_elem(rank1elem)
@@ -137,37 +137,42 @@ def is_empty(elem):
         print([chunk for chunk in elem.itertext()])
     return False
 
+def have_inferable_sec(root):
+    for elem in root:
+        content = ''.join(elem.itertext())
+        if re.search(r'introduction', content, flags=re.I) and elem.tag != 'bibliography' and elem.get('title', '').lower() != 'references':
+            return True
+    return False
+
 def postcheck(root, errlog):
+    """Check if section is absent/empty;
+    WRITE OUT the result to log
+    MODIFIES root attribute `sec_state`: set to OK/inferable/full-text 
+    """
     err = False
     errlog.write(xmlpath + ' \n')
 
-    secdict = {'abstract': root.findall('abstract'), 'secs':root.findall('section')}
-    for title in secdict:
-        elems = secdict[title]
+    sections = root.findall('section') or root.findall('./chapter/section')
 
-        if title == 'secs' and elems == []:
-            elems = root.findall('./chapter/section')
-
-        if len(elems) == 0: # If element not found
+    if len(sections) == 0: # If abstract/section not found
+        err = True
+        # print(title + ' absent: ' + xmlpath)
+        errlog.write('secs absent. ')
+    
+    # If the node exists but is empty
+    for sec in sections:
+        if is_empty(sec):
             err = True
-            # print(title + ' absent: ' + xmlpath)
-            errlog.write(title + ' absent. ')
-            continue
-        
-        # If the node exists but is empty
-        for elem in elems:
-            if is_empty(elem):
-            # try:
-            #     txt = ''.join(elem.itertext()) 
-            # except TypeError:
-            #     print([chunk for chunk in elem.itertext()])
-            # if txt == '':
-                err = True
-                # print('Empty ' + title + ' :' + xmlpath)
-                errlog.write('Empty ' + title + '. ')
+            # print('Empty ' + title + ' :' + xmlpath)
+            errlog.write('Empty secs. ')
                                     
     if not err:
         errlog.write('OK. ')
+        root.set('sec_state', 'OK')
+    elif have_inferable_sec(root): # if there are paragraphs containing 'introduction'
+        root.set('sec_state', 'inferable')
+    else:
+        root.set('sec_state', 'full-text')
     errlog.write('\n ================================== \n')
             
 def get_root(xmlpath):
@@ -181,18 +186,17 @@ def fname2artid(fname):
 
 def add_abstract_from_meta(docroot, fname):
     artid = fname2artid(fname)
-    abst = id2abstract[artid]
-    docroot.set('abstract', abst)
+    metadata = id2meta[artid]
+    for attr in metadata:
+        docroot.set(attr, metadata[attr])
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     xmls = ['=hep-ph0002094.xml']
-    id2abstract = get_urlid2abstract() # This may take a while
+    id2meta = get_urlid2meta() # 1 min
 
-    
     begin = time.time()
-
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xml in enumerate(xmls):
             xmlpath = join(rawxmls_path, xml)

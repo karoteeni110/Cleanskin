@@ -4,14 +4,22 @@ from os import listdir
 from os.path import basename, join, exists, dirname
 from collections import defaultdict, Counter
 from shutil import copyfile, copytree
-from newCleaner import get_root, normalize_txt
 from useLatexml import pick_toptex
 import pickle, re
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
 err2arts_path = join(results_path, 'err2arts.pkl')
-ERRTYPES = {'OK', 'Empty abstract', 'Empty secs', 'secs absent', 'ParseError', 'abstract absent'}
+ERRTYPES = {'OK', 'Empty secs', 'secs absent', 'ParseError'} # , 'Empty abstract','abstract absent'}
+
+def normalize_txt(txt):
+    return normalize('NFKD', txt).lower().strip()
+
+def get_root(xmlpath):
+    tree = ET.parse(xmlpath)
+    root = tree.getroot()
+    ignore_ns(root)
+    return tree, root
 
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)

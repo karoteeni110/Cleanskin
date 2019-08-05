@@ -13,24 +13,25 @@ def url2artid(url):
 
 def read_metaxml(meta_xmlpath):
     root = ET.parse(meta_xmlpath).getroot()
-    id2abstract = {}
+    id2meta = {}
     for article in root:
         artid = url2artid(article[5].text)
-        abstract = article[3].text
-        id2abstract[artid] = abstract
-    return id2abstract
+        abstract, cates = article[3].text, article[-1].text
+        id2meta[artid] = {'abstract': abstract, 'categories': cates}
+    return id2meta
 
-def get_urlid2abstract(metadirpath = metadatas_path):
-    id2abstract = {}
+def get_urlid2meta(metadirpath = metadatas_path):
+    id2meta = {}
     begin = time.time()
     for metaxml in listdir(metadirpath):
         print('Reading', metaxml, '...')
         cate_meta_path = join(metadirpath, metaxml)
-        cate_id2abstract = read_metaxml(cate_meta_path) 
-        id2abstract.update(cate_id2abstract)
+        ith_id2meta = read_metaxml(cate_meta_path) 
+        id2meta.update(ith_id2meta)
+
     end = (time.time() - begin) / 60
     print('Used time: %s min' % end )
-    return id2abstract
+    return id2meta
 
 if __name__ == "__main__":
     print(get_urlid2abstract()['astro-ph0001020'])
