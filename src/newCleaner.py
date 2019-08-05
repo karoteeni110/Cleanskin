@@ -147,8 +147,21 @@ def have_inferable_sec(root):
             return True
     return False
 
+def fname2artid(fname):
+    return fname.strip('=')[:-4] # strip ".xml"
+
+def add_abstract_from_meta(docroot, fname):
+    artid = fname2artid(fname)
+    try:
+        metadata = id2meta[artid]
+    except KeyError as e:
+        metadata = []
+        print('Metadata not found:', e)
+    for attr in metadata:
+        docroot.set(attr, metadata[attr])
+
 def postcheck(root, errlog):
-    """Check if section is absent/empty;
+    """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
     WRITE OUT the result to log
     MODIFIES root attribute `sec_state`: set to OK/inferable/full-text 
     """
@@ -176,8 +189,8 @@ def postcheck(root, errlog):
         root.set('sec_state', 'inferable')
     else:
         root.set('sec_state', 'full-text')
-
-    if root.get('abstract', False):
+    
+    if not root.get('abstract', False):
         errlog.write('Metadata not found. ')
     errlog.write('\n ================================== \n')
             
@@ -186,19 +199,6 @@ def get_root(xmlpath):
     root = tree.getroot()
     ignore_ns(root)
     return tree, root
-
-def fname2artid(fname):
-    return fname.strip('=')[:-4] # strip ".xml"
-
-def add_abstract_from_meta(docroot, fname):
-    artid = fname2artid(fname)
-    try:
-        metadata = id2meta[artid]
-    except KeyError as e:
-        metadata = []
-        print('Metadata not found:', e)
-    for attr in metadata:
-        docroot.set(attr, metadata[attr])
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
@@ -231,4 +231,4 @@ if __name__ == "__main__":
     print(len(xmls), 'files in %s mins' % t)
 
     # With metadata:
-    # 5163 files in 5.117709136009216 mins
+    # 5163 files in 4.929596141974131 mins
