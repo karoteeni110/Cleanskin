@@ -176,6 +176,9 @@ def postcheck(root, errlog):
         root.set('sec_state', 'inferable')
     else:
         root.set('sec_state', 'full-text')
+
+    if root.get('abstract', False):
+        errlog.write('Metadata not found. ')
     errlog.write('\n ================================== \n')
             
 def get_root(xmlpath):
@@ -189,14 +192,17 @@ def fname2artid(fname):
 
 def add_abstract_from_meta(docroot, fname):
     artid = fname2artid(fname)
-    metadata = id2meta[artid]
+    try:
+        metadata = id2meta[artid]
+    except KeyError:
+        metadata = []
     for attr in metadata:
         docroot.set(attr, metadata[attr])
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00086.xml']
+    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmls = ['=1701.00086.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -210,10 +216,10 @@ if __name__ == "__main__":
                 cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
                 continue
             clean(root)
-            postcheck(root, cleanlog)
             add_abstract_from_meta(root, xml)
-            # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(results_path, 'test.xml'))
+            postcheck(root, cleanlog)
+            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(results_path, 'test.xml'))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):

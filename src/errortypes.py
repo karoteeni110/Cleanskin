@@ -10,7 +10,7 @@ import pickle, re
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')
 err2arts_path = join(results_path, 'err2arts.pkl')
-ERRTYPES = {'OK', 'Empty secs', 'secs absent', 'ParseError'} # , 'Empty abstract','abstract absent'}
+ERRTYPES = {'OK', 'Empty secs', 'secs absent', 'ParseError', 'Metadata not found'} # , 'Empty abstract','abstract absent'}
 
 def normalize_txt(txt):
     return normalize('NFKD', txt).lower().strip()
