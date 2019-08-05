@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
 from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
-from abstractFromMeta import get_urlid2abstract, fn2urlid
+from abstractFromMeta import get_urlid2abstract
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -105,10 +105,6 @@ def rename_rank1secs(rank1elem):
                 elem.tag = 'section' 
         rank1elem.tag = 'chapter'
 
-def add_meta_abstract(docroot, artid):
-    abst = id2abstract[arturlid]
-    docroot.set('abstract', abst)
-
 def clean(root):
     toremove = []
     remove_useless(root)
@@ -180,11 +176,20 @@ def get_root(xmlpath):
     ignore_ns(root)
     return tree, root
 
+def fname2artid(fname):
+    return fname.strip('=')[:-4] # strip ".xml"
+
+def add_abstract_from_meta(docroot, fname):
+    artid = fname2artid(fname)
+    abst = id2abstract[artid]
+    docroot.set('abstract', abst)
+
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
+    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmls = ['=hep-ph0002094.xml']
+    id2abstract = get_urlid2abstract() # This may take a while
 
-    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmls = ['=hep-ph0002094.xml']
     
     begin = time.time()
 
@@ -199,7 +204,9 @@ if __name__ == "__main__":
                 continue
             clean(root)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
+            add_abstract_from_meta(root, xml)
+            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(results_path, 'test.xml'))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
