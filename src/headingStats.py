@@ -83,6 +83,12 @@ def show_sectitle_per_art():
     for i in sectitle_cter.most_common(20):
         print(i)
 
+def show(heading_freqlist):
+    more_than_once = sum(freq for title,freq in heading_freqlist.most_common() if freq > 1)
+    print('Total freq of titles that show more than once:', more_than_once)
+    total_freq = sum(heading_freqlist.values())
+    print('%.2f' % (more_than_once / total_freq), 'of', total_freq)
+
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     rootdir = cleanedxml_path
@@ -91,11 +97,11 @@ if __name__ == "__main__":
     heading_freqlist = count_headings(xmlpath_list)
     
     # print(heading_freqlist.most_common(50))
-    print(sum(freq for title,freq in heading_freqlist.most_common() if freq > 1))
+    show(heading_freqlist)
     # [('introduction', 3510), ('conclusions', 893), ('conclusion', 541), ('acknowledgments', 528), ('discussion', 503), ('acknowledgements', 438), ('results', 343), ('summary', 257), ('concluding remarks', 123), ('preliminaries', 117), ('summary and conclusions', 92), ('appendix', 87), ('observations', 83), ('results and discussion', 80), ('discussion and conclusions', 79), ('acknowledgement', 73), ('numerical results', 65), ('the model', 65), ('proof of theorem', 60), ('acknowledgment', 59), ('references', 55), ('observations and data reduction', 55), ('summary and discussion', 54), ('', 45), ('related work', 39), ('examples', 38), ('applications', 35), ('introduction.', 32), ('model', 30), ('methods', 29), ('discussion and conclusion', 29), ('figure captions', 28)
     # Total sections: 22746
     # # of titles of which freq>1: 570
-    # Total freq of titles that shows more than once: 10605 (0.46623582168293326%)
+    # Total freq of titles that show more than once: 10605 (0.46623582168293326%)
 
 
 
