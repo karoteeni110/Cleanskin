@@ -21,12 +21,15 @@ def get_root(xmlpath):
     ignore_ns(root)
     return tree, root
 
+def subcate2cate(subcate):
+    return subcate.split('.')[0]
+
 def get_dicts(txtpath):
     cate2artsdict, art2catedict = defaultdict(set), defaultdict(set)
     with open(txtpath, 'r') as f:
         for line in f.readlines():
             artid = line.split()[0].replace('/','')
-            catelist = [cate.split('.')[0] for cate in line.split()[1].split(',')] # Remove subclass
+            catelist = [subcate2cate(subcate) for subcate in line.split()[1].split(',')] # Remove subclass
             art2catedict[artid] = art2catedict[artid].union(set(catelist))
             for cate in catelist:
                 cate2artsdict[cate].add(artid)
@@ -201,7 +204,7 @@ def show_false_neg():
     s = []
     for i in false_nosec:
         cate = art2cates[i]
-        s.extend(cate))
+        s.extend(cate)
     ct = Counter(s)
     print(ct.most_common(50))
     # print(sum(n for t, n in ct.most_common(50)))

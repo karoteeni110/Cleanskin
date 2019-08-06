@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import pickle
 from os.path import join, basename
 from os import listdir
+from errortypes import subcate2cate
 from newCleaner import get_root, is_section, is_empty
 from paths import results_path, cleanedxml_path
 from collections import Counter
@@ -10,6 +11,12 @@ from unicodedata import normalize
 def get_title(elem):
     title = normalize('NFKD', elem.get('title', '')).lower().strip()
     return title 
+
+def count_cates(xmlpath):
+    _, root = get_root(xmlpath)
+    subcates = root.get('categories', '').split(', ')
+    cates = set(subcate2cate(subcate) for subcate in subcates)
+    return len(cates)
 
 def get_headings(xmlpath):
     """Returns a dict. 
