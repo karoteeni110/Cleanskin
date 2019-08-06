@@ -6,7 +6,7 @@ from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
 from unicodedata import normalize
-import time
+import time, re
 
 
 keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', \
@@ -38,7 +38,7 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.text = txt
 
 def flatten_elem(elem):
-    """Remove all the subelements; keep only text
+    """Remove all the subelements; keep only text and useful attributes
     """
     oldatt = elem.attrib
     txt = ''.join(elem.itertext())
@@ -48,10 +48,14 @@ def flatten_elem(elem):
             elem.set(useful_attrib, oldatt[useful_attrib])
     elem.text = txt
 
+def is_chapter(elem):
+    if elem.tag in ('chapter', 'part') and have_subsec(elem):
+        return True
+    return False
+
 def is_section(elem):
     if elem.tag in sec_tags: # or have_subsec(elem):
-        if elem.get('title', '') not in ['bibliography', 'appendix', 'appendices', 'reference', 'references']:
-            return True
+        return True
     return False    
 
 def clean_sec(sec):
@@ -118,7 +122,7 @@ def clean(root):
                 extract_abst(root, rank1elem)
             flatten_elem(rank1elem)
                 
-        elif is_section(rank1elem):
+        elif is_section(rank1elem) or is_chapter(rank1elem):
             rename_rank1secs(rank1elem)
             clean_sec(rank1elem)
 
