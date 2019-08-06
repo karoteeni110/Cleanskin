@@ -38,7 +38,7 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.text = txt
 
 def flatten_elem(elem):
-    """Remove all the subelements; keeps only text
+    """Remove all the subelements; keep only text
     """
     oldatt = elem.attrib
     txt = ''.join(elem.itertext())
@@ -51,8 +51,7 @@ def flatten_elem(elem):
 def is_section(elem):
     if elem.tag in sec_tags or have_subsec(elem):
         return True
-    else:
-        return False    
+    return False    
 
 def clean_sec(sec):
     for subelem in sec:

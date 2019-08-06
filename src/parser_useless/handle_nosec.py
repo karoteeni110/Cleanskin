@@ -1,5 +1,6 @@
 '''
 Check and re-clean the xmls that do not have sections.
+NOT IN USE
 '''
 import xml.etree.ElementTree as ET
 import sys
