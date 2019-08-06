@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import pickle
+import pickle, re
 from os.path import join, basename
 from os import listdir
 from errortypes import subcate2cate
@@ -10,6 +10,7 @@ from unicodedata import normalize
 
 def get_title(elem):
     title = normalize('NFKD', elem.get('title', '')).lower().strip()
+    title = re.sub('\n', ' ', title)
     return title 
 
 def count_cates(xmlpath):
@@ -62,15 +63,23 @@ def show_cates_per_art():
     for count in cter:
         print('%s articles associated with %s categories: %.4f ' % (cter[count], count, (cter[count]/sum(cter.values()))))
 
-def show_sec_per_art():
+def show_secnum_per_art():
     sec_nums = []
     for xmlpath in xmlpath_list:
         sec_num = len(get_headings(xmlpath)['section'])
         sec_nums.append(str(sec_num))
     cter = Counter(sec_nums)
-    print(cter)
+    print(cter['1'])
     print('Not 0:', sum(cter.values())-cter['0'])
 
+def show_sectitle_per_art():
+    sectitle_cter = Counter()
+    for xmlpath in xmlpath_list:
+        sectitles = get_headings(xmlpath)['section']
+        if len(sectitles) == 5:
+            sectitle_cter.update([frozenset(sectitles)])
+    for i in sectitle_cter.most_common(20):
+        print(i)
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
@@ -91,4 +100,5 @@ if __name__ == "__main__":
     # 7 articles associated with 6 categories: 0.0013 
     # 1 articles associated with 7 categories: 0.0002
 
-    show_sec_per_art()
+    # show_secnum_per_art()
+    show_sectitle_per_art()
