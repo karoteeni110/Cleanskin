@@ -235,7 +235,7 @@ if __name__ == "__main__":
     clean_results = read_xmlcleaner_log()
     # print(cate2arts['hep-th'])
     # show_errtype_arts(['secs absent'])
-    show_false_neg()
+    # show_false_neg()
     # cp_errtypefiles('secs absent', destdirpath=no_sec_xml)
     # show_errtype_stats()
     # show_errtype_cates(['Empty abstract'])

@@ -60,10 +60,17 @@ def show_cates_per_art():
     cter = Counter(str(count_cates(xml)) for xml in xmlpath_list)
     print(cter)
     for count in cter:
-        print('%s articles associated with %s categories: %.4f ' % (cter[count], count, (cter[count]/len(xmlpath_list))))
+        print('%s articles associated with %s categories: %.4f ' % (cter[count], count, (cter[count]/sum(cter.values()))))
 
 def show_sec_per_art():
-    
+    sec_nums = []
+    for xmlpath in xmlpath_list:
+        sec_num = len(get_headings(xmlpath)['section'])
+        sec_nums.append(str(sec_num))
+    cter = Counter(sec_nums)
+    print(cter)
+    print('Not 0:', sum(cter.values())-cter['0'])
+
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
@@ -71,7 +78,7 @@ if __name__ == "__main__":
     xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
     # xmlpath_list = [join(cleanedxml_path, '=astro-ph0001424.xml')]
 
-    # print(count_headings(xmlpath_list).most_common(80))
+    # print(count_headings(xmlpath_list).most_common(500))
     # [('introduction', 3510), ('conclusions', 893), ('conclusion', 541), ('acknowledgments', 528), ('discussion', 503), ('acknowledgements', 438), ('results', 343), ('summary', 257), ('concluding remarks', 123), ('preliminaries', 117), ('summary and conclusions', 92), ('appendix', 87), ('observations', 83), ('results and discussion', 80), ('discussion and conclusions', 79), ('acknowledgement', 73), ('numerical results', 65), ('the model', 65), ('proof of theorem', 60), ('acknowledgment', 59), ('references', 55), ('observations and data reduction', 55), ('summary and discussion', 54), ('', 45), ('related work', 39), ('examples', 38), ('applications', 35), ('introduction.', 32), ('model', 30), ('methods', 29), ('discussion and conclusion', 29), ('figure captions', 28)
     
     # show_cates_per_art()
@@ -83,3 +90,5 @@ if __name__ == "__main__":
     # 19 articles associated with 5 categories: 0.0034 
     # 7 articles associated with 6 categories: 0.0013 
     # 1 articles associated with 7 categories: 0.0002
+
+    show_sec_per_art()

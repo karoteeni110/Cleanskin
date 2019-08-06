@@ -49,8 +49,9 @@ def flatten_elem(elem):
     elem.text = txt
 
 def is_section(elem):
-    if elem.tag in sec_tags or have_subsec(elem):
-        return True
+    if elem.tag in sec_tags: # or have_subsec(elem):
+        if elem.get('title', '') not in ['bibliography', 'appendix', 'appendices', 'reference', 'references']:
+            return True
     return False    
 
 def clean_sec(sec):
