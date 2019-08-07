@@ -12,7 +12,7 @@ import time, re
 keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
-useful_attribs = ['title', 'subtitle']
+sec_attribs = ['title', 'subtitle']
 
 def ignore_ns(root):
     '''Clean namespace in the node's tag. Should be called in the first place.
@@ -37,15 +37,18 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.tag = 'p'
             elem.text = txt
 
+def clean_attribs(elem, oldatts):
+    for useful_attr in sec_attribs:
+        if oldatts.get(useful_attr):
+            elem.set(useful_attr, oldatts[useful_attr])
+
 def flatten_elem(elem):
     """Remove all the subelements; keep only text and useful attributes
     """
-    oldatt = elem.attrib
+    oldatts = elem.attrib
     txt = ''.join(elem.itertext())
     elem.clear()
-    for useful_attrib in useful_attribs:
-        if oldatt.get(useful_attrib, None):
-            elem.set(useful_attrib, oldatt[useful_attrib])
+    clean_attribs(elem, oldatts)
     elem.text = txt
 
 def is_chapter(elem):
@@ -64,6 +67,7 @@ def clean_sec(sec):
             clean_sec(subelem)
         else:
             flatten_elem(subelem)
+    clean_attribs(sec, sec.attrib)
 
 def have_title(elem):
     return elem.get('title', False)
@@ -161,6 +165,7 @@ def add_abstract_from_meta(docroot, fname):
     except KeyError as e:
         metadata = []
         print('Metadata not found:', e)
+    docroot.attrib.clear()
     for attr in metadata:
         docroot.set(attr, metadata[attr])
 
