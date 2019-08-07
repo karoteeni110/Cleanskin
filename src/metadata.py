@@ -20,13 +20,14 @@ def read_metaxml(meta_xmlpath):
     for article in root:
         artid = url2artid(article[5].text)
         abstract, cates = demath(article[3].text), article[-1].text
-        id2meta[artid] = {'abstract': abstract, 'categories': cates}
+        author = article[2].text
+        id2meta[artid] = {'abstract': abstract, 'categories': cates, 'author': author}
     return id2meta
 
 def get_urlid2meta(metadirpath = metadatas_path):
     id2meta = {}
     begin = time.time()
-    print('Reading metadata. Expected time: 1 min')
+    print('Reading metadata. It takes about 1 min')
     for metaxml in listdir(metadirpath): # ['Astrophysics.xml']:
         if metaxml[-3:] == 'xml':
             print('Reading', metaxml, '...')
