@@ -37,7 +37,10 @@ def get_urlid2meta(metadirpath = metadatas_path):
     id2meta = {}
     begin = time.time()
     print('Reading metadata... It takes about 1 min')
-    for metaxml in listdir(metadirpath): # :
+    
+    # metaxml_list = listdir(metadirpath)
+    metaxml_list = ['Condensed_Matter.xml']
+    for metaxml in metaxml_list: # :
         if metaxml[-3:] == 'xml':
             print('Reading', metaxml, '...')
             cate_meta_path = join(metadirpath, metaxml)

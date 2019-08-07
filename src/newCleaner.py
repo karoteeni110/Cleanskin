@@ -117,16 +117,27 @@ def extract_abst(doc, titlepage):
         doc.insert(3,abstract)
         flatten_elem(abstract)
 
-def rename_rank1secs(rank1elem):
+def retag_subsecs(parent_sec, child_sec):
+    if 'section' in child_sec.tag:
+        child_sec.tag = 'sub' + parent_sec.tag 
+
+def retag_rank1secs(rank1elem):
     if 'section' in rank1elem.tag:
         rank1elem.tag = 'section'
+        for subsec in rank1elem:
+            retag_subsecs(rank1elem, subsec)
     elif rank1elem.tag in ('chapter', 'part'):
         for elem in rank1elem:
             if is_section(elem):
                 elem.tag = 'section' 
+                for subsec in elem:
+                    retag_subsecs(elem, subsec)
         rank1elem.tag = 'chapter'
 
 def clean(root):
+    """Main function that cleans the XML.
+    Keeps the subelements in section
+    """
     toremove = []
     remove_useless(root)
     clean_titles(root)
@@ -134,10 +145,14 @@ def clean(root):
         if rank1elem.tag in keeplist: # titles, abstracts, ..
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
-            flatten_elem(rank1elem)
+            
+            if rank1elem.tag == 'creator':
+                clean_sec(rank1elem)
+            else:
+                flatten_elem(rank1elem)
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
-            rename_rank1secs(rank1elem)
+            retag_rank1secs(rank1elem)
             clean_sec(rank1elem)
 
         else:
@@ -194,7 +209,7 @@ def postcheck(root, errlog):
         # print(title + ' absent: ' + xmlpath)
         errlog.write('secs absent. ')
     
-    # If the node exists but is empty
+    # If sections exist but is empty
     for sec in sections:
         if is_empty(sec):
             err = True
@@ -222,7 +237,7 @@ def get_root(xmlpath):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmls = ['=1701.00007.xml']
+    xmls = ['=1701.00007.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -238,8 +253,8 @@ if __name__ == "__main__":
             clean(root)
             add_abstract_from_meta(root, xml)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
-            # tree.write(join(results_path, 'test.xml'))
+            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(results_path, 'test.xml'))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
