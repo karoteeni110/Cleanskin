@@ -219,7 +219,7 @@ def get_root(xmlpath):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00007.xml']
+    # xmls = ['=1701.00007.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -235,8 +235,8 @@ if __name__ == "__main__":
             clean(root)
             add_abstract_from_meta(root, xml)
             postcheck(root, cleanlog)
-            # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(results_path, 'test.xml'))
+            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(results_path, 'test.xml'))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
