@@ -26,7 +26,6 @@ def get_headings(xmlpath):
         if is_section(elem) and not is_empty(elem):
             if elem.attrib['title'] == '':
                 empty_sec_arts.add(basename(xmlpath))
-
             secdict['section'].append(elem.attrib['title'])
         elif elem.tag == 'chapter':
             secdict['chapter'].append(elem.attrib['title']) 

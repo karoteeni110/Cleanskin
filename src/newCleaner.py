@@ -40,7 +40,7 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
 def clean_attribs(elem, oldatts):
     elem.attrib.clear()
     for useful_attr in sec_attribs:
-        if oldatts.get(useful_attr):
+        if oldatts.get(useful_attr) != None:
             elem.set(useful_attr, oldatts[useful_attr])
 
 def flatten_elem(elem):
@@ -142,7 +142,12 @@ def clean(root):
     toremove = []
     remove_useless(root)
     move_titles(root)
+
     for rank1elem in root:  # 1st pass
+        # for i in rank1elem.attrib:
+        #     print(rank1elem.tag, i, rank1elem.attrib[i])
+        # print()
+        # continue
         if rank1elem.tag in keeplist: # titles, abstracts, ..
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
@@ -240,8 +245,8 @@ def get_root(xmlpath):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00007.xml']
+    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmls = ['=hep-ex0002011.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -258,7 +263,7 @@ if __name__ == "__main__":
             add_abstract_from_meta(root, xml)
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(results_path, 'test.xml'))
+            tree.write(join(results_path, 'empty_sectitle.xml'))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
