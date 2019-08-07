@@ -85,12 +85,13 @@ def have_subsec(elem):
             return True
     return False
 
-def normalize_txt(txt):
-    """Remove Unicode strings
+def normalize_title(title):
+    """Remove Unicode chars & new lines in the title element `title`
     """
-    return normalize('NFKD', txt).lower().strip()
+    title = normalize('NFKD', ''.join(title.itertext())).lower().strip()
+    return re.sub('\n', ' ', title)
 
-def clean_titles(root):
+def move_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.
     Should be called first.
     """
@@ -99,8 +100,8 @@ def clean_titles(root):
         title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
         for t in [title, subtitle]:
             if t != None and title_parent.tag != 'document':
-                to_remove.append((title_parent, title))
-                title_content = normalize_txt(''.join(t.itertext()))
+                to_remove.append((title_parent, t))
+                title_content = normalize_title(t)
                 if title_parent.tag in ('theorem', 'proof') and title_content == '.':
                     continue
                 else:
@@ -140,7 +141,7 @@ def clean(root):
     """
     toremove = []
     remove_useless(root)
-    clean_titles(root)
+    move_titles(root)
     for rank1elem in root:  # 1st pass
         if rank1elem.tag in keeplist: # titles, abstracts, ..
             if rank1elem.tag == 'titlepage':
@@ -150,6 +151,9 @@ def clean(root):
                 clean_sec(rank1elem)
             else:
                 flatten_elem(rank1elem)
+            
+            if is_empty(rank1elem): # Remove empty paragraphs
+                toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
             retag_rank1secs(rank1elem)

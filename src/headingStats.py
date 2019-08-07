@@ -8,11 +8,6 @@ from paths import results_path, cleanedxml_path
 from collections import Counter
 from unicodedata import normalize
 
-def get_title(elem):
-    title = normalize('NFKD', elem.get('title', '')).lower().strip()
-    title = re.sub('\n', ' ', title)
-    return title 
-
 def count_cates(xmlpath):
     _, root = get_root(xmlpath)
     subcates = root.get('categories', '').split(', ')
@@ -29,15 +24,15 @@ def get_headings(xmlpath):
     empty_sec_arts = set()
     for elem in root:
         if is_section(elem) and not is_empty(elem):
-            if get_title(elem) == '':
+            if elem.attrib['title'] == '':
                 empty_sec_arts.add(basename(xmlpath))
 
-            secdict['section'].append(get_title(elem))
+            secdict['section'].append(elem.attrib['title'])
         elif elem.tag == 'chapter':
-            secdict['chapter'].append(get_title(elem)) 
+            secdict['chapter'].append(elem.attrib['title']) 
             for subelem in elem:
                 if is_section(subelem) and not is_empty(subelem):
-                    secdict['section'].append(get_title(subelem))
+                    secdict['section'].append(subelem.attrib['title'])
     # print(empty_sec_arts)
     return secdict
 
