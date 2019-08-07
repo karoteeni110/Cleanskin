@@ -38,6 +38,7 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERRO
             elem.text = txt
 
 def clean_attribs(elem, oldatts):
+    elem.attrib.clear()
     for useful_attr in sec_attribs:
         if oldatts.get(useful_attr):
             elem.set(useful_attr, oldatts[useful_attr])
@@ -72,7 +73,8 @@ def clean_sec(sec):
                 to_removes.append(subelem)
     for to_remove in to_removes:
         sec.remove(to_remove)
-    clean_attribs(sec, sec.attrib)
+    oldatts = sec.attrib.copy()
+    clean_attribs(sec, oldatts)
 
 def have_title(elem):
     return elem.get('title', False)
@@ -216,8 +218,8 @@ def get_root(xmlpath):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    # xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmls = ['=1701.00086.xml']
+    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmls = ['=1701.00007.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
