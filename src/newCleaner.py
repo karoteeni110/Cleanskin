@@ -99,9 +99,12 @@ def clean_titles(root):
         title, subtitle = title_parent.find('title'), title_parent.find('subtitle')
         for t in [title, subtitle]:
             if t != None and title_parent.tag != 'document':
-                title_parent.set(t.tag, normalize_txt(''.join(t.itertext())))
                 to_remove.append((title_parent, title))
-
+                title_content = normalize_txt(''.join(t.itertext()))
+                if title_parent.tag in ('theorem', 'proof') and title_content == '.':
+                    continue
+                else:
+                    title_parent.set(t.tag, title_content)
     for p,c in to_remove:
         p.remove(c)
 
