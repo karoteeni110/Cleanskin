@@ -24,7 +24,7 @@ def ignore_ns(root):
         if i >= 0:
             elem.tag = elem.tag[i+1:]
 
-def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
+def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
     """Remove useless elements with keeping the trailing texts
     """
