@@ -9,8 +9,8 @@ from unicodedata import normalize
 import time, re
 
 
-keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', \
-            'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition']
+keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', 'p', \
+            'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
 
@@ -56,7 +56,9 @@ def flatten_elem(elem):
     elem.text = remove_margin(txt)
 
 def is_chapter(elem):
-    if elem.tag in ('chapter', 'part') and have_subsec(elem):
+    if elem.tag in ('chapter', 'part'):
+        if not have_subsec(elem):
+            print(xmlpath)
         return True
     return False
 
@@ -164,6 +166,7 @@ def clean(root):
             clean_sec(rank1elem)
 
         else:
+            print(rank1elem.tag)
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
     for p, c in toremove:
@@ -184,7 +187,9 @@ def is_empty(elem):
 def have_inferable_sec(root):
     for elem in root:
         content = ''.join(elem.itertext())
-        if re.search(r'introduction', content, flags=re.I) and elem.tag != 'bibliography' and elem.get('title', '').lower() != 'references':
+        if re.search(r'introduction', content, flags=re.I) \
+            and elem.tag != 'bibliography' \
+            and elem.get('title', '').lower() != 'references':
             return True
     return False
 
@@ -245,7 +250,7 @@ def get_root(xmlpath):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/latexml/=hep-ph0001237.xml']
+    # xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
