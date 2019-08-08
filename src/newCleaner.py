@@ -153,7 +153,7 @@ def clean(root):
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
             
-            if rank1elem.tag in ('creator', 'bibliography', 'appendix'):
+            if rank1elem.tag == 'creator':
                 clean_sec(rank1elem)
             else:
                 flatten_elem(rank1elem)
