@@ -24,6 +24,12 @@ def ignore_ns(root):
         if i >= 0:
             elem.tag = elem.tag[i+1:]
 
+def get_root(xmlpath):
+    tree = ET.parse(xmlpath)
+    root = tree.getroot()
+    ignore_ns(root)
+    return tree, root
+
 def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
     """Clear useless elements and keeps the trailing texts
@@ -140,9 +146,6 @@ def retag_rank1secs(rank1elem):
                     retag_subsecs(elem, subsec)
         rank1elem.tag = 'chapter'
 
-def get_paras_after_bib(docroot):
-    pass
-
 def clean(root):
     """Main function that cleans the XML.
     Keeps the subelements in section
@@ -179,7 +182,7 @@ def clean(root):
             continue
 
 def is_empty_str(txt):
-    if re.search(r'(\w|\d)+', txt):
+    if re.search(r'(\w|\d)+', txt) and not re.match(r'^figure\W+\d+(\W+\(.*\))?$' , txt.strip(), flags=re.I):
         return False
     return True
 
@@ -249,17 +252,13 @@ def postcheck(root, errlog):
     if not root.get('abstract', False):
         errlog.write('Metadata not found. ')
     errlog.write('\n ================================== \n')
-            
-def get_root(xmlpath):
-    tree = ET.parse(xmlpath)
-    root = tree.getroot()
-    ignore_ns(root)
-    return tree, root
+
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
+    # xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
+    xmlpath_list = ['/home/yzan/Desktop/try/=astro-ph0001103.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -275,9 +274,9 @@ if __name__ == "__main__":
             clean(root)
             add_abstract_from_meta(root, xml)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
-            # tree.write(join(results_path, xml))
+            tree.write(join(results_path, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
