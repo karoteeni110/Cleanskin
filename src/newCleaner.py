@@ -182,7 +182,7 @@ def clean(root):
             continue
 
 def is_empty_str(txt):
-    if re.search(r'(\w|\d)+', txt) and not re.match(r'^figure\W+\d+(\W+\(.*\))?$' , txt.strip(), flags=re.I):
+    if re.search(r'(\w|\d)+', txt) and not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
         return False
     return True
 
@@ -257,8 +257,7 @@ def postcheck(root, errlog):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
-    xmlpath_list = ['/home/yzan/Desktop/try/=astro-ph0001103.xml']
+    xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/=nucl-ex0002002.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -274,7 +273,7 @@ if __name__ == "__main__":
             clean(root)
             add_abstract_from_meta(root, xml)
             postcheck(root, cleanlog)
-            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
             tree.write(join(results_path, xml))
 
