@@ -43,6 +43,9 @@ def clean_attribs(elem, oldatts):
         if oldatts.get(useful_attr) != None:
             elem.set(useful_attr, oldatts[useful_attr])
 
+def remove_margin(txt):
+    return re.sub(r'(\[\d+(mm|ex)\])', '', txt)
+
 def flatten_elem(elem):
     """Remove all the subelements; keep only text and useful attributes
     """
@@ -50,7 +53,7 @@ def flatten_elem(elem):
     txt = ''.join(elem.itertext())
     elem.clear()
     clean_attribs(elem, oldatts)
-    elem.text = txt
+    elem.text = remove_margin(txt)
 
 def is_chapter(elem):
     if elem.tag in ('chapter', 'part') and have_subsec(elem):
@@ -241,14 +244,14 @@ def get_root(xmlpath):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    xmls = [fn for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmls = ['=hep-ex0002046.xml']
+    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/latexml/=hep-ph0001237.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
-        for i, xml in enumerate(xmls):
-            xmlpath = join(rawxmls_path, xml)
+        for i, xmlpath in enumerate(xmlpath_list):
+            xml = basename(xmlpath)
             try:
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
@@ -260,14 +263,15 @@ if __name__ == "__main__":
             postcheck(root, cleanlog)
             tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
+            # tree.write(join(results_path, xml))
 
             if VERBOSE:
-                if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmls):
-                    print('%s of %s ...' % (i+1, len(xmls)))
+                if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
+                    print('%s of %s ...' % (i+1, len(xmlpath_list)))
 
     t = time.time() - begin
     t = t/60
-    print(len(xmls), 'files in %s mins' % t)
+    print(len(xmlpath_list), 'files in %s mins' % t)
 
     # With metadata:
     # 5163 files in 4.929596141974131 mins
