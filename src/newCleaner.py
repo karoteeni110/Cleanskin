@@ -44,7 +44,7 @@ def clean_attribs(elem, oldatts):
             elem.set(useful_attr, oldatts[useful_attr])
 
 def remove_margin(txt):
-    return re.sub(r'(\[\d+(mm|ex)\])', '', txt)
+    return re.sub(r'(\[\d+(mm|ex|cm|pt)\])', '', txt)
 
 def flatten_elem(elem):
     """Remove all the subelements; keep only text and useful attributes
@@ -151,7 +151,7 @@ def clean(root):
             if rank1elem.tag == 'titlepage':
                 extract_abst(root, rank1elem)
             
-            if rank1elem.tag == 'creator':
+            if rank1elem.tag in ('creator', 'bibliography', 'appendix'):
                 clean_sec(rank1elem)
             else:
                 flatten_elem(rank1elem)
