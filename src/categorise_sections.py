@@ -3,6 +3,7 @@ from paths import cleanedxml_path
 from headingStats import get_title
 from os.path import join
 
+# === The 9 cates we want sections to be put into ===
 def is_abstract(elem):
     if elem.tag == 'abstract' or get_title(elem) == 'abstract':
         return True
@@ -34,3 +35,9 @@ def is_conclusion():
 def is_backmatter():
     pass
 
+# == Auxilary functions
+
+def is_bib_sec(secelem):
+    if secelem.tag == 'bibliography' or secelem.get('title') in ('bibliography', 'references', 'reference'):
+        return True
+    return False

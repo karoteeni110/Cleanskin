@@ -3,7 +3,7 @@ import pickle, re
 from os.path import join, basename
 from os import listdir
 from errortypes import subcate2cate
-from newCleaner import get_root, is_section, is_empty
+from newCleaner import get_root, is_section, is_empty_elem
 from paths import results_path, cleanedxml_path
 from collections import Counter
 from unicodedata import normalize
@@ -23,14 +23,14 @@ def get_headings(xmlpath):
     secdict = {'section':[], 'chapter': []}
     empty_sec_arts = set()
     for elem in root:
-        if is_section(elem) and not is_empty(elem):
+        if is_section(elem) and not is_empty_elem(elem):
             if elem.attrib['title'] == '':
                 empty_sec_arts.add(basename(xmlpath))
             secdict['section'].append(elem.attrib['title'])
         elif elem.tag == 'chapter':
             secdict['chapter'].append(elem.attrib['title']) 
             for subelem in elem:
-                if is_section(subelem) and not is_empty(subelem):
+                if is_section(subelem) and not is_empty_elem(subelem):
                     secdict['section'].append(subelem.attrib['title'])
     # print(empty_sec_arts)
     return secdict

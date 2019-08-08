@@ -112,7 +112,7 @@ if __name__ == "__main__":
     rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    show_examplefile(rootdir, 'backmatter')
+    show_examplefile(rootdir, 'p')
     
     # elemname = 'section/*'
     # fd_pkl = join(results_path, '1stsectionChildren.pkl')

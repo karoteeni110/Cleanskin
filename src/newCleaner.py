@@ -9,7 +9,7 @@ from unicodedata import normalize
 import time, re
 
 
-keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', 'p', \
+keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
@@ -26,7 +26,7 @@ def ignore_ns(root):
 
 def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
                     'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
-    """Remove useless elements with keeping the trailing texts
+    """Clear useless elements and keeps the trailing texts
     """
     # rmlist = []
     for tag in tags:
@@ -34,7 +34,7 @@ def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'tabular', '
         for elem in elems: 
             txt = elem.tail
             elem.clear()
-            elem.tag = 'p'
+            elem.tag = 'throwit'
             elem.text = txt
 
 def clean_attribs(elem, oldatts):
@@ -74,7 +74,7 @@ def clean_sec(sec):
             clean_sec(subelem)
         else:
             flatten_elem(subelem)
-            if is_empty(subelem):
+            if is_empty_elem(subelem):
                 to_removes.append(subelem)
     for to_remove in to_removes:
         sec.remove(to_remove)
@@ -107,7 +107,7 @@ def move_titles(root):
             if t != None and title_parent.tag != 'document':
                 to_remove.append((title_parent, t))
                 title_content = normalize_title(t)
-                if title_parent.tag in ('theorem', 'proof') and title_content == '.':
+                if title_parent.tag in ('theorem', 'proof') and is_empty_str(title_content):
                     continue
                 else:
                     title_parent.set(t.tag, title_content)
@@ -140,6 +140,9 @@ def retag_rank1secs(rank1elem):
                     retag_subsecs(elem, subsec)
         rank1elem.tag = 'chapter'
 
+def get_paras_after_bib(docroot):
+    pass
+
 def clean(root):
     """Main function that cleans the XML.
     Keeps the subelements in section
@@ -158,7 +161,7 @@ def clean(root):
             else:
                 flatten_elem(rank1elem)
             
-            if is_empty(rank1elem): # Remove empty paragraphs
+            if is_empty_elem(rank1elem): # Remove empty paragraphs
                 toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
@@ -166,7 +169,7 @@ def clean(root):
             clean_sec(rank1elem)
 
         else:
-            print(rank1elem.tag)
+            print(rank1elem.tag) # <Float>
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
     for p, c in toremove:
@@ -175,16 +178,20 @@ def clean(root):
         except ValueError:
             continue
 
-def is_empty(elem):
+def is_empty_str(txt):
+    if re.search(r'(\w|\d)+', txt):
+        return False
+    return True
+
+def is_empty_elem(elem):
     """True: elem.text does not contain any word or digit 
     """
     try:
         txt = ''.join(elem.itertext())
-        if not re.search(r'(\w|\d)+', txt):
-            return True
+        return is_empty_str(txt)
     except TypeError:
         print([chunk for chunk in elem.itertext()])
-    return False
+        return False
 
 def have_inferable_sec(root):
     for elem in root:
@@ -226,7 +233,7 @@ def postcheck(root, errlog):
     
     # If sections exist but is empty
     for sec in sections:
-        if is_empty(sec):
+        if is_empty_elem(sec):
             err = True
             # print('Empty ' + title + ' :' + xmlpath)
             errlog.write('Empty secs. ')
@@ -251,8 +258,8 @@ def get_root(xmlpath):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
+    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmlpath_list = [join(results_path, 'latexml/=hep-ph0001237.xml')]
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
