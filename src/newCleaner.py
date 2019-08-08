@@ -176,9 +176,11 @@ def clean(root):
             continue
 
 def is_empty(elem):
+    """True: elem.text does not contain any word or digit 
+    """
     try:
         txt = ''.join(elem.itertext())
-        if txt.strip() == '':
+        if not re.search(r'(\w|\d)+', txt):
             return True
     except TypeError:
         print([chunk for chunk in elem.itertext()])
