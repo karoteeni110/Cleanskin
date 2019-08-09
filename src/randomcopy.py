@@ -8,7 +8,7 @@ def copyten():
     for _ in range(0,10):
         fn = choice(listdir(cleanedxml_path))
         src = join(cleanedxml_path, fn)
-        dst = join(results_path, fn)
+        dst = join(results_path, 'random_pick/' + fn)
         copy(src, dst)
 
 

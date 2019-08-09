@@ -8,9 +8,13 @@ from shutil import copy, copytree
 from unicodedata import normalize
 import time, re
 
-
-keeplist = ['title', 'subtitle', 'classification', 'abstract', 'creator', 'keywords', 'para', 'backmatter', \
+# Elements allowed at level 1
+keeplist = ['title', 'subtitle', 'classification', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
+# Elements removed in all levels in the first place
+removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
+        'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
+            'abstract', 'creator']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
 
@@ -30,8 +34,7 @@ def get_root(xmlpath):
     ignore_ns(root)
     return tree, root
 
-def remove_useless(root, tags = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
-                    'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark']):
+def remove_useless(root, tags = removelist):
     """Clear useless elements and keeps the trailing texts
     """
     # rmlist = []
@@ -122,6 +125,8 @@ def move_titles(root):
 
 def extract_abst(doc, titlepage):
     '''Extract abstract and move the element to within <document>
+    USELESS: abstract is extract from metadata
+
     '''
     abstract = titlepage.find('abstract')
     if abstract:
@@ -156,8 +161,9 @@ def clean(root):
 
     for rank1elem in root:  # 1st pass
         if rank1elem.tag in keeplist: # titles, abstracts, ..
-            if rank1elem.tag == 'titlepage':
-                extract_abst(root, rank1elem)
+            # if rank1elem.tag == 'titlepage':
+            #     extract_abst(root, rank1elem)
+            #     toremove.append((root, rank1elem)) # Remove titlepage
             
             if rank1elem.tag == 'creator':
                 clean_sec(rank1elem)
@@ -172,7 +178,7 @@ def clean(root):
             clean_sec(rank1elem)
 
         else:
-            print(rank1elem.tag) # <Float>
+            # print(rank1elem.tag) # <Float>
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
     for p, c in toremove:
@@ -208,7 +214,7 @@ def have_inferable_sec(root):
 def fname2artid(fname):
     return fname.strip('=')[:-4] # strip ".xml"
 
-def add_abstract_from_meta(docroot, fname):
+def add_abstract(docroot, fname):
     artid = fname2artid(fname)
     try:
         metadata = id2meta.pop(artid)
@@ -218,6 +224,12 @@ def add_abstract_from_meta(docroot, fname):
     docroot.attrib.clear()
     for attr in metadata:
         docroot.set(attr, metadata[attr])
+
+def add_art_title(docroot, fname):
+    pass
+
+def add_author(docroot, fname):
+    pass
 
 def postcheck(root, errlog):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
@@ -256,8 +268,8 @@ def postcheck(root, errlog):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/=nucl-ex0002002.xml']
+    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/=nucl-ex0002002.xml']
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -271,11 +283,11 @@ if __name__ == "__main__":
                 cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
                 continue
             clean(root)
-            add_abstract_from_meta(root, xml)
+            add_abstract(root, xml)
             postcheck(root, cleanlog)
             tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
-            tree.write(join(results_path, xml))
+            # tree.write(join(results_path, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
