@@ -11,7 +11,7 @@ import time, re
 # Elements allowed at level 1
 keeplist = ['subtitle', 'classification', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
-# Elements removed in all levels in the first place
+# Elements removed at all levels in the first place
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator']
@@ -77,6 +77,9 @@ def is_section(elem):
     return False    
 
 def clean_sec(sec):
+    """Flatten subelements that are not <subsection>; rename <bibitem> to <bibliography>;
+    remove empty subelements; clear all attributes except <title>
+    """
     to_removes = []
     for subelem in sec:
         if subelem.tag == 'bibitem':
@@ -125,22 +128,11 @@ def move_titles(root):
     for p,c in to_remove:
         p.remove(c)
 
-def extract_abst(doc, titlepage):
-    '''Extract abstract and move the element to within <document>
-    USELESS: abstract is extract from metadata
-
-    '''
-    abstract = titlepage.find('abstract')
-    if abstract:
-        titlepage.remove(abstract)
-        doc.insert(3,abstract)
-        flatten_elem(abstract)
-
 def retag_subsecs(parent_sec, child_sec):
     if 'section' in child_sec.tag:
         child_sec.tag = 'sub' + parent_sec.tag 
 
-def retag_rank1secs(rank1elem):
+def retag_sec_or_chap(rank1elem):
     if is_section(rank1elem):
         rank1elem.tag = 'section'
         for subsec in rank1elem:
@@ -148,7 +140,7 @@ def retag_rank1secs(rank1elem):
     elif is_chapter(rank1elem):
         rank1elem.tag = 'chapter'
         for elem in rank1elem:
-            retag_rank1secs(elem)
+            retag_sec_or_chap(elem)
 
 def clean(root):
     """Main function that cleans the XML.
@@ -166,7 +158,7 @@ def clean(root):
                 toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
-            retag_rank1secs(rank1elem)
+            retag_sec_or_chap(rank1elem)
             clean_sec(rank1elem)
 
         else:
@@ -180,7 +172,7 @@ def clean(root):
             continue
 
 def is_empty_str(txt):
-    if re.search(r'(\w|\d)+', txt) and not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
+    if re.search(r'(\w|\d){5,}', txt) and not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
         return False
     return True
 
@@ -220,12 +212,7 @@ def add_metamsg(docroot, fname):
         else: # abstract, title, author
             subelem = ET.Element(attr)
             subelem.text = metadata[attr]
-            # if attr == 'title':
             docroot.insert(0, subelem)
-            # if attr == 'author':
-            #     docroot.insert(1, subelem)
-            # if attr == 'abstract':
-            #     docroot.insert(2, subelem)
 
 def postcheck(root, errlog):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
@@ -265,7 +252,7 @@ def postcheck(root, errlog):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = [join(rawxmls_path, '=astro-ph0001331.xml')]
+    # xmlpath_list = [join(rawxmls_path, '=hep-th0002155.xml')]
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -281,7 +268,7 @@ if __name__ == "__main__":
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
             # tree.write(join(results_path, xml))
 
