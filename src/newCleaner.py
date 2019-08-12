@@ -9,7 +9,7 @@ from unicodedata import normalize
 import time, re
 
 # Elements allowed at level 1
-keeplist = ['title', 'subtitle', 'classification', 'keywords', 'para', 'backmatter', \
+keeplist = ['subtitle', 'classification', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
 # Elements removed in all levels in the first place
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
@@ -79,6 +79,8 @@ def is_section(elem):
 def clean_sec(sec):
     to_removes = []
     for subelem in sec:
+        if subelem.tag == 'bibitem':
+            subelem.tag = 'bibliography'
         if is_section(subelem):
             clean_sec(subelem)
         else:
@@ -193,7 +195,7 @@ def is_empty_str(txt):
     return True
 
 def is_empty_elem(elem):
-    """True: elem.text does not contain any word or digit 
+    """True: elem.text does not contain any word or digit; elem.text contains only "figure XX"
     """
     try:
         txt = ''.join(elem.itertext())
@@ -214,22 +216,26 @@ def have_inferable_sec(root):
 def fname2artid(fname):
     return fname.strip('=')[:-4] # strip ".xml"
 
-def add_abstract(docroot, fname):
+def add_metamsg(docroot, fname):
     artid = fname2artid(fname)
     try:
-        metadata = id2meta.pop(artid)
+        metadata = id2meta.pop(artid) # get retrive faster
     except KeyError as e:
         metadata = []
         print('Metadata not found:', e)
     docroot.attrib.clear()
     for attr in metadata:
-        docroot.set(attr, metadata[attr])
-
-def add_art_title(docroot, fname):
-    pass
-
-def add_author(docroot, fname):
-    pass
+        if attr == 'categories':
+            docroot.set(attr, metadata[attr])
+        else: # abstract, title, author
+            subelem = ET.Element(attr)
+            subelem.text = metadata[attr]
+            # if attr == 'title':
+            docroot.insert(0, subelem)
+            # if attr == 'author':
+            #     docroot.insert(1, subelem)
+            # if attr == 'abstract':
+            #     docroot.insert(2, subelem)
 
 def postcheck(root, errlog):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
@@ -269,7 +275,7 @@ def postcheck(root, errlog):
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
     xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = ['/home/local/yzan/Desktop/Cleanskin/results/=nucl-ex0002002.xml']
+    # xmlpath_list = [join(rawxmls_path, '=astro-ph0001331.xml')]
     id2meta = get_urlid2meta() # 1 min
 
     begin = time.time()
@@ -283,7 +289,7 @@ if __name__ == "__main__":
                 cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
                 continue
             clean(root)
-            add_abstract(root, xml)
+            add_metamsg(root, xml)
             postcheck(root, cleanlog)
             tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
