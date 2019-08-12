@@ -65,14 +65,14 @@ def flatten_elem(elem):
     elem.text = remove_margin(txt)
 
 def is_chapter(elem):
-    if elem.tag in ('chapter', 'part'):
-        if not have_subsec(elem):
-            print(xmlpath)
+    if elem.tag in ('chapter', 'part') and have_subsec(elem):
         return True
     return False
 
 def is_section(elem):
-    if elem.tag in sec_tags: # or have_subsec(elem):
+    if elem.tag in sec_tags:
+        return True
+    elif elem.tag in ('chapter', 'part') and not have_subsec(elem) and have_title(elem):
         return True
     return False    
 
@@ -141,17 +141,14 @@ def retag_subsecs(parent_sec, child_sec):
         child_sec.tag = 'sub' + parent_sec.tag 
 
 def retag_rank1secs(rank1elem):
-    if 'section' in rank1elem.tag:
+    if is_section(rank1elem):
         rank1elem.tag = 'section'
         for subsec in rank1elem:
             retag_subsecs(rank1elem, subsec)
-    elif rank1elem.tag in ('chapter', 'part'):
-        for elem in rank1elem:
-            if is_section(elem):
-                elem.tag = 'section' 
-                for subsec in elem:
-                    retag_subsecs(elem, subsec)
+    elif is_chapter(rank1elem):
         rank1elem.tag = 'chapter'
+        for elem in rank1elem:
+            retag_rank1secs(elem)
 
 def clean(root):
     """Main function that cleans the XML.
@@ -162,15 +159,8 @@ def clean(root):
     move_titles(root)
 
     for rank1elem in root:  # 1st pass
-        if rank1elem.tag in keeplist: # titles, abstracts, ..
-            # if rank1elem.tag == 'titlepage':
-            #     extract_abst(root, rank1elem)
-            #     toremove.append((root, rank1elem)) # Remove titlepage
-            
-            if rank1elem.tag == 'creator':
-                clean_sec(rank1elem)
-            else:
-                flatten_elem(rank1elem)
+        if rank1elem.tag in keeplist: # classification, keywords, ...
+            flatten_elem(rank1elem)
             
             if is_empty_elem(rank1elem): # Remove empty paragraphs
                 toremove.append((root,rank1elem))
