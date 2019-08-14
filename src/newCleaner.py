@@ -59,7 +59,7 @@ def flatten_elem(elem):
     """Remove all the subelements; keep only text and useful attributes
     """
     oldatts = elem.attrib
-    txt = ''.join(elem.itertext())
+    txt = ''.join(t.strip() + ' ' for t in elem.itertext())
     elem.clear()
     clean_attribs(elem, oldatts)
     elem.text = remove_margin(txt)
@@ -142,6 +142,11 @@ def retag_sec_or_chap(rank1elem):
         for elem in rank1elem:
             retag_sec_or_chap(elem)
 
+def is_fake_para(elem):
+    if elem.tag == 'para':
+        if elem.text in 
+    return False
+
 def clean(root):
     """Main function that cleans the XML.
     Keeps the subelements in section
@@ -154,7 +159,7 @@ def clean(root):
         if rank1elem.tag in keeplist: # classification, keywords, ...
             flatten_elem(rank1elem)
             
-            if is_empty_elem(rank1elem): # Remove empty paragraphs
+            if is_empty_elem(rank1elem) or is_fake_para(rank1elem): # Remove empty paragraphs
                 toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
@@ -199,12 +204,6 @@ def fname2artid(fname):
     return fname.strip('=')[:-4] # strip ".xml"
 
 def add_metamsg(docroot, fname):
-    artid = fname2artid(fname)
-    try:
-        metadata = id2meta.pop(artid) # get retrive faster
-    except KeyError as e:
-        metadata = []
-        print('Metadata not found:', e)
     docroot.attrib.clear()
     for attr in metadata:
         if attr == 'categories':
@@ -251,9 +250,15 @@ def postcheck(root, errlog):
 
 if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
-    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = [join(rawxmls_path, '=hep-th0002155.xml')]
+    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
     id2meta = get_urlid2meta() # 1 min
+    artid = fname2artid(fname)
+    try:
+        metadata = id2meta.pop(artid) # get retrive faster
+    except KeyError as e:
+        metadata = []
+        print('Metadata not found:', e)
 
     begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
@@ -270,7 +275,7 @@ if __name__ == "__main__":
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
-            # tree.write(join(results_path, xml))
+            tree.write(join(results_path, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):

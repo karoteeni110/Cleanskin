@@ -39,7 +39,7 @@ def get_urlid2meta(metadirpath = metadatas_path):
     print('Reading metadata... It takes about 1 min')
     
     # metaxml_list = listdir(metadirpath)
-    metaxml_list = ['High_Energy_Physics_Theory.xml']
+    metaxml_list = ['Computer_Science.xml']
     for metaxml in metaxml_list: # :
         if metaxml[-3:] == 'xml':
             print('Reading', metaxml, '...')
