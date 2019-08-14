@@ -249,9 +249,10 @@ def postcheck(root, errlog):
 
 
 if __name__ == "__main__":
+    # Set verbose
     VERBOSE, REPORT_EVERY = True, 100
-    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
+    
+    # Get metadata 
     id2meta = get_urlid2meta() # 1 min
     artid = fname2artid(fname)
     try:
@@ -259,7 +260,12 @@ if __name__ == "__main__":
     except KeyError as e:
         metadata = []
         print('Metadata not found:', e)
+    
+    # Set paths to dirty XMLs
+    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
 
+    # Cleaning
     begin = time.time()
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
