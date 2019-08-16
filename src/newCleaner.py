@@ -144,7 +144,8 @@ def retag_sec_or_chap(rank1elem):
 
 def is_fake_para(elem):
     if elem.tag == 'para':
-        if elem.text in 
+        if elem.text.strip() in (metadata['author'], metadata['title'], metadata['abstract']):
+            return True
     return False
 
 def clean(root):
@@ -164,10 +165,11 @@ def clean(root):
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
             retag_sec_or_chap(rank1elem)
+            if rank1elem.get('title') == 'abstract':
+                toremove.append((root, rank1elem))
             clean_sec(rank1elem)
 
         else:
-            # print(rank1elem.tag) # <Float>
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
 
     for p, c in toremove:
@@ -177,7 +179,8 @@ def clean(root):
             continue
 
 def is_empty_str(txt):
-    if re.search(r'(\w|\d){5,}', txt) and not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
+    if re.search(r'(\w|\d){5,}', txt) and \
+        not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
         return False
     return True
 
@@ -194,7 +197,7 @@ def is_empty_elem(elem):
 def have_inferable_sec(root):
     for elem in root:
         content = ''.join(elem.itertext())
-        if re.search(r'introduction', content, flags=re.I) \
+        if re.match(r'introduction', content, flags=re.I) \
             and elem.tag != 'bibliography' \
             and elem.get('title', '').lower() != 'references':
             return True
@@ -251,16 +254,10 @@ def postcheck(root, errlog):
 if __name__ == "__main__":
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 100
-    
-    # Get metadata 
+
+    # Read metadata for all articles
     id2meta = get_urlid2meta() # 1 min
-    artid = fname2artid(fname)
-    try:
-        metadata = id2meta.pop(artid) # get retrive faster
-    except KeyError as e:
-        metadata = []
-        print('Metadata not found:', e)
-    
+
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
     xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
@@ -270,6 +267,16 @@ if __name__ == "__main__":
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             xml = basename(xmlpath)
+
+            # === Get title, author, abstract, categories from metadata ===
+            artid = fname2artid(xml)
+            try:
+                metadata = id2meta.pop(artid) # get retrive faster
+            except KeyError as e:
+                metadata = []
+                print('Metadata not found:', e)
+            # === 
+
             try:
                 tree, root = get_root(xmlpath)
             except ET.ParseError:

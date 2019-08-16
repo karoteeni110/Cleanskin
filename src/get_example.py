@@ -1,5 +1,5 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns
+from newCleaner import ignore_ns, get_root
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
@@ -104,15 +104,27 @@ def all_childtags(freqdist):
     mergeset = set().union(*freqdist)
     return mergeset
 
-# def diff_childtags(elem1, elem2):
+def show_elempair_exmp(xmlpath, tag, following_tag):
+    try:
+        _ , root = get_root(xmlpath)
+        # BFS search pairs 
+        for i in range(0,len(root)-2):
+            elempair = (root[i], root[i+1])
+            if elempair[0].tag == tag and elempair[1].tag == following_tag:
+                print(tag, elempair[0].text)
+                print(following_ta elempair[1].text.strip()[:300])
+                print()
+    except ET.ParseError:
+        pass
+
 
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
-    pklpath = join(results_path, '1stnodes_after.pkl')
-    rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
+    # pklpath = join(results_path, '1stnodes_after.pkl')
+    # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    show_examplefile(rootdir, 'p')
+    # show_examplefile(rootdir, 'ERROR')
     
     # elemname = 'section/*'
     # fd_pkl = join(results_path, '1stsectionChildren.pkl')
@@ -120,7 +132,10 @@ if __name__ == "__main__":
     # # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-
+    for xml in listdir(rootdir):
+        if xml[-3:] == 'xml':
+            xmlpath = join(rootdir, xml)
+            show_elempair_exmp(xmlpath, 'ERROR', 'para')
 
 
     # RANK 1:
