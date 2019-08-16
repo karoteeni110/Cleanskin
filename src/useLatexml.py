@@ -1,3 +1,6 @@
+"""Find the top .tex file in the article package and put it into LaTeXML, such that it can convert the article into .xml files.
+"""
+
 from subprocess import run, PIPE, TimeoutExpired, CalledProcessError
 from shutil import copyfile, copytree, rmtree
 from os import walk, makedirs, stat, remove, listdir
@@ -86,7 +89,7 @@ if __name__ == "__main__":
     `rootdir`: the path of the directory where the article folders are
     `outdir`: the destination directory of xmls
     """
-    # Change parameters here
+    # Change the parameters here
     errlogpath = join('/home/yzan/Desktop/try/cluster/1701try', 'error_log.txt') 
     rootdir = '/home/yzan/Desktop/try/cluster/1701try' 
     outdir = join('/home/yzan/Desktop/try/cluster', 'latexml') 
