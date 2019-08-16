@@ -6,11 +6,10 @@
 # To check the articles that don't show (usually caused by withdrawn articles), use src/checkdiff.py
 
 dddd='1701'
-dir='/home/yzan/Desktop/try/1701_002'
+dir='/home/yzan/Desktop/try/cluster/1701_001'
 
 if cd $dir ; then
   pwd
-fi
 else
   echo 'Could not change directory! Aborting.' 1>&2
   exit 1
