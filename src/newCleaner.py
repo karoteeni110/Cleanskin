@@ -9,9 +9,10 @@ from unicodedata import normalize
 import time, re
 
 # Elements to be processed at level 1
-keeplist = ['subtitle', 'classification', 'keywords', 'para', 'backmatter', \
+keeplist = ['ERROR', 'classification', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
 # Elements removed at all levels in the first place
+# XXX: LV 1 <ERROR>s are not removed 
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator']
@@ -39,7 +40,10 @@ def remove_useless(root, tags = removelist):
     """
     # rmlist = []
     for tag in tags:
-        elems = root.findall('.//%s' % tag)
+        if tag != 'ERROR':
+            elems = root.findall('.//%s' % tag)
+        else:
+            elems = root.findall('./*//ERROR') # TODO: TEST IT
         for elem in elems: 
             txt = elem.tail
             elem.clear()
@@ -147,6 +151,10 @@ def is_fake_para(elem):
         if elem.text.strip() in (metadata['author'], metadata['title'], metadata['abstract']):
             return True
     return False
+
+def is_tag_msg(elemerr):
+    if elemerr.text in ('\\abstracts', ''):
+        pass
 
 def clean(root):
     """Main function that cleans the XML.

@@ -140,7 +140,7 @@ if __name__ == "__main__":
             errtxts.extend(show_elempair_exmp(xmlpath, 'ERROR', 'para'))
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print(Counter(errtxts).most_common(50))
+    print(Counter(errtxts).most_common(100))
 
 
     # RANK 1:
