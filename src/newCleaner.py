@@ -8,7 +8,7 @@ from shutil import copy, copytree
 from unicodedata import normalize
 import time, re
 
-# Elements allowed at level 1
+# Elements to be processed at level 1
 keeplist = ['subtitle', 'classification', 'keywords', 'para', 'backmatter', \
             'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
 # Elements removed at all levels in the first place

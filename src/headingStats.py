@@ -89,6 +89,8 @@ if __name__ == "__main__":
     # xmlpath_list = [join(cleanedxml_path, '=astro-ph0001424.xml')]
     heading_freqlist = count_headings(xmlpath_list)
     
+    
+
     # print(heading_freqlist.most_common(50))
     # show(heading_freqlist)
     # [('introduction', 3510), ('conclusions', 893), ('conclusion', 541), ('acknowledgments', 528), ('discussion', 503), ('acknowledgements', 438), ('results', 343), ('summary', 257), ('concluding remarks', 123), ('preliminaries', 117), ('summary and conclusions', 92), ('appendix', 87), ('observations', 83), ('results and discussion', 80), ('discussion and conclusions', 79), ('acknowledgement', 73), ('numerical results', 65), ('the model', 65), ('proof of theorem', 60), ('acknowledgment', 59), ('references', 55), ('observations and data reduction', 55), ('summary and discussion', 54), ('', 45), ('related work', 39), ('examples', 38), ('applications', 35), ('introduction.', 32), ('model', 30), ('methods', 29), ('discussion and conclusion', 29), ('figure captions', 28)

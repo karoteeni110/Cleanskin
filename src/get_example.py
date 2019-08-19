@@ -108,14 +108,15 @@ def show_elempair_exmp(xmlpath, tag, following_tag):
     try:
         _ , root = get_root(xmlpath)
         # BFS search pairs 
+        errortexts = []
         for i in range(0,len(root)-2):
             elempair = (root[i], root[i+1])
             if elempair[0].tag == tag and elempair[1].tag == following_tag:
-                print(tag, elempair[0].text)
-                print(following_ta elempair[1].text.strip()[:300])
-                print()
+                # print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
+                errortexts.append(elempair[0].text)
+        return errortexts
     except ET.ParseError:
-        pass
+        return []
 
 
 if __name__ == "__main__":
@@ -129,13 +130,17 @@ if __name__ == "__main__":
     # elemname = 'section/*'
     # fd_pkl = join(results_path, '1stsectionChildren.pkl')
     # freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
-    # # show_most_common(freqdist, 20)
+    # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    for xml in listdir(rootdir):
+    errtxts = []
+    for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            show_elempair_exmp(xmlpath, 'ERROR', 'para')
+            errtxts.extend(show_elempair_exmp(xmlpath, 'ERROR', 'para'))
+        if i % 100 == 0:
+            print(i, 'of', len(listdir(rootdir)), '...')
+    print(Counter(errtxts).most_common(50))
 
 
     # RANK 1:
