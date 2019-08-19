@@ -64,6 +64,9 @@ def show_examplefile(rootdir, tagname):
         
         if elem != []: 
             print('Found %s in %s' % (tagname, fpath))
+            # for i in elem:
+            #     if i.text == '\\abstract':
+            #         print('Found %s in %s' % (tagname, fpath))
             
 
 def check_childrentags(parent_tag, fpath):
@@ -125,7 +128,7 @@ if __name__ == "__main__":
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    # show_examplefile(rootdir, 'ERROR')
+    show_examplefile(rootdir, 'ERROR')
     
     # elemname = 'section/*'
     # fd_pkl = join(results_path, '1stsectionChildren.pkl')
@@ -133,14 +136,14 @@ if __name__ == "__main__":
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    errtxts = []
-    for i, xml in enumerate(listdir(rootdir)):
-        if xml[-3:] == 'xml':
-            xmlpath = join(rootdir, xml)
-            errtxts.extend(show_elempair_exmp(xmlpath, 'ERROR', 'para'))
-        if i % 100 == 0:
-            print(i, 'of', len(listdir(rootdir)), '...')
-    print(Counter(errtxts).most_common(100))
+    # errtxts = []
+    # for i, xml in enumerate(listdir(rootdir)):
+    #     if xml[-3:] == 'xml':
+    #         xmlpath = join(rootdir, xml)
+    #         errtxts.extend(show_elempair_exmp(xmlpath, 'ERROR', 'para'))
+    #     if i % 100 == 0:
+    #         print(i, 'of', len(listdir(rootdir)), '...')
+    # print(Counter(errtxts).most_common(100))
 
 
     # RANK 1:

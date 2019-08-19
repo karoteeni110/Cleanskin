@@ -5,19 +5,22 @@ from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
+from collections import defaultdict
 from unicodedata import normalize
 import time, re
 
 # Elements to be processed at level 1
-keeplist = ['ERROR', 'classification', 'keywords', 'para', 'backmatter', \
-            'theorem', 'proof', 'appendix', 'bibliography', 'titlepage', 'note', 'date', 'glossarydefinition', 'acknowledgements']
-# Elements removed at all levels in the first place
-# XXX: LV 1 <ERROR>s are not removed 
+# also: <section>, <ERROR>
+keeplist = ['classification', 'keywords', 'para', 'backmatter', \
+            'theorem', 'proof', 'appendix', 'bibliography', 'note', 'date', 'glossarydefinition', 'acknowledgements']
+# Elements removed at all levels in the first place (EXCEPT 'ERROR')
+# XXX: LV 1 <ERROR>s are not removed!!
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
+all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
 
 def ignore_ns(root):
     '''Clean namespace in the node's tag. Should be called in the first place.
@@ -40,10 +43,10 @@ def remove_useless(root, tags = removelist):
     """
     # rmlist = []
     for tag in tags:
-        if tag != 'ERROR':
-            elems = root.findall('.//%s' % tag)
-        else:
-            elems = root.findall('./*//ERROR') # TODO: TEST IT
+        # if tag != 'ERROR':
+        elems = root.findall('.//%s' % tag)
+        # else:
+        #     elems = root.findall('./*//ERROR') # TODO: TEST IT
         for elem in elems: 
             txt = elem.tail
             elem.clear()
@@ -152,9 +155,36 @@ def is_fake_para(elem):
             return True
     return False
 
-def is_tag_msg(elemerr):
-    if elemerr.text in ('\\abstracts', ''):
-        pass
+def errtxt2tag(txt):
+    if txt[0] == '\\':
+        return txt[1:].lower()
+    elif txt[0] == '{':
+        return txt[1:-2].lower()
+    else:
+        return txt
+
+# def infer_errortext(docroot):
+#     to_remove = []
+#     for i in range(0,len(docroot)-2):
+#         elempair = (docroot[i], docroot[i+1])
+#         if elempair[0].tag == 'ERROR':
+#             to_remove.append(elempair[0])
+#             if elempair[1].tag == 'para':
+#                 errortag = errtxt2tag(elempair[0].text)
+#                 if errortag in all_tags:
+#                     elempair[1].tag = errortag
+            
+#     if docroot[-1].tag == 'ERROR':
+#         to_remove.append(docroot[-1])
+#     for error in to_remove:
+#         docroot.remove(error)
+
+def remove_elems(toremovelst):
+    for p, c in toremovelst:
+        try:
+            p.remove(c)
+        except ValueError:
+            continue
 
 def clean(root):
     """Main function that cleans the XML.
@@ -163,12 +193,15 @@ def clean(root):
     toremove = []
     remove_useless(root)
     move_titles(root)
+    # infer_errortext(root)
+    # print([elem.tag for elem in root])
 
     for rank1elem in root:  # 1st pass
         if rank1elem.tag in keeplist: # classification, keywords, ...
             flatten_elem(rank1elem)
             
             if is_empty_elem(rank1elem) or is_fake_para(rank1elem): # Remove empty paragraphs
+                print('is empty or fake', rank1elem.tag)
                 toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
@@ -179,13 +212,9 @@ def clean(root):
 
         else:
             toremove.append((root, rank1elem)) # Don't modify it during iteration!
-
-    for p, c in toremove:
-        try:
-            p.remove(c)
-        except ValueError:
-            continue
-
+   
+    remove_elems(toremove)
+    
 def is_empty_str(txt):
     if re.search(r'(\w|\d){5,}', txt) and \
         not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
@@ -249,8 +278,8 @@ def postcheck(root, errlog):
     if not err:
         errlog.write('OK. ')
         root.set('sec_state', 'OK')
-    elif have_inferable_sec(root): # if there are paragraphs containing 'introduction'
-        root.set('sec_state', 'inferable')
+    # elif have_inferable_sec(root): # if there are paragraphs containing 'introduction'
+    #     root.set('sec_state', 'inferable')
     else:
         root.set('sec_state', 'full-text')
     
@@ -268,7 +297,8 @@ if __name__ == "__main__":
 
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
+    # xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
+    xmlpath_list = [join(results_path, 'test.xml')]
 
     # Cleaning
     begin = time.time()
@@ -281,7 +311,7 @@ if __name__ == "__main__":
             try:
                 metadata = id2meta.pop(artid) # get retrive faster
             except KeyError as e:
-                metadata = []
+                metadata = defaultdict(str)
                 print('Metadata not found:', e)
             # === 
 
@@ -296,7 +326,7 @@ if __name__ == "__main__":
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, 'empty_sectitle.xml'))
-            tree.write(join(results_path, xml))
+            tree.write(join(results_path, '1'+xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
