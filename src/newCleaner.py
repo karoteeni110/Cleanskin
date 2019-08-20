@@ -20,6 +20,7 @@ removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pag
             'abstract', 'creator']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
+infer_errtags = {'abstract', 'address', 'affil'}
 all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
 
 def ignore_ns(root):
@@ -164,15 +165,16 @@ def errtxt2tag(txt):
         return txt
 
 def infer_err_abstract(docroot):
-    """Infer abstracts that are marked as <ERROR> & <para>s in the first level and remove them
+    """Infer `infer_errortags` that are marked as <ERROR> & <para>s in the first level and remove them
     """
     to_remove = []
     for i in range(0,len(docroot)-2):
         elempair = (docroot[i], docroot[i+1])
         if elempair[0].tag == 'ERROR':
             to_remove.append(elempair[0])
-            if 'abstract' in elempair[0].text and elempair[1].tag == 'para':
-                to_remove.append(elempair[1])
+            for t in infer_errtags:
+                if t in elempair[0].text.lower() and elempair[1].tag == 'para':
+                    to_remove.append(elempair[1])
             
     if docroot[-1].tag == 'ERROR':
         to_remove.append(docroot[-1])
@@ -278,8 +280,6 @@ def postcheck(root, errlog):
     if not err:
         errlog.write('OK. ')
         root.set('sec_state', 'OK')
-    # elif have_inferable_sec(root): # if there are paragraphs containing 'introduction'
-    #     root.set('sec_state', 'inferable')
     else:
         root.set('sec_state', 'full-text')
     

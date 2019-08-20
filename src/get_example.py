@@ -115,19 +115,19 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
         #     if leadtagtext in err.text:
         #         print('Find <%s> in %s' % (err.tag, xmlpath))
         # BFS search pairs 
-        # errortexts = []
+        following_tags = []
         for i in range(0,len(root)-2):
             elempair = (root[i], root[i+1])
-            if elempair[0].tag == tag and leadtagtext in elempair[0].text and elempair[1].tag == following_tag:
+            if elempair[0].tag == tag and leadtagtext in elempair[0].text:
                 print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
                 print(elempair[0].text, ''.join(elempair[1].itertext()))
-                print()
-                return 1
-        return 0
+                # print()
+                # following_tags.append(elempair[1].tag)
+        return following_tags
         #         errortexts.append(elempair[0].text)
         # return errortexts
     except ET.ParseError:
-        return 0
+        return []
 
 
 if __name__ == "__main__":
@@ -145,14 +145,14 @@ if __name__ == "__main__":
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    a = 0
+    following_tags = Counter()
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            a += show_elempair_exmp(xmlpath, 'ERROR', 'para', 'abstract')
+            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'affil')
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print(a)
+    print(following_tags.most_common())
 
 
     # RANK 1:
@@ -163,3 +163,25 @@ if __name__ == "__main__":
     # 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 
     # 'date', 'rdf', 'bibliography', 'glossarydefinition', 'chapter', 'proof', 
     # 'resource', 'figure', 'creator', 'para', 'subsection', 'acknowledgements', 'theorem'}
+
+    # <ERROR> text:
+    # ('\\affil', 98), ('\\abstracts', 90), ('\\address', 77), ('\\refb', 67), ('\\section', 47), 
+    # ('\\keywords', 30), ('\\submitted', 23), ('\\reference', 22), ('\\subsection', 22), ('\\thesaurus', 21), 
+    # ('\\epsfile', 21), ('\\heading', 17), ('\\sectionb', 15), ('\\recdate', 15), ('\\offprints', 14), 
+    # ('\\proof', 12), ('{keywords}', 10), ('\\journalname', 10), ('\\Section', 9), ('\\altaffiltext', 9), 
+    # ('\\subtitle', 9), ('\\numberofauthors', 8), ('\\beginfigure', 8), ('\\corollary', 8), ('\\chapter', 7), 
+    # ('\\theorem', 7), ('\\figcaption', 7), ('\\+', 6), ('\\articletitle', 6), ('\\name', 6), ('\\begintable', 6), 
+    # ('\\proposition', 6), ('\\preprintnumber', 5), ('\\fulladdresses', 5), ('\\wocname', 5), ('\\xyoption', 5), 
+    # ('\\newdir', 4), ('\\ignore', 4), ('\\KeyWords', 4), ('\\lefthead', 4), ('\\evenpagefooter', 4), ('\\newarrow', 4), 
+    # ('\\@maketitle', 4), ('\\authorrunninghead', 4), ('\\SubSection', 4), ('\\example', 4), ('\\algorithm', 4), 
+    # ('\\subsubsection', 3), ('\\affiliation', 3), ('\\templatetype', 3), ('\\verticaladjustment', 3), 
+    # ('\\dropcap', 3), ('\\titlehead', 3), ('\\titleb', 3), ('\\authorb', 3), ('\\addressb', 3), ('\\submitb', 3), 
+    # ('{summary}', 3), ('\\resthead', 3), ('\\newtheorem', 3), ('\\newdefinition', 3), ('{opening}', 3), 
+    # ('\\title', 3), ('\\paperauthor', 3), ('\\addbibresource', 3), ('\\primaryclass', 3), ('\\rec', 3), 
+    # ('\\checkfont', 3), ('\\HideDisplacementBoxes', 3), ('\\authoremail', 3), ('\\definecolor', 2), 
+    # ('{lemma}', 2), ('\\textlineskip', 2), ('\\upharpoonright', 2), ('\\toctitle', 2), ('\\oddsidemargin', 2), 
+    # ('\\summary', 2), ('\\woctitle', 2), ('{fmffile}', 2), ('{CJK*}', 2), ('\\bibpunct', 2), 
+    # ('\\author', 2), ('\\abstract', 2), ('\\Author', 2), ('\\newproof', 2), ('\\date', 2), 
+    # ('\\Abstract', 2), ('\\NewEnviron', 2), ('\\volumenumber', 2), ('\\asciiabstract', 2), 
+    # ('\\secondaryclass', 2), ('\\authorinfo', 2), ('\\euro', 2), ('{PACS}', 2), ('\\category', 2), 
+    # ('\\terms', 2), ('\\newfloatcommand', 2), ('\\runninghead', 2), ('\\DeclareUnicodeCharacter', 2), ('\\question', 2)
