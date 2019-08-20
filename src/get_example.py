@@ -107,19 +107,27 @@ def all_childtags(freqdist):
     mergeset = set().union(*freqdist)
     return mergeset
 
-def show_elempair_exmp(xmlpath, tag, following_tag):
+def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
     try:
         _ , root = get_root(xmlpath)
+        # errs = root.findall('.//ERROR')
+        # for err in errs:
+        #     if leadtagtext in err.text:
+        #         print('Find <%s> in %s' % (err.tag, xmlpath))
         # BFS search pairs 
-        errortexts = []
+        # errortexts = []
         for i in range(0,len(root)-2):
             elempair = (root[i], root[i+1])
-            if elempair[0].tag == tag and elempair[1].tag == following_tag:
-                # print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
-                errortexts.append(elempair[0].text)
-        return errortexts
+            if elempair[0].tag == tag and leadtagtext in elempair[0].text and elempair[1].tag == following_tag:
+                print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
+                print(elempair[0].text, ''.join(elempair[1].itertext()))
+                print()
+                return 1
+        return 0
+        #         errortexts.append(elempair[0].text)
+        # return errortexts
     except ET.ParseError:
-        return []
+        return 0
 
 
 if __name__ == "__main__":
@@ -128,7 +136,8 @@ if __name__ == "__main__":
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    show_examplefile(rootdir, 'ERROR')
+    # show_examplefile(rootdir, 'ERROR')
+    
     
     # elemname = 'section/*'
     # fd_pkl = join(results_path, '1stsectionChildren.pkl')
@@ -136,14 +145,14 @@ if __name__ == "__main__":
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    # errtxts = []
-    # for i, xml in enumerate(listdir(rootdir)):
-    #     if xml[-3:] == 'xml':
-    #         xmlpath = join(rootdir, xml)
-    #         errtxts.extend(show_elempair_exmp(xmlpath, 'ERROR', 'para'))
-    #     if i % 100 == 0:
-    #         print(i, 'of', len(listdir(rootdir)), '...')
-    # print(Counter(errtxts).most_common(100))
+    a = 0
+    for i, xml in enumerate(listdir(rootdir)):
+        if xml[-3:] == 'xml':
+            xmlpath = join(rootdir, xml)
+            a += show_elempair_exmp(xmlpath, 'ERROR', 'para', 'abstract')
+        if i % 100 == 0:
+            print(i, 'of', len(listdir(rootdir)), '...')
+    print(a)
 
 
     # RANK 1:

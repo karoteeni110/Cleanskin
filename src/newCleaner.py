@@ -163,21 +163,21 @@ def errtxt2tag(txt):
     else:
         return txt
 
-# def infer_errortext(docroot):
-#     to_remove = []
-#     for i in range(0,len(docroot)-2):
-#         elempair = (docroot[i], docroot[i+1])
-#         if elempair[0].tag == 'ERROR':
-#             to_remove.append(elempair[0])
-#             if elempair[1].tag == 'para':
-#                 errortag = errtxt2tag(elempair[0].text)
-#                 if errortag in all_tags:
-#                     elempair[1].tag = errortag
+def infer_err_abstract(docroot):
+    """Infer abstracts that are marked as <ERROR> & <para>s in the first level and remove them
+    """
+    to_remove = []
+    for i in range(0,len(docroot)-2):
+        elempair = (docroot[i], docroot[i+1])
+        if elempair[0].tag == 'ERROR':
+            to_remove.append(elempair[0])
+            if 'abstract' in elempair[0].text and elempair[1].tag == 'para':
+                to_remove.append(elempair[1])
             
-#     if docroot[-1].tag == 'ERROR':
-#         to_remove.append(docroot[-1])
-#     for error in to_remove:
-#         docroot.remove(error)
+    if docroot[-1].tag == 'ERROR':
+        to_remove.append(docroot[-1])
+    for error in to_remove:
+        docroot.remove(error)
 
 def remove_elems(toremovelst):
     for p, c in toremovelst:
@@ -193,7 +193,7 @@ def clean(root):
     toremove = []
     remove_useless(root)
     move_titles(root)
-    # infer_errortext(root)
+    infer_err_abstract(root)
     # print([elem.tag for elem in root])
 
     for rank1elem in root:  # 1st pass
