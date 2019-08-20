@@ -14,26 +14,40 @@ def is_intro(elem):
         return True
     return False
 
-def is_bg():
-    pass 
+def is_bg(elem):
+    if elem.get('title') == 'background':
+        return True
+    return False 
 
-def is_rltwork():
-    pass
+def is_rltwork(elem):
+    if elem.get('title') == 'related work':
+        return True
+    return False
 
-def is_methods():
-    pass 
+def is_methods(elem):
+    if elem.get('title') == 'methods':
+        return True
+    return False 
 
-def is_results():
-    pass 
+def is_results(elem):
+    if elem.get('title') == 'results':
+        return True
+    return False 
 
-def is_discussion():
-    pass
+def is_discussion(elem):
+    if elem.get('title') == 'discussion':
+        return True
+    return False
 
-def is_conclusion():
-    pass
+def is_conclusion(elem):
+    if elem.get('title') == 'conclusion':
+        return True
+    return False
 
-def is_backmatter():
-    pass
+def is_backmatter(elem):
+    if elem.get('title') == 'acknowledgements':
+        return True
+    return False
 
 # == Auxilary functions
 
