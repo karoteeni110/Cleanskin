@@ -149,7 +149,7 @@ if __name__ == "__main__":
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'affil')
+            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'keywords')
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
     print(following_tags.most_common())

@@ -20,7 +20,7 @@ removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pag
             'abstract', 'creator']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
-infer_errtags = {'abstract', 'address', 'affil'}
+infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author'}
 all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
 
 def ignore_ns(root):
@@ -165,7 +165,7 @@ def errtxt2tag(txt):
         return txt
 
 def infer_err_abstract(docroot):
-    """Infer `infer_errortags` that are marked as <ERROR> & <para>s in the first level and remove them
+    """Infer {abstract, address, affil, } that are marked as <ERROR> & <para>s in the first level and retag the following <para>s
     """
     to_remove = []
     for i in range(0,len(docroot)-2):
@@ -174,7 +174,8 @@ def infer_err_abstract(docroot):
             to_remove.append(elempair[0])
             for t in infer_errtags:
                 if t in elempair[0].text.lower() and elempair[1].tag == 'para':
-                    to_remove.append(elempair[1])
+                    # to_remove.append(elempair[1])
+                    elempair[1].tag = t
             
     if docroot[-1].tag == 'ERROR':
         to_remove.append(docroot[-1])
