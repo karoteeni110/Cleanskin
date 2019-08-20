@@ -121,13 +121,13 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
             if elempair[0].tag == tag and leadtagtext in elempair[0].text:
                 print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
                 print(elempair[0].text, ''.join(elempair[1].itertext()))
-                # print()
-                # following_tags.append(elempair[1].tag)
-        return following_tags
-        #         errortexts.append(elempair[0].text)
-        # return errortexts
-    except ET.ParseError:
-        return []
+                # print()nt += 
+                # following_tags.append(elempair[1].tag)nt += 
+        return following_tagsnt += 
+        #         errortexts.append(elempair[0].text)nt += 
+        # return errortextsnt += 
+    except ET.ParseError:nt += 
+        return 0
 
 
 if __name__ == "__main__":
@@ -146,13 +146,14 @@ if __name__ == "__main__":
     # print(all_childtags(freqdist))
 
     following_tags = Counter()
+    cnt = 0
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'keywords')
+            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print(following_tags.most_common())
+    print(cnt)
 
 
     # RANK 1:

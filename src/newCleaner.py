@@ -20,7 +20,7 @@ removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pag
             'abstract', 'creator']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
 sec_attribs = ['title', 'subtitle']
-infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author'}
+infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
 all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
 
 def ignore_ns(root):
@@ -44,10 +44,10 @@ def remove_useless(root, tags = removelist):
     """
     # rmlist = []
     for tag in tags:
-        # if tag != 'ERROR':
-        elems = root.findall('.//%s' % tag)
-        # else:
-        #     elems = root.findall('./*//ERROR') # TODO: TEST IT
+        if tag != 'ERROR':
+            elems = root.findall('.//%s' % tag)
+        else:
+            elems = root.findall('./*//ERROR') # TODO: TEST IT
         for elem in elems: 
             txt = elem.tail
             elem.clear()
@@ -170,12 +170,16 @@ def infer_err_abstract(docroot):
     to_remove = []
     for i in range(0,len(docroot)-2):
         elempair = (docroot[i], docroot[i+1])
+        print(elempair[0].tag, elempair[1].tag)
         if elempair[0].tag == 'ERROR':
             to_remove.append(elempair[0])
             for t in infer_errtags:
+                print(t)
                 if t in elempair[0].text.lower() and elempair[1].tag == 'para':
                     # to_remove.append(elempair[1])
+                    
                     elempair[1].tag = t
+                    print(elempair[1].tag, ''.join(elempair[1].itertext()))
             
     if docroot[-1].tag == 'ERROR':
         to_remove.append(docroot[-1])
@@ -298,8 +302,8 @@ if __name__ == "__main__":
 
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    # xmlpath_list = [join(rawxmls_path, '=1701.00398.xml')]
-    xmlpath_list = [join(results_path, 'test.xml')]
+    xmlpath_list = [join(rawxmls_path, '=astro-ph0002507.xml')]
+    # xmlpath_list = [join(results_path, 'test.xml')]
 
     # Cleaning
     begin = time.time()
@@ -326,8 +330,8 @@ if __name__ == "__main__":
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
-            # tree.write(join(results_path, 'empty_sectitle.xml'))
-            tree.write(join(results_path, '1'+xml))
+            tree.write(join(results_path, xml))
+            # tree.write(join(results_path, '1'+xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
