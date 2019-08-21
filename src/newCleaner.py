@@ -18,7 +18,7 @@ keeplist = ['classification', 'keywords', 'para', 'backmatter', \
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator']
-sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subpragraph']
+sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 sec_attribs = ['title', 'subtitle']
 infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
 all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
@@ -136,15 +136,17 @@ def move_titles(root):
     for p,c in to_remove:
         p.remove(c)
 
-def retag_subsecs(parent_sec, child_sec):
-    if 'section' in child_sec.tag:
-        child_sec.tag = 'sub' + parent_sec.tag 
+def retag_subsecs(parent_sec, childelem):
+    if 'section' in childelem.tag:
+        childelem.tag = 'sub' + parent_sec.tag 
+    elif childelem.tag == 'subparagraph':
+        childelem.tag = 'paragraph'
 
 def retag_sec_or_chap(rank1elem):
     if is_section(rank1elem):
         rank1elem.tag = 'section'
-        for subsec in rank1elem:
-            retag_subsecs(rank1elem, subsec)
+        for para_or_subsec in rank1elem:
+            retag_subsecs(rank1elem, para_or_subsec)
     elif is_chapter(rank1elem):
         rank1elem.tag = 'chapter'
         for elem in rank1elem:
@@ -170,11 +172,11 @@ def infer_err_abstract(docroot):
     to_remove = []
     for i in range(0,len(docroot)-2):
         elempair = (docroot[i], docroot[i+1])
-        print(elempair[0].tag, elempair[1].tag)
+        # print(elempair[0].tag, elempair[1].tag)
         if elempair[0].tag == 'ERROR':
             to_remove.append(elempair[0])
             for t in infer_errtags:
-                print(t)
+                # print(t)
                 if t in elempair[0].text.lower() and elempair[1].tag == 'para':
                     # to_remove.append(elempair[1])
                     
@@ -263,7 +265,7 @@ def add_metamsg(docroot, fname):
 def postcheck(root, errlog):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
     WRITE OUT the result to log
-    MODIFIES root attribute `sec_state`: set to OK/inferable/full-text 
+    MODIFIES root attribute `sec_state`: set to OK/full-text 
     """
     err = False
     errlog.write(xmlpath + ' \n')
@@ -302,7 +304,7 @@ if __name__ == "__main__":
 
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = [join(rawxmls_path, '=astro-ph0002507.xml')]
+    xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
     # xmlpath_list = [join(results_path, 'test.xml')]
 
     # Cleaning
@@ -329,8 +331,8 @@ if __name__ == "__main__":
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
-            # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(results_path, xml))
+            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(results_path, xml))
             # tree.write(join(results_path, '1'+xml))
 
             if VERBOSE:

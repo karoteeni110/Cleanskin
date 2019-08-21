@@ -120,7 +120,7 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
             elempair = (root[i], root[i+1])
             if elempair[0].tag == tag and leadtagtext in elempair[0].text:
                 print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
-                print(elempair[0].text, ''.join(elempair[1].itertext()))
+                print(elempair[0].text) # , ''.join(elempair[1].itertext()))
                 # print()
                 # following_tags.append(elempair[1].tag)
         return following_tags 
@@ -129,6 +129,19 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
     except ET.ParseError:
         return 0
 
+def show_text(xmlpath, tag):
+    try:
+        _ , root = get_root(xmlpath)
+        elems = root.findall('.//%s' % tag)
+        for elem in elems:
+            print('Found %s in %s' % (tag, xmlpath))
+            print(tag)
+            print(''.join(elem.itertext()))
+    except ET.ParseError:
+        return 0
+
+def inferable_section(xmlpath):
+    pass
 
 if __name__ == "__main__":
     rootdir = join(results_path, 'cleaned_xml')
@@ -136,10 +149,10 @@ if __name__ == "__main__":
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    show_examplefile(rootdir, '/float')
+    show_examplefile(rootdir, '/subparagraph')
     
     
-    # elemname = '/section/*'
+    # elemname = '/*'
     # fd_pkl = join(results_path, 'test.pkl')
     # freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
     # show_most_common(freqdist, 20)
@@ -150,9 +163,10 @@ if __name__ == "__main__":
     # for i, xml in enumerate(listdir(rootdir)):
     #     if xml[-3:] == 'xml':
     #         xmlpath = join(rootdir, xml)
-    #         show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-    #     if i % 100 == 0:
-    #         print(i, 'of', len(listdir(rootdir)), '...')
+            # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
+            # show_text(xmlpath, 'classification')
+        # if i % 100 == 0:
+        #     print(i, 'of', len(listdir(rootdir)), '...')
     # print(cnt)
 
 
