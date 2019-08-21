@@ -11,13 +11,13 @@ import time, re
 
 # Elements to be processed at level 1
 # also: <section>, <ERROR>
-keeplist = ['classification', 'keywords', 'para', 'backmatter', \
-            'theorem', 'proof', 'appendix', 'bibliography', 'note', 'date', 'glossarydefinition', 'acknowledgements']
+keeplist = ['classification', 'keywords', 'para', 'backmatter', 'glossarydefinition', 'acknowledgements',\
+            'theorem', 'proof', 'appendix', 'bibliography', 'note', 'date']
 # Elements removed at all levels in the first place (EXCEPT 'ERROR')
 # XXX: LV 1 <ERROR>s are not removed!!
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
-            'abstract', 'creator']
+            'abstract', 'creator', 'titlepage']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 sec_attribs = ['title', 'subtitle']
 infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
@@ -182,9 +182,8 @@ def infer_err_abstract(docroot):
                 # print(t)
                 if t in elempair[0].text.lower() and elempair[1].tag == 'para':
                     # to_remove.append(elempair[1])
-                    
                     elempair[1].tag = t
-                    print(elempair[1].tag, ''.join(elempair[1].itertext()))
+                    # print(elempair[1].tag, ''.join(elempair[1].itertext()))
             
     if docroot[-1].tag == 'ERROR':
         to_remove.append(docroot[-1])
@@ -213,7 +212,7 @@ def clean(root):
             flatten_elem(rank1elem)
             
             if is_empty_elem(rank1elem) or is_fake_para(rank1elem): # Remove empty paragraphs
-                print('is empty or fake', rank1elem.tag)
+                # print('is empty or fake', rank1elem.tag)
                 toremove.append((root,rank1elem))
                 
         elif is_section(rank1elem) or is_chapter(rank1elem):
@@ -306,8 +305,8 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     # Set paths to dirty XMLs
-    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
-    xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
+    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
     # xmlpath_list = [join(results_path, 'test.xml')]
 
     # Cleaning
@@ -347,4 +346,4 @@ if __name__ == "__main__":
     print(len(xmlpath_list), 'files in %s mins' % t)
 
     # With metadata:
-    # 5163 files in 4.929596141974131 mins
+    # 5163 files in 5.088259251912435 mins
