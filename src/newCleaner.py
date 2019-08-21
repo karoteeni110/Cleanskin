@@ -139,8 +139,11 @@ def move_titles(root):
 def retag_subsecs(parent_sec, childelem):
     if 'section' in childelem.tag:
         childelem.tag = 'sub' + parent_sec.tag 
-    elif childelem.tag == 'subparagraph':
+    elif 'paragraph' in childelem.tag:
         childelem.tag = 'paragraph'
+    # Retag subsubparagraphs recursively
+    for para_or_subpara in childelem:
+        retag_subsecs(childelem, para_or_subpara)
 
 def retag_sec_or_chap(rank1elem):
     if is_section(rank1elem):
