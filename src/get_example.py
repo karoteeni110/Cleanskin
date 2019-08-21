@@ -121,39 +121,39 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
             if elempair[0].tag == tag and leadtagtext in elempair[0].text:
                 print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
                 print(elempair[0].text, ''.join(elempair[1].itertext()))
-                # print()nt += 
-                # following_tags.append(elempair[1].tag)nt += 
-        return following_tagsnt += 
-        #         errortexts.append(elempair[0].text)nt += 
-        # return errortextsnt += 
-    except ET.ParseError:nt += 
+                # print()
+                # following_tags.append(elempair[1].tag)
+        return following_tags 
+        #         errortexts.append(elempair[0].text)
+        # return errortexts
+    except ET.ParseError:
         return 0
 
 
 if __name__ == "__main__":
-    rootdir = join(results_path, 'latexml')
+    rootdir = join(results_path, 'cleaned_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    # show_examplefile(rootdir, 'ERROR')
+    show_examplefile(rootdir, '/float')
     
     
-    # elemname = 'section/*'
-    # fd_pkl = join(results_path, '1stsectionChildren.pkl')
+    # elemname = '/section/*'
+    # fd_pkl = join(results_path, 'test.pkl')
     # freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    following_tags = Counter()
-    cnt = 0
-    for i, xml in enumerate(listdir(rootdir)):
-        if xml[-3:] == 'xml':
-            xmlpath = join(rootdir, xml)
-            show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-        if i % 100 == 0:
-            print(i, 'of', len(listdir(rootdir)), '...')
-    print(cnt)
+    # following_tags = Counter()
+    # cnt = 0
+    # for i, xml in enumerate(listdir(rootdir)):
+    #     if xml[-3:] == 'xml':
+    #         xmlpath = join(rootdir, xml)
+    #         show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
+    #     if i % 100 == 0:
+    #         print(i, 'of', len(listdir(rootdir)), '...')
+    # print(cnt)
 
 
     # RANK 1:

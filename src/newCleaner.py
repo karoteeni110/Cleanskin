@@ -67,7 +67,7 @@ def flatten_elem(elem):
     """Remove all the subelements; keep only text and useful attributes
     """
     oldatts = elem.attrib
-    txt = ''.join(t.strip() + ' ' for t in elem.itertext())
+    txt = ' '.join(t.strip() for t in elem.itertext())
     elem.clear()
     clean_attribs(elem, oldatts)
     elem.text = remove_margin(txt)
