@@ -22,6 +22,7 @@ sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph
 sec_attribs = ['title', 'subtitle']
 infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
 all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
+nonsec_titles = ['acknowledgements', 'acknowledgement', 'acknowledgment', 'acknowledgments', 'references', 'figure captions']
 
 def ignore_ns(root):
     '''Clean namespace in the node's tag. Should be called in the first place.
@@ -272,9 +273,10 @@ def postcheck(root, errlog):
     err = False
     errlog.write(xmlpath + ' \n')
 
-    sections = root.findall('section') or root.findall('./chapter/section')
+    sections = root.findall('.//section')
+    sectags = set([sec.tag for sec in sections if sec.tag not in nonsec_titles])
 
-    if len(sections) == 0: # If abstract/section not found
+    if len(sectags) == 0: # If abstract/section not found OR section is acknowledgement/figure caption/references
         err = True
         # print(title + ' absent: ' + xmlpath)
         errlog.write('secs absent. ')

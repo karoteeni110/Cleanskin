@@ -140,7 +140,7 @@ def show_text(xmlpath, tag):
     except ET.ParseError:
         return 0
 
-def inferable_section(xmlpath):
+def paras_before_intro(xmlpath):
     pass
 
 if __name__ == "__main__":

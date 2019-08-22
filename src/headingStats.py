@@ -21,21 +21,15 @@ def get_headings(xmlpath):
     """
     _, root = get_root(xmlpath)
     secdict = {'section':[], 'chapter': []}
-    empty_sec_arts = set()
-    for elem in root:
-        if is_section(elem) and not is_empty_elem(elem):
-            if elem.attrib['title'] == '':
-                empty_sec_arts.add(basename(xmlpath))
-            secdict['section'].append(elem.attrib['title'])
-        elif elem.tag == 'chapter':
-            secdict['chapter'].append(elem.attrib['title']) 
-            for subelem in elem:
-                if is_section(subelem) and not is_empty_elem(subelem):
-                    secdict['section'].append(subelem.attrib['title'])
+    for k in secdict:
+        for elem in root.findall('.//%s' % k):
+            secdict[k].append(elem.get('title', ''))
     # print(empty_sec_arts)
     return secdict
 
 def count_headings(xmlpath_list):
+    """Returns Counter([all_headings])
+    """
     all_headings = []
     for i, xmlpath in enumerate(xmlpath_list):
         try:
@@ -48,8 +42,7 @@ def count_headings(xmlpath_list):
         if VERBOSE:
             if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
                 print('%s of %s ...' % (i+1, len(xmlpath_list)))
-    cter = Counter(all_headings)
-    return cter
+    return Counter(all_headings)
 
 def show_cates_per_art():
     cter = Counter(str(count_cates(xml)) for xml in xmlpath_list)
@@ -68,11 +61,15 @@ def show_seccount_per_art():
     avg = sum(int(k)*cter[k] for k in cter) / sum(cter.values())
     print('Average: %s sections per article' % avg)
 
-def show_sectitle_per_art():
+def show_sectitles_per_art():
+    """
+    """
     sectitle_cter = Counter()
     for xmlpath in xmlpath_list:
         sectitles = get_headings(xmlpath)['section']
         sectitle_cter.update([frozenset(sectitles)])
+        if frozenset(sectitles) == frozenset({'introduction'}):
+            print(xmlpath)
     for i in sectitle_cter.most_common(20):
         print(i)
 
@@ -88,10 +85,8 @@ if __name__ == "__main__":
     xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
     # xmlpath_list = [join(cleanedxml_path, '=astro-ph0001424.xml')]
     heading_freqlist = count_headings(xmlpath_list)
-    
-    
 
-    # print(heading_freqlist.most_common(50))
+    print(heading_freqlist.most_common(50))
     # show(heading_freqlist)
     # [('introduction', 3510), ('conclusions', 893), ('conclusion', 541), ('acknowledgments', 528), ('discussion', 503), ('acknowledgements', 438), ('results', 343), ('summary', 257), ('concluding remarks', 123), ('preliminaries', 117), ('summary and conclusions', 92), ('appendix', 87), ('observations', 83), ('results and discussion', 80), ('discussion and conclusions', 79), ('acknowledgement', 73), ('numerical results', 65), ('the model', 65), ('proof of theorem', 60), ('acknowledgment', 59), ('references', 55), ('observations and data reduction', 55), ('summary and discussion', 54), ('', 45), ('related work', 39), ('examples', 38), ('applications', 35), ('introduction.', 32), ('model', 30), ('methods', 29), ('discussion and conclusion', 29), ('figure captions', 28)
     # Total sections: 22746
@@ -111,4 +106,4 @@ if __name__ == "__main__":
     # 1 articles associated with 7 categories: 0.0002
 
     # show_seccount_per_art()
-    show_sectitle_per_art()
+    show_sectitles_per_art() # TODO: plot it!
