@@ -191,30 +191,29 @@ def show_boldtxt_in_para(elem):
             firstelem = elem[0][0]
             if firstelem.tag == 'text' and firstelem.get('font') == 'bold':
                 ET.dump(firstelem)
-
+                print()
+                
 def show_elemcontent(rootdir):
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
             
-            _, root = get_root(xmlpath)
-            for note in root.findall('.//note'):
-                print(xmlpath)
-                ET.dump(note)
+            # _, root = get_root(xmlpath)
+            # for note in root.findall('.//note'):
+            #     print(xmlpath)
+            #     ET.dump(note)
 
-            # for elem in elems_before_1stsec(xmlpath):
-            #     # show_content(elem)
-            #     show_boldtxt_in_para(elem)
-            #     # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-            #     # show_text(xmlpath, 'classification')
-
-
+            for elem in elems_before_1stsec(xmlpath):
+                # show_content(elem)
+                show_boldtxt_in_para(elem)
+                # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
+                # show_text(xmlpath, 'classification')
             # print()
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
 
 if __name__ == "__main__":
-    rootdir = join(results_path, 'cleaned_xml')
+    rootdir = join(results_path, 'latexml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
