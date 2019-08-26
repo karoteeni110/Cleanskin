@@ -1,5 +1,5 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns, get_root, move_titles, retag_useless
+from newCleaner import ignore_ns, get_root, move_titles, retag_useless, is_section
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
@@ -136,8 +136,9 @@ def show_text(xmlpath, tag):
         elems = root.findall('.//%s' % tag)
         for elem in elems:
             print('Found %s in %s' % (tag, xmlpath))
-            print(tag)
+            print('<%s>'%tag, elem.attrib)
             print(''.join(elem.itertext()))
+        print()
     except ET.ParseError:
         return 0
 
@@ -145,49 +146,75 @@ def BFS_generator(root):
     for subelem in root:
         yield subelem
 
+def normedstr(txt):
+    return normalize('NFKD', txt).lower().strip()
+
 def is_introsec(elem):
     if elem.tag == 'section' and \
-        normalize('NFKD', elem.get('title', '')).lower().strip() in ('1introduction', 'introduction'):
+        normedstr(elem.get('title', '')) in ('1introduction', 'introduction'):
         return True
     return False
 
-def elems_before_intro(xmlpath):
+def elems_before_1stsec(xmlpath):
     try:
         _ , root = get_root(xmlpath)
         retag_useless(root)
         move_titles(root)
 
-        elems = []
-        for elem in root[3:]:
-            if is_introsec(elem):
-                return elems
+        elems, throwits = [], []
+        for elem in root:
+            if is_section(elem):
+                break
+            elif elem.tag == 'throwit':
+                throwits.append(elem)
             else:
                 elems.append(elem)
-        if len(elems) == len(root):
+        if len(elems) + len(throwits) == len(root):
             return []
         else:
             return elems
+        
     except ET.ParseError:
         return []
 
 def show_content(elem):
-    print(elem.tag, elem.attrib)
+    print('<%s>'% elem.tag, elem.attrib, normedstr(''.join(elem.itertext()))[:200])
+
+def is_shortpara(elem):
+    if len(normedstr(''.join(elem.itertext())).split()) <= 5:
+        return True
+    return False
+
+def show_boldtxt_in_para(elem):
+    if elem.tag == 'para' and len(elem)>=1:
+        if len(elem[0]) >=1:
+            firstelem = elem[0][0]
+            if firstelem.tag == 'text' and firstelem.get('font') == 'bold':
+                ET.dump(firstelem)
 
 def show_elemcontent(rootdir):
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-            # show_text(xmlpath, 'classification')
-            print(xmlpath)
-            for elem in elems_before_intro(xmlpath):
-                show_content(elem)
-            print()
+            
+            _, root = get_root(xmlpath)
+            for note in root.findall('.//note'):
+                print(xmlpath)
+                ET.dump(note)
+
+            # for elem in elems_before_1stsec(xmlpath):
+            #     # show_content(elem)
+            #     show_boldtxt_in_para(elem)
+            #     # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
+            #     # show_text(xmlpath, 'classification')
+
+
+            # print()
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
 
 if __name__ == "__main__":
-    rootdir = join(results_path, 'latexml')
+    rootdir = join(results_path, 'cleaned_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
@@ -196,8 +223,8 @@ if __name__ == "__main__":
     
     show_elemcontent(rootdir)
     
-    # elemname = '/*'
-    # fd_pkl = join(results_path, 'test.pkl')
+    # elemname = '/note'
+    # fd_pkl = join(results_path, 'allnote.pkl')
     # freqdist = get_childrentag_freqdist(rootdir, elemname, newpkl=fd_pkl)
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))

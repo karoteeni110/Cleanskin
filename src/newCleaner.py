@@ -12,12 +12,12 @@ import time, re
 # Elements to be processed at level 1
 # also: <section>, <ERROR>
 keeplist = ['classification', 'keywords', 'para', 'backmatter', 'glossarydefinition', 'acknowledgements',\
-            'theorem', 'proof', 'appendix', 'bibliography', 'note', 'date']
+            'theorem', 'proof', 'appendix', 'bibliography', 'date']
 # Elements removed at all levels in the first place (EXCEPT 'ERROR')
 # XXX: LV 1 <ERROR>s are not removed!!
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
-            'abstract', 'creator', 'titlepage']
+            'abstract', 'creator', 'titlepage', 'note']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 sec_attribs = ['title', 'subtitle']
 infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
