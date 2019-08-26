@@ -172,7 +172,8 @@ def errtxt2tag(txt):
         return txt
 
 def infer_err_abstract(docroot):
-    """Infer {abstract, address, affil, } that are marked as <ERROR> & <para>s in the first level and retag the following <para>s
+    """Pick rank-1 <ERROR> that contains `infer_errtags` 
+    and retag its following <para>s
     """
     to_remove = []
     for i in range(0,len(docroot)-2):
