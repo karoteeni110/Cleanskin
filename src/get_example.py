@@ -192,7 +192,7 @@ def show_boldtxt_in_para(elem):
             if firstelem.tag == 'text' and firstelem.get('font') == 'bold':
                 ET.dump(firstelem)
                 print()
-                
+
 def show_elemcontent(rootdir):
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
