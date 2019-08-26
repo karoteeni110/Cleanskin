@@ -1,5 +1,5 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns, get_root, move_titles, remove_useless
+from newCleaner import ignore_ns, get_root, move_titles, retag_useless
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
@@ -154,7 +154,7 @@ def is_introsec(elem):
 def elems_before_intro(xmlpath):
     try:
         _ , root = get_root(xmlpath)
-        remove_useless(root)
+        retag_useless(root)
         move_titles(root)
 
         elems = []

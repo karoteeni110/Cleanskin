@@ -98,13 +98,6 @@ if __name__ == "__main__":
 
     # show_cates_per_art()
     # Counter({'1': 4452, '2': 738, '3': 266, '4': 76, '5': 19, '6': 7, '7': 1})
-    # 4452 articles associated with 1 categories: 0.8009 
-    # 738 articles associated with 2 categories: 0.1328 
-    # 76 articles associated with 4 categories: 0.0137 
-    # 266 articles associated with 3 categories: 0.0479 
-    # 19 articles associated with 5 categories: 0.0034 
-    # 7 articles associated with 6 categories: 0.0013 
-    # 1 articles associated with 7 categories: 0.0002
 
     # show_seccount_per_art()
     # show_sectitles_per_art() # TODO: plot it!

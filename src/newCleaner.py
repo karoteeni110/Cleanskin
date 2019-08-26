@@ -40,7 +40,7 @@ def get_root(xmlpath):
     ignore_ns(root)
     return tree, root
 
-def remove_useless(root, tags = removelist):
+def retag_useless(root, tags = removelist):
     """Clear useless elements and keeps the trailing texts
     """
     # rmlist = []
@@ -204,7 +204,7 @@ def clean(root):
     Keeps the subelements in section
     """
     toremove = []
-    remove_useless(root)
+    retag_useless(root)
     move_titles(root)
     infer_err_abstract(root)
     # print([elem.tag for elem in root])
