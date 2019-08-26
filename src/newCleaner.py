@@ -93,10 +93,11 @@ def clean_sec(sec):
     for subelem in sec:
         if subelem.tag == 'bibitem':
             subelem.tag = 'bibliography'
-        if is_section(subelem):
+        elif is_section(subelem):
             clean_sec(subelem)
         else:
             flatten_elem(subelem)
+
             if is_empty_elem(subelem):
                 to_removes.append(subelem)
     for to_remove in to_removes:
@@ -238,6 +239,8 @@ def is_empty_elem(elem):
     """
     try:
         txt = ''.join(elem.itertext())
+        # if not is_empty_str(txt) and elem.tag == 'p':
+        #     print(txt)
         return is_empty_str(txt)
     except TypeError:
         print([chunk for chunk in elem.itertext()])

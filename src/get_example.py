@@ -1,9 +1,10 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns, get_root
+from newCleaner import ignore_ns, get_root, move_titles, remove_useless
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
 from collections import Counter
+from unicodedata import normalize
 import pickle
     
 def get_rank1tags(fpath): 
@@ -140,17 +141,60 @@ def show_text(xmlpath, tag):
     except ET.ParseError:
         return 0
 
-def paras_before_intro(xmlpath):
-    pass
+def BFS_generator(root):
+    for subelem in root:
+        yield subelem
+
+def is_introsec(elem):
+    if elem.tag == 'section' and \
+        normalize('NFKD', elem.get('title', '')).lower().strip() in ('1introduction', 'introduction'):
+        return True
+    return False
+
+def elems_before_intro(xmlpath):
+    try:
+        _ , root = get_root(xmlpath)
+        remove_useless(root)
+        move_titles(root)
+
+        elems = []
+        for elem in root[3:]:
+            if is_introsec(elem):
+                return elems
+            else:
+                elems.append(elem)
+        if len(elems) == len(root):
+            return []
+        else:
+            return elems
+    except ET.ParseError:
+        return []
+
+def show_content(elem):
+    print(elem.tag, elem.attrib)
+
+def show_elemcontent(rootdir):
+    for i, xml in enumerate(listdir(rootdir)):
+        if xml[-3:] == 'xml':
+            xmlpath = join(rootdir, xml)
+            # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
+            # show_text(xmlpath, 'classification')
+            print(xmlpath)
+            for elem in elems_before_intro(xmlpath):
+                show_content(elem)
+            print()
+        if i % 100 == 0:
+            print(i, 'of', len(listdir(rootdir)), '...')
 
 if __name__ == "__main__":
-    rootdir = join(results_path, 'cleaned_xml')
+    rootdir = join(results_path, 'latexml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
     # print(all_childtags(rank1tags_freqdist))
-    show_examplefile(rootdir, '/')
+    # show_examplefile(rootdir, '/p')
     
+    show_elemcontent(rootdir)
     
     # elemname = '/*'
     # fd_pkl = join(results_path, 'test.pkl')
@@ -158,16 +202,8 @@ if __name__ == "__main__":
     # show_most_common(freqdist, 20)
     # print(all_childtags(freqdist))
 
-    # following_tags = Counter()
-    # cnt = 0
-    # for i, xml in enumerate(listdir(rootdir)):
-    #     if xml[-3:] == 'xml':
-    #         xmlpath = join(rootdir, xml)
-            # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-            # show_text(xmlpath, 'classification')
-        # if i % 100 == 0:
-        #     print(i, 'of', len(listdir(rootdir)), '...')
-    # print(cnt)
+
+
 
 
     # RANK 1:

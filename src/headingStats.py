@@ -16,14 +16,15 @@ def count_cates(xmlpath):
 
 def get_headings(xmlpath):
     """Returns a dict. 
-    keys: 'section', 'chapter'
+    keys: 'section' (and 'chapter')
     values: list of section titles
     """
     _, root = get_root(xmlpath)
-    secdict = {'section':[], 'chapter': []}
+    secdict = {'section':[]}
     for k in secdict:
         for elem in root.findall('.//%s' % k):
-            secdict[k].append(elem.get('title', ''))
+            if not is_empty_elem(elem):
+                secdict[k].append(elem.get('title', 'NO_TITLE'))
     # print(empty_sec_arts)
     return secdict
 
@@ -84,9 +85,9 @@ if __name__ == "__main__":
     rootdir = cleanedxml_path
     xmlpath_list = [join(rootdir, xml) for xml in listdir(rootdir) if xml[-4:] == '.xml']
     # xmlpath_list = [join(cleanedxml_path, '=astro-ph0001424.xml')]
-    heading_freqlist = count_headings(xmlpath_list)
+    heading_freqlist = count_headings(xmlpath_list) # length 12720
 
-    print(heading_freqlist.most_common(50))
+    print(len(heading_freqlist))
     # show(heading_freqlist)
     # [('introduction', 3510), ('conclusions', 893), ('conclusion', 541), ('acknowledgments', 528), ('discussion', 503), ('acknowledgements', 438), ('results', 343), ('summary', 257), ('concluding remarks', 123), ('preliminaries', 117), ('summary and conclusions', 92), ('appendix', 87), ('observations', 83), ('results and discussion', 80), ('discussion and conclusions', 79), ('acknowledgement', 73), ('numerical results', 65), ('the model', 65), ('proof of theorem', 60), ('acknowledgment', 59), ('references', 55), ('observations and data reduction', 55), ('summary and discussion', 54), ('', 45), ('related work', 39), ('examples', 38), ('applications', 35), ('introduction.', 32), ('model', 30), ('methods', 29), ('discussion and conclusion', 29), ('figure captions', 28)
     # Total sections: 22746
@@ -106,4 +107,4 @@ if __name__ == "__main__":
     # 1 articles associated with 7 categories: 0.0002
 
     # show_seccount_per_art()
-    show_sectitles_per_art() # TODO: plot it!
+    # show_sectitles_per_art() # TODO: plot it!
