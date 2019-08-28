@@ -112,6 +112,7 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
     try:
         _ , root = get_root(xmlpath)
         # errs = root.findall('.//ERROR')
+
         # for err in errs:
         #     if leadtagtext in err.text:
         #         print('Find <%s> in %s' % (err.tag, xmlpath))
@@ -119,15 +120,9 @@ def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
         following_tags = []
         for i in range(0,len(root)-2):
             elempair = (root[i], root[i+1])
-            if elempair[0].tag == tag and leadtagtext in elempair[0].text:
-                print('Find <%s> <%s> in %s' % (elempair[0].tag, elempair[1].tag, xmlpath))
-                print(elempair[0].text) # , ''.join(elempair[1].itertext()))
-                # print()
-                # following_tags.append(elempair[1].tag)
-        return following_tags 
-        #         errortexts.append(elempair[0].text)
-        # return errortexts
-    except ET.ParseError:
+            if t in elempair[0].text.lower() and elempair[1].tag == following_tag:
+                ET.dump(elempair[0])
+                
         return 0
 
 def show_text(xmlpath, tag):

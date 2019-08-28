@@ -9,19 +9,19 @@ from collections import defaultdict
 from unicodedata import normalize
 import time, re
 
-# Elements to be processed at level 1
-# also: <section>, <ERROR>
-keeplist = ['classification', 'keywords', 'para', 'backmatter', 'glossarydefinition', 'acknowledgements',\
+# Elements directly flattened at level 1
+keeplist = ['classification', 'keywords', 'backmatter', 'glossarydefinition', 'acknowledgements',\
             'theorem', 'proof', 'appendix', 'bibliography', 'date']
 # Elements removed at all levels in the first place (EXCEPT 'ERROR')
 # XXX: LV 1 <ERROR>s are NOT removed!!
-removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
+removelist = ['ERROR','cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator', 'titlepage', 'note']
+inferables = ['para', 'ERROR']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 sec_attribs = ['title', 'subtitle']
 infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords', 'author', 'submitted'}
-all_tags = keeplist + removelist + sec_tags + sec_attribs + ['abstract', 'author']
+all_tags = keeplist + removelist + sec_tags + sec_attribs + inferables + ['abstract', 'author'] 
 nonsec_titles = ['acknowledgements', 'acknowledgement', 'acknowledgment', 'acknowledgments', 'references', 'figure captions']
 
 def ignore_ns(root):
@@ -171,27 +171,15 @@ def errtxt2tag(txt):
     else:
         return txt
 
-def infer_err_abstract(docroot):
+def infer_errelem(elem_err, following_elem):
     """Pick rank-1 <ERROR> that contains `infer_errtags` 
     and retag its following <para>s
     """
-    to_remove = []
-    for i in range(0,len(docroot)-2):
-        elempair = (docroot[i], docroot[i+1])
-        # print(elempair[0].tag, elempair[1].tag)
-        if elempair[0].tag == 'ERROR':
-            to_remove.append(elempair[0])
-            for t in infer_errtags:
-                # print(t)
-                if t in elempair[0].text.lower() and elempair[1].tag == 'para':
-                    # to_remove.append(elempair[1])
-                    elempair[1].tag = t
-                    # print(elempair[1].tag, ''.join(elempair[1].itertext()))
-            
-    if docroot[-1].tag == 'ERROR':
-        to_remove.append(docroot[-1])
-    for error in to_remove:
-        docroot.remove(error)
+    if following_elem.tag == 'para':
+        for t in infer_errtags:
+            if t in elem_err.text.lower(): # if text contains keywords
+                following_elem.tag = t
+                # print(elempair[1].tag, ''.join(elempair[1].itertext()))
 
 def remove_elems(toremovelst):
     for p, c in toremovelst:
@@ -199,6 +187,14 @@ def remove_elems(toremovelst):
             p.remove(c)
         except ValueError:
             continue
+
+def next_elem(current_idx, root):
+    if current_idx == len(root)-1:
+        return None
+    else:
+        return root[current_idx+1]
+
+def is_inferable_para
 
 def clean(root):
     """Main function that cleans the XML.
@@ -213,10 +209,6 @@ def clean(root):
     # ===== BFS operations: =====
     for i in range(len(root)):  # 1st pass
         rank1elem = root[i]
-        if i == len(root)-1:
-            nextelem = None
-        else:
-            nextelem = root[i+1]
 
         # ===== Single elements process, no inference needed: =====
         if rank1elem.tag in keeplist: # classification, keywords, ...
@@ -232,8 +224,15 @@ def clean(root):
                 toremove.append((root, rank1elem))
             clean_sec(rank1elem)
 
-        # ===== Pair of elements process, `sec_state` = 'inferred': =====
+        # ===== Pair of elements process, if `rank1elem.tag` in `inferables`: =====
+        elif rank1elem.tag == 'ERROR':
+            toremove.append((root, rank1elem))
+            if nextelem:
+                infer_errelem(rank1elem, next_elem(rank1elem))
         
+        elif rank1elem.tag == 'para':
+            flatten_elem(rank1elem)
+            # if is_inferable(rank1elem):
 
         else:
             toremove.append((root, rank1elem)) # NO modifying during iteration!
@@ -257,15 +256,6 @@ def is_empty_elem(elem):
     except TypeError:
         print([chunk for chunk in elem.itertext()])
         return False
-
-def have_inferable_sec(root):
-    for elem in root:
-        content = ''.join(elem.itertext())
-        if re.match(r'introduction', content, flags=re.I) \
-            and elem.tag != 'bibliography' \
-            and elem.get('title', '').lower() != 'references':
-            return True
-    return False
 
 def fname2artid(fname):
     return fname.strip('=')[:-4] # strip ".xml"
