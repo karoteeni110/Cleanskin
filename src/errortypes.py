@@ -1,11 +1,11 @@
-from paths import cate_path, results_path, cleanlog_path, cleanedxml_path, rawxmls_path, \
-    data0001, data0002, data1701, no_sec_latex_path, no_sec_xml
 from os import listdir
 from os.path import basename, join, exists, dirname
 from collections import defaultdict, Counter
 from shutil import copyfile, copytree
 from useLatexml import pick_toptex
-import pickle, re
+from newCleaner import ignore_ns
+import pickle, re, paths
+import xml.etree.ElementTree as ET
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
 art2cates_path = join(results_path, 'arts2cate.pkl')

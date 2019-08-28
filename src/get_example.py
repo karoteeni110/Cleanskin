@@ -185,15 +185,20 @@ def is_shortpara(elem):
         return True
     return False
 
-def show_boldtxt_in_para(elem):
+def show_boldtxt_in_para(elem, path):
+    # fonts = []
     if elem.tag == 'para' and len(elem)>=1:
         if len(elem[0]) >=1:
             firstelem = elem[0][0]
-            if firstelem.tag == 'text' and firstelem.get('font') == 'bold':
-                ET.dump(firstelem)
-                print()
+            if firstelem.tag == 'text':#  and firstelem.get('font') == 'slanted':
+                ET.dump(elem)
+                # ET.dump(firstelem)
+                # print(path)
+                # fonts.append(firstelem.get('font'))         
+    # return fonts
 
 def show_elemcontent(rootdir):
+    fonts = []
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
@@ -205,12 +210,14 @@ def show_elemcontent(rootdir):
 
             for elem in elems_before_1stsec(xmlpath):
                 # show_content(elem)
-                show_boldtxt_in_para(elem)
+                # fonts.extend(show_boldtxt_in_para(elem, xmlpath))
                 # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
                 # show_text(xmlpath, 'classification')
             # print()
+    
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
+    print(Counter(fonts).most_common(11))
 
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
@@ -262,3 +269,8 @@ if __name__ == "__main__":
     # ('\\Abstract', 2), ('\\NewEnviron', 2), ('\\volumenumber', 2), ('\\asciiabstract', 2), 
     # ('\\secondaryclass', 2), ('\\authorinfo', 2), ('\\euro', 2), ('{PACS}', 2), ('\\category', 2), 
     # ('\\terms', 2), ('\\newfloatcommand', 2), ('\\runninghead', 2), ('\\DeclareUnicodeCharacter', 2), ('\\question', 2)
+
+    # <text> fonts:
+    # {'slanted', 'sansserif', 'caligraphic', 'italic', 'smallcaps', 'normal', 'bold italic', 'bold smallcaps', 'typewriter', 'bold', 'bold slanted'}
+
+    # [('bold', 745), (None, 369), ('italic', 273), ('slanted', 48), ('smallcaps', 38), ('sansserif', 19), ('typewriter', 13), ('normal', 4), ('bold italic', 3), ('bold smallcaps', 1), ('bold slanted', 1)]
