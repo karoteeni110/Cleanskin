@@ -16,7 +16,7 @@ keeplist = ['classification', 'keywords', 'backmatter', 'glossarydefinition', 'a
 # XXX: LV 1 <ERROR>s are NOT removed!!
 removelist = ['ERROR','cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
-            'abstract', 'creator', 'titlepage', 'note']
+            'abstract', 'creator', 'titlepage', 'note', 'graphics']
 inferables = ['para', 'ERROR']
 sec_tags = ['section', 'subsection', 'subsubsection', 'paragraph', 'subparagraph']
 sec_attribs = ['title', 'subtitle']

@@ -58,19 +58,32 @@ def is_introsec(elem):
         return True
     return False
 
+def get_upperstream(idx, parent):
+    if idx == 0:
+        return parent
+    
+
 def cut_useless(root):
     retag_useless(root)
+    toremove = []
     for p in root.findall('.//throwit/..'):
-        pass 
+        for idx, elem in enumerate(p):
+            if elem.tag == 'throwit':
+                toremove.append((p, elem))
+                upper_stream = get_upperstream(idx, p)
+                upper_stream.text += elem.text
         # merge its text to the upper non-throwit sibling; if no sbling, then to parent
 
 def show_text_starting_paras(xmlpath):
     try:
         _ , root = get_root(xmlpath)
-        cut_useless(root)
+        retag_useless(root)
         move_titles(root)
         print(xmlpath)
 
+        for text in root.findall(".//para/p[1][text='']/text[1]/.."):
+            ET.dump(text)
+            print()
         # for elem in root:
         #     if elem.tag == 'para' and len(elem)>=1:
         #         if elem[0].tag =='p' and len(elem[0])>=1:
@@ -94,18 +107,25 @@ def show_boldtxt_in_para(elem, path):
             if firstelem.tag == 'text':
                 ET.dump(elem)
 
+def all_tags(docroot):
+    tagset = []
+    for elem in root.findall('./*'):
+        tagset.append(elem.tag)
+    return tagset
+
 
 def trav_xmls(rootdir):
-    for i, xml in enumerate(listdir(rootdir)[:1]):
+    tagset = []
+    for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-
-            show_text_starting_paras(xmlpath)
+            tagset.extend(all_tags(root))
+            # show_text_starting_paras(xmlpath)
 
     
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-
+    print(set(tagset))
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
