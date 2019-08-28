@@ -58,19 +58,24 @@ def is_introsec(elem):
         return True
     return False
 
+def cut_useless(root):
+    retag_useless(root)
+    for p in root.findall('.//throwit/..'):
+        pass 
+        # merge its text to the upper non-throwit sibling; if no sbling, then to parent
+
 def show_text_starting_paras(xmlpath):
     try:
         _ , root = get_root(xmlpath)
-        retag_useless(root)
+        cut_useless(root)
         move_titles(root)
-        for throwit in root.findall('./throwit'):
-            root.remove(throwit)
+        print(xmlpath)
 
-        for elem in root:
-            if elem.tag == 'para' and len(elem)>=1:
-                if elem[0].tag =='p' and len(elem[0])>=1:
-                    if elem[0][0] == 'text':
-                        ET.dump(elem)
+        # for elem in root:
+        #     if elem.tag == 'para' and len(elem)>=1:
+        #         if elem[0].tag =='p' and len(elem[0])>=1:
+        #             if elem[0][0] == 'text':
+        #                 ET.dump(elem)
     except ET.ParseError:
         pass
 
@@ -91,7 +96,7 @@ def show_boldtxt_in_para(elem, path):
 
 
 def trav_xmls(rootdir):
-    for i, xml in enumerate(listdir(rootdir)):
+    for i, xml in enumerate(listdir(rootdir)[:1]):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
 
