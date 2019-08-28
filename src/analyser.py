@@ -20,37 +20,13 @@ def get_rank1tags(fpath):
         print('ParseError at',fpath)
         return frozenset()
     
-
-def get_rank1tags_freqdist(rootdir=None, report_every=100, newpkl=None, oldpkl=None):
-    '''
-    Collect all the possible direct children of <document>.
-    '''
-    if not oldpkl:
-        nodesetlst = []
-        print('Collecting doc infos....')
-        for i, fn in enumerate(listdir(rootdir)):
-            fpath = join(rootdir, fn)
-            if fn[-3:] == 'xml': 
-                nodesetlst.append(get_rank1tags(fpath))
-            if (i+1) % report_every == 0:
-                print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
-        rank1nodes = Counter(nodesetlst)
-        if newpkl:
-            with open(newpkl, 'wb') as f:
-                pickle.dump(rank1nodes, f)
-    else:
-        rank1nodes = pickle.load(open(oldpkl, 'rb'))
-    return rank1nodes
-    
 def show_most_common(counterdict, first):
     for st, ct in counterdict.most_common(first):
         print(ct, list(st))
 
 def show_examplefile(rootdir, tagname):
-    '''
-    Show example files that contain the tags in ``tagname``.
-    ``tagname`` is part of the XPath parameter of 'findall' function: './_tagname_'
-    '''
+    """Show example files that contain the tags in ``tagname``.
+    ``tagname`` is part of the XPath parameter of 'findall' function: './_tagname_'"""
     for fn in listdir(rootdir):
         fpath = join(rootdir, fn)
         if fn[-3:] == 'xml':
@@ -67,152 +43,63 @@ def show_examplefile(rootdir, tagname):
             print('Found %s in %s' % (tagname, fpath))
             # for i in elem:
             #     if i.text == '\\abstract':
-            #         print('Found %s in %s' % (tagname, fpath))
-            
-
-def check_childrentags(parent_tag, fpath):
-    '''
-    Returns the frozenset of all the tags of nodes that are the direct children 
-    of nodes with tag ``parent_tag``.
-    '''
-    try:
-        tree = ET.parse(fpath)
-        root = tree.getroot()
-        ignore_ns(root) # get rid of namespace
-        direct_children_tags = [child.tag for child in root.findall('./%s' % parent_tag)] 
-        return frozenset(direct_children_tags)
-    except ET.ParseError:
-        print('ParseError at',fpath)
-        return frozenset()
-    
-
-def get_childrentag_freqdist(rootdir, parent_tag, report_every=100, newpkl=None, oldpkl=None):
-    if not oldpkl:
-        nodesetlst = []
-        print('Collecting doc infos....')
-        for i, fn in enumerate(listdir(rootdir)):
-            fpath = join(rootdir, fn)
-            if fn[-3:] == 'xml': 
-                nodesetlst.append(check_childrentags(parent_tag, fpath))
-            if (i+1) % report_every == 0:
-                print('%s of %s collected.' % (i+1, len(listdir(rootdir))))
-        node_freqdist = Counter(nodesetlst)
-        if newpkl:
-            with open(newpkl, 'wb') as f:
-                pickle.dump(node_freqdist, f)
-    else:
-        node_freqdist = pickle.load(open(oldpkl, 'rb'))
-    return node_freqdist
+            #         print('Found %s in %s' % (tagname, fpath))  
 
 def all_childtags(freqdist):
     mergeset = set().union(*freqdist)
     return mergeset
 
-def show_elempair_exmp(xmlpath, tag, following_tag, leadtagtext):
-    try:
-        _ , root = get_root(xmlpath)
-        # errs = root.findall('.//ERROR')
-
-        # for err in errs:
-        #     if leadtagtext in err.text:
-        #         print('Find <%s> in %s' % (err.tag, xmlpath))
-        # BFS search pairs 
-        following_tags = []
-        for i in range(0,len(root)-2):
-            elempair = (root[i], root[i+1])
-            if t in elempair[0].text.lower() and elempair[1].tag == following_tag:
-                ET.dump(elempair[0])
-                
-        return 0
-
-def show_text(xmlpath, tag):
-    try:
-        _ , root = get_root(xmlpath)
-        elems = root.findall('.//%s' % tag)
-        for elem in elems:
-            print('Found %s in %s' % (tag, xmlpath))
-            print('<%s>'%tag, elem.attrib)
-            print(''.join(elem.itertext()))
-        print()
-    except ET.ParseError:
-        return 0
-
-def BFS_generator(root):
-    for subelem in root:
-        yield subelem
-
-def normedstr(txt):
+def normed_str(txt):
     return normalize('NFKD', txt).lower().strip()
 
 def is_introsec(elem):
     if elem.tag == 'section' and \
-        normedstr(elem.get('title', '')) in ('1introduction', 'introduction'):
+        normed_str(elem.get('title', '')) in ('1introduction', 'introduction'):
         return True
     return False
 
-def elems_before_1stsec(xmlpath):
+def show_text_starting_paras(xmlpath):
     try:
         _ , root = get_root(xmlpath)
         retag_useless(root)
         move_titles(root)
+        for throwit in root.findall('./throwit'):
+            root.remove(throwit)
 
-        elems, throwits = [], []
         for elem in root:
-            if is_section(elem):
-                break
-            elif elem.tag == 'throwit':
-                throwits.append(elem)
-            else:
-                elems.append(elem)
-        if len(elems) + len(throwits) == len(root):
-            return []
-        else:
-            return elems
-        
+            if elem.tag == 'para' and len(elem)>=1:
+                if elem[0].tag =='p' and len(elem[0])>=1:
+                    if elem[0][0] == 'text':
+                        ET.dump(elem)
     except ET.ParseError:
-        return []
+        pass
 
 def show_content(elem):
-    print('<%s>'% elem.tag, elem.attrib, normedstr(''.join(elem.itertext()))[:200])
+    print('<%s>'% elem.tag, elem.attrib, normed_str(''.join(elem.itertext()))[:200])
 
 def is_shortpara(elem):
-    if len(normedstr(''.join(elem.itertext())).split()) <= 5:
+    if len(normed_str(''.join(elem.itertext())).split()) <= 5:
         return True
     return False
 
 def show_boldtxt_in_para(elem, path):
-    # fonts = []
     if elem.tag == 'para' and len(elem)>=1:
         if len(elem[0]) >=1:
             firstelem = elem[0][0]
-            if firstelem.tag == 'text':#  and firstelem.get('font') == 'slanted':
+            if firstelem.tag == 'text':
                 ET.dump(elem)
-                # ET.dump(firstelem)
-                # print(path)
-                # fonts.append(firstelem.get('font'))         
-    # return fonts
 
-def show_elemcontent(rootdir):
-    fonts = []
+
+def trav_xmls(rootdir):
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            
-            # _, root = get_root(xmlpath)
-            # for note in root.findall('.//note'):
-            #     print(xmlpath)
-            #     ET.dump(note)
 
-            for elem in elems_before_1stsec(xmlpath):
-                # show_content(elem)
-                # fonts.extend(show_boldtxt_in_para(elem, xmlpath))
-                # show_elempair_exmp(xmlpath, 'ERROR', 'para', 'submitted')
-                # show_text(xmlpath, 'classification')
-            # print()
+            show_text_starting_paras(xmlpath)
+
     
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print(Counter(fonts).most_common(11))
 
 if __name__ == "__main__":
     rootdir = join(results_path, 'latexml')
@@ -222,7 +109,7 @@ if __name__ == "__main__":
     # print(all_childtags(rank1tags_freqdist))
     # show_examplefile(rootdir, '/p')
     
-    show_elemcontent(rootdir)
+    trav_xmls(rootdir)
     
     # elemname = '/note'
     # fd_pkl = join(results_path, 'allnote.pkl')

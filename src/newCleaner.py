@@ -41,7 +41,8 @@ def get_root(xmlpath):
     return tree, root
 
 def retag_useless(root, tags = removelist):
-    """Clear useless elements and keeps the trailing texts
+    """Clear useless elements, move .tail to .text
+    Empty elements would either be flattened if depth > 1 or be removed by func `clean()` 
     """
     # rmlist = []
     for tag in tags:
@@ -188,13 +189,14 @@ def remove_elems(toremovelst):
         except ValueError:
             continue
 
-def next_elem(current_idx, root):
-    if current_idx == len(root)-1:
+def next_elem(current_idx, parent):
+    if current_idx == len(parent)-1:
         return None
     else:
-        return root[current_idx+1]
+        return parent[current_idx+1]
 
-def is_inferable_para
+def is_inferable_para(elem):
+    return False
 
 def clean(root):
     """Main function that cleans the XML.
@@ -227,8 +229,8 @@ def clean(root):
         # ===== Pair of elements process, if `rank1elem.tag` in `inferables`: =====
         elif rank1elem.tag == 'ERROR':
             toremove.append((root, rank1elem))
-            if nextelem:
-                infer_errelem(rank1elem, next_elem(rank1elem))
+            if next_elem(i, root):
+                infer_errelem(rank1elem, next_elem(i, root))
         
         elif rank1elem.tag == 'para':
             flatten_elem(rank1elem)
