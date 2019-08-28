@@ -14,7 +14,7 @@ import time, re
 keeplist = ['classification', 'keywords', 'para', 'backmatter', 'glossarydefinition', 'acknowledgements',\
             'theorem', 'proof', 'appendix', 'bibliography', 'date']
 # Elements removed at all levels in the first place (EXCEPT 'ERROR')
-# XXX: LV 1 <ERROR>s are not removed!!
+# XXX: LV 1 <ERROR>s are NOT removed!!
 removelist = ['cite', 'Math', 'figure', 'table', 'tabular', 'TOC', 'ERROR', 'pagination', 'rdf', 'index', \
         'toctitle', 'tags', 'tag', 'equation', 'equationgroup', 'ref', 'break', 'resource', 'indexmark', 'contact',\
             'abstract', 'creator', 'titlepage', 'note']
@@ -205,12 +205,20 @@ def clean(root):
     Keeps the subelements in section
     """
     toremove = []
+    # ===== DFS operations: =====
     retag_useless(root)
     move_titles(root)
-    infer_err_abstract(root)
-    # print([elem.tag for elem in root])
+    # infer_err_abstract(root)
 
-    for rank1elem in root:  # 1st pass
+    # ===== BFS operations: =====
+    for i in range(len(root)):  # 1st pass
+        rank1elem = root[i]
+        if i == len(root)-1:
+            nextelem = None
+        else:
+            nextelem = root[i+1]
+
+        # ===== Single elements process, no inference needed: =====
         if rank1elem.tag in keeplist: # classification, keywords, ...
             flatten_elem(rank1elem)
             
@@ -224,8 +232,11 @@ def clean(root):
                 toremove.append((root, rank1elem))
             clean_sec(rank1elem)
 
+        # ===== Pair of elements process, `sec_state` = 'inferred': =====
+        
+
         else:
-            toremove.append((root, rank1elem)) # Don't modify it during iteration!
+            toremove.append((root, rank1elem)) # NO modifying during iteration!
    
     remove_elems(toremove)
     

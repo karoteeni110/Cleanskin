@@ -4,7 +4,8 @@ from collections import defaultdict, Counter
 from shutil import copyfile, copytree
 from useLatexml import pick_toptex
 from newCleaner import ignore_ns
-import pickle, re, paths
+from paths import *
+import pickle, re
 import xml.etree.ElementTree as ET
 
 cate2arts_path = join(results_path, 'cate2arts.pkl')
