@@ -118,8 +118,11 @@ def have_subsec(elem):
 def normalize_title(title):
     """Remove Unicode chars & new lines in the title element `title`
     """
-    title = normalize('NFKD', ''.join(title.itertext())).lower().strip()
-    return re.sub('\n', ' ', title)
+    title = normalize('NFKD', ''.join(title.itertext())).lower().strip() # remove unicode chars, lower case, strip spaces
+    title = re.sub('\n', ' ', title) # space in place of new lines
+    remove_num_pt= r'((?!i+\W|v|vi{0,3})\b[a-z]+(\s)?)+'
+    title = re.search(remove_num_pt, title, flags=re.I).group(0) # remove numerals before title
+    return title
 
 def move_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.

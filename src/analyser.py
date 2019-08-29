@@ -79,11 +79,16 @@ def show_text_starting_paras(xmlpath):
         _ , root = get_root(xmlpath)
         retag_useless(root)
         move_titles(root)
-        print(xmlpath)
 
-        for text in root.findall(".//para/p[1][text='']/text[1]/.."):
-            ET.dump(text)
-            print()
+        paras = root.findall("./para/p[1][@class='ltx_align_center']/text/../..")
+        if paras:
+            print(xmlpath)
+
+        for para in paras:
+            if para[0].text == None:
+                print('Para index in docroot:', list(root).index(para))
+                ET.dump(para)
+                print()
         # for elem in root:
         #     if elem.tag == 'para' and len(elem)>=1:
         #         if elem[0].tag =='p' and len(elem[0])>=1:
@@ -109,7 +114,7 @@ def show_boldtxt_in_para(elem, path):
 
 def all_tags(docroot):
     tagset = []
-    for elem in root.findall('./*'):
+    for elem in docroot.findall('.//*'):
         tagset.append(elem.tag)
     return tagset
 
@@ -119,10 +124,12 @@ def trav_xmls(rootdir):
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
-            tagset.extend(all_tags(root))
-            # show_text_starting_paras(xmlpath)
+            # try:
+            #     _ , root = get_root(xmlpath)
+            # except ET.ParseError:
+            #     continue
 
-    
+            show_text_starting_paras(xmlpath)
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
     print(set(tagset))
@@ -146,9 +153,23 @@ if __name__ == "__main__":
 
 
 
-    # RANK 1:
-    # {'paragraph', 'tags', 'section', 'subtitle', 'titlepage', 'keywords', 'abstract', 'pagination', 'title', 'TOC', 'note', 'toctitle', 'subsubsection', 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 'date', 'rdf', 'bibliography', 'glossarydefinition', 'chapter', 'proof', 'resource', 'figure', 'creator', 'para', 'subsection', 'acknowledgements', 'theorem'}
-
+    # tag full set:
+    # {'backmatter', 'bibrefphrase', 'dots', 'rect', 'polygon', 
+    # 'stop', 'XMText', 'table', 'clipPath', 'g', 'bibref', 'subsection', 
+    # 'tfoot', 'bibliography', 'index', 'symbol', 'picture', 'creator', 
+    # 'bib-related', 'XMHint', 'tags', 'tbody', 'contact', 'acknowledgements', '
+    # glossarydefinition', 'break', 'rule', 'inline-block', 'bib-identifier', 
+    # 'switch', 'biblist', 'classification', 'bib-title', 'keywords', 'sup', 
+    # 'foreignObject', 'bibentry', 'ERROR', 'XMRef', 'MathFork', 'date', 'listingline', 
+    # 'equation', 'itemize', 'toctitle', 'line', 'bib-language', 'svg', 'caption', 
+    # 'anchor', 'theorem', 'indexmark', 'toccaption', 'XMDual', 'description', 'figure', 
+    # 'XMCell', 'resource', 'MathBranch', 'title', 'bezier', 'circle', 'para', 
+    # 'linearGradient', 'appendix', 'emph', 'chapter', 'defs', 'enumerate', 
+    # 'verbatim', 'pagination', 'td', 'tabular', 'listing', 'bib-data', 'bib-part', 
+    # 'inline-para', 'XMWrap', 'bib-note', 'item', 'XMApp', 'indexphrase', 'inline-enumerate', 'bib-publisher', 'radialGradient', 'bibblock', 'thead', 'bib-review', 'personname', 'quote', 'block', 'pattern', 'text', 'subparagraph', 'cite', 'bib-status', 'tr', 'TOC', 'float', 'proof', 'bib-edition', 'equationgroup', 'givenname', 'graphics', 'XMArray', 'ref', 'subsubsection', 'subtitle', 'note', 'XMath', 'part', 'titlepage', 'bib-name', 'bib-links', 'bib-date', 'bibitem', 'inline-item', 'section', 'rdf', 'path', 
+    # 'abstract', 'surname', 'tag', 'Math', 'bib-url', 'XMArg', 'paragraph', 'glossaryref', 'use', 'p', 'XMRow', 'XMTok', 'glossaryphrase', 'sub'}
+    
+    # RANK 1
     # {'paragraph', 'tags', 'section', 'subtitle', 'titlepage', 'keywords', 
     # 'abstract', 'pagination', 'title', 'TOC', 'note', 'toctitle', 'subsubsection', 
     # 'ERROR', 'float', 'subparagraph', 'index', 'classification', 'table', 'appendix', 
