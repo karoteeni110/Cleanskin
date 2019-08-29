@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from unicodedata import normalize
 import pickle
+import numpy as np
     
 def get_rank1tags(fpath): 
     rank1nodes = []           
@@ -50,7 +51,9 @@ def all_childtags(freqdist):
     return mergeset
 
 def normed_str(txt):
-    return normalize('NFKD', txt).lower().strip()
+    normed_str = normalize('NFKD', txt).lower().strip()
+    # return re.sub('\n', ' ', normedstr)
+    return normed_str
 
 def is_introsec(elem):
     if elem.tag == 'section' and \
@@ -80,12 +83,12 @@ def show_text_starting_paras(xmlpath):
         retag_useless(root)
         move_titles(root)
 
-        paras = root.findall("./para/p[1][@class='ltx_align_center']/text/../..")
+        paras = root.findall("./para/p[1]/text[1][@font='bold']/../..")
         if paras:
             print(xmlpath)
 
         for para in paras:
-            if para[0].text == None:
+            if para[0].text == None and len(para) == len(para[0]) == 1:
                 print('Para index in docroot:', list(root).index(para))
                 ET.dump(para)
                 print()
@@ -97,12 +100,31 @@ def show_text_starting_paras(xmlpath):
     except ET.ParseError:
         pass
 
+def title_lens(xmlpath):
+    try:
+        _ , root = get_root(xmlpath)
+        retag_useless(root)
+        move_titles(root)
+
+        lengths = []
+        for sec in root.findall('.//section'):
+            l = normed_str(sec.get('title', ''))
+            if l:
+                lengths.append(len(l))
+            if len(l)>=40:
+                print(xmlpath)
+                print('short title:', sec.get('title'))
+        return lengths
+
+    except ET.ParseError:
+        return []
+
 def show_content(elem):
     print('<%s>'% elem.tag, elem.attrib, normed_str(''.join(elem.itertext()))[:200])
 
 def is_shortpara(elem):
-    if len(normed_str(''.join(elem.itertext())).split()) <= 5:
-        return True
+    # if len(normed_str(''.join(elem.itertext())).split()) <= 5:
+    #     return True
     return False
 
 def show_boldtxt_in_para(elem, path):
@@ -120,7 +142,7 @@ def all_tags(docroot):
 
 
 def trav_xmls(rootdir):
-    tagset = []
+    titlelengths = []
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
@@ -129,12 +151,14 @@ def trav_xmls(rootdir):
             # except ET.ParseError:
             #     continue
 
-            show_text_starting_paras(xmlpath)
+            titlelengths.extend(title_lens(xmlpath))
+            # show_text_starting_paras(xmlpath)
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print(set(tagset))
+    print('avg title length:', np.mean(titlelengths))
+    print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'latexml')
+    rootdir = join(results_path, 'cleaned_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
@@ -202,3 +226,6 @@ if __name__ == "__main__":
     # {'slanted', 'sansserif', 'caligraphic', 'italic', 'smallcaps', 'normal', 'bold italic', 'bold smallcaps', 'typewriter', 'bold', 'bold slanted'}
 
     # [('bold', 745), (None, 369), ('italic', 273), ('slanted', 48), ('smallcaps', 38), ('sansserif', 19), ('typewriter', 13), ('normal', 4), ('bold italic', 3), ('bold smallcaps', 1), ('bold slanted', 1)]
+
+    # avg section title length: 24.3376484204
+    # std: 16.4747358315
