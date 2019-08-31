@@ -111,9 +111,9 @@ def title_lens(xmlpath):
             l = normed_str(sec.get('title', ''))
             if l:
                 lengths.append(len(l))
-            if len(l)>=40:
-                print(xmlpath)
-                print('short title:', sec.get('title'))
+                if len(l)<=4:
+                    print(xmlpath)
+                    print('short title:', sec.get('title')) 
         return lengths
 
     except ET.ParseError:
@@ -227,5 +227,4 @@ if __name__ == "__main__":
 
     # [('bold', 745), (None, 369), ('italic', 273), ('slanted', 48), ('smallcaps', 38), ('sansserif', 19), ('typewriter', 13), ('normal', 4), ('bold italic', 3), ('bold smallcaps', 1), ('bold slanted', 1)]
 
-    # avg section title length: 24.3376484204
-    # std: 16.4747358315
+    # avg section title length: 24.3376484204 ; std: 16.4747358315
