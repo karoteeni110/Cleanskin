@@ -141,24 +141,54 @@ def all_tags(docroot):
     return tagset
 
 
+def infer_boldtext(xmlpath):
+    try:
+        _ , docroot = get_root(xmlpath)
+        # retag_useless(docroot)
+        # move_titles(docroot)
+
+        paras = docroot.findall("./para/p[1]/text[1]/../..")
+
+        for para in paras:
+            textelem = para.find('p').find('text')
+            if textelem.text:
+                if para[0].text == None and len(para) == len(para[0]) == 1 and 'abstract' in normed_str(textelem.text):
+                    para_idx = list(docroot).index(para)
+                    ET.dump(textelem)
+                    if not textelem.tail:
+                        try:
+                            next_para_idx = para_idx+1
+                            while docroot[next_para_idx].tag != 'para' and normed_str(''.join(docroot[next_para_idx].itertext())) == '':
+                                next_para_idx += 1
+                            print('Next para:')
+                            ET.dump(docroot[next_para_idx])
+                        except IndexError:
+                            print('No next para')
+                    print()
+
+
+    except ET.ParseError:
+        pass
+
 def trav_xmls(rootdir):
-    titlelengths = []
+    # titlelengths = []
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
             # try:
             #     _ , root = get_root(xmlpath)
+            infer_boldtext(xmlpath)
             # except ET.ParseError:
             #     continue
 
-            titlelengths.extend(title_lens(xmlpath))
+            
             # show_text_starting_paras(xmlpath)
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print('avg title length:', np.mean(titlelengths))
-    print('std:', np.std(titlelengths))
+    # print('avg title length:', np.mean(titlelengths))
+    # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'cleaned_xml')
+    rootdir = join(results_path, 'no_sec_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
