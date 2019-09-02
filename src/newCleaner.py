@@ -120,10 +120,16 @@ def normalize_title(title):
     """
     normed_title = normalize('NFKD', ''.join(title.itertext())).lower().strip() # remove unicode chars, lower case, strip spaces
     normed_title = re.sub('\n', ' ', normed_title) # space in place of new lines
+    
+    # == Remove numerals before title
     remove_num_pt= r'((?!i+\W|vi{0,4}\W|iv\W)\b[a-z]+(\s)?)+'
-    ttmatch = re.search(remove_num_pt, normed_title, flags=re.I) # remove numerals before title
+    ttmatch = re.search(remove_num_pt, normed_title, flags=re.I) 
     if ttmatch != None:
         normed_title = ttmatch.group(0)
+    # ==
+    
+    if normed_title.isspace():
+        normed_title = ''
     return normed_title
 
 def move_titles(root):

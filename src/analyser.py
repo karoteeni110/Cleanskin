@@ -5,7 +5,7 @@ from os import listdir
 import xml.etree.ElementTree as ET
 from collections import Counter
 from unicodedata import normalize
-import pickle
+import pickle, pprint
 import numpy as np
     
 def get_rank1tags(fpath): 
@@ -52,7 +52,8 @@ def all_childtags(freqdist):
 
 def normed_str(txt):
     normed_str = normalize('NFKD', txt).lower().strip()
-    # return re.sub('\n', ' ', normedstr)
+    if normed_str.isspace():
+        normed_str = ''
     return normed_str
 
 def is_introsec(elem):
@@ -154,14 +155,30 @@ def infer_boldtext(xmlpath):
             if textelem.text:
                 if para[0].text == None and len(para) == len(para[0]) == 1 and 'abstract' in normed_str(textelem.text):
                     para_idx = list(docroot).index(para)
-                    ET.dump(textelem)
+                    ET.dump(textelem) # in tail or its child
+
                     if not textelem.tail:
+
+                        # in its child
+                        if len(textelem) >=1:
+                            pass
+                        
+                        
+                        # content in next para:
                         try:
                             next_para_idx = para_idx+1
-                            while docroot[next_para_idx].tag != 'para' and normed_str(''.join(docroot[next_para_idx].itertext())) == '':
+                            while docroot[next_para_idx].tag != 'para' or normed_str(''.join(docroot[next_para_idx].itertext())) == '':
                                 next_para_idx += 1
                             print('Next para:')
                             ET.dump(docroot[next_para_idx])
+                            # pp = pprint.PrettyPrinter(indent=4)
+                            # pp.pprint('next para text (normed):' + '[' + ''.join(docroot[next_para_idx].itertext()) +']')
+
+                            # content in its child:
+
+                        
+
+                            # in sibling:
                         except IndexError:
                             print('No next para')
                     print()
