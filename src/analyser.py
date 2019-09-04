@@ -152,7 +152,7 @@ def infer_boldtext(xmlpath):
                     # ET.dump(elem_text) # in tail or its child
 
                     if elem_text.tail:
-                        # print('NOT NONE')
+                        print('NOT NONE')
                         if len(elem_text.text) > 10: # abstract within <text>
                             ET.dump(elem_text)
 

@@ -271,10 +271,9 @@ def clean(root):
 def is_empty_str(txt):
     if txt.isspace():
         return True
-    elif re.search(r'(\w|\d){5,}', txt) and \
-        not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
-        return False
-    return True
+    elif re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
+        return True
+    return False
 
 def is_empty_elem(elem):
     """True: elem.text does not contain any word or digit; elem.text contains only "figure XX"
