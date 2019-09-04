@@ -58,7 +58,7 @@ def retag_useless(root, tags = removelist):
             elem.tag = 'throwit'
             elem.text = txt
 
-def get_upperstream(idx, parent):
+def get_upstream(idx, parent):
     if idx == 0:
         return parent
     else:
@@ -75,11 +75,11 @@ def cut_useless(root):
             if elem.tag == 'throwit':
                 toremove.append((p, elem))
                 if elem.text:
-                    upper_stream = get_upperstream(idx, p)
+                    upstream_elem = get_upstream(idx, p)
                     try:
-                        upper_stream.text += elem.text
+                        upstream_elem.text += elem.text
                     except TypeError:
-                        upper_stream.text = elem.text
+                        upstream_elem.text = elem.text
                     elem.text = None
     for p,c in toremove:
         p.remove(c)

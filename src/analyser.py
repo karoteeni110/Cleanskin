@@ -63,7 +63,7 @@ def is_introsec(elem):
         return True
     return False
 
-def get_upperstream(idx, parent):
+def get_upstream(idx, parent):
     if idx == 0:
         return parent
     else:
@@ -81,11 +81,11 @@ def cut_useless(root):
                 toremove.append((p, elem))
                 if elem.text:
                     if normed_str(elem.text):
-                        upper_stream = get_upperstream(idx, p)
+                        upstream = get_upstream(idx, p)
                         try:
-                            upper_stream.text += ' ' + elem.text
+                            upstream.text += ' ' + elem.text
                         except TypeError:
-                            upper_stream.text = elem.text
+                            upstream.text = elem.text
 
                     elem.text = None
     for p,c in toremove:
@@ -146,7 +146,7 @@ def infer_boldtext(xmlpath):
             elem_text.text = normed_str(elem_text.text)
             elem_text.tail = normed_str(elem_text.tail)
             if elem_text.text:
-                if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
+                if elem_p.text == None and re.match(r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)', elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
                     # para_idx = list(docroot).index(para)
                     # ET.dump(elem_text) # in tail or its child
                     # print('Yes')
@@ -197,7 +197,7 @@ def trav_xmls(rootdir):
     # print('avg title length:', np.mean(titlelengths))
     # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'latexml')
+    rootdir = join(results_path, 'no_sec_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
