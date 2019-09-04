@@ -1,11 +1,11 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns, get_root, move_titles, retag_useless, is_section
+from newCleaner import ignore_ns, get_root, move_titles, retag_useless, is_section, removelist, is_empty_str
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
 from collections import Counter
 from unicodedata import normalize
-import pickle, pprint
+import pickle, pprint, re
 import numpy as np
     
 def get_rank1tags(fpath): 
@@ -51,10 +51,11 @@ def all_childtags(freqdist):
     return mergeset
 
 def normed_str(txt):
-    normed_str = normalize('NFKD', txt).lower().strip()
-    if normed_str.isspace():
-        normed_str = ''
-    return normed_str
+    if txt != None:
+        normed = normalize('NFKD', txt).strip()
+        if is_empty_str(normed):
+            normed = None
+        return normed
 
 def is_introsec(elem):
     if elem.tag == 'section' and \
@@ -65,7 +66,11 @@ def is_introsec(elem):
 def get_upperstream(idx, parent):
     if idx == 0:
         return parent
-    
+    else:
+        previous_ele_idx = idx-1
+        while parent[previous_ele_idx].text == None or parent[previous_ele_idx].tag == 'throwit' and previous_ele_idx > 0:
+            previous_ele_idx -= 1
+        return parent[previous_ele_idx]
 
 def cut_useless(root):
     retag_useless(root)
@@ -74,32 +79,18 @@ def cut_useless(root):
         for idx, elem in enumerate(p):
             if elem.tag == 'throwit':
                 toremove.append((p, elem))
-                upper_stream = get_upperstream(idx, p)
-                upper_stream.text += elem.text
+                if elem.text:
+                    if normed_str(elem.text):
+                        upper_stream = get_upperstream(idx, p)
+                        try:
+                            upper_stream.text += ' ' + elem.text
+                        except TypeError:
+                            upper_stream.text = elem.text
+
+                    elem.text = None
+    for p,c in toremove:
+        p.remove(c)
         # merge its text to the upper non-throwit sibling; if no sbling, then to parent
-
-def show_text_starting_paras(xmlpath):
-    try:
-        _ , root = get_root(xmlpath)
-        retag_useless(root)
-        move_titles(root)
-
-        paras = root.findall("./para/p[1]/text[1][@font='bold']/../..")
-        if paras:
-            print(xmlpath)
-
-        for para in paras:
-            if para[0].text == None and len(para) == len(para[0]) == 1:
-                print('Para index in docroot:', list(root).index(para))
-                ET.dump(para)
-                print()
-        # for elem in root:
-        #     if elem.tag == 'para' and len(elem)>=1:
-        #         if elem[0].tag =='p' and len(elem[0])>=1:
-        #             if elem[0][0] == 'text':
-        #                 ET.dump(elem)
-    except ET.ParseError:
-        pass
 
 def title_lens(xmlpath):
     try:
@@ -119,9 +110,6 @@ def title_lens(xmlpath):
 
     except ET.ParseError:
         return []
-
-def show_content(elem):
-    print('<%s>'% elem.tag, elem.attrib, normed_str(''.join(elem.itertext()))[:200])
 
 def is_shortpara(elem):
     # if len(normed_str(''.join(elem.itertext())).split()) <= 5:
@@ -146,42 +134,48 @@ def infer_boldtext(xmlpath):
     try:
         _ , docroot = get_root(xmlpath)
         # retag_useless(docroot)
-        # move_titles(docroot)
+        cut_useless(docroot)
+        move_titles(docroot)
 
         paras = docroot.findall("./para/p[1]/text[1]/../..")
 
         for para in paras:
-            textelem = para.find('p').find('text')
-            if textelem.text:
-                if para[0].text == None and len(para) == len(para[0]) == 1 and 'abstract' in normed_str(textelem.text):
-                    para_idx = list(docroot).index(para)
-                    ET.dump(textelem) # in tail or its child
+            elem_p = para.find('p')
+            elem_text = elem_p.find('text') # first <p>, first <text>
 
-                    if not textelem.tail:
+            elem_text.text = normed_str(elem_text.text)
+            elem_text.tail = normed_str(elem_text.tail)
+            if elem_text.text:
+                # print('NOT NONE')
+                if elem_p.text == None and re.match('abstract', elem_text.text): #and len(para) == len(elem_p) == 1:
+                    # para_idx = list(docroot).index(para)
+                    # ET.dump(elem_text) # in tail or its child
 
-                        # in its child
-                        if len(textelem) >=1:
-                            pass
-                        
-                        
-                        # content in next para:
-                        try:
-                            next_para_idx = para_idx+1
-                            while docroot[next_para_idx].tag != 'para' or normed_str(''.join(docroot[next_para_idx].itertext())) == '':
-                                next_para_idx += 1
-                            print('Next para:')
-                            ET.dump(docroot[next_para_idx])
-                            # pp = pprint.PrettyPrinter(indent=4)
-                            # pp.pprint('next para text (normed):' + '[' + ''.join(docroot[next_para_idx].itertext()) +']')
+                    if elem_text.tail:
+                        # print('NOT NONE')
+                        if len(elem_text.text) > 10: # abstract within <text>
+                            ET.dump(elem_text)
 
-                            # content in its child:
+                    # if not elem_text.tail:
+                    #     # in its child
+                    #     if len(elem_text) >=10:
+                    #         pass
+                    #     # content in next para:
+                    #     try:
+                    #         next_para_idx = para_idx+1
+                    #         while docroot[next_para_idx].tag != 'para' or normed_str(''.join(docroot[next_para_idx].itertext())) == '':
+                    #             next_para_idx += 1
+                    #         print('Next para:')
+                    #         ET.dump(docroot[next_para_idx])
+                    #         # pp = pprint.PrettyPrinter(indent=4)
+                    #         # pp.pprint('next para text (normed):' + '[' + ''.join(docroot[next_para_idx].itertext()) +']')
 
-                        
+                    #         # content in its child:
 
-                            # in sibling:
-                        except IndexError:
-                            print('No next para')
-                    print()
+                    #         # in sibling:
+                    #     except IndexError:
+                    #         print('No next para')
+                    # print()
 
 
     except ET.ParseError:
@@ -205,7 +199,7 @@ def trav_xmls(rootdir):
     # print('avg title length:', np.mean(titlelengths))
     # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'no_sec_xml')
+    rootdir = join(results_path, 'latexml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)

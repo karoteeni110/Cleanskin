@@ -56,6 +56,23 @@ def retag_useless(root, tags = removelist):
             elem.tag = 'throwit'
             elem.text = txt
 
+def cut_useless(root):
+    retag_useless(root)
+    toremove = []
+    for p in root.findall('.//throwit/..'):
+        for idx, elem in enumerate(p):
+            if elem.tag == 'throwit':
+                toremove.append((p, elem))
+                if elem.text:
+                    upper_stream = get_upperstream(idx, p)
+                    try:
+                        upper_stream.text += elem.text
+                    except TypeError:
+                        upper_stream.text = elem.text
+                    elem.text = None
+    for p,c in toremove:
+        p.remove(c)
+
 def clean_attribs(elem, oldatts):
     elem.attrib.clear()
     for useful_attr in sec_attribs:
@@ -215,7 +232,7 @@ def clean(root):
     """
     toremove = []
     # ===== DFS operations: =====
-    retag_useless(root)
+    cut_useless(root)
     move_titles(root)
     # infer_err_abstract(root)
 
@@ -246,14 +263,15 @@ def clean(root):
         elif rank1elem.tag == 'para':
             flatten_elem(rank1elem)
             # if is_inferable(rank1elem):
-
         else:
             toremove.append((root, rank1elem)) # NO modifying during iteration!
    
     remove_elems(toremove)
     
 def is_empty_str(txt):
-    if re.search(r'(\w|\d){5,}', txt) and \
+    if txt.isspace():
+        return True
+    elif re.search(r'(\w|\d){5,}', txt) and \
         not re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
         return False
     return True
