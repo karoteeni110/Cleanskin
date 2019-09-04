@@ -1,5 +1,5 @@
 from paths import results_path, data_path
-from newCleaner import ignore_ns, get_root, move_titles, retag_useless, is_section, removelist, is_empty_str
+from newCleaner import ignore_ns, get_root, mv_titles, retag_useless, is_section, removelist, is_empty_str
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
@@ -51,7 +51,7 @@ def all_childtags(freqdist):
     return mergeset
 
 def normed_str(txt):
-    if txt != None:
+    if type(txt) == str:
         normed = normalize('NFKD', txt).strip()
         if is_empty_str(normed):
             normed = None
@@ -96,7 +96,7 @@ def title_lens(xmlpath):
     try:
         _ , root = get_root(xmlpath)
         retag_useless(root)
-        move_titles(root)
+        mv_titles(root)
 
         lengths = []
         for sec in root.findall('.//section'):
@@ -135,7 +135,7 @@ def infer_boldtext(xmlpath):
         _ , docroot = get_root(xmlpath)
         # retag_useless(docroot)
         cut_useless(docroot)
-        move_titles(docroot)
+        mv_titles(docroot)
 
         paras = docroot.findall("./para/p[1]/text[1]/../..")
 
@@ -149,9 +149,8 @@ def infer_boldtext(xmlpath):
                 if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
                     # para_idx = list(docroot).index(para)
                     # ET.dump(elem_text) # in tail or its child
-                    print('Yes')
+                    # print('Yes')
                     if elem_text.tail:
-                        # print('NOT NONE')
                         if len(elem_text.text) > 10: # abstract within <text>
                             ET.dump(elem_text)
 

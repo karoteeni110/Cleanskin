@@ -24,6 +24,8 @@ infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords'
 all_tags = keeplist + removelist + sec_tags + sec_attribs + inferables + ['abstract', 'author'] 
 nonsec_titles = ['acknowledgements', 'acknowledgement', 'acknowledgment', 'acknowledgments', 'references', 'figure captions']
 
+remove_num_pt= r'((?!i+\W|vi{0,4}\W|iv\W)\b[a-z]+(\s)?)+'
+
 def ignore_ns(root):
     '''Clean namespace in the node's tag. Should be called in the first place.
     '''
@@ -55,6 +57,15 @@ def retag_useless(root, tags = removelist):
             elem.clear()
             elem.tag = 'throwit'
             elem.text = txt
+
+def get_upperstream(idx, parent):
+    if idx == 0:
+        return parent
+    else:
+        previous_ele_idx = idx-1
+        while parent[previous_ele_idx].text == None or parent[previous_ele_idx].tag == 'throwit' and previous_ele_idx > 0:
+            previous_ele_idx -= 1
+        return parent[previous_ele_idx]
 
 def cut_useless(root):
     retag_useless(root)
@@ -135,11 +146,10 @@ def have_subsec(elem):
 def normalize_title(title):
     """Remove Unicode chars & new lines in the title element `title`
     """
-    normed_title = normalize('NFKD', ''.join(title.itertext())).lower().strip() # remove unicode chars, lower case, strip spaces
+    normed_title = normalize('NFKD', ''.join(title.itertext())).strip() # remove unicode chars, strip spaces
     normed_title = re.sub('\n', ' ', normed_title) # space in place of new lines
     
     # == Remove numerals before title
-    remove_num_pt= r'((?!i+\W|vi{0,4}\W|iv\W)\b[a-z]+(\s)?)+'
     ttmatch = re.search(remove_num_pt, normed_title, flags=re.I) 
     if ttmatch != None:
         normed_title = ttmatch.group(0)
@@ -149,7 +159,7 @@ def normalize_title(title):
         normed_title = ''
     return normed_title
 
-def move_titles(root):
+def mv_titles(root):
     """Set all the <title>s as the parent node's attribute and remove it from the parent.
     Should be called first.
     """
@@ -186,12 +196,6 @@ def retag_sec_or_chap(rank1elem):
         for elem in rank1elem:
             retag_sec_or_chap(elem)
 
-def is_fake_para(elem):
-    if elem.tag == 'para':
-        if elem.text.strip() in (metadata['author'], metadata['title'], metadata['abstract']):
-            return True
-    return False
-
 def errtxt2tag(txt):
     if txt[0] == '\\':
         return txt[1:].lower()
@@ -223,33 +227,66 @@ def next_elem(current_idx, parent):
     else:
         return parent[current_idx+1]
 
-def is_inferable_para(elem):
-    return False
+def normed_txt(txt):
+    if type(txt) == str:
+        normed = normalize('NFKD', txt).strip()
+        if is_empty_str(normed):
+            normed = None
+        return normed
+
+def hidden_abstracts(docroot):
+    paras = docroot.findall("./para/p[1]/text[1]/../..")
+
+    for para in paras:
+        elem_p = para.find('p') # first <p>
+        elem_text = elem_p.find('text') # first <text>
+
+        elem_text.text = normed_txt(elem_text.text)
+        elem_text.tail = normed_txt(elem_text.tail)
+        if elem_text.text:
+            if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
+                # para_idx = list(docroot).index(para)
+                # ET.dump(elem_text) # in tail or its child
+                # print('Yes')
+                
+                if len(elem_text.text) > 10: # abstract within <text>
+                    elem_text.text = None # Remove the abstract 
+
+def infer_secs(docroot):
+    pass
 
 def clean(root):
-    """Main function that cleans the XML.
+    """Remove all the subelements that are not 
     Keeps the subelements in section
     """
     toremove = []
     # ===== DFS operations: =====
     cut_useless(root)
-    move_titles(root)
+    mv_titles(root)
+    
     # infer_err_abstract(root)
 
+    for rank1elem in root:
+        if is_section(rank1elem) or is_chapter(rank1elem):
+            retag_sec_or_chap(rank1elem)
+        if rank1elem.tag in ('author', 'title', 'abstract'):
+            toremove.append((root, rank1elem))
+
+    if root.find('section') is None:
+        infer_secs(root)
+
     # ===== BFS operations: =====
-    for i in range(len(root)):  # 1st pass
-        rank1elem = root[i]
+    for i, rank1elem in enumerate(root):  # 1st pass
 
         # ===== Single elements process, no inference needed: =====
         if rank1elem.tag in keeplist: # classification, keywords, ...
             flatten_elem(rank1elem)
             
-            if is_empty_elem(rank1elem) or is_fake_para(rank1elem): # Remove empty paragraphs
+            if is_empty_elem(rank1elem): # Remove empty paragraphs
                 # print('is empty or fake', rank1elem.tag)
                 toremove.append((root,rank1elem))
                 
-        elif is_section(rank1elem) or is_chapter(rank1elem):
-            retag_sec_or_chap(rank1elem)
+        elif rank1elem.tag in ('section', 'chapter'):
             if rank1elem.get('title') == 'abstract':
                 toremove.append((root, rank1elem))
             clean_sec(rank1elem)
@@ -308,20 +345,17 @@ def postcheck(root, errlog):
     err = False
     errlog.write(xmlpath + ' \n')
 
-    sections = root.findall('.//section')
-    sectags = set([sec.tag for sec in sections if sec.tag not in nonsec_titles])
-
-    if len(sectags) == 0: # If abstract/section not found OR section is acknowledgement/figure caption/references
+    if root.find('section') is None: # If abstract/section not found OR section is acknowledgement/figure caption/references
         err = True
         # print(title + ' absent: ' + xmlpath)
         errlog.write('secs absent. ')
     
     # If sections exist but is empty
-    for sec in sections:
-        if is_empty_elem(sec):
-            err = True
-            # print('Empty ' + title + ' :' + xmlpath)
-            errlog.write('Empty secs. ')
+
+    elif root.find('section') is False:
+        err = True
+        # print('Empty ' + title + ' :' + xmlpath)
+        errlog.write('Empty secs. ')
                                     
     if not err:
         errlog.write('OK. ')
