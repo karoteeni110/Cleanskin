@@ -146,13 +146,12 @@ def infer_boldtext(xmlpath):
             elem_text.text = normed_str(elem_text.text)
             elem_text.tail = normed_str(elem_text.tail)
             if elem_text.text:
-                # print('NOT NONE')
-                if elem_p.text == None and re.match('abstract', elem_text.text): #and len(para) == len(elem_p) == 1:
+                if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
                     # para_idx = list(docroot).index(para)
                     # ET.dump(elem_text) # in tail or its child
-
+                    print('Yes')
                     if elem_text.tail:
-                        print('NOT NONE')
+                        # print('NOT NONE')
                         if len(elem_text.text) > 10: # abstract within <text>
                             ET.dump(elem_text)
 
