@@ -76,6 +76,12 @@ def cut_useless(root):
                 toremove.append((p, elem))
                 if elem.text:
                     upstream_elem = get_upstream(idx, p)
+                    if upstream_elem.tail:
+                        try:
+                            upstream_elem.text += ' ' + normed_str(upstream_elem.tail)
+                        except TypeError:
+                            upstream_elem.text = normed_str(upstream_elem.tail)
+                        upstream_elem.tail = None
                     try:
                         upstream_elem.text += elem.text
                     except TypeError:
@@ -227,34 +233,29 @@ def next_elem(current_idx, parent):
     else:
         return parent[current_idx+1]
 
-def normed_txt(txt):
-    if type(txt) == str:
-        normed = normalize('NFKD', txt).strip()
-        if is_empty_str(normed):
-            normed = None
-        return normed
+def normed_str(txt):
+    normed = normalize('NFKD', txt).strip()
+    if is_empty_str(normed):
+        normed = None
+    return normed
 
-def hidden_abstracts(docroot):
+def rm_inferred_ab(docroot):
     paras = docroot.findall("./para/p[1]/text[1]/../..")
 
     for para in paras:
         elem_p = para.find('p') # first <p>
         elem_text = elem_p.find('text') # first <text>
 
-        elem_text.text = normed_txt(elem_text.text)
-        elem_text.tail = normed_txt(elem_text.tail)
+        elem_text.text = normed_str(elem_text.text)
+        elem_text.tail = normed_str(elem_text.tail)
         if elem_text.text:
             if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
-                # para_idx = list(docroot).index(para)
-                # ET.dump(elem_text) # in tail or its child
-                # print('Yes')
-                
-                if len(elem_text.text) > 10: # abstract within <text>
+                if len(elem_text.text) > 10 : # abstract within <text>
                     elem_text.text = None # Remove the abstract 
-
-def infer_secs(docroot):
-    pass
-
+                elif elem_text.tail:
+                    if len(elem_text.tail) > 10:
+                        elem_text.text = None
+                        
 def clean(root):
     """Remove all the subelements that are not 
     Keeps the subelements in section
@@ -269,11 +270,9 @@ def clean(root):
     for rank1elem in root:
         if is_section(rank1elem) or is_chapter(rank1elem):
             retag_sec_or_chap(rank1elem)
-        if rank1elem.tag in ('author', 'title', 'abstract'):
-            toremove.append((root, rank1elem))
 
-    if root.find('section') is None:
-        infer_secs(root)
+    if root.find('abstract') is None:
+        rm_inferred_ab(root)
 
     # ===== BFS operations: =====
     for i, rank1elem in enumerate(root):  # 1st pass
@@ -339,7 +338,11 @@ def add_metamsg(docroot, fname):
 
 def postcheck(root, errlog):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
-    WRITE OUT the result to log
+    WRITE OUT the result to log: 
+            0: section OK
+            1: no sections
+            2: empty sections
+            3: metadata not found
     MODIFIES root attribute `sec_state`: set to OK/full-text 
     """
     err = False
@@ -348,23 +351,23 @@ def postcheck(root, errlog):
     if root.find('section') is None: # If abstract/section not found OR section is acknowledgement/figure caption/references
         err = True
         # print(title + ' absent: ' + xmlpath)
-        errlog.write('secs absent. ')
+        errlog.write('1') # No sections
     
     # If sections exist but is empty
 
     elif root.find('section') is False:
         err = True
         # print('Empty ' + title + ' :' + xmlpath)
-        errlog.write('Empty secs. ')
+        errlog.write('2') # Empty sections
                                     
     if not err:
-        errlog.write('OK. ')
+        errlog.write('0')
         root.set('sec_state', 'OK')
     else:
         root.set('sec_state', 'full-text')
     
     if not root.get('abstract', False):
-        errlog.write('Metadata not found. ')
+        errlog.write('3') # Metadata not found
     errlog.write('\n ================================== \n')
 
 

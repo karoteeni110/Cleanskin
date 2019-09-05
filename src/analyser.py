@@ -80,12 +80,17 @@ def cut_useless(root):
             if elem.tag == 'throwit':
                 toremove.append((p, elem))
                 if elem.text:
-                    if normed_str(elem.text):
-                        upstream = get_upstream(idx, p)
+                    upstream = get_upstream(idx, p)
+                    if upstream.tail:
                         try:
-                            upstream.text += ' ' + elem.text
+                            upstream.text += ' ' + normed_str(upstream.tail)
                         except TypeError:
-                            upstream.text = elem.text
+                            upstream.text = normed_str(upstream.tail)
+                        upstream.tail = None
+                    try:
+                        upstream.text += ' ' + normed_str(elem.text)
+                    except TypeError:
+                        upstream.text = normed_str(elem.text)
 
                     elem.text = None
     for p,c in toremove:
@@ -146,13 +151,18 @@ def infer_boldtext(xmlpath):
             elem_text.text = normed_str(elem_text.text)
             elem_text.tail = normed_str(elem_text.tail)
             if elem_text.text:
-                if elem_p.text == None and re.match(r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)', elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
+                intropt = r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)'
+                abspt = r'abstract'
+                if elem_p.text == None and re.match(abspt, elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
                     # para_idx = list(docroot).index(para)
                     # ET.dump(elem_text) # in tail or its child
                     # print('Yes')
-                    if elem_text.tail:
-                        if len(elem_text.text) > 10: # abstract within <text>
-                            ET.dump(elem_text)
+                    
+                    if len(elem_text.text) < 10 and elem_text.tail: # abstract within <text>
+                        if len(elem_text.tail) > 10:
+                            print(xmlpath)
+                            ET.dump(elem_p)
+                            print()
 
                     # if not elem_text.tail:
                     #     # in its child
