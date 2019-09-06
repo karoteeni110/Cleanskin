@@ -52,44 +52,13 @@ def retag_useless(root, tags = removelist):
         if tag != 'ERROR':
             elems = root.findall('.//%s' % tag)
         else:
-            elems = root.findall('./*//ERROR') # TODO: TEST IT
+            elems = root.findall('./*//ERROR')
         for elem in elems: 
             txt = elem.tail
             elem.clear()
             elem.tag = 'throwit'
             elem.text = txt
-
-def get_upstream(idx, parent):
-    if idx == 0:
-        return parent
-    else:
-        previous_ele_idx = idx-1
-        while parent[previous_ele_idx].text == None or parent[previous_ele_idx].tag == 'throwit' and previous_ele_idx > 0:
-            previous_ele_idx -= 1
-        return parent[previous_ele_idx]
-
-def cut_useless(root):
-    retag_useless(root)
-    toremove = []
-    for p in root.findall('.//throwit/..'):
-        for idx, elem in enumerate(p):
-            if elem.tag == 'throwit':
-                toremove.append((p, elem))
-                if elem.text:
-                    upstream_elem = get_upstream(idx, p)
-                    if upstream_elem.tail:
-                        try:
-                            upstream_elem.text += ' ' + normed_str(upstream_elem.tail)
-                        except TypeError:
-                            upstream_elem.text = normed_str(upstream_elem.tail)
-                        upstream_elem.tail = None
-                    try:
-                        upstream_elem.text += elem.text
-                    except TypeError:
-                        upstream_elem.text = elem.text
-                    elem.text = None
-    for p,c in toremove:
-        p.remove(c)
+        
 
 def clean_attribs(elem, oldatts):
     elem.attrib.clear()
@@ -256,10 +225,7 @@ def rm_inferred_ab(docroot):
 
         if elem_text.text:
             if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
-                elem_text.text = None 
-                if elem_text.tail:
-                    if len(elem_text.tail) > 10:
-                        elem_text.tail = None
+                pass
 
 def clean(root):
     """Remove all the subelements that are not 
@@ -267,7 +233,7 @@ def clean(root):
     """
     toremove = []
     # ===== DFS operations: =====
-    cut_useless(root)
+    retag_useless(root)
     mv_titles(root)
     
     # infer_err_abstract(root)
@@ -286,10 +252,6 @@ def clean(root):
         if rank1elem.tag in keeplist: # classification, keywords, ...
             flatten_elem(rank1elem)
             
-            if is_empty_elem(rank1elem): # Remove empty paragraphs
-                # print('is empty or fake', rank1elem.tag)
-                toremove.append((root,rank1elem))
-                
         elif rank1elem.tag in ('section', 'chapter'):
             if rank1elem.get('title') == 'abstract':
                 toremove.append((root, rank1elem))
@@ -303,14 +265,19 @@ def clean(root):
         
         elif rank1elem.tag == 'para':
             flatten_elem(rank1elem)
-            # if is_inferable(rank1elem):
+            
         else:
             toremove.append((root, rank1elem)) # NO modifying during iteration!
+
+        if is_empty_elem(rank1elem):
+            toremove.append((root, rank1elem))
    
     remove_elems(toremove)
     
 def is_empty_str(txt):
-    if txt.isspace():
+    if txt.isspace(): # contains only space
+        return True 
+    elif re.search(r'[a-zA-Z]+?', txt) == None: # does not have words
         return True
     elif re.match(r'^\W*fig(\.|ure)\W+\d+(\W+\(.*\))?\W*$' , txt, flags=re.I):
         return True

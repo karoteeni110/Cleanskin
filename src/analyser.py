@@ -57,40 +57,6 @@ def normed_str(txt):
             normed = None
         return normed
 
-def get_upstream(idx, parent):
-    if idx == 0:
-        return parent
-    else:
-        previous_ele_idx = idx-1
-        while parent[previous_ele_idx].text == None or parent[previous_ele_idx].tag == 'throwit' and previous_ele_idx > 0:
-            previous_ele_idx -= 1
-        return parent[previous_ele_idx]
-
-def cut_useless(root):
-    retag_useless(root)
-    toremove = []
-    for p in root.findall('.//throwit/..'):
-        for idx, elem in enumerate(p):
-            if elem.tag == 'throwit':
-                toremove.append((p, elem))
-                if elem.text:
-                    upstream = get_upstream(idx, p)
-                    if upstream.tail:
-                        try:
-                            upstream.text += ' ' + normed_str(upstream.tail)
-                        except TypeError:
-                            upstream.text = normed_str(upstream.tail)
-                        upstream.tail = None
-                    try:
-                        upstream.text += ' ' + normed_str(elem.text)
-                    except TypeError:
-                        upstream.text = normed_str(elem.text)
-
-                    elem.text = None
-    for p,c in toremove:
-        p.remove(c)
-        # merge its text to the upper non-throwit sibling; if no sbling, then to parent
-
 def title_lens(xmlpath):
     try:
         _ , root = get_root(xmlpath)
@@ -123,17 +89,28 @@ def all_tags(docroot):
         tagset.append(elem.tag)
     return tagset
 
+def dp_next_para(present_para, docroot):
+    present_para_idx = list(docroot).index(present_para)
+    idx = present_para_idx+1
+    while docroot[present_para_idx].tag != 'para' and idx < len(docroot):
+        idx+=1
+    if docroot[idx].tag == 'para':
+        ET.dump(docroot[idx])
+    else:
+        print('NO NEXT PARA')
+
 
 def infer_boldtext(xmlpath):
     try:
         _ , docroot = get_root(xmlpath)
         # retag_useless(docroot)
-        cut_useless(docroot)
+        retag_useless(docroot)
         mv_titles(docroot)
 
         paras = docroot.findall("./para/p[1]/text[1]/../..")
-
+    
         for para in paras:
+
             elem_p = para.find('p')
             elem_text = elem_p.find('text') # first <p>, first <text>
 
@@ -143,17 +120,16 @@ def infer_boldtext(xmlpath):
                 intropt = r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)'
                 abspt = r'abstract'
                 if elem_p.text == None and re.match(abspt, elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
-                    # para_idx = list(docroot).index(para)
-                    # ET.dump(elem_text) # in tail or its child
-                    # print('Yes')
-                    if len(elem_text.text) > 10:
-                        pass
-
-                    elif elem_text.tail: # abstract within <text>
-                        if len(elem_text.tail) > 10:
-                            print(xmlpath)
-                            ET.dump(elem_p)
-                            print()
+                    if len(normed_str(''.join(elem_p.itertext()))) <= 10:
+                        print(xmlpath)
+                        ET.dump(elem_p)
+                        p_idx = 0
+                        while para[p_idx].tag != 'p':
+                            p_idx += 1
+                        if len(para) > p_idx+1:
+                            ET.dump(para[p_idx+1])
+                        else:
+                            dp_next_para(para, docroot)
 
                     # if not elem_text.tail:
                     #     # in its child
