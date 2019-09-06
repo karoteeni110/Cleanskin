@@ -92,7 +92,6 @@ def all_tags(docroot):
 def dp_next_para(present_para, docroot):
     present_para_idx = list(docroot).index(present_para)
     idx = present_para_idx+1
-    print('docroot len', len(docroot))
     while docroot[idx].tag != 'para' and idx < len(list(docroot)):
         idx+=1
     if docroot[idx].tag == 'para':
@@ -119,17 +118,19 @@ def infer_boldtext(xmlpath):
             if elem_text.text:
                 intropt = r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)'
                 abspt = r'abstract'
-                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
-                    if len(normed_str(''.join(elem_p.itertext()))) <= 15:
-                        print(xmlpath)
-                        ET.dump(elem_p)
-                        p_idx = 0
-                        while para[p_idx].tag != 'p':
-                            p_idx += 1
-                        if len(para) > p_idx+1:
-                            ET.dump(para[p_idx+1])
-                        else:
-                            dp_next_para(para, docroot)
+                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I):
+                    # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
+                    if len(elem_text.text.split()) <= 5:
+                        # print(xmlpath)
+                        print(elem_text.text)
+                        # ET.dump(elem_text)
+                        # p_idx = 0
+                        # while para[p_idx].tag != 'p':
+                        #     p_idx += 1
+                        # if len(para) > p_idx+1:
+                        #     ET.dump(para[p_idx+1])
+                        # else:
+                        #     dp_next_para(para, docroot)
 
                     # if not elem_text.tail:
                     #     # in its child
