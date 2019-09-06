@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import sys, re
-from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path
+from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path, no_sec_xml, cleaned_nonsecs
 from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir
@@ -10,6 +10,7 @@ from unicodedata import normalize
 import time, re
 
 # Elements directly flattened at level 1
+# Modification for <para> <section> and <ERROR> are different
 keeplist = ['classification', 'keywords', 'backmatter', 'glossarydefinition', 'acknowledgements',\
             'theorem', 'proof', 'appendix', 'bibliography', 'date']
 # Elements removed at all levels in the first place (EXCEPT 'ERROR')
@@ -246,16 +247,17 @@ def rm_inferred_ab(docroot):
         elem_p = para.find('p') # first <p>
         elem_text = elem_p.find('text') # first <text>
 
-        elem_text.text = normed_str(elem_text.text)
-        elem_text.tail = normed_str(elem_text.tail)
+        if elem_text.tail:
+            elem_text.tail = normed_str(elem_text.tail)
         if elem_text.text:
+            elem_text.text = normed_str(elem_text.text)
             if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
                 if len(elem_text.text) > 10 : # abstract within <text>
                     elem_text.text = None # Remove the abstract 
                 elif elem_text.tail:
                     if len(elem_text.tail) > 10:
                         elem_text.text = None
-                        
+
 def clean(root):
     """Remove all the subelements that are not 
     Keeps the subelements in section
@@ -379,7 +381,8 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     # Set paths to dirty XMLs
-    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-4:] == '.xml']
+    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
+    xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
     # xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
     # xmlpath_list = [join(results_path, 'test.xml')]
 
@@ -407,9 +410,9 @@ if __name__ == "__main__":
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
+            # tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, xml))
-            # tree.write(join(results_path, '1'+xml))
+            tree.write(join(cleaned_nonsecs, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):

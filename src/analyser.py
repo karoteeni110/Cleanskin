@@ -57,12 +57,6 @@ def normed_str(txt):
             normed = None
         return normed
 
-def is_introsec(elem):
-    if elem.tag == 'section' and \
-        normed_str(elem.get('title', '')) in ('1introduction', 'introduction'):
-        return True
-    return False
-
 def get_upstream(idx, parent):
     if idx == 0:
         return parent
@@ -116,11 +110,6 @@ def title_lens(xmlpath):
     except ET.ParseError:
         return []
 
-def is_shortpara(elem):
-    # if len(normed_str(''.join(elem.itertext())).split()) <= 5:
-    #     return True
-    return False
-
 def show_boldtxt_in_para(elem, path):
     if elem.tag == 'para' and len(elem)>=1:
         if len(elem[0]) >=1:
@@ -157,8 +146,10 @@ def infer_boldtext(xmlpath):
                     # para_idx = list(docroot).index(para)
                     # ET.dump(elem_text) # in tail or its child
                     # print('Yes')
-                    
-                    if len(elem_text.text) < 10 and elem_text.tail: # abstract within <text>
+                    if len(elem_text.text) > 10:
+                        pass
+
+                    elif elem_text.tail: # abstract within <text>
                         if len(elem_text.tail) > 10:
                             print(xmlpath)
                             ET.dump(elem_p)

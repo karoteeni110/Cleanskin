@@ -17,7 +17,8 @@ cleanedxml_path = join(results_path, 'cleaned_xml')
 cleanlog_path = join(results_path, 'cleaned_xml/logs/cleanlog.txt')
 
 no_sec_latex_path = join(results_path, 'no_section_latex')
-no_sec_xml = join(results_path, 'no_section_xml')
+no_sec_xml = join(results_path, 'no_sec_xml')
+cleaned_nonsecs = join(results_path, 'cleaned_nonsecs')
 metadatas_path = join(data_path, 'arxiv_metadata')
 
 if __name__ == "__main__":
