@@ -1,4 +1,4 @@
-from paths import results_path, data_path
+from paths import results_path, data_path, no_sec_xml
 from newCleaner import ignore_ns, get_root, mv_titles, retag_useless, is_section, removelist, is_empty_str
 from os.path import join
 from os import listdir

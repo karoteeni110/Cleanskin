@@ -235,7 +235,11 @@ def next_elem(current_idx, parent):
         return parent[current_idx+1]
 
 def normed_str(txt):
-    normed = normalize('NFKD', txt).strip()
+    if type(txt) == str:
+        t = txt
+    elif txt == None:
+        t = ''
+    normed = normalize('NFKD', t).strip()
     if is_empty_str(normed):
         normed = None
     return normed
@@ -247,16 +251,15 @@ def rm_inferred_ab(docroot):
         elem_p = para.find('p') # first <p>
         elem_text = elem_p.find('text') # first <text>
 
-        if elem_text.tail:
-            elem_text.tail = normed_str(elem_text.tail)
+        elem_text.text = normed_str(elem_text.text)
+        elem_text.tail = normed_str(elem_text.tail)
+
         if elem_text.text:
-            elem_text.text = normed_str(elem_text.text)
             if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
-                if len(elem_text.text) > 10 : # abstract within <text>
-                    elem_text.text = None # Remove the abstract 
-                elif elem_text.tail:
+                elem_text.text = None 
+                if elem_text.tail:
                     if len(elem_text.tail) > 10:
-                        elem_text.text = None
+                        elem_text.tail = None
 
 def clean(root):
     """Remove all the subelements that are not 
@@ -382,7 +385,7 @@ if __name__ == "__main__":
 
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
-    xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
+    xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
     # xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
     # xmlpath_list = [join(results_path, 'test.xml')]
 
