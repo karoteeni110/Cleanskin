@@ -213,19 +213,39 @@ def normed_str(txt):
         normed = None
     return normed
 
+def get_next_para(present_para, docroot):
+    present_para_idx = list(docroot).index(present_para)
+    idx = present_para_idx+1
+    while docroot[idx].tag != 'para' and idx < len(docroot):
+        idx+=1
+    if docroot[idx].tag == 'para':
+        return docroot[idx]
+
 def rm_inferred_ab(docroot):
     paras = docroot.findall("./para/p[1]/text[1]/../..")
 
     for para in paras:
         elem_p = para.find('p') # first <p>
-        elem_text = elem_p.find('text') # first <text>
+        if elem_p:
+            elem_text = elem_p.find('text') # first <text>
 
-        elem_text.text = normed_str(elem_text.text)
-        elem_text.tail = normed_str(elem_text.tail)
+            elem_text.text = normed_str(elem_text.text)
+            elem_text.tail = normed_str(elem_text.tail)
 
-        if elem_text.text:
-            if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
-                pass
+            if elem_text.text:
+                if elem_p.text == None and re.match('abstract', elem_text.text, flags=re.I):
+                    if len(normed_str(''.join(elem_p.itertext()))) <= 10:
+                        p_idx = 0
+                        while para[p_idx].tag != 'p':
+                            p_idx += 1
+                        try:
+                            para[p_idx+1].clear()
+                        except IndexError:
+                            nextpara = get_next_para(para, docroot)
+                            if nextpara:
+                                nextpara.clear()
+                    elem_p.clear()
+
 
 def clean(root):
     """Remove all the subelements that are not 

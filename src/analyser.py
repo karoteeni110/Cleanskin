@@ -1,5 +1,5 @@
 from paths import results_path, data_path, no_sec_xml
-from newCleaner import ignore_ns, get_root, mv_titles, retag_useless, is_section, removelist, is_empty_str
+from newCleaner import ignore_ns, get_root, mv_titles, retag_useless, is_section, removelist, is_empty_str, is_empty_elem
 from os.path import join
 from os import listdir
 import xml.etree.ElementTree as ET
@@ -92,7 +92,8 @@ def all_tags(docroot):
 def dp_next_para(present_para, docroot):
     present_para_idx = list(docroot).index(present_para)
     idx = present_para_idx+1
-    while docroot[present_para_idx].tag != 'para' and idx < len(docroot):
+    print('docroot len', len(docroot))
+    while docroot[idx].tag != 'para' and idx < len(list(docroot)):
         idx+=1
     if docroot[idx].tag == 'para':
         ET.dump(docroot[idx])
@@ -110,7 +111,6 @@ def infer_boldtext(xmlpath):
         paras = docroot.findall("./para/p[1]/text[1]/../..")
     
         for para in paras:
-
             elem_p = para.find('p')
             elem_text = elem_p.find('text') # first <p>, first <text>
 
@@ -119,8 +119,8 @@ def infer_boldtext(xmlpath):
             if elem_text.text:
                 intropt = r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)'
                 abspt = r'abstract'
-                if elem_p.text == None and re.match(abspt, elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
-                    if len(normed_str(''.join(elem_p.itertext()))) <= 10:
+                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I): #and len(para) == len(elem_p) == 1:
+                    if len(normed_str(''.join(elem_p.itertext()))) <= 15:
                         print(xmlpath)
                         ET.dump(elem_p)
                         p_idx = 0
@@ -165,6 +165,7 @@ def trav_xmls(rootdir):
             #     _ , root = get_root(xmlpath)
             infer_boldtext(xmlpath)
             # except ET.ParseError:
+
             #     continue
 
             
