@@ -288,6 +288,7 @@ def clean(root):
     
     if root.find('section') is None:
         infersecs(root)
+        root.set('sec_state', 'inferred')
 
 
     # ===== BFS operations: =====
@@ -377,7 +378,7 @@ def postcheck(root, errlog):
         # print('Empty ' + title + ' :' + xmlpath)
         errlog.write('2') # Empty sections
                                     
-    if not err:
+    if not err and not root.get('sec_state', False):
         errlog.write('0')
         root.set('sec_state', 'OK')
     else:
