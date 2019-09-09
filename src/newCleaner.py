@@ -172,14 +172,6 @@ def retag_sec_or_chap(rank1elem):
         for elem in rank1elem:
             retag_sec_or_chap(elem)
 
-def errtxt2tag(txt):
-    if txt[0] == '\\':
-        return txt[1:].lower()
-    elif txt[0] == '{':
-        return txt[1:-2].lower()
-    else:
-        return txt
-
 def infer_errelem(elem_err, following_elem):
     """Pick rank-1 <ERROR> that contains `infer_errtags` 
     and retag its following <para>s
@@ -246,6 +238,35 @@ def rm_inferred_ab(docroot):
                                 nextpara.clear()
                     elem_p.clear()
 
+def infer_sectitles(root):
+    paras = root.findall("./para/p[1]/text[1]/../..")
+    for para in paras:
+            elem_p = para.find('p')
+            elem_text = elem_p.find('text') 
+
+            elem_text.text = normed_str(elem_text.text)
+            elem_text.tail = normed_str(elem_text.tail)
+
+            if elem_text.text:
+                intropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
+                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I):
+                    # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
+                    if len(elem_text.text.split()) <= 5 and len(para.findall('p'))==1:
+                        elem_text.text = None
+                        elem_text.attrib.clear()
+                        elem_p.tag = 'para'
+                        elem_p.attrib.clear()
+                        flatten_elem(elem_p)
+                        para.tag = 'section'
+                        para.attrib.clear()
+                        para.set('title', 'Introduction')
+
+                        
+
+def infersecs(root):
+    infer_sectitles(root)
+    # reshape_paras(root)
+
 
 def clean(root):
     """Remove all the subelements that are not 
@@ -264,6 +285,10 @@ def clean(root):
 
     if root.find('abstract') is None:
         rm_inferred_ab(root)
+    
+    if root.find('section') is None:
+        infersecs(root)
+
 
     # ===== BFS operations: =====
     for i, rank1elem in enumerate(root):  # 1st pass
@@ -285,7 +310,7 @@ def clean(root):
         
         elif rank1elem.tag == 'para':
             flatten_elem(rank1elem)
-            
+
         else:
             toremove.append((root, rank1elem)) # NO modifying during iteration!
 
