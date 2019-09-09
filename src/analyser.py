@@ -108,21 +108,28 @@ def infer_boldtext(xmlpath):
         mv_titles(docroot)
 
         paras = docroot.findall("./para/p[1]/text[1]/../..")
-    
+        # paras = docroot.findall('./para/p[1]/emph[1]/../..')
+
+
         for para in paras:
             elem_p = para.find('p')
-            elem_text = elem_p.find('text') # first <p>, first <text>
+            elem_text = elem_p.find('text') # or  # first <p>, first <text>
+            # elem_text = elem_p.find('emph')
 
             elem_text.text = normed_str(elem_text.text)
             elem_text.tail = normed_str(elem_text.tail)
+
             if elem_text.text:
-                intropt = r'((i+\W|vi{0,4}\W|iv\W)?\bintroduction)'
+                intropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
                 abspt = r'abstract'
-                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I):
+                if elem_p.text == None and 'introduction' in elem_text.text.lower() :# re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
                     if len(elem_text.text.split()) <= 5:
                         # print(xmlpath)
-                        print(elem_text.text)
+                        if not re.match(intropt, elem_text.text, flags=re.I):
+                            ET.dump(elem_text)
+                        return True
+        
                         # ET.dump(elem_text)
                         # p_idx = 0
                         # while para[p_idx].tag != 'p':
@@ -159,20 +166,24 @@ def infer_boldtext(xmlpath):
 
 def trav_xmls(rootdir):
     # titlelengths = []
+    xmlcounter = 0
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
             # try:
             #     _ , root = get_root(xmlpath)
-            infer_boldtext(xmlpath)
+            if infer_boldtext(xmlpath):
+                xmlcounter += 1
             # except ET.ParseError:
 
             #     continue
 
             
             # show_text_starting_paras(xmlpath)
+    
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
+    print('%s xmls have tails on intro' % xmlcounter)
     # print('avg title length:', np.mean(titlelengths))
     # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
