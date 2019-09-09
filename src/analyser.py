@@ -124,10 +124,9 @@ def infer_boldtext(xmlpath):
                 abspt = r'abstract'
                 if elem_p.text == None and 'introduction' in elem_text.text.lower() :# re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
-                    if len(elem_text.text.split()) <= 5:
-                        # print(xmlpath)
-                        if not re.match(intropt, elem_text.text, flags=re.I):
-                            ET.dump(elem_text)
+                    if len(elem_text.text.split()) <= 5 and len(para.findall('p'))==1:
+                        print(xmlpath)
+                        ET.dump(para)
                         return True
         
                         # ET.dump(elem_text)
