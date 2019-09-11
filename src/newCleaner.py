@@ -251,7 +251,7 @@ def infer_sectitles(root):
                 # cintropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
                 if elem_p.text == None: #and re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
-                    if len(elem_text.text.split()) <= 8 and len(para.findall('p'))==1:
+                    if len(elem_text.text.split()) <= 8: # and len(para.findall('p'))==1:
                         para.tag = 'section' # retag <para> to <section>
                         para.attrib.clear()
                         elem_p.tag = 'para'  # retag <p> to <para>
@@ -262,7 +262,8 @@ def infer_sectitles(root):
                         flatten_elem(elem_p) # flatten the new <para>
                         
 def infersecs(root):
-    infer_sectitles(root)
+    pass
+    # infer_sectitles(root)
     # reshape_paras(root)
 
 
@@ -412,7 +413,7 @@ if __name__ == "__main__":
                 metadata = id2meta.pop(artid) # get retrive faster
             except KeyError as e:
                 metadata = defaultdict(str)
-                print('Metadata not found:', e)
+                # print('Metadata not found:', e)
             # === 
 
             try:
