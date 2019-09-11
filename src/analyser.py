@@ -65,12 +65,12 @@ def title_lens(xmlpath):
 
         lengths = []
         for sec in root.findall('.//section'):
-            l = normed_str(sec.get('title', ''))
+            l = sec.get('title', '') # normed_str(sec.get('title', ''))
             if l:
-                lengths.append(len(l))
-                if len(l)<=4:
-                    print(xmlpath)
-                    print('short title:', sec.get('title')) 
+                lengths.append(len(l.split()))
+            # if len(l.split()) > 10:
+            #     print(xmlpath)
+            #     print(l)
         return lengths
 
     except ET.ParseError:
@@ -128,51 +128,20 @@ def infer_boldtext(xmlpath):
                         print(xmlpath)
                         ET.dump(para)
                         return True
-        
-                        # ET.dump(elem_text)
-                        # p_idx = 0
-                        # while para[p_idx].tag != 'p':
-                        #     p_idx += 1
-                        # if len(para) > p_idx+1:
-                        #     ET.dump(para[p_idx+1])
-                        # else:
-                        #     dp_next_para(para, docroot)
-
-                    # if not elem_text.tail:
-                    #     # in its child
-                    #     if len(elem_text) >=10:
-                    #         pass
-                    #     # content in next para:
-                    #     try:
-                    #         next_para_idx = para_idx+1
-                    #         while docroot[next_para_idx].tag != 'para' or normed_str(''.join(docroot[next_para_idx].itertext())) == '':
-                    #             next_para_idx += 1
-                    #         print('Next para:')
-                    #         ET.dump(docroot[next_para_idx])
-                    #         # pp = pprint.PrettyPrinter(indent=4)
-                    #         # pp.pprint('next para text (normed):' + '[' + ''.join(docroot[next_para_idx].itertext()) +']')
-
-                    #         # content in its child:
-
-                    #         # in sibling:
-                    #     except IndexError:
-                    #         print('No next para')
-                    # print()
 
 
     except ET.ParseError:
         pass
 
 def trav_xmls(rootdir):
-    # titlelengths = []
-    xmlcounter = 0
+    titlelengths = []
+    # xmlcounter = 0
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
             # try:
             #     _ , root = get_root(xmlpath)
-            if infer_boldtext(xmlpath):
-                xmlcounter += 1
+            titlelengths.extend(title_lens(xmlpath))
             # except ET.ParseError:
 
             #     continue
@@ -182,11 +151,11 @@ def trav_xmls(rootdir):
     
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    print('%s xmls have tails on intro' % xmlcounter)
-    # print('avg title length:', np.mean(titlelengths))
-    # print('std:', np.std(titlelengths))
+    # print('%s xmls have tails on intro' % xmlcounter)
+    print('avg title length:', np.mean(titlelengths))
+    print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'no_sec_xml')
+    rootdir = join(results_path, 'cleaned_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)
@@ -202,8 +171,8 @@ if __name__ == "__main__":
     # print(all_childtags(freqdist))
 
 
-
-
+    # avg title length (words): 3.14261219941 ; std: 2.54380398459 
+    # avg title length (chars): 24.3376484204 ; std: 16.4747358315 
 
     # tag full set:
     # {'backmatter', 'bibrefphrase', 'dots', 'rect', 'polygon', 
@@ -255,4 +224,4 @@ if __name__ == "__main__":
 
     # [('bold', 745), (None, 369), ('italic', 273), ('slanted', 48), ('smallcaps', 38), ('sansserif', 19), ('typewriter', 13), ('normal', 4), ('bold italic', 3), ('bold smallcaps', 1), ('bold slanted', 1)]
 
-    # avg section title length: 24.3376484204 ; std: 16.4747358315
+    

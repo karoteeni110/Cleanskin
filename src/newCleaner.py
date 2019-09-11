@@ -248,10 +248,10 @@ def infer_sectitles(root):
             elem_text.tail = normed_str(elem_text.tail)
 
             if elem_text.text:
-                intropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
-                if elem_p.text == None and re.match(intropt, elem_text.text, flags=re.I):
+                # cintropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
+                if elem_p.text == None: #and re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
-                    if len(elem_text.text.split()) <= 5 and len(para.findall('p'))==1:
+                    if len(elem_text.text.split()) <= 8 and len(para.findall('p'))==1:
                         elem_text.text = None
                         elem_text.attrib.clear()
                         elem_p.tag = 'para'
@@ -262,7 +262,6 @@ def infer_sectitles(root):
                         para.set('title', 'Introduction')
 
                         
-
 def infersecs(root):
     infer_sectitles(root)
     # reshape_paras(root)
