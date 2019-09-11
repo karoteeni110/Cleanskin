@@ -124,9 +124,11 @@ def normalize_title(title):
     normed_title = normalize('NFKD', ''.join(title.itertext())).strip() # remove unicode chars, strip spaces
     normed_title = re.sub('\n', ' ', normed_title) # space in place of new lines
     
-    # == Remove numerals at the beginning of the title str
-    remove_num_pt= r'(^(\W)?(i+|vi{0,4}|iv|\d+)\W+)'
+    # == Remove numerals at the beginning
+    remove_num_pt= r'(^(\W)?(i{1,3}|vi{0,4}|iv|\d+)\W+)'
     normed_title = re.sub(remove_num_pt, '', normed_title, flags=re.I)
+    # == Remove the 
+    normed_title = re.sub(r'\W+$', '', normed_title)
     # ==
     
     if normed_title.isspace():
