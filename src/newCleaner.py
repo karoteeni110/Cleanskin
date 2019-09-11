@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
-from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001
+from paths import data_path, results_path, rawxmls_path, cleanlog_path, \
+    cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001, cleaned_tmp0001_dir
 from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir
@@ -388,6 +389,8 @@ def postcheck(root, errlog):
         errlog.write('3') # Metadata not found
     errlog.write('\n ================================== \n')
 
+def get_xmlpathlist(dirname):
+    return [join(dirname, fn) for fn in listdir(dirname) if fn[-3:] == 'xml']
 
 if __name__ == "__main__":
     # Set verbose
@@ -397,14 +400,14 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     # Set paths to dirty XMLs
-    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
+    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
     # xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
-    # xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
+    xmlpath_list = get_xmlpathlist(tmp_0001)
     # xmlpath_list = [join(results_path, 'test.xml')]
 
     # Cleaning
     begin = time.time()
-    with open(cleanlog_path, 'w') as cleanlog:
+    with open(cleanlog_path, 'a') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             xml = basename(xmlpath)
 
@@ -420,14 +423,14 @@ if __name__ == "__main__":
             try:
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
-                print('Skipped: ParseError at %s' % xmlpath)
-                cleanlog.write(xmlpath + ' \n' + 'ParseError. \n' + '================================== \n')
+                print('Skipped: ParseError at %s' % xml)
+                cleanlog.write(xml + ' \n' + 'ParseError. \n' + '================================== \n')
                 continue
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
-            tree.write(join(cleanedxml_path, xml))
-            # tree.write(join(results_path, xml))
+            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(cleaned_tmp0001_dir, xml))
             # tree.write(join(cleaned_nonsecs, xml))
 
             if VERBOSE:
