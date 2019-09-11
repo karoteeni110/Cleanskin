@@ -384,7 +384,7 @@ def postcheck(root, errlog):
     else:
         root.set('sec_state', 'full-text')
     
-    if not root.find('abstract', False):
+    if not root.get('categories'):
         errlog.write('3') # Metadata not found
     errlog.write('\n ================================== \n')
 
