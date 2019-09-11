@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import sys, re
-from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path, no_sec_xml, cleaned_nonsecs
+from paths import data_path, results_path, rawxmls_path, cleanlog_path, cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001
 from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir
@@ -396,8 +396,8 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     # Set paths to dirty XMLs
-    # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
-    xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
+    xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
+    # xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
     # xmlpath_list = [join(rawxmls_path, '=physics0002007.xml')]
     # xmlpath_list = [join(results_path, 'test.xml')]
 
@@ -410,7 +410,7 @@ if __name__ == "__main__":
             # === Get title, author, abstract, categories from metadata ===
             artid = fname2artid(xml)
             try:
-                metadata = id2meta.pop(artid) # get retrive faster
+                metadata = id2meta.pop(artid) # Use `pop` to get retriving faster
             except KeyError as e:
                 metadata = defaultdict(str)
                 # print('Metadata not found:', e)
@@ -425,9 +425,9 @@ if __name__ == "__main__":
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
-            # tree.write(join(cleanedxml_path, xml))
+            tree.write(join(cleanedxml_path, xml))
             # tree.write(join(results_path, xml))
-            tree.write(join(cleaned_nonsecs, xml))
+            # tree.write(join(cleaned_nonsecs, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):

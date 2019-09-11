@@ -21,6 +21,8 @@ no_sec_xml = join(results_path, 'no_sec_xml')
 cleaned_nonsecs = join(results_path, 'cleaned_nonsecs')
 metadatas_path = join(data_path, 'arxiv_metadata')
 
+tmp_0001 = join('/tmp/arxiv', '0001')
+
 if __name__ == "__main__":
     # Check that we are reading the correct file
     print('src', src_path)

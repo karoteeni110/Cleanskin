@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     # avg title length (words): 3.14261219941 ; std: 2.54380398459 
     # avg title length (chars): 24.3376484204 ; std: 16.4747358315 
-    # Percentage of titles that is of length shorter than 8: 0.95962107248489
+    # Percentage of titles with length shorter than 8: 0.95962107248489
 
     # tag full set:
     # {'backmatter', 'bibrefphrase', 'dots', 'rect', 'polygon', 
@@ -208,19 +208,7 @@ if __name__ == "__main__":
     # ('\\subtitle', 9), ('\\numberofauthors', 8), ('\\beginfigure', 8), ('\\corollary', 8), ('\\chapter', 7), 
     # ('\\theorem', 7), ('\\figcaption', 7), ('\\+', 6), ('\\articletitle', 6), ('\\name', 6), ('\\begintable', 6), 
     # ('\\proposition', 6), ('\\preprintnumber', 5), ('\\fulladdresses', 5), ('\\wocname', 5), ('\\xyoption', 5), 
-    # ('\\newdir', 4), ('\\ignore', 4), ('\\KeyWords', 4), ('\\lefthead', 4), ('\\evenpagefooter', 4), ('\\newarrow', 4), 
-    # ('\\@maketitle', 4), ('\\authorrunninghead', 4), ('\\SubSection', 4), ('\\example', 4), ('\\algorithm', 4), 
-    # ('\\subsubsection', 3), ('\\affiliation', 3), ('\\templatetype', 3), ('\\verticaladjustment', 3), 
-    # ('\\dropcap', 3), ('\\titlehead', 3), ('\\titleb', 3), ('\\authorb', 3), ('\\addressb', 3), ('\\submitb', 3), 
-    # ('{summary}', 3), ('\\resthead', 3), ('\\newtheorem', 3), ('\\newdefinition', 3), ('{opening}', 3), 
-    # ('\\title', 3), ('\\paperauthor', 3), ('\\addbibresource', 3), ('\\primaryclass', 3), ('\\rec', 3), 
-    # ('\\checkfont', 3), ('\\HideDisplacementBoxes', 3), ('\\authoremail', 3), ('\\definecolor', 2), 
-    # ('{lemma}', 2), ('\\textlineskip', 2), ('\\upharpoonright', 2), ('\\toctitle', 2), ('\\oddsidemargin', 2), 
-    # ('\\summary', 2), ('\\woctitle', 2), ('{fmffile}', 2), ('{CJK*}', 2), ('\\bibpunct', 2), 
-    # ('\\author', 2), ('\\abstract', 2), ('\\Author', 2), ('\\newproof', 2), ('\\date', 2), 
-    # ('\\Abstract', 2), ('\\NewEnviron', 2), ('\\volumenumber', 2), ('\\asciiabstract', 2), 
-    # ('\\secondaryclass', 2), ('\\authorinfo', 2), ('\\euro', 2), ('{PACS}', 2), ('\\category', 2), 
-    # ('\\terms', 2), ('\\newfloatcommand', 2), ('\\runninghead', 2), ('\\DeclareUnicodeCharacter', 2), ('\\question', 2)
+
 
     # <text> fonts:
     # {'slanted', 'sansserif', 'caligraphic', 'italic', 'smallcaps', 'normal', 'bold italic', 'bold smallcaps', 'typewriter', 'bold', 'bold slanted'}
