@@ -285,9 +285,9 @@ def clean(root):
     if root.find('abstract') is None:
         rm_inferred_ab(root)
     
-    if root.find('section') is None:
-        infersecs(root)
-        root.set('sec_state', 'inferred')
+    # if root.find('section') is None:
+    #     infersecs(root)
+    #     root.set('sec_state', 'inferred')
 
 
     # ===== BFS operations: =====
@@ -365,14 +365,15 @@ def postcheck(root, errlog):
     err = False
     errlog.write(xmlpath + ' \n')
 
-    if root.find('section') is None: # If abstract/section not found OR section is acknowledgement/figure caption/references
+    findsec = root.find('section')
+    if findsec is None: # If abstract/section not found OR section is acknowledgement/figure caption/references
         err = True
         # print(title + ' absent: ' + xmlpath)
         errlog.write('1') # No sections
     
     # If sections exist but is empty
 
-    elif root.find('section') is False:
+    elif findsec is False:
         err = True
         # print('Empty ' + title + ' :' + xmlpath)
         errlog.write('2') # Empty sections
@@ -383,7 +384,7 @@ def postcheck(root, errlog):
     else:
         root.set('sec_state', 'full-text')
     
-    if not root.get('abstract', False):
+    if not root.find('abstract', False):
         errlog.write('3') # Metadata not found
     errlog.write('\n ================================== \n')
 
@@ -437,5 +438,5 @@ if __name__ == "__main__":
     t = t/60
     print(len(xmlpath_list), 'files in %s mins' % t)
 
-    # With metadata:
-    # 5163 files in 5.088259251912435 mins
+    # With metadata: (11.09.2019)
+    # 5164 files in 6.320970141887665 mins 
