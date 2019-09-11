@@ -252,15 +252,14 @@ def infer_sectitles(root):
                 if elem_p.text == None: #and re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
                     if len(elem_text.text.split()) <= 8 and len(para.findall('p'))==1:
+                        para.tag = 'section' # retag <para> to <section>
+                        para.attrib.clear()
+                        elem_p.tag = 'para'  # retag <p> to <para>
+                        elem_p.attrib.clear()
+                        para.set('title', normed_str(elem_text.text)) # move title to <section>
                         elem_text.text = None
                         elem_text.attrib.clear()
-                        elem_p.tag = 'para'
-                        elem_p.attrib.clear()
-                        flatten_elem(elem_p)
-                        para.tag = 'section'
-                        para.attrib.clear()
-                        para.set('title', 'Introduction')
-
+                        flatten_elem(elem_p) # flatten the new <para>
                         
 def infersecs(root):
     infer_sectitles(root)

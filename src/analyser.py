@@ -151,9 +151,11 @@ def trav_xmls(rootdir):
     
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
+    titlelengths = np.array(titlelengths)
     # print('%s xmls have tails on intro' % xmlcounter)
-    print('avg title length:', np.mean(titlelengths))
-    print('std:', np.std(titlelengths))
+    # print('Percentage of titles that is of length shorter than 8:', titlelengths[titlelengths<=8].shape[0] / titlelengths.shape[0] )
+    # print('avg title length:', np.mean(titlelengths))
+    # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
     rootdir = join(results_path, 'cleaned_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
@@ -173,6 +175,7 @@ if __name__ == "__main__":
 
     # avg title length (words): 3.14261219941 ; std: 2.54380398459 
     # avg title length (chars): 24.3376484204 ; std: 16.4747358315 
+    # Percentage of titles that is of length shorter than 8: 0.95962107248489
 
     # tag full set:
     # {'backmatter', 'bibrefphrase', 'dots', 'rect', 'polygon', 
