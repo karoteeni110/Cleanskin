@@ -14,7 +14,8 @@ rawxmls_path = join(results_path, 'latexml')
 errcase_path = join(results_path, 'latexml/errcp')
 
 cleanedxml_path = join(results_path, 'cleaned_xml')
-cleanlog_path = join(results_path, 'cleaned_xml/logs/cleanlog.txt')
+# cleanlog_path = join(results_path, 'cleaned_xml/logs/cleanlog.txt')
+cleanlog_path = join(results_path, 'tmp0001_log.txt')
 
 no_sec_latex_path = join(results_path, 'no_section_latex')
 no_sec_xml = join(results_path, 'no_sec_xml')

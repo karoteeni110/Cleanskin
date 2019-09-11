@@ -40,9 +40,9 @@ def get_urlid2meta(metadirpath = metadatas_path):
     
     metaxml_list = listdir(metadirpath)
     # metaxml_list = ['Physics.xml']
-    for metaxml in metaxml_list: #
+    for i, metaxml in enumerate(metaxml_list): #
         if metaxml[-3:] == 'xml':
-            print('Reading', metaxml, '...')
+            print('Reading', metaxml, '...', '%s/%s' % (i+1, len(metadirpath)))
             cate_meta_path = join(metadirpath, metaxml)
             ith_id2meta = read_metaxml(cate_meta_path) 
             id2meta.update(ith_id2meta)
