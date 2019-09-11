@@ -26,8 +26,6 @@ infer_errtags = {'abstract', 'address', 'affil', 'refb', 'reference', 'keywords'
 all_tags = keeplist + removelist + sec_tags + sec_attribs + inferables + ['abstract', 'author'] 
 nonsec_titles = ['acknowledgements', 'acknowledgement', 'acknowledgment', 'acknowledgments', 'references', 'figure captions']
 
-remove_num_pt= r'((?!i+\W|vi{0,4}\W|iv\W)\b[a-z]+(\s)?)+'
-
 def ignore_ns(root):
     '''Clean namespace in the node's tag. Should be called in the first place.
     '''
@@ -126,10 +124,9 @@ def normalize_title(title):
     normed_title = normalize('NFKD', ''.join(title.itertext())).strip() # remove unicode chars, strip spaces
     normed_title = re.sub('\n', ' ', normed_title) # space in place of new lines
     
-    # == Remove numerals before title
-    ttmatch = re.search(remove_num_pt, normed_title, flags=re.I) 
-    if ttmatch != None:
-        normed_title = ttmatch.group(0)
+    # == Remove numerals at the beginning of the title str
+    remove_num_pt= r'(^(\W)?(i+|vi{0,4}|iv|\d+)\W+)'
+    normed_title = re.sub(remove_num_pt, '', normed_title, flags=re.I)
     # ==
     
     if normed_title.isspace():

@@ -122,11 +122,12 @@ def infer_boldtext(xmlpath):
             if elem_text.text:
                 intropt = r'((\W)?(1|0|i+|vi{0,4}|iv)?(\W)*?introduction)'
                 abspt = r'abstract'
-                if elem_p.text == None and 'introduction' in elem_text.text.lower() :# re.match(intropt, elem_text.text, flags=re.I):
+                if elem_p.text == None and 'introduction' in elem_text.text.lower():# re.match(intropt, elem_text.text, flags=re.I):
                     # if len(normed_str(''.join(elem_p.itertext()))) >= 15:
-                    if len(elem_text.text.split()) <= 5 and len(para.findall('p'))==1:
-                        print(xmlpath)
-                        ET.dump(para)
+                    if len(elem_text.text.split()) > 1 and len(para.findall('p'))==1:
+                        # print(xmlpath)
+                        print(elem_text.text)
+                        # ET.dump(para)
                         return True
 
 
@@ -134,14 +135,15 @@ def infer_boldtext(xmlpath):
         pass
 
 def trav_xmls(rootdir):
-    titlelengths = []
+    # titlelengths = []
     # xmlcounter = 0
     for i, xml in enumerate(listdir(rootdir)):
         if xml[-3:] == 'xml':
             xmlpath = join(rootdir, xml)
             # try:
             #     _ , root = get_root(xmlpath)
-            titlelengths.extend(title_lens(xmlpath))
+            # titlelengths.extend(title_lens(xmlpath))
+            infer_boldtext(xmlpath)
             # except ET.ParseError:
 
             #     continue
@@ -151,13 +153,13 @@ def trav_xmls(rootdir):
     
         if i % 100 == 0:
             print(i, 'of', len(listdir(rootdir)), '...')
-    titlelengths = np.array(titlelengths)
+    # titlelengths = np.array(titlelengths)
     # print('%s xmls have tails on intro' % xmlcounter)
     # print('Percentage of titles that is of length shorter than 8:', titlelengths[titlelengths<=8].shape[0] / titlelengths.shape[0] )
     # print('avg title length:', np.mean(titlelengths))
     # print('std:', np.std(titlelengths))
 if __name__ == "__main__":
-    rootdir = join(results_path, 'cleaned_xml')
+    rootdir = join(results_path, 'no_sec_xml')
     # pklpath = join(results_path, '1stnodes_after.pkl')
     # rank1tags_freqdist = get_rank1tags_freqdist(rootdir, oldpkl=pklpath)
     # show_most_common(rank1tags_freqdist, 20)

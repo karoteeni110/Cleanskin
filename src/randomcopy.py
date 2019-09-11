@@ -15,7 +15,7 @@ def copyten(cp=10):
 
 
 if __name__ == "__main__":   
-    if sys.argv[1]: 
+    if len(sys.argv)>1: 
         copyten(int(sys.argv[1]))
     else:
         copyten()
