@@ -80,8 +80,8 @@ def tarn_no_ext(tar_fn):
     return tar_fn[:4]
 
 def tarback(tar_fn):
-    cmd = 'if cd %s; then tar -czf ../new_arxiv/%s %s/; fi' % ('/tmp/arxiv', tar_fn, tarn_no_ext(tar_fn))  
-    run_and_report_done('%s of %s Done: /tmp/new_arxiv/%s' % (i+1, len(tarlist),tar_fn), cmd)
+    cmd = 'if cd %s; then tar -czf /cs/group/grp-glowacka/arxiv/cleaned_xml/%s %s/; fi' % ('/tmp/arxiv', tar_fn, tarn_no_ext(tar_fn))  
+    run_and_report_done('%s of %s Done: /cs/.../cleaned_xml/%s' % (i+1, len(tarlist),tar_fn), cmd)
 
 def rm_cleansed_dir(tar_fn):
     dirn = tarn_no_ext(tar_fn)
@@ -99,7 +99,7 @@ def main(tar_fn):
 if __name__ == "__main__":
     # tarlist = ['0001.tar.gz']
     tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') \
-                if fn[-2:] == 'gz' and fn not in listdir('/tmp/new_arxiv')]
+                if fn[-2:] == 'gz' and fn not in listdir('/cs/group/grp-glowacka/arxiv/cleaned_xml')]
 
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 500
