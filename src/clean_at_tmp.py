@@ -33,9 +33,9 @@ def cleanse(tar_fn):
 
     begin = time.time()
 
-
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
+            writeout = True
             xml = basename(xmlpath)
 
             # === Get title, author, abstract, categories from metadata ===
@@ -51,12 +51,14 @@ def cleanse(tar_fn):
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
                 print('Skipped: ParseError at %s' % xml)
+                remove(xmlpath)
                 cleanlog.write(xml + ' \n' + 'ParseError \n' + '================================== \n')
                 continue
             clean(root)
             add_metamsg(root, xml, metadata)
             postcheck(root, cleanlog)
-            tree.write(join(src_dst_dir, xml))
+            if writeout:
+                tree.write(join(src_dst_dir, xml))
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
@@ -71,27 +73,21 @@ def tarn_no_ext(tar_fn):
     return tar_fn[:4]
 
 def tarback(tar_fn):
-    cmd = 'tar -czf %s %s/' % (tar_fn, tarn_no_ext(tar_fn))  
-    run_and_report_done('Tarred back: %s' % tar_fn, cmd)
+    cmd = 'if cd %s; then tar -czf ../new_arxiv/%s %s/; fi' % ('/tmp/arxiv', tar_fn, tarn_no_ext(tar_fn))  
+    run_and_report_done('%s of %s Done: /tmp/new_arxiv/%s' % (i+1, len(tarlist),tar_fn), cmd)
 
 def rm_cleansed_dir(tar_fn):
     dirn = tarn_no_ext(tar_fn)
     rmtree(join('/tmp/arxiv', dirn))
     print('Old dir /tmp/arxiv/%s removed' % dirn)
 
-def mv_newtar(tar_fn):
-    move(join('/tmp/arxiv', tar_fn), join('/tmp/new_arxiv', tar_fn))
-    print('/tmp/new_arxiv/%s' % tar_fn, 'DONE:', (i+1, len(tarlist)))
-
 def main(tar_fn):
     cp_1tar(tar_fn)
     unzip_1tar(tar_fn)
-    exit(0)
     rm_oldtar(tar_fn)
     cleanse(tar_fn)
     tarback(tar_fn)
     rm_cleansed_dir(tar_fn)
-    mv_newtar(tar_fn)
 
 if __name__ == "__main__":
     tarlist = ['0001.tar.gz']
