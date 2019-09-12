@@ -32,7 +32,7 @@ def cleanse(tar_fn):
     cleanlog_path = join(results_path, 'tmplog.txt')
 
     begin = time.time()
-
+    print('Cleaning... %s' % tar_fn)
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             writeout = True
@@ -58,7 +58,7 @@ def cleanse(tar_fn):
             add_metamsg(root, xml, metadata)
             postcheck(root, cleanlog, xml)
             if writeout:
-                tree.write(join(src_dst_dir, xml))
+                tree.write(xmlpath_list)
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
