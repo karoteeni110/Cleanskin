@@ -63,7 +63,7 @@ def cleanse(tar_fn):
 
 def tarn_no_ext(tar_fn):
     """Return the first 4 chars"""
-    return tar_fn[:5]
+    return tar_fn[:4]
 
 def tarback(tar_fn):
     cmd = 'tar -czf %s %s/' % (tar_fn, tarn_no_ext(tar_fn))  
