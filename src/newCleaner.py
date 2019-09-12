@@ -353,7 +353,7 @@ def add_metamsg(docroot, fname, metadata):
             subelem.text = metadata[attr]
             docroot.insert(0, subelem)
 
-def postcheck(root, errlog):
+def postcheck(root, errlog, xml):
     """Check if: 1) section is absent/empty; 2) metadata has been added to the root attrib
     WRITE OUT the result to log: 
             0: section OK
@@ -363,7 +363,7 @@ def postcheck(root, errlog):
     MODIFIES root attribute `sec_state`: set to OK/full-text 
     """
     err = False
-    errlog.write(xmlpath + ' \n')
+    errlog.write(xml + ' \n')
 
     findsec = root.find('section')
     if findsec is None: # If abstract/section not found OR section is acknowledgement/figure caption/references

@@ -56,7 +56,7 @@ def cleanse(tar_fn):
                 continue
             clean(root)
             add_metamsg(root, xml, metadata)
-            postcheck(root, cleanlog)
+            postcheck(root, cleanlog, xml)
             if writeout:
                 tree.write(join(src_dst_dir, xml))
 
