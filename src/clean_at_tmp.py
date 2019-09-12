@@ -33,7 +33,7 @@ def cleanse(tar_fn):
 
     begin = time.time()
     print('Cleaning... %s' % tar_fn)
-    with open(cleanlog_path, 'w') as cleanlog:
+    with open(cleanlog_path, 'a') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             writeout = True
             xml = basename(xmlpath)
@@ -90,8 +90,8 @@ def main(tar_fn):
     rm_cleansed_dir(tar_fn)
 
 if __name__ == "__main__":
-    tarlist = ['0001.tar.gz']
-    # # tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') if fn[-2:] == 'gz']
+    # tarlist = ['0001.tar.gz']
+    tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') if fn[-2:] == 'gz']
 
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 500
