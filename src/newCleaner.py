@@ -125,7 +125,7 @@ def normalize_title(title):
     normed_title = re.sub('\n', ' ', normed_title) # space in place of new lines
     
     # == Remove numerals at the beginning
-    remove_num_pt= r'(^(\W)?(i{1,3}|vi{0,4}|iv|\d+)\W+)'
+    remove_num_pt= r'(^(\W)?(i{1,3}|vi{0,4}|iv|\d+)\W+(\d\W+)?)'
     normed_title = re.sub(remove_num_pt, '', normed_title, flags=re.I)
     # == Remove the 
     normed_title = re.sub(r'\W+$', '', normed_title)
@@ -401,12 +401,12 @@ if __name__ == "__main__":
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
     # xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
-    xmlpath_list = get_xmlpathlist(tmp_0001)
-    # xmlpath_list = [join(results_path, 'test.xml')]
+    # xmlpath_list = get_xmlpathlist(tmp_0001)
+    xmlpath_list = [join(tmp_0001, 'nlin0001010.xml')]
 
     # Cleaning
     begin = time.time()
-    with open(cleanlog_path, 'a') as cleanlog:
+    with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             xml = basename(xmlpath)
 
