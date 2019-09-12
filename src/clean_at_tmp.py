@@ -3,6 +3,7 @@ from subprocess import run, PIPE, CalledProcessError
 from shutil import copyfile, copytree, rmtree, move
 from os import listdir, remove
 from os.path import join
+from paths import results_path
 
 def run_and_report_done(done_msg, cmd):
     try:
@@ -18,7 +19,7 @@ def cp_1tar(tar_fn):
     _ = copyfile(src_tarpath, dst_tarpath)
 
 def unzip_1tar(tar_fn):
-    cmd = 'tar -xzf %s' % join('/tmp/arxiv', tar_fn)
+    cmd = 'if cd %s ; then tar -xzf %s; fi' % ('/tmp/arxiv', tar_fn)
     run_and_report_done('%s unzipped ...' % tar_fn, cmd)
     
 def rm_oldtar(tar_fn):
@@ -28,7 +29,11 @@ def rm_oldtar(tar_fn):
 def cleanse(tar_fn):
     src_dst_dir = '/tmp/arxiv'
     xmlpath_list = get_xmlpathlist(join(src_dst_dir, tarn_no_ext(tar_fn)))
+    cleanlog_path = join(results_path, 'tmplog.txt')
+
     begin = time.time()
+
+
     with open(cleanlog_path, 'w') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             xml = basename(xmlpath)
@@ -81,6 +86,7 @@ def mv_newtar(tar_fn):
 def main(tar_fn):
     cp_1tar(tar_fn)
     unzip_1tar(tar_fn)
+    exit(0)
     rm_oldtar(tar_fn)
     cleanse(tar_fn)
     tarback(tar_fn)
