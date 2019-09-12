@@ -98,7 +98,8 @@ def main(tar_fn):
 
 if __name__ == "__main__":
     # tarlist = ['0001.tar.gz']
-    tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') if fn[-2:] == 'gz']
+    tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') \
+                if fn[-2:] == 'gz' and fn not in listdir('/tmp/new_arxiv')]
 
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 500

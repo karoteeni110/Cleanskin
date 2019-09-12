@@ -207,11 +207,14 @@ def normed_str(txt):
 
 def get_next_para(present_para, docroot):
     present_para_idx = list(docroot).index(present_para)
-    idx = present_para_idx+1
-    while docroot[idx].tag != 'para' and idx < len(docroot):
-        idx+=1
-    if docroot[idx].tag == 'para':
-        return docroot[idx]
+    if present_para_idx != len(list(docroot))-1:
+        idx = present_para_idx+1
+        while docroot[idx].tag != 'para' and idx < len(docroot):
+            idx+=1
+        if docroot[idx].tag == 'para':
+            return docroot[idx]
+    else:
+        return None
 
 def rm_inferred_ab(docroot):
     paras = docroot.findall("./para/p[1]/text[1]/../..")
