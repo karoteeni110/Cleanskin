@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import sys, re
-from paths import data_path, results_path, rawxmls_path, cleanlog_path, \
-    cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001, cleaned_tmp0001_dir
+# from paths import data_path, results_path, rawxmls_path, cleanlog_path, \
+#     cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001, cleaned_tmp0001_dir
 from metadata import get_urlid2meta
 from os.path import join, basename
 from os import listdir

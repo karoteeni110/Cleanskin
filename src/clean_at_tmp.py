@@ -88,7 +88,7 @@ def main(tar_fn):
     mv_newtar(tar_fn)
 
 if __name__ == "__main__":
-    tarlist = [join('/cs/group/grp-glowacka/arxiv/xml', '0001.tar.gz')]
+    tarlist = ['0001.tar.gz']
     # # tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') if fn[-2:] == 'gz']
 
     # Set verbose
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     for i, tarfn in enumerate(tarlist):
-        print('Tarball %s of %s ...', (i+1, len(tarlist)))
+        print('Tarball %s of %s ...' % (i+1, len(tarlist)))
         main(tarfn)
 
     # run_and_report_done('TRY ECHO:', 'hahahahha')
