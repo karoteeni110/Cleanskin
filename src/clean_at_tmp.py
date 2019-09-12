@@ -58,7 +58,7 @@ def cleanse(tar_fn):
             add_metamsg(root, xml, metadata)
             postcheck(root, cleanlog, xml)
             if writeout:
-                tree.write(xmlpath_list)
+                tree.write(xmlpath)
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
