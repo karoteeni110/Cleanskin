@@ -53,7 +53,6 @@ def cleanse(tar_fn):
             postcheck(root, cleanlog)
             tree.write(join(src_dst_dir, xml))
 
-
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
                     print('%s of %s ...' % (i+1, len(xmlpath_list)))
@@ -68,13 +67,16 @@ def tarn_no_ext(tar_fn):
 
 def tarback(tar_fn):
     cmd = 'tar -czf %s %s/' % (tar_fn, tarn_no_ext(tar_fn))  
-    run(cmd)
+    run_and_report_done('Tarred back: %s' % tar_fn, cmd)
 
 def rm_cleansed_dir(tar_fn):
-    pass
+    dirn = tarn_no_ext(tar_fn)
+    rmtree(join('/tmp/arxiv', dirn))
+    print('Old dir /tmp/arxiv/%s removed' % dirn)
 
 def mv_newtar(tar_fn):
     move(join('/tmp/arxiv', tar_fn), join('/tmp/new_arxiv', tar_fn))
+    print('/tmp/new_arxiv/%s' % tar_fn, 'DONE:', (i+1, len(tarlist)))
 
 def main(tar_fn):
     cp_1tar(tar_fn)
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     # # tarlist = [fn for fn in listdir('/cs/group/grp-glowacka/arxiv/xml') if fn[-2:] == 'gz']
 
     # Set verbose
-    VERBOSE, REPORT_EVERY = True, 100
+    VERBOSE, REPORT_EVERY = True, 500
 
     # Read metadata for all articles
     id2meta = get_urlid2meta() # 1 min
