@@ -7,19 +7,18 @@ from paths import results_path
 import logging
 
 level    = logging.INFO
-format   = '  %(message)s'
+format   = '%(message)s'
 handlers = [logging.FileHandler('tmp_tar.log'), logging.StreamHandler()]
 
 logging.basicConfig(level = level, format = format, handlers = handlers)
-logging.info('Hey, this is working!')
 
 def run_and_report_done(done_msg, cmd):
     try:
         run(cmd, shell=True, stderr=PIPE, check=True)
     except CalledProcessError as e:
-        print(e.stderr.decode('utf-8'))
+        logging.info(e.stderr.decode('utf-8'))
     else: 
-        print(done_msg)
+        logging.info(done_msg)
 
 def cp_1tar(tar_fn):
     src_tarpath = join('/cs/group/grp-glowacka/arxiv/xml', tar_fn)
@@ -32,7 +31,7 @@ def unzip_1tar(tar_fn):
     
 def rm_oldtar(tar_fn):
     remove(join('/tmp/arxiv', tar_fn))
-    print('Old tar /tmp/arxiv/%s removed' % tar_fn)
+    logging.info('Old tar /tmp/arxiv/%s removed' % tar_fn)
 
 def cleanse(tar_fn):
     src_dst_dir = '/tmp/arxiv'
@@ -40,7 +39,7 @@ def cleanse(tar_fn):
     cleanlog_path = join(results_path, 'tmplog.txt')
 
     begin = time.time()
-    print('Cleaning... %s' % tar_fn)
+    logging.info('Cleaning... %s' % tar_fn)
     with open(cleanlog_path, 'a') as cleanlog:
         for i, xmlpath in enumerate(xmlpath_list):
             writeout = True
@@ -52,13 +51,13 @@ def cleanse(tar_fn):
                 metadata = id2meta.pop(artid) # Use `pop` to get retriving faster
             except KeyError:
                 metadata = defaultdict(str)
-                # print('Metadata not found:', e)
+                # logging.info('Metadata not found:', e)
             # === 
 
             try:
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
-                print('Skipped: ParseError at %s' % xml)
+                logging.info('Skipped: ParseError at %s' % xml)
                 remove(xmlpath)
                 cleanlog.write(xml + ' \n' + 'ParseError \n' + '================================== \n')
                 continue
@@ -70,11 +69,11 @@ def cleanse(tar_fn):
 
             if VERBOSE:
                 if (i+1) % REPORT_EVERY == 0 or i+1 == len(xmlpath_list):
-                    print('%s of %s ...' % (i+1, len(xmlpath_list)))
+                    logging.info('%s of %s ...' % (i+1, len(xmlpath_list)))
 
     t = time.time() - begin
     t = t/60
-    print(len(xmlpath_list), 'files in %s mins' % t)
+    logging.info('%s files in %s mins' % (len(xmlpath_list), t))
 
 def tarn_no_ext(tar_fn):
     """Return the first 4 chars"""
@@ -87,7 +86,7 @@ def tarback(tar_fn):
 def rm_cleansed_dir(tar_fn):
     dirn = tarn_no_ext(tar_fn)
     rmtree(join('/tmp/arxiv', dirn))
-    print('Old dir /tmp/arxiv/%s removed' % dirn)
+    logging.info('Old dir /tmp/arxiv/%s removed' % dirn)
 
 def main(tar_fn):
     cp_1tar(tar_fn)
@@ -108,7 +107,7 @@ if __name__ == "__main__":
     id2meta = get_urlid2meta() # 1 min
 
     for i, tarfn in enumerate(tarlist):
-        print('Tarball %s of %s ...' % (i+1, len(tarlist)))
+        logging.info('Tarball %s of %s ...' % (i+1, len(tarlist)))
         main(tarfn)
 
     # run_and_report_done('TRY ECHO:', 'hahahahha')
