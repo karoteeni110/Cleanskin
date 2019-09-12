@@ -401,8 +401,8 @@ if __name__ == "__main__":
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']
     # xmlpath_list = [join(no_sec_xml, fn) for fn in listdir(no_sec_xml) if fn[-3:] == 'xml']
-    # xmlpath_list = get_xmlpathlist(tmp_0001)
-    xmlpath_list = [join(tmp_0001, 'nlin0001010.xml')]
+    xmlpath_list = get_xmlpathlist(tmp_0001)
+    # xmlpath_list = [join(tmp_0001, 'nlin0001010.xml')]
 
     # Cleaning
     begin = time.time()
@@ -423,13 +423,13 @@ if __name__ == "__main__":
                 tree, root = get_root(xmlpath)
             except ET.ParseError:
                 print('Skipped: ParseError at %s' % xml)
-                cleanlog.write(xml + ' \n' + 'ParseError. \n' + '================================== \n')
+                cleanlog.write(xml + ' \n' + 'ParseError \n' + '================================== \n')
                 continue
             clean(root)
             add_metamsg(root, xml)
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
-            tree.write(join(cleaned_tmp0001_dir, xml))
+            tree.write(join(tmp_0001, xml))
             # tree.write(join(cleaned_nonsecs, xml))
 
             if VERBOSE:
