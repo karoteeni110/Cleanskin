@@ -343,7 +343,7 @@ def is_empty_elem(elem):
 def fname2artid(fname):
     return fname.strip('=')[:-4] # strip ".xml"
 
-def add_metamsg(docroot, fname):
+def add_metamsg(docroot, fname, metadata):
     docroot.attrib.clear()
     for attr in metadata:
         if attr == 'categories':
@@ -389,6 +389,7 @@ def postcheck(root, errlog):
     errlog.write('\n ================================== \n')
 
 def get_xmlpathlist(dirname):
+    """Enhanced version of `listdir()`"""
     return [join(dirname, fn) for fn in listdir(dirname) if fn[-3:] == 'xml']
 
 if __name__ == "__main__":
@@ -426,7 +427,7 @@ if __name__ == "__main__":
                 cleanlog.write(xml + ' \n' + 'ParseError \n' + '================================== \n')
                 continue
             clean(root)
-            add_metamsg(root, xml)
+            add_metamsg(root, xml, metadata)
             postcheck(root, cleanlog)
             # tree.write(join(cleanedxml_path, xml))
             tree.write(join(tmp_0001, xml))
