@@ -4,6 +4,14 @@ from shutil import copyfile, copytree, rmtree, move
 from os import listdir, remove
 from os.path import join
 from paths import results_path
+import logging
+
+level    = logging.INFO
+format   = '  %(message)s'
+handlers = [logging.FileHandler('tmp_tar.log'), logging.StreamHandler()]
+
+logging.basicConfig(level = level, format = format, handlers = handlers)
+logging.info('Hey, this is working!')
 
 def run_and_report_done(done_msg, cmd):
     try:
