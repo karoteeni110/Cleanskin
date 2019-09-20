@@ -22,8 +22,7 @@ no_sec_xml = join(results_path, 'no_sec_xml')
 cleaned_nonsecs = join(results_path, 'cleaned_nonsecs')
 metadatas_path = join(data_path, 'arxiv_metadata')
 
-tmp_0001 = join('/tmp/arxiv', '0001')
-cleaned_tmp0001_dir = join(results_path, 'cleaned_tmp0001')
+cs_lda_dir = join(results_path, 'cs_lda')
 
 if __name__ == "__main__":
     # Check that we are reading the correct file
