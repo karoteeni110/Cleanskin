@@ -64,7 +64,7 @@ def pick_cs_papers(tarfn):
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
-                        absfile.write(''.join(ab.itertext()))
+                        absfile.write(nmlz(''.join(ab.itertext())))
                     
                     fulltext_path = join(FULLTEXT_DST, txtfname)
                     with open(fulltext_path, 'w') as ftfile:

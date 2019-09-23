@@ -46,7 +46,7 @@ def is_conclusion(elem):
     return False
 
 def is_backmatter(elem):
-    if re.match(r'(acknowledg(e)ment(s)|reference)', elem.get('title'), flags=re.I):
+    if re.match(r'(acknowledg(e)ment(s)|reference|bibliography)', elem.get('title'), flags=re.I):
         return True
     elif elem.tag.lower() == 'bibliography':
         return True
