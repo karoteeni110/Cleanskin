@@ -8,9 +8,9 @@ import logging
 
 level    = logging.INFO
 format   = '%(message)s'
-handlers = [logging.FileHandler('tmp_tar.log'), logging.StreamHandler()]
+# handlers = [logging.FileHandler('tmp_tar.log'), logging.StreamHandler()]
 
-logging.basicConfig(level = level, format = format, handlers = handlers)
+# logging.basicConfig(level = level, format = format, handlers = handlers)
 
 def run_and_report_done(done_msg, cmd):
     try:
@@ -35,7 +35,7 @@ def rm_oldtar(tar_fn):
 
 def cleanse(tar_fn):
     src_dst_dir = '/tmp/arxiv'
-    xmlpath_list = get_xmlpathlist(join(src_dst_dir, tarn_no_ext(tar_fn)))
+    xmlpath_list = get_xmlpathlist(join(src_dst_dir, rm_tar_ext(tar_fn)))
     cleanlog_path = join(results_path, 'tmplog.txt')
 
     begin = time.time()
@@ -75,16 +75,16 @@ def cleanse(tar_fn):
     t = t/60
     logging.info('%s files in %s mins' % (len(xmlpath_list), t))
 
-def tarn_no_ext(tar_fn):
+def rm_tar_ext(tar_fn):
     """Return the first 4 chars"""
     return tar_fn[:4]
 
 def tarback(tar_fn):
-    cmd = 'if cd %s; then tar -czf /cs/group/grp-glowacka/arxiv/cleaned_xml/%s %s/; fi' % ('/tmp/arxiv', tar_fn, tarn_no_ext(tar_fn))  
+    cmd = 'if cd %s; then tar -czf /cs/group/grp-glowacka/arxiv/cleaned_xml/%s %s/; fi' % ('/tmp/arxiv', tar_fn, rm_tar_ext(tar_fn))  
     run_and_report_done('%s of %s Done: /cs/.../cleaned_xml/%s' % (i+1, len(tarlist),tar_fn), cmd)
 
 def rm_cleansed_dir(tar_fn):
-    dirn = tarn_no_ext(tar_fn)
+    dirn = rm_tar_ext(tar_fn)
     rmtree(join('/tmp/arxiv', dirn))
     logging.info('Old dir /tmp/arxiv/%s removed' % dirn)
 
