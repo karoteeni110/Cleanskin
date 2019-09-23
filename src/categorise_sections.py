@@ -45,7 +45,9 @@ def is_conclusion(elem):
     return False
 
 def is_backmatter(elem):
-    if elem.get('title') == 'acknowledgements':
+    if elem.get('title').lower() == 'acknowledgements':
+        return True
+    elif elem.tag.lower() == 'bibliography':
         return True
     return False
 

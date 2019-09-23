@@ -1,13 +1,12 @@
 import xml.etree.ElementTree as ET
-import logging
+import logging, re
 from newCleaner import get_root
 from clean_at_tmp import run_and_report_done, rm_tar_ext
-from metadata import get_urlid2meta
+from categorise_sections import is_backmatter
 from shutil import copyfile, rmtree
 from os import listdir, remove
 from os.path import join 
-from paths import *
-import re
+from paths import results_path
 
 def is_longtoken_sec(sectxt):
     """Check if the tokens within `sec` are concatenated:
@@ -59,14 +58,15 @@ def pick_cs_papers(tarfn):
                 # secelems = (root[3:] if root.get('categories') else root)
 
                 for sec in root[3:]: # root[3:] does not include metadata
-                    sectext = ''.join(sec.itertext())
-                    tkratio = len(sectext) / len(sectext.split())
-                    if tkratio < 10:
-                        fulltext += nmlz(sectext) + '\n'
-                    else:
-                        logging.info('Skipped: %s (abnormal long tokens)' % xml)
-                        fulltext = ''
-                        break
+                    if not is_backmatter(sec):
+                        sectext = ''.join(sec.itertext())
+                        tkratio = len(sectext) / len(sectext.split())
+                        if tkratio < 10:
+                            fulltext += nmlz(sectext) + '\n'
+                        else:
+                            logging.info('Skipped: %s (abnormal long tokens)' % xml)
+                            fulltext = ''
+                            break
 
                 if fulltext:
                     txtfname = xmlext2txt(xml)
