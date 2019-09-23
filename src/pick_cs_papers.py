@@ -36,17 +36,6 @@ def is_cs(docroot):
         return True
     return False
 
-def writeout_abstract(docroot, dst):
-    ab = root.find('abstract')
-    if ab is None: 
-        logging.info('Skipped: %s (abstract not found)' % xml)
-        return continue
-    else:
-        ''.join(ab.itertext())
-
-def writeout_fulltext(docroot, dst):
-    pass
-
 def xmlext2txt(xmlname):
     return xmlname[:-3] + 'txt'
 
@@ -64,19 +53,19 @@ def pick_cs_papers(tarfn):
                 continue
             else:
                 fulltext = ''
-                secelems = (root[3:] if root.get('categories') else root)
+                # secelems = (root[3:] if root.get('categories') else root)
 
-                for sec in secelems: # root[3:] does not include metadata
+                for sec in root[3:]: # root[3:] does not include metadata
                     sectext = ''.join(sec.itertext())
                     tkratio = len(sectext) / len(sectext.split())
                     if tkratio < 10:
-                        fulltextstr += sectext + '\n'
+                        fulltext += sectext + '\n'
                     else:
                         logging.info('Skipped: %s (abnormal long tokens)' % xml)
                         fulltext = ''
                         break
 
-                if fulltextstr:
+                if fulltext:
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
@@ -107,7 +96,7 @@ def main(tar_fn):
 if __name__ == "__main__":
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 500
-    
+
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
