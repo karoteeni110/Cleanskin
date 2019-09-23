@@ -8,14 +8,6 @@ from os import listdir, remove
 from os.path import join 
 from paths import results_path
 
-def is_longtoken_sec(sectxt):
-    """Check if the tokens within `sec` are concatenated:
-    If len(text)/len(text.split()) > 10.0, return True ;
-    else: False
-    """
-    
-    return False
-
 def cp_1tar(tarfn):
     src = join(CLEANED_XML, tarfn)
     dst = join(TARS_COPY_TO, tarfn)

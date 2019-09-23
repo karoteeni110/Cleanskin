@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import re
 from paths import cleanedxml_path
 from headingStats import get_headings
 from os.path import join
@@ -45,7 +46,7 @@ def is_conclusion(elem):
     return False
 
 def is_backmatter(elem):
-    if elem.get('title').lower() == 'acknowledgements':
+    if re.match(r'(acknowledg(e)ment(s)|reference)', elem.get('title'), flags=re.I):
         return True
     elif elem.tag.lower() == 'bibliography':
         return True
