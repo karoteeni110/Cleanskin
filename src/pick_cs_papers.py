@@ -39,8 +39,11 @@ def is_cs(docroot):
 def xmlext2txt(xmlname):
     return xmlname[:-3] + 'txt'
 
+def nmlz(text):
+    return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
+
 def pick_cs_papers(tarfn):
-    dirn = join(TARS_COPY_TO, tarfn)
+    dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     for xml in listdir(dirn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
@@ -59,7 +62,7 @@ def pick_cs_papers(tarfn):
                     sectext = ''.join(sec.itertext())
                     tkratio = len(sectext) / len(sectext.split())
                     if tkratio < 10:
-                        fulltext += sectext + '\n'
+                        fulltext += nmlz(sectext) + '\n'
                     else:
                         logging.info('Skipped: %s (abnormal long tokens)' % xml)
                         fulltext = ''
@@ -84,11 +87,11 @@ def get_topic_probs():
     pass
 
 def main(tar_fn):
-    cp_1tar(tar_fn)
-    unzip_1tar(tar_fn)
-    rm_oldtar(tar_fn)
+    # cp_1tar(tar_fn)
+    # unzip_1tar(tar_fn)
+    # rm_oldtar(tar_fn)
     pick_cs_papers(tar_fn)
-    rm_picked_dir(tar_fn)
+    # rm_picked_dir(tar_fn)
     # get_topic_probs() 
     # Finally get `cs_ft_composition.txt`, `cs_abt_composition.txt`, `cs_ft_keys.txt`
 
@@ -108,9 +111,8 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
 
-    tarlist = [fn for fn in listdir(CLEANED_XML) \
-                if fn not in listdir(cs_lda_dir)] 
-
+    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(cs_lda_dir)] 
+    tarlist = ['1801.tar.gz']
 
     for i, tarfn in enumerate(tarlist):
         logging.info('Tarball %s of %s ...' % (i+1, len(tarlist)))
