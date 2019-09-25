@@ -36,7 +36,7 @@ def nmlz(text):
     return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    metadata = docroot.findall(".//*[1]") + docroot.findall(".//*[2]") + docroot.findall(".//*[3]")
+    metadata = [docroot.find("./title"), docroot.find("./author"), docroot.find("./abstract")]
     ack = (docroot.findall(".//*acknowledgements")  \
                 or docroot.findall(".//*[@title='acknowledgment']") \
                 or docroot.findall(".//*[@title='acknowledgments']") \
@@ -46,6 +46,8 @@ def rm_backmatter(docroot):
     for elem in metadata+ack+bib:
         elem.clear()
     return docroot
+    # ET.dump(docroot)
+    # exit(0)
 
 
 def pick_cs_papers(tarfn):
@@ -63,6 +65,7 @@ def pick_cs_papers(tarfn):
                 skipped += 1
                 continue
             else:
+                abtxt = nmlz(''.join(ab.itertext()))
                 fulltext = ''
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
@@ -71,7 +74,7 @@ def pick_cs_papers(tarfn):
                     tkratio = len(sectext) / (len(sectext.split()) or 1)
                     if tkratio < 15:
                         fulltext += sectext + '\n'
-                    elif len(sectext) < 50: # some short notes may be weird; just exclude it
+                    elif len(sectext.split()) < 10: # some short notes may be weird; just exclude it
                         continue
                     else:
                         logging.info('Skipped: %s (abnormal long tokens)' % xml)
@@ -83,14 +86,14 @@ def pick_cs_papers(tarfn):
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
-                        absfile.write(nmlz(''.join(ab.itertext())))
+                        absfile.write(abtxt)
                     
                     fulltext_path = join(FULLTEXT_DST, txtfname)
                     with open(fulltext_path, 'w') as ftfile:
                         ftfile.write(fulltext)
 
     inputcount = len(listdir(dirn))
-    logging.info('Successful outputs: %s from %s' % (inputcount-skipped, inputcount))
+    logging.info('Successful output: %s / %s' % (inputcount-skipped, inputcount))
 
 def rm_picked_dir(tarfn):
     unzipped_dirn = rm_tar_ext(tarfn)
