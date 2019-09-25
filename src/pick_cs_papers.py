@@ -55,12 +55,13 @@ def tk_ratio(txt):
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
-    skipped = 0
+    skipped, allpaper = 0, 0
     for xml in listdir(dirn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
         
         if is_cs(root):
+            allpaper += 1
             # Check abstract
             ab = root.find('abstract')
             if ab is None: 
@@ -79,7 +80,7 @@ def pick_cs_papers(tarfn):
                     else: # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
                         continue
 
-                if len(fulltext.split())>100:
+                if len(fulltext.split())>300:
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
@@ -92,8 +93,7 @@ def pick_cs_papers(tarfn):
                     logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
                     skipped += 1
 
-    inputcount = len(listdir(dirn))
-    logging.info('Successful output: %s / %s' % (inputcount-skipped, inputcount))
+    logging.info('Papers extracted: %s / %s' % (allpaper-skipped, allpaper))
 
 def rm_picked_dir(tarfn):
     unzipped_dirn = rm_tar_ext(tarfn)
