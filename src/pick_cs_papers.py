@@ -31,7 +31,21 @@ def xmlext2txt(xmlname):
     return xmlname[:-3] + 'txt'
 
 def nmlz(text):
+    '''Exclude nums and puncts, characters lower cased
+    '''
     return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
+
+def rm_backmatter(docroot):
+    ack = (docroot.findall(".//*acknowledgements")  \
+                or docroot.findall(".//*[@title='acknowledgment']") \
+                or docroot.findall(".//*[@title='acknowledgments']") \
+                or docroot.findall(".//*[@title='acknowledgements']") \
+                or docroot.findall(".//*[@title='acknowledgement']"))
+    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='references']") )
+    for elem in ack+bib:
+        elem.clear()
+    return docroot
+
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
@@ -48,8 +62,8 @@ def pick_cs_papers(tarfn):
             else:
                 fulltext = ''
                 # secelems = (root[3:] if root.get('categories') else root)
-
-                for sec in root[3:]: # root[3:] does not include metadata
+                secelems = rm_backmatter(root[3:])
+                for sec in secelems: # root[3:] does not include metadata
                     if not is_backmatter(sec):
                         sectext = ''.join(sec.itertext())
                         tkratio = len(sectext) / len(sectext.split())
