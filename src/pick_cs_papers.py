@@ -36,13 +36,14 @@ def nmlz(text):
     return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
+    metadata = docroot.findall(".//*[1]") + docroot.findall(".//*[2]") + docroot.findall(".//*[3]")
     ack = (docroot.findall(".//*acknowledgements")  \
                 or docroot.findall(".//*[@title='acknowledgment']") \
                 or docroot.findall(".//*[@title='acknowledgments']") \
                 or docroot.findall(".//*[@title='acknowledgements']") \
                 or docroot.findall(".//*[@title='acknowledgement']"))
     bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='references']") )
-    for elem in ack+bib:
+    for elem in metadata+ack+bib:
         elem.clear()
     return docroot
 
@@ -62,7 +63,7 @@ def pick_cs_papers(tarfn):
             else:
                 fulltext = ''
                 # secelems = (root[3:] if root.get('categories') else root)
-                secelems = rm_backmatter(root[3:])
+                secelems = rm_backmatter(root)
                 for sec in secelems: # root[3:] does not include metadata
                     if not is_backmatter(sec):
                         sectext = ''.join(sec.itertext())
