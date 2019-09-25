@@ -33,16 +33,17 @@ def xmlext2txt(xmlname):
 def nmlz(text):
     '''Exclude nums and puncts, characters lower cased
     '''
+    # return re.sub(r"(\d+|[^a-zA-Z]+\b)",'', text).lower()
     return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    metadata = [docroot.find("./title"), docroot.find("./author"), docroot.find("./abstract")]
-    ack = (docroot.findall(".//*acknowledgements")  \
+    metadata = [docroot[i] for i in [0,1,2]]
+    ack = (docroot.findall(".//acknowledgements")  \
                 or docroot.findall(".//*[@title='acknowledgment']") \
                 or docroot.findall(".//*[@title='acknowledgments']") \
                 or docroot.findall(".//*[@title='acknowledgements']") \
                 or docroot.findall(".//*[@title='acknowledgement']"))
-    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='References']") )
+    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='References']"))
     for elem in metadata+ack+bib:
         elem.clear()
     return docroot
@@ -74,13 +75,13 @@ def pick_cs_papers(tarfn):
                     tkratio = len(sectext) / (len(sectext.split()) or 1)
                     if tkratio < 15:
                         fulltext += sectext + '\n'
-                    elif len(sectext.split()) < 10: # some short notes may be weird; just exclude it
+                    else: # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
                         continue
-                    else:
-                        logging.info('Skipped: %s (abnormal long tokens)' % xml)
-                        skipped += 1
-                        fulltext = ''
-                        break
+                    # else:
+                    #     logging.info('Skipped: %s (abnormal long tokens)' % xml)
+                    #     skipped += 1
+                    #     fulltext = ''
+                    #     break
 
                 if fulltext:
                     txtfname = xmlext2txt(xml)
