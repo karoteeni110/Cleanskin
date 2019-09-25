@@ -50,6 +50,8 @@ def rm_backmatter(docroot):
     # ET.dump(docroot)
     # exit(0)
 
+def tk_ratio(txt):
+    return len(txt) / (len(txt.split()) or 1)
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
@@ -72,18 +74,12 @@ def pick_cs_papers(tarfn):
                 secelems = rm_backmatter(root)
                 for sec in secelems: # root[3:] does not include metadata
                     sectext = nmlz(''.join(sec.itertext()))
-                    tkratio = len(sectext) / (len(sectext.split()) or 1)
-                    if tkratio < 15:
+                    if tk_ratio(sectext) < 10:
                         fulltext += sectext + '\n'
                     else: # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
                         continue
-                    # else:
-                    #     logging.info('Skipped: %s (abnormal long tokens)' % xml)
-                    #     skipped += 1
-                    #     fulltext = ''
-                    #     break
 
-                if fulltext:
+                if len(fulltext.split())>100:
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
@@ -92,6 +88,9 @@ def pick_cs_papers(tarfn):
                     fulltext_path = join(FULLTEXT_DST, txtfname)
                     with open(fulltext_path, 'w') as ftfile:
                         ftfile.write(fulltext)
+                else:
+                    logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
+                    skipped += 1
 
     inputcount = len(listdir(dirn))
     logging.info('Successful output: %s / %s' % (inputcount-skipped, inputcount))
