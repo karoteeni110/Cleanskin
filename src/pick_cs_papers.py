@@ -42,7 +42,7 @@ def rm_backmatter(docroot):
                 or docroot.findall(".//*[@title='acknowledgments']") \
                 or docroot.findall(".//*[@title='acknowledgements']") \
                 or docroot.findall(".//*[@title='acknowledgement']"))
-    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='references']") )
+    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='References']") )
     for elem in metadata+ack+bib:
         elem.clear()
     return docroot
@@ -50,6 +50,7 @@ def rm_backmatter(docroot):
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
+    skipped = 0
     for xml in listdir(dirn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
@@ -59,21 +60,24 @@ def pick_cs_papers(tarfn):
             ab = root.find('abstract')
             if ab is None: 
                 logging.info('Skipped: %s (abstract not found)' % xml)
+                skipped += 1
                 continue
             else:
                 fulltext = ''
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
                 for sec in secelems: # root[3:] does not include metadata
-                    if not is_backmatter(sec):
-                        sectext = ''.join(sec.itertext())
-                        tkratio = len(sectext) / len(sectext.split())
-                        if tkratio < 10:
-                            fulltext += nmlz(sectext) + '\n'
-                        else:
-                            logging.info('Skipped: %s (abnormal long tokens)' % xml)
-                            fulltext = ''
-                            break
+                    sectext = nmlz(''.join(sec.itertext()))
+                    tkratio = len(sectext) / (len(sectext.split()) or 1)
+                    if tkratio < 15:
+                        fulltext += sectext + '\n'
+                    elif len(sectext) < 50: # some short notes may be weird; just exclude it
+                        continue
+                    else:
+                        logging.info('Skipped: %s (abnormal long tokens)' % xml)
+                        skipped += 1
+                        fulltext = ''
+                        break
 
                 if fulltext:
                     txtfname = xmlext2txt(xml)
@@ -84,6 +88,9 @@ def pick_cs_papers(tarfn):
                     fulltext_path = join(FULLTEXT_DST, txtfname)
                     with open(fulltext_path, 'w') as ftfile:
                         ftfile.write(fulltext)
+
+    inputcount = len(listdir(dirn))
+    logging.info('Successful outputs: %s from %s' % (inputcount-skipped, inputcount))
 
 def rm_picked_dir(tarfn):
     unzipped_dirn = rm_tar_ext(tarfn)
@@ -124,4 +131,5 @@ if __name__ == "__main__":
     for i, tarfn in enumerate(tarlist):
         logging.info('Tarball %s of %s ...' % (i+1, len(tarlist)))
         main(tarfn)
+        
 
