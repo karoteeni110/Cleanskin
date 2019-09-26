@@ -94,8 +94,9 @@ def pick_cs_papers(tarfn):
 def clear_picked_dir(tarfn):
     """Clear the content of the dir and keeps the empty dir"""
     unzipped_dirn = rm_tar_ext(tarfn)
-    for xml in listdir(unzipped_dirn):
-        remove(join(unzipped_dirn, xml))
+    unzipped_dir_path = join(TARS_COPY_TO, unzipped_dirn)
+    for xml in listdir(unzipped_dir_path):
+        remove(join(unzipped_dir_path, xml))
     # rmtree(join(TARS_COPY_TO, unzipped_dirn))
     logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
 
@@ -127,8 +128,8 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
     
-    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
-    tarlist = ['1801.tar.gz']
+    tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
+    # tarlist = ['1801.tar.gz']
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
     for i, tarfn in enumerate(tarlist):
