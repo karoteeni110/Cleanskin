@@ -33,8 +33,10 @@ def xmlext2txt(xmlname):
 def nmlz(text):
     '''Exclude nums and puncts, characters lower cased
     '''
-    # return re.sub(r"(\d+|[^a-zA-Z]+\b)",'', text).lower()
-    return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
+    # print (re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*(?:(?=\s)|(?=$))", text))
+    # exit(0)
+    return ' '.join((re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*(?:(?=\s)|(?=$))", text))).lower()
+    # return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
     elems = docroot.findall('.//*')
@@ -43,8 +45,6 @@ def rm_backmatter(docroot):
             or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
             elem.clear()
     return docroot
-    # ET.dump(docroot)
-    # exit(0)
 
 def tk_ratio(txt):
     return len(txt) / (len(txt.split()) or 1)
@@ -89,7 +89,9 @@ def pick_cs_papers(tarfn):
                     logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
                     skipped += 1
 
-    logging.info('Papers extracted: %s / %s' % (allpaper-skipped, allpaper))
+    extracted = allpaper-skipped
+    logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
+    return extracted, allpaper
 
 def rm_picked_dir(tarfn):
     unzipped_dirn = rm_tar_ext(tarfn)
@@ -103,9 +105,10 @@ def main(tar_fn):
     # cp_1tar(tar_fn)
     # unzip_1tar(tar_fn)
     # rm_oldtar(tar_fn)
-    pick_cs_papers(tar_fn)
+    extracted, allpaper = pick_cs_papers(tar_fn)
     # rm_picked_dir(tar_fn)
     # get_topic_probs() 
+    return extracted, allpaper
     # Finally get `cs_ft_composition.txt`, `cs_abt_composition.txt`, `cs_ft_keys.txt`
 
 
@@ -123,12 +126,16 @@ if __name__ == "__main__":
     TARS_COPY_TO = '/tmp/arxiv'
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
-
+    
     # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(cs_lda_dir)] 
     tarlist = ['1801.tar.gz']
-
+    EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
+   
     for i, tarfn in enumerate(tarlist):
         logging.info('Tarball %s of %s ...' % (i+1, len(tarlist)))
-        main(tarfn)
+        extracted, allpaper = main(tarfn)
+        EXTRACTED_SUM += extracted
+        ALLPAPER_SUM += allpaper
+    logging.info('Summary: paper extracted: %s of %s' % (EXTRACTED_SUM, ALLPAPER_SUM))
         
 
