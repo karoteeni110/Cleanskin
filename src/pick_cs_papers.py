@@ -33,10 +33,8 @@ def xmlext2txt(xmlname):
 def nmlz(text):
     '''Exclude nums and puncts, characters lower cased
     '''
-    # print (re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*(?:(?=\s)|(?=$))", text))
-    # exit(0)
-    return ' '.join((re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*(?:(?=\s)|(?=$))", text))).lower()
-    # return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
+    # return ' '.join((re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*)", text))).lower()
+    return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
     elems = docroot.findall('.//*')
@@ -102,12 +100,11 @@ def get_topic_probs():
     pass
 
 def main(tar_fn):
-    # cp_1tar(tar_fn)
-    # unzip_1tar(tar_fn)
-    # rm_oldtar(tar_fn)
+    cp_1tar(tar_fn)
+    unzip_1tar(tar_fn)
+    rm_oldtar(tar_fn)
     extracted, allpaper = pick_cs_papers(tar_fn)
-    # rm_picked_dir(tar_fn)
-    # get_topic_probs() 
+    rm_picked_dir(tar_fn)
     return extracted, allpaper
     # Finally get `cs_ft_composition.txt`, `cs_abt_composition.txt`, `cs_ft_keys.txt`
 
