@@ -91,10 +91,13 @@ def pick_cs_papers(tarfn):
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
     return extracted, allpaper
 
-def rm_picked_dir(tarfn):
+def clear_picked_dir(tarfn):
+    """Clear the content of the dir and keeps the empty dir"""
     unzipped_dirn = rm_tar_ext(tarfn)
-    rmtree(join(TARS_COPY_TO, unzipped_dirn))
-    logging.info('Old dir %s/%s removed' % (TARS_COPY_TO, unzipped_dirn))
+    for xml in listdir(unzipped_dirn):
+        remove(join(unzipped_dirn, xml))
+    # rmtree(join(TARS_COPY_TO, unzipped_dirn))
+    logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
 
 def get_topic_probs():
     pass
@@ -104,7 +107,7 @@ def main(tar_fn):
     unzip_1tar(tar_fn)
     rm_oldtar(tar_fn)
     extracted, allpaper = pick_cs_papers(tar_fn)
-    rm_picked_dir(tar_fn)
+    clear_picked_dir(tar_fn)
     return extracted, allpaper
     # Finally get `cs_ft_composition.txt`, `cs_abt_composition.txt`, `cs_ft_keys.txt`
 
@@ -124,7 +127,7 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
     
-    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(cs_lda_dir)] 
+    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
     tarlist = ['1801.tar.gz']
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
