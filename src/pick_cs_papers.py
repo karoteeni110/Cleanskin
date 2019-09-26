@@ -37,15 +37,11 @@ def nmlz(text):
     return ' '.join(re.findall(r"[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    metadata = [docroot[i] for i in [0,1,2]]
-    ack = (docroot.findall(".//acknowledgements")  \
-                or docroot.findall(".//*[@title='acknowledgment']") \
-                or docroot.findall(".//*[@title='acknowledgments']") \
-                or docroot.findall(".//*[@title='acknowledgements']") \
-                or docroot.findall(".//*[@title='acknowledgement']"))
-    bib = (docroot.findall(".//bibliography") or docroot.findall(".//*[@title='References']"))
-    for elem in metadata+ack+bib:
-        elem.clear()
+    elems = docroot.findall('.//*')
+    for elem in elems:
+        if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography') \
+            or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
+            elem.clear()
     return docroot
     # ET.dump(docroot)
     # exit(0)
