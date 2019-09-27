@@ -4,9 +4,9 @@ Sections are garbled.
 ##  Mallet usage
 
 ```
-./bin/mallet import-dir --input ../Cleanskin/data/cs_fulltext --output cs_fulltext.mallet --keep-sequence --remove-stopwords
+./bin/mallet import-dir --input ~/Desktop/Cleanskin/results/cs_lda/fulltext --output cs_fulltext.mallet --keep-sequence --remove-stopwords
 
-./bin/mallet import-dir --input ../Cleanskin/data/cs_abstract --output cs_abstract.mallet --keep-sequence --remove-stopwords
+./bin/mallet import-dir --input ~/Desktop/Cleanskin/results/cs_lda/abstract --output cs_abstract.mallet --keep-sequence --remove-stopwords
 
 ./bin/mallet train-topics --input cs_fulltext.mallet --num-topics 100 --output-model cs_ftmodel.mallet --output-doc-topics cs_ft_composition.txt --output-topic-keys cs_ft_keys.txt --inferencer-filename cs_ft_inferencer.mallet
 
