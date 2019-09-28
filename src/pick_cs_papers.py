@@ -31,8 +31,7 @@ def xmlext2txt(xmlname):
     return xmlname[:-3] + 'txt'
 
 def nmlz(text):
-    '''Exclude nums and puncts, characters lower cased
-    '''
+    '''Exclude nums and puncts, characters lower cased'''
     # return ' '.join((re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*)", text))).lower()
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
