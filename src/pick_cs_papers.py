@@ -63,17 +63,17 @@ def pick_cs_papers(tarfn):
                 continue
             else:
                 abtxt = nmlz(''.join(ab.itertext()))
-                fulltext = ''
+                fulltext, garbled_len= '', 0
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
                 for sec in secelems: # root[3:] does not include metadata
                     sectext = nmlz(''.join(sec.itertext()))
                     if tk_ratio(sectext) < 10:
                         fulltext += sectext + '\n'
-                    else: # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
-                        continue
-
-                if len(fulltext.split())>300:
+                    elif len(sectext)>300 : # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
+                        garbled_len += len(sectext)
+                
+                if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
                     txtfname = xmlext2txt(xml)
                     abstract_path = join(ABSTRACT_DST, txtfname)
                     with open(abstract_path, 'w') as absfile :
@@ -98,9 +98,6 @@ def clear_picked_dir(tarfn):
         remove(join(unzipped_dir_path, xml))
     # rmtree(join(TARS_COPY_TO, unzipped_dirn))
     logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
-
-def get_topic_probs():
-    pass
 
 def main(tar_fn):
     cp_1tar(tar_fn)
@@ -127,8 +124,8 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
     
-    tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
-    # tarlist = ['1801.tar.gz']
+    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
+    tarlist = ['1801.tar.gz']
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
     for i, tarfn in enumerate(tarlist):
