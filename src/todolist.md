@@ -16,3 +16,5 @@ Sections are garbled.
 (Keyword .txt files (`XXX_keys.txt`) are just for checking if model is working well.)
 
 Distributions: cs_XX_composition.txt
+
+Time usage for the model: 12~13 hours for corpus with 140,000+ articles
