@@ -124,8 +124,8 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
     FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
     
-    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
-    tarlist = ['1801.tar.gz']
+    tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
+    # tarlist = ['1801.tar.gz']
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
     for i, tarfn in enumerate(tarlist):
