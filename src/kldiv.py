@@ -3,40 +3,50 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import re
 from random import choice
-from paths import kldiv_dir, data_path
+from paths import kldiv_dir, data_path, metadatas_path
+from metadata import get_urlid2meta
 from os.path import join
+from os import listdir
 
 def read_data(mallet_out):
     pd.set_option('precision', 21)
     df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
     df[1] = df[1].apply(lambda x:x.split('/')[-1][:-4]) # strip file extension
     # print(df.head(3))
-    return df.head(3)
+    return df
 
-def get_pid2cate_dict(catedata_path):
+def get_pid2cate_dict(metaxml_list):
+    pid2meta = get_urlid2meta(metaxml_list)
     pid2cate = dict()
-    with open(catedata_path, 'r') as catef:
-        for line in catef:
-            raw_pid, raw_cates = line.split('')
-            pid = re.sub(r'//', '', raw_pid) # quant-ph/9904108 => quant-ph9904108
-            rand_subcate = choice([c[3:] for c in raw_cates.split(',') if c[:2]=='cs'])
-            pid2cate[pid] = rand_subcate
+    for pid in pid2meta:
+        pid2cate[pid] = choice([c[3:] 
+            for c in pid2meta[pid]['categories'].split(', ') 
+                if c[:2]=='cs'])
     return pid2cate
 
 def merge_frames(df1, df2):
     return 0
 
-def get_div_dfs(fulltext_df, sec_df):
+def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
     """ 
     """
     if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
         p_i, q_i = fulltext_df.iloc[:,2:].to_numpy(), sec_df.iloc[:,2:].to_numpy()
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
         kldiv_paper = np.sum(kldiv_i,axis=1).reshape((-1,1))
-        cate_vec = get_pid2cate_dict(CATEDATA_PATH)
-        pid_with_cate = merge_frames(fulltext_df.iloc[:, :3], cate_vec)
-        div_df = merge_frames(pid_with_cate, kldiv_paper)
-        return div_df
+        cate_series = fulltext_df.iloc[:,1].map(get_pid2cate_dict(metaxml_list))
+
+        # exclude cases where categories not found
+        cate_series, fulltext_df = cate_series[cate_series.notnull()], fulltext_df[cate_series.notnull()] 
+        # print('Paper category not found:') 
+        # print(fulltext_df[cate_series.isnull()])
+        # print('Check if uncategorized are all from 2019:')
+        # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
+        # exit(0)
+        # TODO: kldiv_paper to series
+        div_df = pd.concat([fulltext_df.iloc[:, :3], cate_series, pd.Series(kldiv_paper)], axis=1)
+        print(div_df.head(10))
+        # return div_df
     else:
         print('DFs not aligned')
         exit(0)
@@ -74,5 +84,4 @@ if __name__ == "__main__":
     # print(ft_df)
     # print()
     # print(abt_df)
-    CATEDATA_PATH = join(data_path, 'arxiv_cate/Computer_Science.txt')
-    get_div_dfs(ft_df, abt_df)
+    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
