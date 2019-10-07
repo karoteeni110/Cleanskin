@@ -1,16 +1,27 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import re
+from random import choice
+from paths import kldiv_dir, data_path
+from os.path import join
 
-
-def read_data(datafile):
+def read_data(mallet_out):
     pd.set_option('precision', 21)
-    df = pd.read_csv(datafile, sep="\t", header=None, float_precision='high')
+    df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
     df[1] = df[1].apply(lambda x:x.split('/')[-1][:-4]) # strip file extension
     # print(df.head(3))
     return df.head(3)
 
-
+def get_pid2cate_dict(catedata_path):
+    pid2cate = dict()
+    with open(catedata_path, 'r') as catef:
+        for line in catef:
+            raw_pid, raw_cates = line.split('')
+            pid = re.sub(r'//', '', raw_pid) # quant-ph/9904108 => quant-ph9904108
+            rand_subcate = choice([c[3:] for c in raw_cates.split(',') if c[:2]=='cs'])
+            pid2cate[pid] = rand_subcate
+    return pid2cate
 
 def merge_frames(df1, df2):
     return 0
@@ -18,15 +29,14 @@ def merge_frames(df1, df2):
 def get_div_dfs(fulltext_df, sec_df):
     """ 
     """
-    if fulltext_df.loc[:,1].equals(sec_df.loc[:1]): # pids must be aligned
-        print('Aligned!')
-        # p_i = fulltext_df.iloc[:,2:] 
-        # q_i = sec_df.iloc[:, 2:]
-        # kl_divs = np.multiply(p_i, np.log2(p_i)-np.log2(q_i))
-        # cate_vec = 0
-        # pid_with_cate = merge_frames(fulltext_df.iloc[:, :3], cate_vec)
-        # div_df = merge_frames(pid_with_cate, kl_divs)
-        # return div_df
+    if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
+        p_i, q_i = fulltext_df.iloc[:,2:].to_numpy(), sec_df.iloc[:,2:].to_numpy()
+        kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
+        kldiv_paper = np.sum(kldiv_i,axis=1).reshape((-1,1))
+        cate_vec = get_pid2cate_dict(CATEDATA_PATH)
+        pid_with_cate = merge_frames(fulltext_df.iloc[:, :3], cate_vec)
+        div_df = merge_frames(pid_with_cate, kldiv_paper)
+        return div_df
     else:
         print('DFs not aligned')
         exit(0)
@@ -54,16 +64,15 @@ def ytick():
     ax.plot(l,y)
     # ax.set_xticks(l)
     ax.set_yticklabels(x)
-
     plt.show()
 
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    ft_df = read_data('./KLdiv/cs_ft_composition.txt')
-    
-    abt_df = read_data('./KLdiv/cs_abt_composition.txt')
+    ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
+    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
     # print(ft_df)
     # print()
     # print(abt_df)
+    CATEDATA_PATH = join(data_path, 'arxiv_cate/Computer_Science.txt')
     get_div_dfs(ft_df, abt_df)
