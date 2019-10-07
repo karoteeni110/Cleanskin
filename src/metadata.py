@@ -33,7 +33,7 @@ def read_metaxml(meta_xmlpath):
         id2meta[artid] = {'abstract': abstract, 'categories': categories, 'author': author, 'title': title}
     return id2meta
 
-def get_urlid2meta(metaxml_list=listdir(metadatas_path)):
+def get_pid2meta(metaxml_list=listdir(metadatas_path)):
     id2meta = {}
     # begin = time.time()
     print('Reading metadata... It takes about 1 min')
@@ -51,5 +51,5 @@ def get_urlid2meta(metaxml_list=listdir(metadatas_path)):
     return id2meta
 
 if __name__ == "__main__":
-    print(get_urlid2meta(['Astrophysics.xml'])['astro-ph0001020'])
+    print(get_pid2meta(['Astrophysics.xml'])['astro-ph0001020'])
     

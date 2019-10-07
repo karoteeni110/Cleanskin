@@ -105,7 +105,7 @@ if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 500
 
     # Read metadata for all articles
-    id2meta = get_urlid2meta() # 1 min
+    id2meta = get_pid2meta() # 1 min
 
     for i, tarfn in enumerate(tarlist):
         logging.info('Tarball %s of %s ...' % (i+1, len(tarlist)))

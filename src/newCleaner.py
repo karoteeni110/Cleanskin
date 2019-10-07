@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import sys, re
 # from paths import data_path, results_path, rawxmls_path, cleanlog_path, \
 #     cleanedxml_path, no_sec_xml, cleaned_nonsecs, tmp_0001, cleaned_tmp0001_dir
-from metadata import get_urlid2meta
+from metadata import get_pid2meta
 from os.path import join, basename
 from os import listdir
 from shutil import copy, copytree
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     VERBOSE, REPORT_EVERY = True, 100
 
     # Read metadata for all articles
-    id2meta = get_urlid2meta() # 1 min
+    id2meta = get_pid2meta() # 1 min
 
     # Set paths to dirty XMLs
     # xmlpath_list = [join(rawxmls_path, fn) for fn in listdir(rawxmls_path) if fn[-3:] == 'xml']

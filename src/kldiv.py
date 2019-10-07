@@ -33,7 +33,7 @@ def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
     if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
         p_i, q_i = fulltext_df.iloc[:,2:].to_numpy(), sec_df.iloc[:,2:].to_numpy()
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
-        kldiv_paper = np.sum(kldiv_i,axis=1).reshape((-1,1))
+        kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
         cate_series = fulltext_df.iloc[:,1].map(get_pid2cate_dict(metaxml_list))
 
         # exclude cases where categories not found
@@ -43,8 +43,9 @@ def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
         # print('Check if uncategorized are all from 2019:')
         # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
         # exit(0)
-        # TODO: kldiv_paper to series
-        div_df = pd.concat([fulltext_df.iloc[:, :3], cate_series, pd.Series(kldiv_paper)], axis=1)
+        div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
+        # colnames = pd.Series(['pid', 'category', 'kld']) 
+        # div_df = div_df.assign(column_name=colnames)
         print(div_df.head(10))
         # return div_df
     else:
