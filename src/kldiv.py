@@ -30,12 +30,15 @@ def get_pid2cate_dict(metaxml_list):
 
 def acro_trans(cate_series):
     _, root = get_root(join(data_path, 'cs_cate_acro.xml'))
-    x=0
-    for i, elem in enumerate(root):
+    acro2cate = dict()
+    for i in range(len(root)):
         if i%2==1:
-            x+=1
-            ET.dump(root[i][0][0])
-    print(x)
+            # ET.dump(root[i][0][0])
+            # print(root[i][0][0].text)
+            acro, fn = root[i][0][0].text.split(' - ')
+            fn = re.sub(r'\s\(.*\)','',fn) #remove parenthese
+            acro2cate[acro] = fn
+    return cate_series.map(acro2cate)
 
 def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
     """ 
@@ -45,18 +48,17 @@ def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
         kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
         cate_series = fulltext_df.iloc[:,1].map(get_pid2cate_dict(metaxml_list))
-
-        #
+        cate_series = acro_trans(cate_series)
         
         # print('Paper category not found:') 
         # print(fulltext_df[cate_series.isnull()])
         # print('Check if uncategorized are all from 2019:')
         # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
         # exit(0)
+
         div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
         div_df.columns = ['pid', 'category', 'kld']
         div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
-        
         div_df.to_csv(path_or_buf=join(data_path, 'cs_abstract_kld.txt'), index=False)
         # return div_df
     else:
@@ -91,7 +93,7 @@ def ytick():
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    # ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
-    # abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    # get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
-    acro_trans(0)
+    ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
+    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
+    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
+    # acro_trans(0)
