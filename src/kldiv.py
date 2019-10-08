@@ -2,11 +2,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+import xml.etree.ElementTree as ET
+from newCleaner import get_root
 from random import choice
 from paths import kldiv_dir, data_path, metadatas_path
 from metadata import get_pid2meta
 from os.path import join
 from os import listdir
+
+# cs_cates = { }
 
 def read_data(mallet_out):
     pd.set_option('precision', 21)
@@ -24,8 +28,12 @@ def get_pid2cate_dict(metaxml_list):
                 if c[:2]=='cs'])
     return pid2cate
 
-def merge_frames(df1, df2):
-    return 0
+def acro_trans(cate_series):
+    _, root = get_root(join(data_path, 'cs_cate_acro.xml'))
+    for i, elem in enumerate(root):
+        if i%2==1:
+            ET.dump(root[i][0][0])
+    
 
 def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
     """ 
@@ -81,9 +89,7 @@ def ytick():
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
-    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    # print(ft_df)
-    # print()
-    # print(abt_df)
-    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
+    # ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
+    # abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
+    # get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
+    acro_trans(0)
