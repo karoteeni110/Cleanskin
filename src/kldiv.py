@@ -30,10 +30,12 @@ def get_pid2cate_dict(metaxml_list):
 
 def acro_trans(cate_series):
     _, root = get_root(join(data_path, 'cs_cate_acro.xml'))
+    x=0
     for i, elem in enumerate(root):
         if i%2==1:
+            x+=1
             ET.dump(root[i][0][0])
-    
+    print(x)
 
 def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
     """ 
