@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import re
 from random import choice
 from paths import kldiv_dir, data_path, metadatas_path
-from metadata import get_urlid2meta
+from metadata import get_pid2meta
 from os.path import join
 from os import listdir
 
@@ -16,7 +16,7 @@ def read_data(mallet_out):
     return df
 
 def get_pid2cate_dict(metaxml_list):
-    pid2meta = get_urlid2meta(metaxml_list)
+    pid2meta = get_pid2meta(metaxml_list)
     pid2cate = dict()
     for pid in pid2meta:
         pid2cate[pid] = choice([c[3:] 
@@ -36,17 +36,18 @@ def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
         kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
         cate_series = fulltext_df.iloc[:,1].map(get_pid2cate_dict(metaxml_list))
 
-        # exclude cases where categories not found
-        cate_series, fulltext_df = cate_series[cate_series.notnull()], fulltext_df[cate_series.notnull()] 
+        #
+        
         # print('Paper category not found:') 
         # print(fulltext_df[cate_series.isnull()])
         # print('Check if uncategorized are all from 2019:')
         # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
         # exit(0)
         div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
-        # colnames = pd.Series(['pid', 'category', 'kld']) 
-        # div_df = div_df.assign(column_name=colnames)
-        print(div_df.head(10))
+        div_df.columns = ['pid', 'category', 'kld']
+        div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
+        
+        div_df.to_csv(path_or_buf=join(data_path, 'cs_abstract_kld.txt'), index=False)
         # return div_df
     else:
         print('DFs not aligned')

@@ -51,5 +51,5 @@ def get_pid2meta(metaxml_list=listdir(metadatas_path)):
     return id2meta
 
 if __name__ == "__main__":
-    print(get_pid2meta(['Astrophysics.xml'])['astro-ph0001020'])
+    print(get_pid2meta(['Computer_Science.xml'])['1907.03852'])
     
