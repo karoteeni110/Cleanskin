@@ -10,9 +10,15 @@ from metadata import get_pid2meta
 from os.path import join
 from os import listdir
 
-# cs_cates = { }
-
 def read_data(mallet_out):
+    # Remove colnames in first line
+    with open(mallet_out, 'r') as csv:
+        data = csv.read().splitlines(True)
+        first_line = data[0]
+    if not first_line[0] == '0':
+        with open(mallet_out, 'w') as fout:
+            fout.writelines(data[1:])   
+    
     pd.set_option('precision', 21)
     df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
     df[1] = df[1].apply(lambda x:x.split('/')[-1][:-4]) # strip file extension

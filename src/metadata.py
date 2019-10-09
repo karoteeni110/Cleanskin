@@ -46,8 +46,6 @@ def get_pid2meta(metaxml_list=listdir(metadatas_path)):
             ith_id2meta = read_metaxml(cate_meta_path) 
             id2meta.update(ith_id2meta)
 
-    # end = (time.time() - begin) / 60
-    # print('Used time: %s min' % end )
     return id2meta
 
 if __name__ == "__main__":
