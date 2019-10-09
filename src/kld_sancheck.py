@@ -6,6 +6,8 @@ import numpy as np
 
 def get_abst_df(secs_df):
     print('Extracting abstract composition...')
+    print(secs_df.iloc[:,1])
+    exit(0)
     abst_select = secs_df.iloc[:,1].str.endswith('0')
     abst_df = secs_df[abst_select]
     if abst_df.loc[1,1][:-2] == '_0':

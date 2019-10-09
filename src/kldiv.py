@@ -17,12 +17,15 @@ def read_data(mallet_out):
         data = csv.read().splitlines(True)
         first_line = data[0]
     if not first_line[0] == '0':
+        print('Colname in firstline. Removing...')
         with open(mallet_out, 'w') as fout:
             fout.writelines(data[1:])   
+
     
     pd.set_option('precision', 21)
     df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
-    if '/' in df.iloc[1,1] and df.iloc[1,1][:-4]=='.txt': # strip file extension
+    if '/' in df.iloc[1,1] and df.iloc[1,1][-4:]=='.txt': # strip file extension
+        print('Stripping extention name in pid...')
         df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
     # print(df.head(3))
     return df
