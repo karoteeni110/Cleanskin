@@ -11,22 +11,20 @@ from os.path import join
 from os import listdir
 
 def read_data(mallet_out):
-    # Remove colnames in first line
+    pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
     with open(mallet_out, 'r') as csv:
         data = csv.read().splitlines(True)
         first_line = data[0]
-    if not first_line[0] == '0':
-        print('Colname in firstline. Removing...')
-        with open(mallet_out, 'w') as fout:
-            fout.writelines(data[1:])   
+    if first_line[0] == '0': 
+        df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
+    else:
+        df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high')
 
-    
-    pd.set_option('precision', 21)
-    df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
     if '/' in df.iloc[1,1] and df.iloc[1,1][-4:]=='.txt': # strip file extension
         print('Stripping extention name in pid...')
         df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
+        print('... done')
     # print(df.head(3))
     return df
 
