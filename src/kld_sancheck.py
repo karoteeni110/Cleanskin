@@ -10,7 +10,7 @@ def get_abst_df(secs_df):
     exit(0)
     abst_select = secs_df.iloc[:,1].str.endswith('0')
     abst_df = secs_df[abst_select]
-    if abst_df.loc[1,1][:-2] == '_0':
+    if abst_df.loc[1,1][-2:] == '_0':
         abst_df.loc[:,1] = abst_df.loc[:,1].apply(lambda x:x[:-2]) # strip '_0' in filename
     return abst_df
 
