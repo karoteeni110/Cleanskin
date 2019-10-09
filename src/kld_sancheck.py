@@ -8,7 +8,8 @@ def get_abst_df(secs_df):
     print('Extracting abstract composition...')
     abst_select = secs_df.iloc[:,1].str.endswith('0')
     abst_df = secs_df[abst_select]
-    abst_df.loc[:,1] = abst_df[1].apply(lambda x:x[:-2]) # strip '_0' in filename
+    if abst_df.loc[1,1][:-2] == '_0':
+        abst_df.loc[:,1] = abst_df.loc[:,1].apply(lambda x:x[:-2]) # strip '_0' in filename
     return abst_df
 
 if __name__ == "__main__":
