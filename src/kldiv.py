@@ -12,6 +12,7 @@ from os import listdir
 
 def read_data(mallet_out):
     # Remove colnames in first line
+    print('Reading data: %s' % mallet_out)
     with open(mallet_out, 'r') as csv:
         data = csv.read().splitlines(True)
         first_line = data[0]
@@ -21,7 +22,7 @@ def read_data(mallet_out):
     
     pd.set_option('precision', 21)
     df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
-    df[1] = df[1].apply(lambda x:x.split('/')[-1][:-4]) # strip file extension
+    df.loc[:,1] = df[1].apply(lambda x:x.split('/')[-1][:-4]) # strip file extension
     # print(df.head(3))
     return df
 
@@ -47,7 +48,7 @@ def acro_trans(cate_series):
             acro2cate[acro] = fn
     return cate_series.map(acro2cate)
 
-def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path), dst):
+def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
     """
     if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
@@ -103,5 +104,5 @@ if __name__ == "__main__":
     # show_errbar()
     ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
     abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'],join(data_path, 'cs_abstract_kld.txt'))
+    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld.txt'), ['Computer_Science.xml'])
     # acro_trans(0)
