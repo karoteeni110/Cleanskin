@@ -26,6 +26,7 @@ def read_data(mallet_out):
     return df
 
 def get_pid2cate_dict(metaxml_list):
+    """TODO: repeat article n times; n=len(category)"""
     pid2meta = get_pid2meta(metaxml_list)
     pid2cate = dict()
     for pid in pid2meta:
@@ -46,7 +47,7 @@ def acro_trans(cate_series):
             acro2cate[acro] = fn
     return cate_series.map(acro2cate)
 
-def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
+def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path), dst):
     """ 
     """
     if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
@@ -65,7 +66,8 @@ def get_div_dfs(fulltext_df, sec_df, metaxml_list=listdir(metadatas_path)):
         div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
         div_df.columns = ['pid', 'category', 'kld']
         div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
-        div_df.to_csv(path_or_buf=join(data_path, 'cs_abstract_kld.txt'), index=False)
+        div_df.to_csv(path_or_buf=dst, index=False)
+        print('KLD stats DONE! %s' % dst)
         # return div_df
     else:
         print('DFs not aligned')
@@ -101,5 +103,5 @@ if __name__ == "__main__":
     # show_errbar()
     ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
     abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'])
+    get_div_dfs(ft_df, abt_df, ['Computer_Science.xml'],join(data_path, 'cs_abstract_kld.txt'))
     # acro_trans(0)
