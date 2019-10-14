@@ -82,8 +82,9 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
 
         # div_df.columns = ['pid', 'kld', 'category']
         div_df.category = div_df.category.map(get_acro2cate_dict()) # Human-readable categories
-        print('Categories not found:', len(div_df.category.isnull()))
-        div_df = div_df[ (div_df.category not in ['Other', 'General Literature', 'NaN']) ]
+        # print('Categories not found:', len(div_df.category.isnull()))
+        div_df = div_df[div_df.category.notnull()]
+        div_df = div_df.loc[ ~(div_df['category'].str.match(r'(General Literature|Other)')) ]
         
         div_df.to_csv(path_or_buf=dst, index=False)
         print('KLD stats DONE! %s' % dst)
