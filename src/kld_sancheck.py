@@ -19,8 +19,8 @@ def get_abst_df(secs_df):
     return abst_df
 
 def align_dfs(ftdf,secdf):
-    for df in [ftdf, secdf]:
-        df.rename(columns={1:'pid'}, errors="raise", inplace=True)
+    # for df in [ftdf, secdf]:
+    #     df.rename(columns={1:'pid'}, errors="raise", inplace=True)
     x = pd.merge(ftdf, secdf, on='pid',how='inner')
     new_ftdf = x.iloc[:, :101]
     new_secdf = pd.concat([x['pid'], x.iloc[:, 101:]], axis=1)

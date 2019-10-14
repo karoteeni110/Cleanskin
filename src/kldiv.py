@@ -20,17 +20,15 @@ def read_data(mallet_out):
         df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high').drop(0,axis=1)
     else:
         df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high').drop(0, axis=1)
-    
-    # Turn columns [1:] to array
-    vec = df.iloc[:,1:].to_numpy()
-    df = pd.concat([df.iloc[:,0], vec], axis=1)
 
     # Strip file extension
     if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': 
         print('Stripping extention name in pid...')
         df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
         print('... done')
-    df.columns = ['pid', 'topic_dist']
+
+    # df.iloc[:,1:].to_list()
+    df = df.rename(columns={1:'pid'})
     return df
 
 def get_pid2cate_dict(metaxml_list):
@@ -61,18 +59,23 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
     """
     if fulltext_df.iloc[:,0].equals(sec_df.iloc[:,0]) and fulltext_df.shape==sec_df.shape: # pids must be aligned
-        # Add categories
-        catedict = get_pid2cate_dict(metaxml_list)
-        cate_series = fulltext_df.pid.map(catedict).apply(pd.Series) # fill with NaN 
-        fulltext_df.insert(1,'cates',cate_series) # add
-        # Repeat pid n times (n=len(cates))
-        # pd.concat([Series(ftrow, cate_series.split('')] )
 
         # Compute KLdiv
-        p_i, q_i = fulltext_df.topic_dist, sec_df.topic_dist # fulltext_df.iloc[:,1:].to_numpy(), sec_df.iloc[:,1:].to_numpy()
+        p_i, q_i = fulltext_df.iloc[:,1:].to_numpy(), sec_df.iloc[:,1:].to_numpy()
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # element-wise multiply
         kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
         
+        div_df = pd.concat([fulltext_df.pid, pd.Series(kldiv_paper, name='kld')], axis=1)
+
+        catedict = get_pid2cate_dict(metaxml_list)
+        cate_series = fulltext_df.pid.map(catedict)# .apply(pd.Series) # fill with NaN 
+        div_df = cate_series.merge(div_df, left_index=True, right_index=True) \
+                    .melt(id_vars=['pid','kld'], value_name='category') \
+                    .drop('variable',axis=1) \
+                    .dropna()
+        # div_df.insert(1,'cates',cate_series) # add
+
+
         # cate_series = acro_trans(cate_series)
         
         # print('Paper category not found:') 
@@ -81,10 +84,7 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
         # exit(0)
 
-        div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
-        
-        
-        div_df.columns = ['pid', 'category', 'kld']
+        # div_df.columns = ['pid', 'kld', 'category']
         div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
         div_df.to_csv(path_or_buf=dst, index=False)
         print('KLD stats DONE! %s' % dst)
