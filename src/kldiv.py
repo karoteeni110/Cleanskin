@@ -13,15 +13,16 @@ from os import listdir
 def read_data(mallet_out):
     pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
-    with open(mallet_out, 'r') as csv:
-        data = csv.read().splitlines(True)
+    with open(mallet_out, 'r') as f:
+        data = f.read().split('\n')
         first_line = data[0]
     if first_line[0] == '0': 
-        df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high')
+        df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high').drop(0,axis=1)
     else:
-        df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high')
+        df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high').drop(0, axis=1)
+    
 
-    if '/' in df.iloc[1,1] and df.iloc[1,1][-4:]=='.txt': # strip file extension
+    if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': # strip file extension
         print('Stripping extention name in pid...')
         df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
         print('... done')
@@ -31,12 +32,14 @@ def read_data(mallet_out):
 def get_pid2cate_dict(metaxml_list):
     """TODO: repeat article n times; n=len(category)"""
     pid2meta = get_pid2meta(metaxml_list)
-    pid2cate = dict()
+    pid2cates = dict()
     for pid in pid2meta:
-        pid2cate[pid] = choice([c[3:] 
-            for c in pid2meta[pid]['categories'].split(', ') 
-                if c[:2]=='cs'])
-    return pid2cate
+        pid2cates[pid] = [c[3:] for c in pid2meta[pid]['categories'].split(', ') 
+                            if c[:2]=='cs']
+        # pid2cate[pid] = choice([c[3:] 
+        #     for c in pid2meta[pid]['categories'].split(', ') 
+        #         if c[:2]=='cs'])
+    return pid2cates
 
 def acro_trans(cate_series):
     _, root = get_root(join(data_path, 'cs_cate_acro.xml'))
@@ -53,12 +56,22 @@ def acro_trans(cate_series):
 def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
     """
-    if fulltext_df.loc[:,1].equals(sec_df.loc[:,1]): # pids must be aligned
+    if fulltext_df.iloc[:,0].equals(sec_df.iloc[:,0]) and fulltext_df.shape==sec_df.shape: # pids must be aligned
+        # Add categories
+        catedict = get_pid2cate_dict(metaxml_list)
+        
+
+        cate_series = fulltext_df.iloc[:,1].map(catedict).apply(pd.Series) # fill with NaN 
+        fulltext_df.insert(1,'cates',cate_series) # add
+        # Repeat pid n times (n=len(cates))
+        # pd.concat([Series(ftrow, cate_series.split('')] )
+
+        # Compute KLdiv
         p_i, q_i = fulltext_df.iloc[:,2:].to_numpy(), sec_df.iloc[:,2:].to_numpy()
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
         kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
-        cate_series = fulltext_df.iloc[:,1].map(get_pid2cate_dict(metaxml_list))
-        cate_series = acro_trans(cate_series)
+        
+        # cate_series = acro_trans(cate_series)
         
         # print('Paper category not found:') 
         # print(fulltext_df[cate_series.isnull()])
@@ -67,6 +80,8 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         # exit(0)
 
         div_df = pd.concat([fulltext_df.iloc[:, 1:2], cate_series, pd.Series(kldiv_paper)], axis=1)
+        
+        
         div_df.columns = ['pid', 'category', 'kld']
         div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
         div_df.to_csv(path_or_buf=dst, index=False)
