@@ -21,12 +21,16 @@ def read_data(mallet_out):
     else:
         df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high').drop(0, axis=1)
     
+    # Turn columns [1:] to array
+    vec = df.iloc[:,1:].to_numpy()
+    df = pd.concat([df.iloc[:,0], vec], axis=1)
 
-    if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': # strip file extension
+    # Strip file extension
+    if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': 
         print('Stripping extention name in pid...')
         df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
         print('... done')
-    # print(df.head(3))
+    df.columns = ['pid', 'topic_dist']
     return df
 
 def get_pid2cate_dict(metaxml_list):
@@ -59,16 +63,14 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     if fulltext_df.iloc[:,0].equals(sec_df.iloc[:,0]) and fulltext_df.shape==sec_df.shape: # pids must be aligned
         # Add categories
         catedict = get_pid2cate_dict(metaxml_list)
-        
-
-        cate_series = fulltext_df.iloc[:,1].map(catedict).apply(pd.Series) # fill with NaN 
+        cate_series = fulltext_df.pid.map(catedict).apply(pd.Series) # fill with NaN 
         fulltext_df.insert(1,'cates',cate_series) # add
         # Repeat pid n times (n=len(cates))
         # pd.concat([Series(ftrow, cate_series.split('')] )
 
         # Compute KLdiv
-        p_i, q_i = fulltext_df.iloc[:,2:].to_numpy(), sec_df.iloc[:,2:].to_numpy()
-        kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # before sum
+        p_i, q_i = fulltext_df.topic_dist, sec_df.topic_dist # fulltext_df.iloc[:,1:].to_numpy(), sec_df.iloc[:,1:].to_numpy()
+        kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # element-wise multiply
         kldiv_paper = np.sum(kldiv_i,axis=1) #.reshape((-1,1))
         
         # cate_series = acro_trans(cate_series)
