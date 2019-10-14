@@ -43,7 +43,8 @@ def get_pid2cate_dict(metaxml_list):
         #         if c[:2]=='cs'])
     return pid2cates
 
-def acro_trans(cate_series):
+def get_acro2cate_dict():
+    """returns a dictionary, keys: acronyms, values: human-readable categories"""
     _, root = get_root(join(data_path, 'cs_cate_acro.xml'))
     acro2cate = dict()
     for i in range(len(root)):
@@ -53,7 +54,7 @@ def acro_trans(cate_series):
             acro, fn = root[i][0][0].text.split(' - ')
             fn = re.sub(r'\s\(.*\)','',fn) #remove parenthese
             acro2cate[acro] = fn
-    return cate_series.map(acro2cate)
+    return acro2cate # cate_series.map(acro2cate)
 
 def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
@@ -68,16 +69,11 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         div_df = pd.concat([fulltext_df.pid, pd.Series(kldiv_paper, name='kld')], axis=1)
 
         catedict = get_pid2cate_dict(metaxml_list)
-        cate_series = fulltext_df.pid.map(catedict)# .apply(pd.Series) # fill with NaN 
+        cate_series = fulltext_df.pid.map(catedict).apply(pd.Series) # fill with NaN 
         div_df = cate_series.merge(div_df, left_index=True, right_index=True) \
                     .melt(id_vars=['pid','kld'], value_name='category') \
                     .drop('variable',axis=1) \
-                    .dropna()
-        # div_df.insert(1,'cates',cate_series) # add
-
-
-        # cate_series = acro_trans(cate_series)
-        
+                    .dropna()        
         # print('Paper category not found:') 
         # print(fulltext_df[cate_series.isnull()])
         # print('Check if uncategorized are all from 2019:')
@@ -85,6 +81,7 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         # exit(0)
 
         # div_df.columns = ['pid', 'kld', 'category']
+        div_df.category = div_df.category.map(get_acro2cate_dict()) # Human-readable categories
         div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
         div_df.to_csv(path_or_buf=dst, index=False)
         print('KLD stats DONE! %s' % dst)
