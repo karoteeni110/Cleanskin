@@ -82,14 +82,16 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
 
         # div_df.columns = ['pid', 'kld', 'category']
         div_df.category = div_df.category.map(get_acro2cate_dict()) # Human-readable categories
-        div_df = div_df[div_df['category'].notnull()]  # exclude cases where categories not found
+        print('Categories not found:', len(div_df.category.isnull()))
+        div_df = div_df[ (div_df.category not in ['Other', 'General Literature', 'NaN']) ]
+        
         div_df.to_csv(path_or_buf=dst, index=False)
         print('KLD stats DONE! %s' % dst)
         # return div_df
     else:
         print('DFs not aligned.')
-        print('Full-text pids:', fulltext_df.loc[:,1])
-        print('Sec pids:', sec_df.loc[:,1])
+        print('Full-text pids:', fulltext_df.pid)
+        print('Sec pids:', sec_df.pid)
         exit(0)
 
 def show_errbar():
