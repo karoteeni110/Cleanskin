@@ -49,6 +49,8 @@ dev.off()
 ########## REPRODUCE OLD FIGURE 1
 abstract <- read.csv('../../data/old_cs_abstract_kld.txt', header=T)
 abstract2 <- summarySE(abstract, measurevar = 'kld', groupvars = c('category'))
+# check dist:
+# ggplot() + geom_density(data=abstract, aes(kld, col=category))
 
 pdf("../../results/redo_fig1.pdf", h=7, w=6)
 ggplot(abstract2, aes(x=reorder(category, kld, FUN=mean), y=kld)) + geom_errorbar(aes(ymin=kld-ci, ymax=kld+ci)) + geom_point() + coord_flip() + ylab('KL divergence (bits)') + xlab('') + scale_y_continuous(limits=c(2,3),breaks=c(2.0,2.2,2.4,2.6,2.8,3.0)) + theme_bw()
