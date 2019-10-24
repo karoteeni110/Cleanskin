@@ -18,3 +18,6 @@ Sections are garbled.
 Distributions: cs_XX_composition.txt
 
 Time usage for the model: 12~13 hours for corpus with 140,000+ articles
+
+
+
