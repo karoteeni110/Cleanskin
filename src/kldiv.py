@@ -70,17 +70,12 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
 
         catedict = get_pid2cate_dict(metaxml_list)
         cate_series = fulltext_df.pid.map(catedict).apply(pd.Series) # fill with NaN 
+        # Repeat each paper n times (n=len(categories)) 
         div_df = cate_series.merge(div_df, left_index=True, right_index=True) \
                     .melt(id_vars=['pid','kld'], value_name='category') \
                     .drop('variable',axis=1) \
                     .dropna()        
-        # print('Paper category not found:') 
-        # print(fulltext_df[cate_series.isnull()])
-        # print('Check if uncategorized are all from 2019:')
-        # print(fulltext_df[cate_series.isnull()].iloc[:,1].str.match(pat='1907.*').sum())
-        # exit(0)
 
-        # div_df.columns = ['pid', 'kld', 'category']
         div_df.category = div_df.category.map(get_acro2cate_dict()) # Human-readable categories
         # print('Categories not found:', len(div_df.category.isnull()))
         div_df = div_df[div_df.category.notnull()]

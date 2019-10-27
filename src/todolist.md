@@ -19,5 +19,15 @@ Distributions: cs_XX_composition.txt
 
 Time usage for the model: 12~13 hours for corpus with 140,000+ articles
 
+## ML catelogs
+
+>> print(Counter(ml_inlist.catecount))
+Counter({0: 9642, 1: 8963, 2: 3507, 3: 697, 4: 76, 5: 2})
+
+## Neural catelogs
+
+>> print(Counter(neural_inlist.catecount))
+Counter({0: 1063, 1: 1507, 2: 1044, 3: 278, 4: 31, 5: 2})
+
 
 

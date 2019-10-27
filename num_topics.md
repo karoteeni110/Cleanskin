@@ -4,7 +4,7 @@
 
 Gist: Split data into training & held-out sets. Train model & test its perplexity on the held-out set.
 
-**BUT**: Isn't it the same with our KL divergence measurement? It's equavalent to training multiple models and choose the one that yields lowest KLD?
+(What if we check KLD on different sets?)
 
 > See: [Selecting model parameters (Stanford Topic Modeling Toolbox)](https://nlp.stanford.edu/software/tmt/tmt-0.4/)
 
@@ -12,14 +12,23 @@ Gist: Split data into training & held-out sets. Train model & test its perplexit
 
 Gist: Plot the topic coherence value over number of topics and choose the elbow point.
 
-Topic coherence evaluates topics (with "the confirmation measure" like PMI), then combines the results into one number. 
+Topic coherence evaluates topics (with "the confirmation measure" such as PMI), then combines the results into one number. 
 
 > See: 
 [Gensim: How to find the optimal number of topics for LDA?](https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/#17howtofindtheoptimalnumberoftopicsforlda), [What is topic coherence?](https://rare-technologies.com/what-is-topic-coherence/)
 
-### 3 Nonparametric model: HDP (Hierachical dirichlet process)
+### 3 Like evaluate clusters
 
-Tunes the number automatically during the training process. **BUT**:
+Take each topic as a cluster and evaluate the effectiveness of different number of them.
+
+Metrics:
+[Determining the number of clusters in a data set - Wikipedia](https://en.wikipedia.org/wiki/Determining_the_number_of_clusters_in_a_data_set)
+
+### 4 Nonparametric model: HDP (Hierachical dirichlet process)
+
+Tunes the number automatically during the training process; topics' interpretability not gauranteed. 
+
+**AND**:
 
 > Even in such models, some parameters remain to be tuned, such as the topic smoothing and term smoothing parameters.
 
