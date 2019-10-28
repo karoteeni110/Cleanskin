@@ -17,11 +17,17 @@ Topic coherence evaluates topics (with "the confirmation measure" such as PMI), 
 > See: 
 [Gensim: How to find the optimal number of topics for LDA?](https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/#17howtofindtheoptimalnumberoftopicsforlda), [What is topic coherence?](https://rare-technologies.com/what-is-topic-coherence/)
 
-### 3 Like evaluate clusters
+### 3 Cluster measurements
 
 Take each topic as a cluster and evaluate the effectiveness of different number of them.
 
 Metrics:
+
+1. The elbow method: plots the percentage of variance explained by the clusters against the number of clusters, and take the elbow point.
+
+2. Akaike information criterion (AIC) or Bayesian information criterion (BIC) for x-means clustering:
+
+> See:
 [Determining the number of clusters in a data set - Wikipedia](https://en.wikipedia.org/wiki/Determining_the_number_of_clusters_in_a_data_set)
 
 ### 4 Nonparametric model: HDP (Hierachical dirichlet process)

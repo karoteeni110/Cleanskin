@@ -59,8 +59,9 @@ def get_acro2cate_dict():
 def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
     """
+    
     if fulltext_df.iloc[:,0].equals(sec_df.iloc[:,0]) and fulltext_df.shape==sec_df.shape: # pids must be aligned
-
+        print("Dataframes aligned. Calculating KLdiv...")
         # Compute KLdiv
         p_i, q_i = fulltext_df.iloc[:,1:].to_numpy(), sec_df.iloc[:,1:].to_numpy()
         kldiv_i = np.multiply(p_i, np.log2(p_i)-np.log2(q_i)) # element-wise multiply
@@ -118,7 +119,11 @@ def ytick():
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
-    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld.txt'), ['Computer_Science.xml'])
-    # acro_trans(0)
+    # ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
+    # abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
+    # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld.txt'), ['Computer_Science.xml'])
+
+    ft_df = read_data(join(data_path, '200tpc/cs_ft_composition_200tp.txt'))
+    abt_df = read_data(join(data_path, '200tpc/cs_abt_composition_200tp.txt'))
+    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld_200tp.txt'), ['Computer_Science.xml'])
+    
