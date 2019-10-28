@@ -23,9 +23,13 @@ Take each topic as a cluster and evaluate the effectiveness of different number 
 
 Metrics:
 
-1. The elbow method: plots the percentage of variance explained by the clusters against the number of clusters, and take the elbow point.
+1. [The elbow method](https://en.wikipedia.org/wiki/Elbow_method_(clustering)): plots the percentage of variance explained by the clusters against the number of clusters, and take the elbow point.
 
-2. Akaike information criterion (AIC) or Bayesian information criterion (BIC) for x-means clustering:
+2. Akaike information criterion ([AIC_wikipedia](https://en.wikipedia.org/wiki/Akaike_information_criterion)) or Bayesian information criterion ([BIC_wikipedia](https://en.wikipedia.org/wiki/Bayesian_information_criterion)) for x-means clustering
+
+3. [Silhouette Method](https://en.wikipedia.org/wiki/Silhouette_(clustering)): measures how closely it is matched to data within its cluster and how loosely it is matched to data of the neighbouring cluster, i.e. the cluster whose average distance from the datum is lowest.
+
+4. Other confusing methods in ↓
 
 > See:
 [Determining the number of clusters in a data set - Wikipedia](https://en.wikipedia.org/wiki/Determining_the_number_of_clusters_in_a_data_set)
@@ -34,7 +38,7 @@ Metrics:
 
 Tunes the number automatically during the training process; topics' interpretability not gauranteed. 
 
-**AND**:
+**BUT**:
 
 > Even in such models, some parameters remain to be tuned, such as the topic smoothing and term smoothing parameters.
 
