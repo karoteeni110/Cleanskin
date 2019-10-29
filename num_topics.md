@@ -6,7 +6,7 @@ Gist: Split data into training & held-out sets. Train model & test its perplexit
 
 (What if we check KLD on different sets?)
 
-> See: [Selecting model parameters (Stanford Topic Modeling Toolbox)](https://nlp.stanford.edu/software/tmt/tmt-0.4/)
+> See: [Selecting model parameters (Stanford Topic Modeling Toolbox)](https://nlp.stanford.edu/software/tmt/tmt-0.4/), [Perplexity To Evaluate Topic Models](http://qpleple.com/perplexity-to-evaluate-topic-models/), [Wallach09a](http://dirichlet.net/pdf/wallach09evaluation.pdf)
 
 ### 2 Check coherence
 
