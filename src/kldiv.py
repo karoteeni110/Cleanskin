@@ -31,16 +31,18 @@ def read_data(mallet_out):
     df = df.rename(columns={1:'pid'})
     return df
 
-def get_pid2cate_dict(metaxml_list):
-    """TODO: repeat article n times; n=len(category)"""
+def get_pid2cate_dict(metaxml_list=listdir(metadatas_path), random_cate=False):
+    """returns dictionary: 
+    key:pid str; value: list of category acronyms"""
     pid2meta = get_pid2meta(metaxml_list)
     pid2cates = dict()
     for pid in pid2meta:
-        pid2cates[pid] = [c[3:] for c in pid2meta[pid]['categories'].split(', ') 
+        if not random_cate:
+            pid2cates[pid] = [c[3:] for c in pid2meta[pid]['categories'].split(', ') 
                             if c[:2]=='cs']
-        # pid2cate[pid] = choice([c[3:] 
-        #     for c in pid2meta[pid]['categories'].split(', ') 
-        #         if c[:2]=='cs'])
+        else:
+            pid2cates[pid] = choice([c[3:] for c in pid2meta[pid]['categories'].split(', ') 
+                            if c[:2]=='cs'])
     return pid2cates
 
 def get_acro2cate_dict():
@@ -115,6 +117,7 @@ def ytick():
     # ax.set_xticks(l)
     ax.set_yticklabels(x)
     plt.show()
+
 
 if __name__ == "__main__":
     # ytick()

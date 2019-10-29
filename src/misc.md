@@ -4,16 +4,16 @@ Sections are garbled.
 ##  Mallet usage
 
 ```
-# Import fulltext
+# Import fulltext data
 ./bin/mallet import-dir --input ~/Desktop/Cleanskin/results/cs_lda/fulltext --output cs_fulltext.mallet --keep-sequence --remove-stopwords
 
-# Import abstract
+# Import abstract data
 ./bin/mallet import-dir --input ~/Desktop/Cleanskin/results/cs_lda/abstract --output cs_abstract.mallet --keep-sequence --remove-stopwords
 
 # Get model and inferencer (take hours)
 ./bin/mallet train-topics --input cs_fulltext.mallet --num-topics 100 --output-model cs_ftmodel_100tpc.mallet --output-doc-topics cs_ft_composition_100tpc.txt --output-topic-keys cs_ft_keys_100tpc.txt --inferencer-filename cs_ft_inferencer_100tpc.mallet
 
-# Infer & get distribution (fast)
+# Infer & get distribution
 ./bin/mallet infer-topics --inferencer cs_ft_inferencer_100tpc.mallet --input cs_abstract.mallet --output-doc-topics cs_abt_composition_100tpc.txt
 ```
 
@@ -21,7 +21,7 @@ Sections are garbled.
 
 Distributions: cs_XX_composition_Xtpc.txt
 
-Took 12~13 hours for 100 topics from 140k docs
+Time usage for the model: 12~13 hours for 100 topics from 140k articles
 
 ## ML catelogs
 

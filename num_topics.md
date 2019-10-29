@@ -8,7 +8,7 @@ Gist: Split data into training & held-out sets. Train model & test its perplexit
 
 > See: [Selecting model parameters (Stanford Topic Modeling Toolbox)](https://nlp.stanford.edu/software/tmt/tmt-0.4/)
 
-### 2 Check coherence value
+### 2 Check coherence
 
 Gist: Plot the topic coherence value over number of topics and choose the elbow point.
 

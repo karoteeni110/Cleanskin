@@ -1,12 +1,13 @@
 from random import choice
 from shutil import copy
-from paths import results_path, cleanedxml_path, cleaned_tmp0001_dir
+from paths import results_path, cleanedxml_path
 from os import listdir
 from os.path import join
+from random import choice
 import sys
 
 def copyten(cp=10):
-    source_dir = cleaned_tmp0001_dir
+    source_dir = 0
     for _ in range(0,cp):
         fn = choice(listdir(source_dir))
         src = join(source_dir, fn)
