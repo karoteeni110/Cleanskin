@@ -25,6 +25,8 @@ metadatas_path = join(data_path, 'arxiv_metadata')
 cs_lda_dir = join(results_path, 'cs_lda')
 fulltext_dir = join(cs_lda_dir, 'fulltext')
 kldiv_dir = join(src_path, 'KLdiv')
+perpsets_testdir = join(results_path, 'perpsets/10test')
+perpsets_traindir = join(results_path, 'perpsets/90train')
 
 if __name__ == "__main__":
     # Check that we are reading the correct file
