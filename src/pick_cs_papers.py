@@ -36,11 +36,13 @@ def nmlz(text):
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
+    """Clear backmatter elems"""
     elems = docroot.findall('.//*')
     for elem in elems:
         if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography') \
             or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
             elem.clear()
+    return docroot
     return docroot
 
 def tk_ratio(txt):
@@ -99,9 +101,21 @@ def clear_picked_dir(tarfn):
     # rmtree(join(TARS_COPY_TO, unzipped_dirn))
     logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
 
+def rm_bmtext(docroot):
+    elems = docroot.findall('.//*')
+    for elem in elems:
+        if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography') \
+            or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
+            t = elem.get('title')
+            elem.clear()
+            elem.set('title', t)
+    return docroot
+
 def pick_cs_headings(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     skipped, allpaper = 0, 0
+    headingstr, pid_heading_str = '', ''
+
     for xml in listdir(dirn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
@@ -111,7 +125,7 @@ def pick_cs_headings(tarfn):
             
             fulltext, garbled_len= '', 0
             # secelems = (root[3:] if root.get('categories') else root)
-            secelems = rm_backmatter(root)
+            secelems = rm_bmtext(root)
             for sec in secelems: # root[3:] does not include metadata
                 sectext = nmlz(''.join(sec.itertext()))
                 if tk_ratio(sectext) < 10:
@@ -120,15 +134,19 @@ def pick_cs_headings(tarfn):
                     garbled_len += len(sectext)
             
             if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
-                
-                cs_headings_txt_path = join(results_path, 'cs_headings.txt')
-                with open(cs_headings_txt_path, 'a') as hdtxt:
-                    for sec in root.findall('.//section'):
-                        heading = sec.get('title')
-                        hdtxt.write(heading+'\n')
+                secs = root.findall('.//section')
+                for sec in secs[1:]:
+                    headingstr += sec.get('title', '') + '\n'
+                    pid_heading_str += xml + ' ' +headingstr
+
             else:
                 logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
                 skipped += 1
+
+    with open(cs_headings_txt_path, 'a') as hdtxt:
+        hdtxt.write(headingstr)
+    with open(pid_heading_txt_path, 'a') as pidtxt:
+        pidtxt.write(pid_heading_str)
 
     extracted = allpaper-skipped
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
@@ -150,14 +168,16 @@ if __name__ == "__main__":
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('topicmodel.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('CSheadings.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
     TARS_COPY_TO = '/tmp/arxiv'
-    ABSTRACT_DST = join(results_path, 'cs_lda/abstract')
-    FULLTEXT_DST = join(results_path, 'cs_lda/fulltext')
-    
+    ABSTRACT_DST = '' # join(results_path, 'cs_lda/abstract')
+    FULLTEXT_DST = ''# join(results_path, 'cs_lda/fulltext')
+    cs_headings_txt_path = join(results_path, 'cs_headings.txt')
+    pid_heading_txt_path = join(results_path, 'pid_headings.txt')
+
     tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
     # tarlist = ['1801.tar.gz']
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
