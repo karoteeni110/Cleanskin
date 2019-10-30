@@ -34,10 +34,15 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path)):
     cate2pcount = pd.Series(cate2pcount)
     return pid2cates, cate2pcount
 
-def copy_to_catedir(paperfn, cate, to_trainset):
+def copy_to_catedir(paperfn, cate):
     src = join(PAPERDIR, paperfn)
+    to_trainset = cate2train_toadd[cate]
     if to_trainset:
         dst = join(perpsets_traindir, paperfn)
+        cate2train_toadd[cate] -= 1
+        if cate2train_toadd[cate] == 0:
+            print(cate, 'training set collection done. %s/%s' % 
+                        (len(cate2train_toadd[cate2train_toadd==0]), len(cate2train_toadd)))
     else:
         dst = join(perpsets_testdir, paperfn)
     # copy(src, dst)
@@ -48,7 +53,8 @@ if __name__ == "__main__":
     catedir_paths = mk_cate_dirs()
     cs_paper_fns = listdir(fulltext_dir) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
     pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'])
-    
+
+    cate2train_toadd = pd.Series(cate2pcount*0.9, dtype='int')
     cs_paper_fns = shuffle(cs_paper_fns)
     PAPERDIR = fulltext_dir
     for paperfn in cs_paper_fns:

@@ -99,14 +99,48 @@ def clear_picked_dir(tarfn):
     # rmtree(join(TARS_COPY_TO, unzipped_dirn))
     logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
 
+def pick_cs_headings(tarfn):
+    dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
+    skipped, allpaper = 0, 0
+    for xml in listdir(dirn):
+        xmlpath = join(dirn, xml)
+        _, root = get_root(xmlpath)
+        
+        if is_cs(root):
+            allpaper += 1
+            
+            fulltext, garbled_len= '', 0
+            # secelems = (root[3:] if root.get('categories') else root)
+            secelems = rm_backmatter(root)
+            for sec in secelems: # root[3:] does not include metadata
+                sectext = nmlz(''.join(sec.itertext()))
+                if tk_ratio(sectext) < 10:
+                    fulltext += sectext + '\n'
+                elif len(sectext)>300 : # if len(sectext.split()) < 10: # some short notes may be weird; just exclude it
+                    garbled_len += len(sectext)
+            
+            if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
+                
+                cs_headings_txt_path = join(results_path, 'cs_headings.txt')
+                with open(cs_headings_txt_path, 'a') as hdtxt:
+                    for sec in root.findall('.//section'):
+                        heading = sec.get('title')
+                        hdtxt.write(heading+'\n')
+            else:
+                logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
+                skipped += 1
+
+    extracted = allpaper-skipped
+    logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
+    return extracted, allpaper
+
 def main(tar_fn):
     cp_1tar(tar_fn)
     unzip_1tar(tar_fn)
     rm_oldtar(tar_fn)
-    extracted, allpaper = pick_cs_papers(tar_fn)
+    extracted, allpaper = pick_cs_headings(tar_fn) # pick_cs_papers(tar_fn)
     clear_picked_dir(tar_fn)
     return extracted, allpaper
-    # Finally get `cs_ft_composition.txt`, `cs_abt_composition.txt`, `cs_ft_keys.txt`
 
 
 if __name__ == "__main__":
