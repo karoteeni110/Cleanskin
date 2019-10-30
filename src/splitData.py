@@ -1,4 +1,4 @@
-from kldiv import get_pid2meta
+from kldiv import get_pid2meta, get_acro2cate_dict
 from paths import fulltext_dir, metadatas_path, perpsets_testdir, perpsets_traindir
 from shutil import copy
 from os import listdir
@@ -43,11 +43,12 @@ def copy_to_catedir(paperfn, cate):
         if cate2train_toadd[cate] == 0:
             print(cate, 'training set collection done. %s/%s' % 
                         (len(cate2train_toadd[cate2train_toadd==0]), len(cate2train_toadd)))
+        if cate2train_toadd[cate] % 100 == 0:
+            print('Cate:', cate+'('+acro2cate[cate]+')', 'papers to add:', cate2train_toadd[cate])
+    
     else:
         dst = join(perpsets_testdir, paperfn)
-    print(cate2train_toadd)
-    print()
-    # copy(src, dst)
+    copy(src, dst)
     
 
 
@@ -58,9 +59,10 @@ if __name__ == "__main__":
     shuffle(cs_paper_fns)
     print('... Listdir done.')
     pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'])
+    acro2cate = get_acro2cate_dict()
 
     cate2train_toadd = pd.Series(cate2pcount*0.9, dtype='int')
     PAPERDIR = fulltext_dir
     for paperfn in cs_paper_fns:
         pid = paperfn[:-4] # strip '.txt'
-        copy_to_catedir(paperfn, pid2cate[pid])
+        copy_to_catedir(paperfn, pid2cate.pop(pid))
