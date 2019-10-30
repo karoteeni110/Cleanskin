@@ -43,7 +43,7 @@ def copy_to_catedir(paperfn, cate):
         if cate2train_toadd[cate] == 0:
             print(cate, 'training set collection done. %s/%s' % 
                         (len(cate2train_toadd[cate2train_toadd==0]), len(cate2train_toadd)))
-        if cate2train_toadd[cate] % 100 == 0:
+        if (100-(cate2train_toadd[cate]/int(cate2pcount[cate]*0.9))*100)%5 ==0 : # Report every 5 percent
             print('Cate:', cate+'('+acro2cate[cate]+')', 'papers to add:', cate2train_toadd[cate])
     
     else:
@@ -65,4 +65,8 @@ if __name__ == "__main__":
     PAPERDIR = fulltext_dir
     for paperfn in cs_paper_fns:
         pid = paperfn[:-4] # strip '.txt'
-        copy_to_catedir(paperfn, pid2cate.pop(pid))
+        try:
+            cate = pid2cate.pop(pid)
+            copy_to_catedir(paperfn, cate)
+        except KeyError:
+            continue
