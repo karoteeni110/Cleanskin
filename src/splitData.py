@@ -46,6 +46,7 @@ def copy_to_catedir(paperfn, cate):
     else:
         dst = join(perpsets_testdir, paperfn)
     print(cate2train_toadd)
+    print()
     # copy(src, dst)
     
 
@@ -54,11 +55,11 @@ if __name__ == "__main__":
     catedir_paths = mk_cate_dirs()
     print('Listdir:', fulltext_dir, '...')
     cs_paper_fns = listdir(fulltext_dir) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
+    shuffle(cs_paper_fns)
     print('... Listdir done.')
     pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'])
 
     cate2train_toadd = pd.Series(cate2pcount*0.9, dtype='int')
-    cs_paper_fns = shuffle(cs_paper_fns)
     PAPERDIR = fulltext_dir
     for paperfn in cs_paper_fns:
         pid = paperfn[:-4] # strip '.txt'
