@@ -135,9 +135,9 @@ def pick_cs_headings(tarfn):
             
             if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
                 secs = root.findall('.//section')
-                for sec in secs[1:]:
+                for sec in secs:
                     headingstr += sec.get('title', '') + '\n'
-                    pid_heading_str += xml + ' ' +headingstr
+                    pid_heading_str += xml + ' ' + sec.get('title', '') + '\n'
 
             else:
                 logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('CSheadings.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('csheadings.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'

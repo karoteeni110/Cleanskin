@@ -21,7 +21,7 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path)):
     pid2meta = get_pid2meta(metaxml_list)
     pid2cates = dict()
     cate2pcount = Counter()
-    print('Collecting paper categories...')
+    print('Collecting categories...')
     for pid in pid2meta:
         pcate = choice([c[3:] for c in pid2meta[pid]['categories'].split(', ') 
                             if c[:2]=='cs'])
@@ -45,13 +45,16 @@ def copy_to_catedir(paperfn, cate):
                         (len(cate2train_toadd[cate2train_toadd==0]), len(cate2train_toadd)))
     else:
         dst = join(perpsets_testdir, paperfn)
+    print(cate2train_toadd)
     # copy(src, dst)
     
 
 
 if __name__ == "__main__":
     catedir_paths = mk_cate_dirs()
+    print('Listdir:', fulltext_dir, '...')
     cs_paper_fns = listdir(fulltext_dir) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
+    print('... Listdir done.')
     pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'])
 
     cate2train_toadd = pd.Series(cate2pcount*0.9, dtype='int')
