@@ -34,23 +34,27 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path)):
     print()
 
     cate2pcount = pd.Series(cate2pcount)
-    return pid2cates, cate2pcount
+    return pid2cate, cate2pcount
 
-def copy_to_catedir(paperfn, cate, cate2train_toadd):
+def copy_to_catedir(paperfn, cate, cate2test_to_add):
     src = join(PAPERDIR, paperfn)
-    to_testset = cate2test_toadd[cate]
+    to_testset = cate2test_to_add[cate]
+    if (cate2pcount-to_testset)%50 ==0:
+        print('Cate:',cate, 'to add:', cate2test_to_add[cate])
     if to_testset>0:
         dst = join(perpsets_testdir, paperfn)
-        cate2train_toadd[cate] -= 1
-        if cate2train_toadd[cate] == 0:
-            print(cate, 'training set collection done. %s/%s' % 
-                        (len(cate2train_toadd[cate2train_toadd==0]), len(cate2train_toadd)))
-        if (100-(cate2train_toadd[cate]/int(cate2pcount[cate]*0.9))*100)%5 ==0 : # Report every 5 percent
-            print('Cate:', cate+'('+acro2cate[cate]+')', 'papers to add:', cate2train_toadd[cate])
-    
+        cate2test_to_add[cate] -= 1    
     else:
         dst = join(perpsets_traindir, paperfn)
     copy(src, dst)
+    
+    if cate2test_to_add[cate] == 0:
+        print(cate, 'training set collection done. %s/%s' % 
+                        (len(cate2test_to_add[cate2test_to_add==0]), len(cate2test_to_add)))
+    finished = 100-(cate2test_to_add[cate]/int(cate2pcount[cate]*0.1))*100
+    if finished % 5 == 0 : # Report every 5 percent
+        print('Cate:', cate+'('+acro2cate[cate]+')', 'process:', finished + '%%;',
+                 'to add:', cate2test_to_add[cate])
     
 
 
@@ -63,14 +67,15 @@ if __name__ == "__main__":
     pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'])
     acro2cate = get_acro2cate_dict()
 
-    cate2test_toadd = pd.Series(np.ones(len(cate2pcount))*3, index=cate2pcount.index) # pd.Series(cate2pcount*0.1, dtype='int')
-    PAPERDIR = join(results_path, 'test') # fulltext_dir
+    cate2test_toadd = pd.Series(cate2pcount*0.1, dtype='int')
+    PAPERDIR =  fulltext_dir # join(results_path, 'test')
     for paperfn in cs_paper_fns:
         pid = paperfn[:-4] # strip '.txt'
         try:
             cate = pid2cate.pop(pid)
-            print('OLD:', cate, cate2test_toadd[cate])
+            
             copy_to_catedir(paperfn, cate, cate2test_toadd)
+            print('OLD:', cate, cate2test_toadd[cate])
             print('NEW:', cate, cate2test_toadd[cate])
         except KeyError:
             continue
