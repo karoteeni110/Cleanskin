@@ -20,22 +20,38 @@ def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
     pid2cate = pid2cate.apply(lambda cates: [c[3:] for c in cates if c[:2]=='cs'] )
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
-    pid2cate = pid2cate[pid2cate.index.isin(allpids)]
+    train_pid2cate = pid2cate[pid2cate.index.isin(allpids[0])]
+    test_pid2cate = pid2cate[pid2cate.index.isin(allpids[1])]
 
-    cate2pcount = dict()
-    for subcate in set(pid2cate):
-        cate2pcount[subcate] = len(pid2cate[pid2cate==subcate])
-    print("Papers categorized. Summary:")
-    for cate in cate2pcount:
-        print(cate, ":", cate2pcount[cate])
+    traincount = dict()
+    for subcate in set(train_pid2cate):
+        traincount[subcate] = len(train_pid2cate[train_pid2cate==subcate])
+    print("Train folder categorized. Summary:")
+    for cate in traincount:
+        print(cate, ":", traincount[cate])
     print()
 
-    cate2pcount = pd.Series(cate2pcount)
-    return pid2cate, cate2pcount
+    testcount = dict()
+    for subcate in set(test_pid2cate):
+        testcount[subcate] = len(test_pid2cate[test_pid2cate==subcate])
+    print("Papers categorized. Summary:")
+    for cate in testcount:
+        print(cate, ":", testcount[cate])
+    print()
+
+    traincount = pd.Series(traincount)
+    testcount = pd.Series(testcount)
+    return train_pid2cate, traincount, test_pid2cate, testcount
 
 if __name__ == "__main__":
-    train_pid2cate = get_pid2dst(listdir(perpsets_traindir), ['Computer_Science.xml'])
-    test_pid2cate = get_pid2dst(listdir(perpsets_traindir), ['Computer_Science.xml'])
+    print('Listdir: train')
+    trainpids = pd.Series(listdir(perpsets_traindir)).apply(lambda x:x[:-4])
+    print('... done')
+    print('Listdir: test')
+    testpids = pd.Series(listdir(perpsets_testdir)).apply(lambda x:x[:-4])
+    print('... done')
+    train_pid2cate, traincount, test_pid2cate, testcount = get_pid2dst([trainpids, testpids], ['Computer_Science.xml'])
+    # , testcount = get_pid2dst(, ['Computer_Science.xml'])
     for cate in set(train_pid2cate):
         traincount = len(train_pid2cate[train_pid2cate==cate])
         test_in_cate = test_pid2cate[test_pid2cate==cate]
@@ -45,7 +61,7 @@ if __name__ == "__main__":
             test_shouldbe = int((traincount+testcount)*0.1)
             tomove = testcount-test_shouldbe
             print(cate, 'papers to move: %s' % tomove)
-        #     for pid in test_in_cate[:tomove]:
-        #         move(join(perpsets_testdir, pid+'.txt'), join(perpsets_traindir, pid+'.txt'))
-        # print('Moved articles: %s' % tomove)
-    
+            print()
+            for pid in test_in_cate[:tomove]:
+                move(join(perpsets_testdir, pid+'.txt'), join(perpsets_traindir, pid+'.txt'))
+        print('Moved articles: %s' % tomove)

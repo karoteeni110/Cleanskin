@@ -37,7 +37,7 @@ def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
 
     cate2pcount = pd.Series(cate2pcount)
     return pid2cate, cate2pcount
-    return 0
+    
 
 
 def copy_to_catedir(paperfn, cate, test_to_add):
