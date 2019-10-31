@@ -122,11 +122,11 @@ def ytick():
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    # ft_df = read_data(join(kldiv_dir, 'cs_ft_composition.txt'))
-    # abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
+    ft_df = read_data(join(data_path, '50tpc/cs_ft_composition_50tp.txt'))
+    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
     # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld.txt'), ['Computer_Science.xml'])
 
-    ft_df = read_data(join(data_path, '200tpc/cs_ft_composition_200tp.txt'))
-    abt_df = read_data(join(data_path, '200tpc/cs_abt_composition_200tp.txt'))
-    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld_200tp.txt'), ['Computer_Science.xml'])
+    # ft_df = read_data(join(data_path, '200tpc/cs_ft_composition_200tp.txt'))
+    # abt_df = read_data(join(data_path, '200tpc/cs_abt_composition_200tp.txt'))
+    # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld_200tp.txt'), ['Computer_Science.xml'])
     
