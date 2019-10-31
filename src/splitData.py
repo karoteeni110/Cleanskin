@@ -11,7 +11,7 @@ import numpy as np
 def mk_cate_dirs(dst=''):
     return 0
 
-def get_pid2dst(metaxml_list=listdir(metadatas_path), fulltext_dir_fns):
+def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
     """Returns: pid2cates -- dictionary 
                             key: pid
                             value: CS subcategory acronym
@@ -19,15 +19,13 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path), fulltext_dir_fns):
                             index: CS subcate acronym
                             value: count of papers in the subcate
     """
-    pid2cate= pd.Series(get_pid2meta(metaxml_list))
-    fulltext_dir_pids = pd.Series(fulltext_dir_fns).apply(lambda x: x[:-4]) # strip '.txt'
+    pid2cate = pd.Series(get_pid2meta(metaxml_list)) # strip '.txt'
 
     print('Collecting categories...')
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
     pid2cate = pid2cate.apply(lambda cates: [c[3:] for c in cates if c[:2]=='cs'] )
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
-
-    # pid2cate = pid2cate.apply(lambda x: x if x.index )
+    pid2cate = pid2cate[pid2cate.index.isin(allpids)]
 
     cate2pcount = dict()
     for subcate in set(pid2cate):
@@ -39,6 +37,8 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path), fulltext_dir_fns):
 
     cate2pcount = pd.Series(cate2pcount)
     return pid2cate, cate2pcount
+    return 0
+
 
 def copy_to_catedir(paperfn, cate, test_to_add):
     src = join(PAPERDIR, paperfn)
@@ -56,17 +56,20 @@ if __name__ == "__main__":
     print('Listdir:', fulltext_dir, '...')
     cs_paper_fns = listdir(fulltext_dir) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
     shuffle(cs_paper_fns)
+    allpids = pd.Series(cs_paper_fns)
+    allpids = allpids.apply(lambda x:x[:-4])
     print('... Listdir done.')
-    pid2cate, cate2pcount = get_pid2dst(['Computer_Science.xml'], cs_paper_fns)
+    
+    pid2cate, cate2pcount = get_pid2dst(allpids, ['Computer_Science.xml'])
     # acro2cate = get_acro2cate_dict()
 
-    totest, totrain = pd.Series(), pd.Series()
-    for cate in set(pid2cate):
-        papers_in_cate = pid2cate[pid2cate==cate]
-        sumcount = len(papers_in_cate)
-        boundary = int(sumcount*0.1)
-        totest = totest.append(papers_in_cate[:boundary].index.to_series())
-        totrain = totrain.append(papers_in_cate[boundary:].index.to_series())
+    # totest, totrain = pd.Series(), pd.Series()
+    # for cate in set(pid2cate):
+    #     papers_in_cate = pid2cate[pid2cate==cate]
+    #     sumcount = len(papers_in_cate)
+    #     boundary = int(sumcount*0.1)
+    #     totest = totest.append(papers_in_cate[:boundary].index.to_series())
+    #     totrain = totrain.append(papers_in_cate[boundary:].index.to_series())
 
     cate2test_toadd = pd.Series(cate2pcount*0.1, dtype='int')
     sumkeeper = cate2test_toadd.copy()
