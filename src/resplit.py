@@ -62,6 +62,8 @@ if __name__ == "__main__":
             tomove = testcount-test_shouldbe
             print(cate, 'papers to move: %s' % tomove)
             print()
-            for pid in test_in_cate[:tomove]:
+            for x, pid in enumerate(test_in_cate.index[:tomove]):
                 move(join(perpsets_testdir, pid+'.txt'), join(perpsets_traindir, pid+'.txt'))
-        print('Moved articles: %s' % tomove)
+            if (x+1)%30==0 or x+1==tomove:
+                print(cate, 'moved:', x)
+        print()
