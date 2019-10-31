@@ -20,11 +20,10 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path)):
                             value: count of papers in the subcate
     """
     pid2cate= pd.Series(get_pid2meta(metaxml_list))
+    print('Collecting categories...')
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
     pid2cate = pid2cate.apply(lambda cates: [c[3:] for c in cates if c[:2]=='cs'] )
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
-
-    print('Collecting categories...')
     cate2pcount = dict()
     for subcate in set(pid2cate):
         cate2pcount[subcate] = len(pid2cate[pid2cate==subcate])
@@ -38,23 +37,23 @@ def get_pid2dst(metaxml_list=listdir(metadatas_path)):
 
 def copy_to_catedir(paperfn, cate, cate2test_to_add):
     src = join(PAPERDIR, paperfn)
-    to_testset = cate2test_to_add[cate]
-    if (cate2pcount-to_testset)%50 ==0:
-        print('Cate:',cate, 'to add:', cate2test_to_add[cate])
+    to_testset = cate2test_to_add.at[cate]
+    if (cate2pcount.at[cate]-to_testset)%50 ==0:
+        print('Cate:',cate, 'to add:', cate2test_to_add.at[cate])
     if to_testset>0:
         dst = join(perpsets_testdir, paperfn)
-        cate2test_to_add[cate] -= 1    
+        cate2test_to_add.at[cate] -= 1    
     else:
         dst = join(perpsets_traindir, paperfn)
     copy(src, dst)
     
-    if cate2test_to_add[cate] == 0:
+    if cate2test_to_add.at[cate] == 0:
         print(cate, 'training set collection done. %s/%s' % 
                         (len(cate2test_to_add[cate2test_to_add==0]), len(cate2test_to_add)))
-    finished = 100-(cate2test_to_add[cate]/int(cate2pcount[cate]*0.1))*100
+    finished = 100-(cate2test_to_add.at[cate]/int(cate2pcount.at[cate]*0.1))*100
     if finished % 5 == 0 : # Report every 5 percent
-        print('Cate:', cate+'('+acro2cate[cate]+')', 'process:', finished + '%%;',
-                 'to add:', cate2test_to_add[cate])
+        print('Cate:', cate+'('+acro2cate.at[cate]+')', 'process:', finished + '%%;',
+                 'to add:', cate2test_to_add.at[cate])
     
 
 
@@ -73,7 +72,6 @@ if __name__ == "__main__":
         pid = paperfn[:-4] # strip '.txt'
         try:
             cate = pid2cate.pop(pid)
-            
             copy_to_catedir(paperfn, cate, cate2test_toadd)
             print('OLD:', cate, cate2test_toadd[cate])
             print('NEW:', cate, cate2test_toadd[cate])
