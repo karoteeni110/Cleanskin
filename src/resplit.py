@@ -64,6 +64,6 @@ if __name__ == "__main__":
             print()
             for x, pid in enumerate(test_in_cate.index[:tomove]):
                 move(join(perpsets_testdir, pid+'.txt'), join(perpsets_traindir, pid+'.txt'))
-            if (x+1)%30==0 or x+1==tomove:
-                print(cate, 'moved:', x)
+                if (x+1)%30==0 or x+1==tomove:
+                    print(cate, 'moved:', x)
         print()
