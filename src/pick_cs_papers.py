@@ -23,7 +23,7 @@ def rm_oldtar(tar_fn):
 
 def is_cs(docroot):
     cateinfo = docroot.get('categories', '')
-    if re.search(r'\bcs\.', cateinfo):
+    if re.search(r'\bmath\.', cateinfo):
         return True
     return False
 
@@ -43,8 +43,7 @@ def rm_backmatter(docroot):
             or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
             elem.clear()
     return docroot
-    return docroot
-
+    
 def tk_ratio(txt):
     return len(txt) / (len(txt.split()) or 1)
 
@@ -156,7 +155,7 @@ def main(tar_fn):
     cp_1tar(tar_fn)
     unzip_1tar(tar_fn)
     rm_oldtar(tar_fn)
-    extracted, allpaper = pick_cs_headings(tar_fn) # pick_cs_papers(tar_fn)
+    extracted, allpaper =  pick_cs_papers(tar_fn) # pick_cs_headings(tar_fn) 
     clear_picked_dir(tar_fn)
     return extracted, allpaper
 
@@ -168,15 +167,15 @@ if __name__ == "__main__":
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('csheadings.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('math_lda.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
-    TARS_COPY_TO = '/tmp/arxiv'
-    ABSTRACT_DST = '' # join(results_path, 'cs_lda/abstract')
-    FULLTEXT_DST = ''# join(results_path, 'cs_lda/fulltext')
-    cs_headings_txt_path = join(results_path, 'cs_headings.txt')
-    pid_heading_txt_path = join(results_path, 'pid_headings.txt')
+    TARS_COPY_TO = '/tmp/arxiv_math'
+    ABSTRACT_DST = join(results_path, 'math_lda/abstract')
+    FULLTEXT_DST = join(results_path, 'math_lda/fulltext')
+    # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
+    # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 
     tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
     # tarlist = ['1801.tar.gz']

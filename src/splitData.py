@@ -11,8 +11,10 @@ import numpy as np
 def mk_cate_dirs(dst=''):
     return 0
 
-def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
-    """Returns: pid2cates -- dictionary 
+def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
+    """Args:
+    `avb_pids`  --    available 
+    Returns: pid2cates -- dictionary 
                             key: pid
                             value: CS subcategory acronym
                 cate2pcount -- pd series
@@ -25,7 +27,7 @@ def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
     pid2cate = pid2cate.apply(lambda cates: [c[3:] for c in cates if c[:2]=='cs'] )
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
-    pid2cate = pid2cate[pid2cate.index.isin(allpids)]
+    pid2cate = pid2cate[pid2cate.index.isin(avb_pids)]
 
     cate2pcount = dict()
     for subcate in set(pid2cate):
