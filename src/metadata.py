@@ -4,6 +4,7 @@ from os import listdir
 from os.path import join
 import time, re, pickle
 from random import shuffle
+from collections import Counter
 
 def url2artid(url):
     urlid = url.split('/')[-2:]
@@ -54,4 +55,4 @@ if __name__ == "__main__":
     physics = list(get_pid2meta(['Physics.xml']).keys())
     shuffle(physics)
     with open(join(results_path, 'pickable_pids_phy.pkl'), 'wb') as pickablelst:
-        pickle.dump(physics[:600000],pickablelst)
+        pickle.dump(dict().fromkeys(physics, True),pickablelst)

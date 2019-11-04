@@ -26,8 +26,9 @@ def is_cs(docroot, xmlname):
     cateinfo = docroot.get('categories', '')
     phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
     if PICKABLE_PIDS:
-        
         pid = xmlname[:-4]
+        if pid in PICKABLE_PIDS:
+            return True
     else:
         if re.search(phys_cate_acros, cateinfo):
         # if re.search(r'\bmath\.', cateinfo):
@@ -196,7 +197,7 @@ if __name__ == "__main__":
         extracted, allpaper = main(tarfn)
         EXTRACTED_SUM += extracted
         ALLPAPER_SUM += allpaper
-        if EXTRACTED_SUM == 130000:
+        if EXTRACTED_SUM > 131703:
             break
     logging.info('Summary: paper extracted: %s of %s' % (EXTRACTED_SUM, ALLPAPER_SUM))
         
