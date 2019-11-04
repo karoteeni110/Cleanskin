@@ -7,6 +7,7 @@ from shutil import copyfile, rmtree
 from os import listdir, remove
 from os.path import join 
 from paths import results_path
+from random import shuffle
 
 def cp_1tar(tarfn):
     src = join(CLEANED_XML, tarfn)
@@ -21,11 +22,12 @@ def rm_oldtar(tar_fn):
     remove(join(TARS_COPY_TO, tar_fn))
     logging.info('Old tar %s/%s removed' % (TARS_COPY_TO, tar_fn))
 
-def is_cs(docroot):
+def is_cs(docroot, xmlname):
     cateinfo = docroot.get('categories', '')
     phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
     if PICKABLE_PIDS:
-        cateinfo
+        
+        pid = xmlname[:-4]
     else:
         if re.search(phys_cate_acros, cateinfo):
         # if re.search(r'\bmath\.', cateinfo):
@@ -59,7 +61,7 @@ def pick_cs_papers(tarfn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
         
-        if is_cs(root):
+        if is_cs(root, xml):
             allpaper += 1
             # Check abstract
             ab = root.find('abstract')
@@ -124,7 +126,7 @@ def pick_cs_headings(tarfn):
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
         
-        if is_cs(root):
+        if is_cs(root, xml):
             allpaper += 1
             
             fulltext, garbled_len= '', 0
@@ -179,12 +181,14 @@ if __name__ == "__main__":
     TARS_COPY_TO = '/tmp/arxiv_phy'
     ABSTRACT_DST = join(results_path, 'phy_lda/abstract')
     FULLTEXT_DST = join(results_path, 'phy_lda/fulltext')
-    PICKABLE_PIDS = 
+    with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
+        PICKABLE_PIDS = join(results_path, 'pickable_pids_phy.pkl')
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
     # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 
     tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
     # tarlist = ['1801.tar.gz']
+    shuffle(tarlist)
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
     for i, tarfn in enumerate(tarlist):
@@ -192,6 +196,8 @@ if __name__ == "__main__":
         extracted, allpaper = main(tarfn)
         EXTRACTED_SUM += extracted
         ALLPAPER_SUM += allpaper
+        if EXTRACTED_SUM == 130000:
+            break
     logging.info('Summary: paper extracted: %s of %s' % (EXTRACTED_SUM, ALLPAPER_SUM))
         
 
