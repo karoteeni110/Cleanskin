@@ -37,6 +37,18 @@ Counter({0: 9642, 1: 8963, 2: 3507, 3: 697, 4: 76, 5: 2})
 Counter({0: 1063, 1: 1507, 2: 1044, 3: 278, 4: 31, 5: 2})
 ``` 
 
+## CS, math, physics article numbers
+```
+$ grep "</article>" Physics.xml | wc -l
+1022424
+
+$ grep "</article>" Computer_Science.xml | wc -l
+224425
+
+$ grep "</article>" Mathematics.xml | wc -l
+419265
+```
+
 
 
 

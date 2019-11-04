@@ -23,8 +23,13 @@ def rm_oldtar(tar_fn):
 
 def is_cs(docroot):
     cateinfo = docroot.get('categories', '')
-    if re.search(r'\bmath\.', cateinfo):
-        return True
+    phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
+    if PICKABLE_PIDS:
+        cateinfo
+    else:
+        if re.search(phys_cate_acros, cateinfo):
+        # if re.search(r'\bmath\.', cateinfo):
+            return True
     return False
 
 def xmlext2txt(xmlname):
@@ -167,13 +172,14 @@ if __name__ == "__main__":
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('math_lda.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('phy_lda.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
-    TARS_COPY_TO = '/tmp/arxiv_math'
-    ABSTRACT_DST = join(results_path, 'math_lda/abstract')
-    FULLTEXT_DST = join(results_path, 'math_lda/fulltext')
+    TARS_COPY_TO = '/tmp/arxiv_phy'
+    ABSTRACT_DST = join(results_path, 'phy_lda/abstract')
+    FULLTEXT_DST = join(results_path, 'phy_lda/fulltext')
+    PICKABLE_PIDS = 
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
     # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 

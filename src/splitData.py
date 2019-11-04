@@ -14,12 +14,12 @@ def mk_cate_dirs(dst=''):
 def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
     """Args:
     `avb_pids`  --    available 
-    Returns: pid2cates -- dictionary 
-                            key: pid
-                            value: CS subcategory acronym
-                cate2pcount -- pd series
-                            index: CS subcate acronym
-                            value: count of papers in the subcate
+    Returns:pid2cates -- dictionary 
+                        key: pid
+                        value: CS subcategory acronym
+            cate2pcount -- pd series
+                        index: CS subcate acronym
+                        value: count of papers in the subcate
     """
     pid2cate = pd.Series(get_pid2meta(metaxml_list)) # strip '.txt'
 
@@ -40,8 +40,6 @@ def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
     cate2pcount = pd.Series(cate2pcount)
     return pid2cate, cate2pcount
     
-
-
 def copy_to_catedir(paperfn, cate, test_to_add):
     src = join(PAPERDIR, paperfn)
     if test_to_add > 0:
@@ -65,13 +63,13 @@ if __name__ == "__main__":
     pid2cate, cate2pcount = get_pid2dst(allpids, ['Computer_Science.xml'])
     # acro2cate = get_acro2cate_dict()
 
-    # totest, totrain = pd.Series(), pd.Series()
-    # for cate in set(pid2cate):
-    #     papers_in_cate = pid2cate[pid2cate==cate]
-    #     sumcount = len(papers_in_cate)
-    #     boundary = int(sumcount*0.1)
-    #     totest = totest.append(papers_in_cate[:boundary].index.to_series())
-    #     totrain = totrain.append(papers_in_cate[boundary:].index.to_series())
+    totest, totrain = pd.Series(), pd.Series()
+    for cate in set(pid2cate):
+        papers_in_cate = pid2cate[pid2cate==cate]
+        sumcount = len(papers_in_cate)
+        boundary = int(sumcount*0.1)
+        totest = totest.append(papers_in_cate[:boundary].index.to_series())
+        totrain = totrain.append(papers_in_cate[boundary:].index.to_series())
 
     cate2test_toadd = pd.Series(cate2pcount*0.1, dtype='int')
     sumkeeper = cate2test_toadd.copy()
@@ -84,10 +82,6 @@ if __name__ == "__main__":
             gototest = copy_to_catedir(paperfn, cate, cate2test_toadd.at[cate])
             if gototest:
                 cate2test_toadd[cate] -=1
-
-            # if old.equals(cate2test_toadd):
-            #     print('counter does not change')
-            #     exit(0)
 
             done = sumkeeper.at[cate]-cate2test_toadd.at[cate]
             if done % 50 == 0:

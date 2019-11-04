@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
-from paths import metadatas_path
+from paths import metadatas_path, results_path
 from os import listdir
 from os.path import join
-import time, re
+import time, re, pickle
+from random import shuffle
 
 def url2artid(url):
     urlid = url.split('/')[-2:]
@@ -49,5 +50,8 @@ def get_pid2meta(metaxml_list=listdir(metadatas_path)):
     return id2meta
 
 if __name__ == "__main__":
-    print(get_pid2meta(['Computer_Science.xml'])['1907.03852'])
-    
+    # print(get_pid2meta(['Computer_Science.xml'])['1907.03852'])
+    physics = list(get_pid2meta(['Physics.xml']).keys())
+    shuffle(physics)
+    with open(join(results_path, 'pickable_pids_phy.pkl'), 'wb') as pickablelst:
+        pickle.dump(physics[:600000],pickablelst)
