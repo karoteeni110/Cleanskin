@@ -49,6 +49,43 @@ $ grep "</article>" Mathematics.xml | wc -l
 419265
 ```
 
+## Split math papers
+
+Summary:
+DG : 7062
+CT : 667
+NT : 6538
+CA : 3584
+SG : 1137
+QA : 2712
+MP : 7978
+KT : 666
+IT : 7533
+CO : 10008
+GN : 762
+NA : 4549
+AP : 9737
+RA : 2542
+AT : 1795
+LO : 2115
+CV : 2606
+DS : 5175
+SP : 1131
+AC : 2094
+HO : 478
+GR : 3305
+OC : 5222
+AG : 8136
+RT : 3187
+FA : 4658
+GT : 3437
+ST : 2636
+ph : 7994
+OA : 1847
+GM : 552
+MG : 1423
+PR : 8430
+
 
 
 

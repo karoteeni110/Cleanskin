@@ -45,12 +45,12 @@ def copy_to_catedir(paperfn, cate, test_to_add):
     src = join(PAPERDIR, paperfn)
     if test_to_add > 0:
         dst = join(results_path, 'perpsets/math_10test', paperfn)
-        gototest = 1
+        go2test, go2train = 1, 0
     else:
         dst = join(join(results_path, 'perpsets/math_90train'), paperfn)
-        gototest = 0
+        go2test, go2train = 0, 1
     copy(src, dst)
-    return gototest
+    return go2test, go2train
 
 if __name__ == "__main__":
     # catedir_paths = mk_cate_dirs()
@@ -83,14 +83,19 @@ if __name__ == "__main__":
         try:
             cate = pid2cate.pop(pid)
             
-            gototest = copy_to_catedir(paperfn, cate, cate2test_toadd.at[cate])
+            gototest, gototrain = copy_to_catedir(paperfn, cate, cate2test_toadd.at[cate])
             if gototest:
                 cate2test_toadd[cate] -=1
+            # else:
 
-            done = sumkeeper.at[cate]-cate2test_toadd.at[cate]
-            if done % 50 == 0:
-                print('Test set for', cate+':', 
-                        done, '/', sumkeeper.at[cate], str(done*100/sumkeeper.at[cate])+'%%')
+            testdone = sumkeeper.at[cate]-cate2test_toadd.at[cate]
+            
+            if testdone % 50 == 0 and cate2test_toadd.at[cate] != 0 :
+                print('Test set for', cate+':', '%d / %d (%.3f%%)' %
+                        (testdone, sumkeeper.at[cate], testdone*100/sumkeeper.at[cate]))
+            # if cate2test_toadd.at[cate] == 0:
+            #     traindone = 
+            #     print('Train set for', cate+':', )
 
         except KeyError:
             continue
