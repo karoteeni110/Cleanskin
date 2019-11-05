@@ -25,7 +25,8 @@ def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
 
     print('Collecting categories...')
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
-    pid2cate = pid2cate.apply(lambda cates: [c[3:] for c in cates if c[:2]=='cs'] )
+    pid2cate = pid2cate.apply(lambda cates: [c[5:] for c in cates if c[:4]=='math'])
+    pid2cate = pid2cate[pid2cate.apply(lambda c: True if c else False)] # drop empty lists
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
     pid2cate = pid2cate[pid2cate.index.isin(avb_pids)]
 
@@ -43,24 +44,27 @@ def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
 def copy_to_catedir(paperfn, cate, test_to_add):
     src = join(PAPERDIR, paperfn)
     if test_to_add > 0:
-        dst = join(perpsets_testdir, paperfn)
+        dst = join(results_path, 'perpsets/math_10test', paperfn)
         gototest = 1
     else:
-        dst = join(perpsets_traindir, paperfn)
+        dst = join(join(results_path, 'perpsets/math_90train'), paperfn)
         gototest = 0
     copy(src, dst)
     return gototest
 
 if __name__ == "__main__":
     # catedir_paths = mk_cate_dirs()
-    print('Listdir:', fulltext_dir, '...')
-    cs_paper_fns = listdir(fulltext_dir) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
+
+    PAPERDIR = join(results_path, 'math_lda/fulltext') # fulltext_dir
+    print('Listdir:', PAPERDIR, '...')
+    cs_paper_fns = listdir(PAPERDIR) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
     shuffle(cs_paper_fns)
+    cs_paper_fns = cs_paper_fns[:131703] # !!!!
     allpids = pd.Series(cs_paper_fns)
     allpids = allpids.apply(lambda x:x[:-4])
     print('... Listdir done.')
     
-    pid2cate, cate2pcount = get_pid2dst(allpids, ['Computer_Science.xml'])
+    pid2cate, cate2pcount = get_pid2dst(allpids, ['Mathematics.xml']) # ['Computer_Science.xml'])
     # acro2cate = get_acro2cate_dict()
 
     totest, totrain = pd.Series(), pd.Series()
@@ -73,7 +77,7 @@ if __name__ == "__main__":
 
     cate2test_toadd = pd.Series(cate2pcount*0.1, dtype='int')
     sumkeeper = cate2test_toadd.copy()
-    PAPERDIR =  fulltext_dir # join(results_path, 'test')
+    
     for paperfn in cs_paper_fns:
         pid = paperfn[:-4] # strip '.txt'
         try:

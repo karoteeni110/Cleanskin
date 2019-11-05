@@ -9,6 +9,8 @@ from os.path import join
 from paths import results_path
 from random import shuffle
 
+phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
+
 def cp_1tar(tarfn):
     src = join(CLEANED_XML, tarfn)
     dst = join(TARS_COPY_TO, tarfn)
@@ -24,7 +26,7 @@ def rm_oldtar(tar_fn):
 
 def is_cs(docroot, xmlname):
     cateinfo = docroot.get('categories', '')
-    phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
+    
     if PICKABLE_PIDS:
         pid = xmlname[:-4]
         if pid in PICKABLE_PIDS:
@@ -175,7 +177,7 @@ if __name__ == "__main__":
     # ===== 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('phy_lda.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('phy.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
@@ -183,7 +185,7 @@ if __name__ == "__main__":
     ABSTRACT_DST = join(results_path, 'phy_lda/abstract')
     FULLTEXT_DST = join(results_path, 'phy_lda/fulltext')
     with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
-        PICKABLE_PIDS = join(results_path, 'pickable_pids_phy.pkl')
+        PICKABLE_PIDS = False # join(results_path, 'pickable_pids_phy.pkl')
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
     # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 
@@ -197,8 +199,8 @@ if __name__ == "__main__":
         extracted, allpaper = main(tarfn)
         EXTRACTED_SUM += extracted
         ALLPAPER_SUM += allpaper
-        if EXTRACTED_SUM > 131703:
-            break
+        # if EXTRACTED_SUM > 131703:
+        #     break
     logging.info('Summary: paper extracted: %s of %s' % (EXTRACTED_SUM, ALLPAPER_SUM))
         
 

@@ -43,7 +43,7 @@ $ grep "</article>" Physics.xml | wc -l
 1022424
 
 $ grep "</article>" Computer_Science.xml | wc -l
-224425
+224425 (131703)
 
 $ grep "</article>" Mathematics.xml | wc -l
 419265
