@@ -5,6 +5,8 @@ from os import listdir
 from random import choice, shuffle
 from collections import Counter
 from os.path import join 
+from pick_cs_papers import phys_cate_acros
+import re
 import pandas as pd
 import numpy as np
 
@@ -25,7 +27,7 @@ def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
 
     print('Collecting categories...')
     pid2cate = pid2cate.apply(lambda x: x.get('categories').split(', '))
-    pid2cate = pid2cate.apply(lambda cates: [c[5:] for c in cates if c[:4]=='math'])
+    pid2cate = pid2cate.apply(lambda cates: [c for c in cates if re.search(phys_cate_acros, c)])
     pid2cate = pid2cate[pid2cate.apply(lambda c: True if c else False)] # drop empty lists
     pid2cate = pid2cate.apply(lambda subcates: choice(subcates))
     pid2cate = pid2cate[pid2cate.index.isin(avb_pids)]
@@ -44,10 +46,10 @@ def get_pid2dst(avb_pids, metaxml_list=listdir(metadatas_path)):
 def copy_to_catedir(paperfn, cate, test_to_add):
     src = join(PAPERDIR, paperfn)
     if test_to_add > 0:
-        dst = join(results_path, 'perpsets/math_10test', paperfn)
+        dst = join(results_path, 'perpsets/phy_10test', paperfn)
         go2test, go2train = 1, 0
     else:
-        dst = join(join(results_path, 'perpsets/math_90train'), paperfn)
+        dst = join(join(results_path, 'perpsets/phy_90train'), paperfn)
         go2test, go2train = 0, 1
     copy(src, dst)
     return go2test, go2train
@@ -55,7 +57,7 @@ def copy_to_catedir(paperfn, cate, test_to_add):
 if __name__ == "__main__":
     # catedir_paths = mk_cate_dirs()
 
-    PAPERDIR = join(results_path, 'math_lda/fulltext') # fulltext_dir
+    PAPERDIR = join(results_path, 'phy_lda/fulltext') # fulltext_dir
     print('Listdir:', PAPERDIR, '...')
     cs_paper_fns = listdir(PAPERDIR) # [i[:-4] for i in listdir(fulltext_dir) if i[-3:]=='txt']
     shuffle(cs_paper_fns)
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     allpids = allpids.apply(lambda x:x[:-4])
     print('... Listdir done.')
     
-    pid2cate, cate2pcount = get_pid2dst(allpids, ['Mathematics.xml']) # ['Computer_Science.xml'])
+    pid2cate, cate2pcount = get_pid2dst(allpids, ['Physics.xml']) # ['Computer_Science.xml'])
     # acro2cate = get_acro2cate_dict()
 
     totest, totrain = pd.Series(), pd.Series()
