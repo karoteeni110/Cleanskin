@@ -15,6 +15,13 @@ Sections are garbled.
 
 # Infer & get distribution (fast)
 ./bin/mallet infer-topics --inferencer cs_ft_inferencer_100tpc.mallet --input cs_abstract.mallet --output-doc-topics cs_abt_composition_100tpc.txt
+
+# 
+./bin/mallet evaluate-topics 
+
+# Infer topics with loop
+for i in `seq 50 50 1000`; do echo $i; ./bin/mallet infer-topics --inferencer ../csmodels/model_${i}/cs_ft_inferencer.mallet --input cs_10test.mallet --output-doc-topics cs_testcomp/cs_test_composition_${i}tpc.txt; done
+
 ```
 
 `XXX_keys.txt`: topic words
@@ -86,6 +93,27 @@ GM : 552
 MG : 1423
 PR : 8430
 
-
-
-
+## seq echo
+```
+y@whq-58:~$ for i in `seq 50 50 1000`; do echo $i; done
+50
+100
+150
+200
+250
+300
+350
+400
+450
+500
+550
+600
+650
+700
+750
+800
+850
+900
+950
+1000
+```
