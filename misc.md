@@ -19,8 +19,8 @@ Sections are garbled.
 # 
 ./bin/mallet evaluate-topics 
 
-# Infer topics with loop
-for i in `seq 50 50 1000`; do echo $i; ./bin/mallet infer-topics --inferencer ../csmodels/model_${i}/cs_ft_inferencer.mallet --input cs_10test.mallet --output-doc-topics cs_testcomp/cs_test_composition_${i}tpc.txt; done
+# Evaluate topics with loop
+for i in `seq 50 50 1000`; do echo $i...; ./bin/mallet evaluate-topics --evaluator ../csmodels/model_${i}/evaluator.mallet --input cs_10test.mallet --output-doc-probs ../cs_testcomp/cs_${i}_perdoc.txt --output-prob ../cs_testcomp/cs_heldout_${i}tpc.txt; echo $i 'done'; done
 
 ```
 
