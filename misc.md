@@ -16,9 +16,6 @@ Sections are garbled.
 # Infer & get distribution (fast)
 ./bin/mallet infer-topics --inferencer cs_ft_inferencer_100tpc.mallet --input cs_abstract.mallet --output-doc-topics cs_abt_composition_100tpc.txt
 
-# 
-./bin/mallet evaluate-topics 
-
 # Evaluate topics with loop
 for i in `seq 50 50 1000`; do echo $i...; ./bin/mallet evaluate-topics --evaluator ../csmodels/model_${i}/evaluator.mallet --input cs_10test.mallet --output-doc-probs ../cs_testcomp/cs_${i}_perdoc.txt --output-prob ../cs_testcomp/cs_heldout_${i}tpc.txt; echo $i 'done'; done
 
