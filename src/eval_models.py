@@ -92,13 +92,14 @@ if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
     
-    modeldirx = '/cs/group/grp-glowacka/arxiv/models/math/model_'
-    diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in range(50,1001,50)]
+    tpcnum_range = range(5,101,5)
+    modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
+    diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
     cohdict, cmt, cc = get_alldiag(diag_xmls)
     # plot_data(cohdict, cmt, cc)
 
-    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/math/math_testcomp'
-    eval_txts = [join(testcompdirx, i) for i in listdir(testcompdirx) if 'heldout' in i]
+    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
+    eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
     perpdict, pmt, pc = get_allperp(eval_txts)
     # plot_data(perpdict, pmt, pc)
 
