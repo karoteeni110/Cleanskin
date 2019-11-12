@@ -3,7 +3,7 @@ from os.path import join, exists, basename, dirname
 from gensim.models import wrappers
 from os import listdir
 from newCleaner import get_root
-import pickle
+import pickle, re
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,27 +41,65 @@ def get_alldiag(diag_xml_pathlst, metrics='coherence'):
 def get_perp(evaltxt_path):
     """Returns: dict with single item 
     key: num_of_topics; value: probability AFTER log transformation"""
-    pass
+    with open(evaltxt_path, 'r') as f:
+        prob = float(f.read())
+    tpcnum = re.search(r'_(\d+)tpc', basename(evaltxt_path)).group(1)
+    return tpcnum, prob
 
 def get_allperp(eval_txt_pathlst):
-    pass
+    cate = eval_txt_pathlst[0].split('/')[-3]
+    print('Reading', cate, 'perplexities...')
+    perpdict = dict()
+    for evaltxt in eval_txt_pathlst:
+        tpcnum, prob = get_perp(evaltxt)
+        perpdict[tpcnum] = -prob
+    return perpdict, 'negative perplexity', cate
 
 def plot_data(datadict, metrics, cate):
     x, y = zip(*datadict.items())
-    x, y = list(x), list(y)
+    x, y = np.array(x, dtype=int), np.array(y)
+    idn = np.argsort(x)
+    x, y = x[idn], y[idn]
     plt.plot(x, y)
     plt.xticks(x)
-    plt.ylabel('Model '+metrics+' score')
+    plt.ylabel('Model '+metrics)
     plt.xlabel('Num of topics')
     plt.title(cate.upper())
+    # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
+    plt.show()
+
+def doubleplot(perpdict, diagdict, cate):
+    plt.figure()
+    for i, datadict in enumerate((perpdict, diagdict)):
+        if i==0:
+            plt.subplot(211)
+            plt.ylabel('Negative perplexity')
+        else:
+            plt.subplot(212)
+            plt.ylabel('Coherence')
+        x, y = zip(*datadict.items())
+        x, y = np.array(x, dtype=int), np.array(y)
+        idn = np.argsort(x)
+        x, y = x[idn], y[idn]
+        plt.xticks(x)
+        plt.plot(x, y)
+    plt.xlabel('Num of topics')
+    plt.suptitle(cate.upper())
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
 if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
-    modeldirx = '/cs/group/grp-glowacka/arxiv/models/physics/model_'
-
+    
+    modeldirx = '/cs/group/grp-glowacka/arxiv/models/math/model_'
     diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in range(50,1001,50)]
-    cohdict, mt, c = get_alldiag(diag_xmls)
-    plot_data(cohdict, mt, c)
+    cohdict, cmt, cc = get_alldiag(diag_xmls)
+    # plot_data(cohdict, cmt, cc)
+
+    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/math/math_testcomp'
+    eval_txts = [join(testcompdirx, i) for i in listdir(testcompdirx) if 'heldout' in i]
+    perpdict, pmt, pc = get_allperp(eval_txts)
+    # plot_data(perpdict, pmt, pc)
+
+    doubleplot(perpdict, cohdict, pc)
