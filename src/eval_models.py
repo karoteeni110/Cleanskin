@@ -21,7 +21,9 @@ def read_diag(diag_xmlpath, metrics):
     tpc_num, avgcoh = len(model), np.mean(m_values)
     return tpc_num, avgcoh
 
-def get_alldiag(diag_xml_pathlst, metrics='coherence'):
+def get_alldiag(diag_xml_pathlst, metrics='coherence', flip=False):
+    """metrics: the key in the diagnostics.xml attributes
+    """
     cate = diag_xml_pathlst[0].split('/')[-3]
     print('Reading', cate, 'diagnostics...')
     if exists(CATE_COH_PKLPATH):
@@ -31,10 +33,14 @@ def get_alldiag(diag_xml_pathlst, metrics='coherence'):
         cate_diag = dict()
         for xmlpath in diag_xml_pathlst:
             model_tpc_num, avg_mv = read_diag(xmlpath, metrics)
+            if flip:
+                avg_mv = -avg_mv
             cate_diag[model_tpc_num] = avg_mv
         # cate = basename(diag_xml_pathlst)
         if DUMPDICT:
             pickle.dump(cate_diag, join(results_path, cate+'_'+metrics[:4]+'.pkl'))
+    if flip:
+        metrics = metrics + ' (flipped)'
     return cate_diag, metrics, cate
 
 # Perplexity
@@ -88,19 +94,20 @@ def doubleplot(perpdict, diagdict, cate):
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
+
 if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
     
+    # tpcnum_range = range(100,1001,50)
     tpcnum_range = range(5,101,5)
     modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
     diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
-    cohdict, cmt, cc = get_alldiag(diag_xmls)
-    # plot_data(cohdict, cmt, cc)
+    cohdict, cmt, cc = get_alldiag(diag_xmls, 'token-doc-diff', True)
+    plot_data(cohdict, cmt, cc)
 
     testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
     eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
     perpdict, pmt, pc = get_allperp(eval_txts)
     # plot_data(perpdict, pmt, pc)
-
-    doubleplot(perpdict, cohdict, pc)
+    # doubleplot(perpdict, cohdict, pc)
