@@ -74,7 +74,7 @@ def plot_data(datadict, metrics, cate):
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
-def doubleplot(perpdict, diagdict, cate):
+def doublecurve(perpdict, diagdict, cate):
     plt.figure()
     for i, datadict in enumerate((perpdict, diagdict)):
         if i==0:
@@ -94,7 +94,7 @@ def doubleplot(perpdict, diagdict, cate):
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
-def doublecurve(datadict1, datadict2, metrics, cate):
+def doubleplot(datadict1, datadict2, metrics, cate):
     x, y = zip(*datadict1.items())
     x, y = np.array(x, dtype=int), np.array(y)
     idn = np.argsort(x)
@@ -125,9 +125,10 @@ if __name__ == "__main__":
     tpcnum_range = [50,100]# range(5,101,5)
     modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs_10k/model_'
     diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
-    cohdict, cmt, cc = get_alldiag(diag_xmls)
+    cohdict, cmt, cc = get_alldiag(diag_xmls, 'eff_num_words')
     # plot_data(cohdict, cmt, cc)
 
+    tpcnum_range = range(5,101,5)
     testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
     eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
     perpdict, pmt, pc = get_allperp(eval_txts)
@@ -137,5 +138,13 @@ if __name__ == "__main__":
     tpcnum_range = range(5,101,5)
     modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
     diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
-    cohdict2, cmt2, cc2 = get_alldiag(diag_xmls)
-    doublecurve(cohdict, cohdict2, cmt, 'CS')
+    cohdict2, cmt2, cc2 = get_alldiag(diag_xmls, 'eff_num_words')
+    
+    tpcnum_range = [50,100]
+    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs_10k'
+    eval_txts = [join(testcompdirx, 'cs_10kiter_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
+    perpdict2, pmt2, pc2 = get_allperp(eval_txts)
+
+    # doubleplot(perpdict, perpdict2, pmt2, 'CS')
+    
+    doubleplot(cohdict, cohdict2, cmt, 'CS')
