@@ -94,20 +94,48 @@ def doubleplot(perpdict, diagdict, cate):
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
+def doublecurve(datadict1, datadict2, metrics, cate):
+    x, y = zip(*datadict1.items())
+    x, y = np.array(x, dtype=int), np.array(y)
+    idn = np.argsort(x)
+    x, y = x[idn], y[idn]
+    plt.plot(x, y, 'ro')
+
+    x2, y2 = zip(*datadict2.items())
+    x2, y2 = np.array(x2, dtype=int), np.array(y2)
+    idn2 = np.argsort(x2)
+    x2, y2 = x2[idn2], y2[idn2]
+    plt.plot(x2, y2, 'bs')
+
+    if len(x) > len(x2):
+        plt.xticks(x)
+    else:
+        plt.xticks(x2)
+    plt.ylabel('Model '+metrics)
+    plt.xlabel('Num of topics')
+    plt.title(cate.upper())
+    # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
+    plt.show()
 
 if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
     
     # tpcnum_range = range(100,1001,50)
-    tpcnum_range = range(5,101,5)
-    modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
+    tpcnum_range = [50,100]# range(5,101,5)
+    modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs_10k/model_'
     diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
-    cohdict, cmt, cc = get_alldiag(diag_xmls, 'token-doc-diff', True)
-    plot_data(cohdict, cmt, cc)
+    cohdict, cmt, cc = get_alldiag(diag_xmls)
+    # plot_data(cohdict, cmt, cc)
 
     testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
     eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
     perpdict, pmt, pc = get_allperp(eval_txts)
     # plot_data(perpdict, pmt, pc)
-    # doubleplot(perpdict, cohdict, pc)
+    # doubleplot(cohdict2, cohdict, pc)
+
+    tpcnum_range = range(5,101,5)
+    modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
+    diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
+    cohdict2, cmt2, cc2 = get_alldiag(diag_xmls)
+    doublecurve(cohdict, cohdict2, cmt, 'CS')
