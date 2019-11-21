@@ -19,6 +19,12 @@ Sections are garbled.
 # Evaluate topics with loop
 for i in `seq 50 50 1000`; do echo $i...; ./bin/mallet evaluate-topics --evaluator ../csmodels/model_${i}/evaluator.mallet --input cs_10test.mallet --output-doc-probs ../cs_testcomp/cs_${i}_perdoc.txt --output-prob ../cs_testcomp/cs_heldout_${i}tpc.txt; echo $i 'done'; done
 
+# Increment
+
+for d in ../cs_t100/*; do let "i+=1"; echo $i $d; done
+
+for d in ../cs_t100/*; do let "i+=1"; echo $i $d; ./bin/mallet evaluate-topics --evaluator ../cs_t100/${d}/evaluator.mallet --input cs_10test.mallet --output-prob ../cs_testcomp/${d}_heldoutprob.txt; echo "...done"; done
+
 ```
 
 `XXX_keys.txt`: topic words
