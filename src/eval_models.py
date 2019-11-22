@@ -137,7 +137,14 @@ def histos(datadict):
     plt.hist(y, bins=40)
 
     mean, std = np.mean(y), np.std(y) 
+    maxi, mini = np.max(y), np.min(y)
     plt.text(3.002e8, 10, r'$\mu=%.2f,\ \sigma=%.2f$' % (mean,std))
+    plt.text(3.002e8, 9.5, r'max: %.2f, min: %.2f' %(maxi,mini))
+    plt.axvline(x=3.008537211643294E8, color='r', linestyle='dashed') # 1k
+    plt.axvline(x=3.007215099975852E8, color='r', linestyle='dashed') # 10k
+    plt.annotate('iter 1k', xy=(3.008537211643294E8, 10), xytext=(3.009E8,10),arrowprops=dict(facecolor='black'))
+    plt.annotate('iter 10k', xy=(3.007215099975852E8, 9.5), xytext=(3.0075E8,10),arrowprops=dict(facecolor='black'))
+
     # plt.xticks(y)
     plt.ylabel('Freq')
     # # plt.xlabel('Num of topics')
