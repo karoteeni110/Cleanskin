@@ -68,7 +68,7 @@ def plot_data(datadict, metrics, cate):
     x, y = np.array(x, dtype=int), np.array(y)
     idn = np.argsort(x)
     x, y = x[idn], y[idn]
-    plt.plot(x, y, 'gs')
+    # plt.plot(x, y, 'gs')
     
     mean, std = np.mean(y), np.std(y)
     horiz_line_data = np.array([mean for i in range(len(x))])
@@ -128,6 +128,24 @@ def doubleplot(datadict1, datadict2, metrics, cate):
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
+def histos(datadict):
+    x, y = zip(*datadict.items())
+    x, y = np.array(x, dtype=int), np.array(y)
+    idn = np.argsort(x)
+    x, y = x[idn], y[idn]
+    # plt.plot(x, y, 'gs')
+    plt.hist(y, bins=40)
+
+    mean, std = np.mean(y), np.std(y) 
+    plt.text(3.002e8, 10, r'$\mu=%.2f,\ \sigma=%.2f$' % (mean,std))
+    # plt.xticks(y)
+    plt.ylabel('Freq')
+    # # plt.xlabel('Num of topics')
+    plt.xlabel('Negative perplexity')
+    plt.title('cs_t100 distribution')
+    # # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
+    plt.show()
+
 if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
@@ -148,7 +166,8 @@ if __name__ == "__main__":
     testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs_t100/cs_testcomp'
     eval_txts = [join(testcompdirx, txt) for txt in listdir(testcompdirx)]
     perpdict, pmt, pc = get_allperp(eval_txts)
-    plot_data(perpdict, pmt, pc)
+    # plot_data(perpdict, pmt, pc)
+    histos(perpdict)
     # doubleplot(cohdict2, cohdict, pc)
 
     tpcnum_range = range(5,101,5)
