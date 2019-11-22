@@ -49,11 +49,13 @@ def get_perp(evaltxt_path):
     key: num_of_topics; value: probability AFTER log transformation"""
     with open(evaltxt_path, 'r') as f:
         prob = float(f.read())
-    tpcnum = re.search(r'_(\d+)tpc', basename(evaltxt_path)).group(1)
+    # tpcnum = re.search(r'_(\d+)tpc', basename(evaltxt_path)).group(1)
+    tpcnum = re.search(r'_(\d+)_heldoutprob',basename(evaltxt_path)).group(1)
     return tpcnum, prob
 
 def get_allperp(eval_txt_pathlst):
-    cate = eval_txt_pathlst[0].split('/')[-3]
+    # cate = eval_txt_pathlst[0].split('/')[-3]
+    cate = 'cs_t100'
     print('Reading', cate, 'perplexities...')
     perpdict = dict()
     for evaltxt in eval_txt_pathlst:
@@ -66,10 +68,18 @@ def plot_data(datadict, metrics, cate):
     x, y = np.array(x, dtype=int), np.array(y)
     idn = np.argsort(x)
     x, y = x[idn], y[idn]
-    plt.plot(x, y)
+    plt.plot(x, y, 'gs')
+    
+    mean, std = np.mean(y), np.std(y)
+    horiz_line_data = np.array([mean for i in range(len(x))])
+    plt.plot(x, horiz_line_data, 'r--') 
+    plt.plot(x, np.array([mean+std for i in range(len(x))]), 'b--')
+    plt.plot(x, np.array([mean-std for i in range(len(x))]), 'b--')
+    # std: 255774.50041036308 ; mean: 255774.50041036308
     plt.xticks(x)
     plt.ylabel('Model '+metrics)
-    plt.xlabel('Num of topics')
+    # plt.xlabel('Num of topics')
+    plt.xlabel('t100 model id')
     plt.title(cate.upper())
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
@@ -90,6 +100,7 @@ def doublecurve(perpdict, diagdict, cate):
         plt.xticks(x)
         plt.plot(x, y)
     plt.xlabel('Num of topics')
+   
     plt.suptitle(cate.upper())
     # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
@@ -128,11 +139,16 @@ if __name__ == "__main__":
     cohdict, cmt, cc = get_alldiag(diag_xmls, 'eff_num_words')
     # plot_data(cohdict, cmt, cc)
 
-    tpcnum_range = range(5,101,5)
-    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
-    eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
+    # tpcnum_range = [100] # range(5,101,5)
+    # testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp'
+    # eval_txts = [join(testcompdirx, 'cs_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
+    # perpdict, pmt, pc = get_allperp(eval_txts)
+    # print(perpdict)
+
+    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs_t100/cs_testcomp'
+    eval_txts = [join(testcompdirx, txt) for txt in listdir(testcompdirx)]
     perpdict, pmt, pc = get_allperp(eval_txts)
-    # plot_data(perpdict, pmt, pc)
+    plot_data(perpdict, pmt, pc)
     # doubleplot(cohdict2, cohdict, pc)
 
     tpcnum_range = range(5,101,5)
@@ -147,4 +163,4 @@ if __name__ == "__main__":
 
     # doubleplot(perpdict, perpdict2, pmt2, 'CS')
     
-    doubleplot(cohdict, cohdict2, cmt, 'CS')
+    # doubleplot(cohdict, cohdict2, cmt, 'CS')
