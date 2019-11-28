@@ -1,3 +1,4 @@
+"""Correct the wrong split of train&test set for MALLET"""
 from os import listdir
 from os.path import join
 from random import choice
@@ -7,12 +8,13 @@ from shutil import move
 import pandas as pd
 
 def get_pid2dst(allpids, metaxml_list=listdir(metadatas_path)):
-    """Returns: pid2cates -- dictionary 
-                            key: pid
-                            value: CS subcategory acronym
-                cate2pcount -- pd series
-                            index: CS subcate acronym
-                            value: count of papers in the subcate
+    """Returns: 
+    pid2cates -- dictionary 
+            key: pid
+            value: CS subcategory acronym
+    cate2pcount -- pd series
+            index: CS subcate acronym
+            value: count of papers in the subcate
     """
     pid2cate = pd.Series(get_pid2meta(metaxml_list)) # strip '.txt'
 

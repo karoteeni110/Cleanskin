@@ -1,3 +1,7 @@
+"""Copy and decompress tarballs from .../grp/cleaned_xml/ to /tmp
+   After immediately removing tarballs, pick pick papers of specified field
+   Delete all the xmls after picking; 
+   empty directory is left as a record of progress"""
 import xml.etree.ElementTree as ET
 import logging, re
 from newCleaner import get_root
@@ -174,7 +178,7 @@ if __name__ == "__main__":
     # Set verbose
     VERBOSE, REPORT_EVERY = True, 500
 
-    # ===== 
+    # Set logging 
     level    = logging.INFO
     format   = '%(message)s'
     handlers = [logging.FileHandler('phy.log'), logging.StreamHandler()]
@@ -184,6 +188,8 @@ if __name__ == "__main__":
     TARS_COPY_TO = '/tmp/arxiv_phy'
     ABSTRACT_DST = join(results_path, 'phy_lda/abstract')
     FULLTEXT_DST = join(results_path, 'phy_lda/fulltext')
+
+    # Decaprecated:
     with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
         PICKABLE_PIDS = False # join(results_path, 'pickable_pids_phy.pkl')
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
