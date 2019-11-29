@@ -3,7 +3,7 @@
    Delete all the xmls after picking; 
    empty directory is left as a record of progress"""
 import xml.etree.ElementTree as ET
-import logging, re
+import logging, re, time
 from newCleaner import get_root
 from clean_at_tmp import run_and_report_done, rm_tar_ext
 from categorise_sections import is_backmatter
@@ -46,7 +46,6 @@ def xmlext2txt(xmlname):
 
 def nmlz(text):
     '''Exclude nums and puncts, characters lower cased'''
-    # return ' '.join((re.findall(r"(?:(?<=\s)|(?<=^))\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*)", text))).lower()
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
@@ -115,6 +114,7 @@ def clear_picked_dir(tarfn):
     logging.info('Old dir %s/%s cleared' % (TARS_COPY_TO, unzipped_dirn))
 
 def rm_bmtext(docroot):
+    """Clear title, author, abstract, acknowledgements, bibliography texts"""
     elems = docroot.findall('.//*')
     for elem in elems:
         if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography') \
@@ -165,11 +165,69 @@ def pick_cs_headings(tarfn):
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
     return extracted, allpaper
 
+def get_title2label():
+    return dict()
+
+def pick_cs_secs(tarfn):
+    dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
+    skipped, allpaper = 0, 0
+    for xml in listdir(dirn):
+        xmlpath = join(dirn, xml)
+        _, root = get_root(xmlpath)
+        
+        if is_cs(root, xml):
+            allpaper += 1
+            # Check abstract
+            ab = root.find('abstract')
+            if ab is None: 
+                logging.info('Skipped: %s (abstract not found)' % xml)
+                skipped += 1
+                continue
+            else:
+                label2text = dict()
+                fulltext, garbled_len= '', 0
+                # secelems = (root[3:] if root.get('categories') else root)
+                secelems = rm_backmatter(root)
+
+                # Put sections into `label2text`
+                for sec in secelems: # root[3:] does not include metadata
+                    sectitle = sec.get('title','')
+                    sectext = nmlz(''.join(sec.itertext()))
+                    if tk_ratio(sectext) < 10:
+                        fulltext += sectext + '\n'
+                        if TITLE2LABEL.get(sectitle) != None:
+                            label2text[TITLE2LABEL.get(sectitle)] = sectext + '\n'
+                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
+                        garbled_len += len(sectext)
+                label2text['abstract'] = nmlz(''.join(ab.itertext()))
+                label2text['fulltext'] = fulltext
+
+                # Write out text to subcate dirs
+                if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
+                    txtfname = xmlext2txt(xml)
+                    for seccate in label2text: 
+                        output_path = join(DST_DIRS, seccate+'/'+txtfname) # labelname should be dirname
+                        seccate_text = label2text.get(seccate, '')
+                        if seccate_text != '':
+                            print(output_path, seccate_text)
+                            time.sleep(20)
+                            # with open(output_path, 'w') as seccatefile:
+                            #     seccatefile.write(seccate_text)
+
+                else:
+                    logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
+                    skipped += 1
+
+    extracted = allpaper-skipped
+    logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
+    return extracted, allpaper
+
 def main(tar_fn):
     cp_1tar(tar_fn)
     unzip_1tar(tar_fn)
     rm_oldtar(tar_fn)
-    extracted, allpaper =  pick_cs_papers(tar_fn) # pick_cs_headings(tar_fn) 
+    # extracted, allpaper =  pick_cs_papers(tar_fn) # pick_cs_headings(tar_fn) 
+    extracted, allpaper = pick_cs_secs(tar_fn)
     clear_picked_dir(tar_fn)
     return extracted, allpaper
 
@@ -181,13 +239,13 @@ if __name__ == "__main__":
     # Set logging 
     level    = logging.INFO
     format   = '%(message)s'
-    handlers = [logging.FileHandler('phy.log'), logging.StreamHandler()]
+    handlers = [logging.FileHandler('cs_secsplit.log'), logging.StreamHandler()]
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
     TARS_COPY_TO = '/tmp/arxiv_phy'
-    ABSTRACT_DST = join(results_path, 'phy_lda/abstract')
-    FULLTEXT_DST = join(results_path, 'phy_lda/fulltext')
+    DST_DIRS = join(results_path, 'cs_lbsec') # Dir for 
+    TITLE2LABEL = get_title2label()
 
     # Decaprecated:
     with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
