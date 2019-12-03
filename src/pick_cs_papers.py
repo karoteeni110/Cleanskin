@@ -12,6 +12,7 @@ from os import listdir, remove
 from os.path import join 
 from paths import results_path
 from random import shuffle
+from sortLabels import final
 
 phys_cate_acros = r'\b(astro|cond-mat|gr|hep|math\-ph|nlin|nucl|physics|quant)'
 
@@ -36,7 +37,8 @@ def is_cs(docroot, xmlname):
         if pid in PICKABLE_PIDS:
             return True
     else:
-        if re.search(phys_cate_acros, cateinfo):
+        if re.search(r'\bcs', cateinfo):
+        # if re.search(phys_cate_acros, cateinfo):
         # if re.search(r'\bmath\.', cateinfo):
             return True
     return False
@@ -165,9 +167,6 @@ def pick_cs_headings(tarfn):
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
     return extracted, allpaper
 
-def get_title2label():
-    return dict()
-
 def pick_cs_secs(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     skipped, allpaper = 0, 0
@@ -191,12 +190,13 @@ def pick_cs_secs(tarfn):
 
                 # Put sections into `label2text`
                 for sec in secelems: # root[3:] does not include metadata
-                    sectitle = sec.get('title','')
+                    sectitle = sec.get('title','').lower().strip().replace('_',' ')
                     sectext = nmlz(''.join(sec.itertext()))
                     if tk_ratio(sectext) < 10:
                         fulltext += sectext + '\n'
-                        if TITLE2LABEL.get(sectitle) != None:
-                            label2text[TITLE2LABEL.get(sectitle)] = sectext + '\n'
+                        # if TITLE2LABEL.get(sectitle) != None:
+                        for lb in TITLE2LABEL.get(sectitle):
+                            label2text[lb] = sectext + '\n'
                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                         garbled_len += len(sectext)
                 label2text['abstract'] = nmlz(''.join(ab.itertext()))
@@ -243,19 +243,19 @@ if __name__ == "__main__":
     logging.basicConfig(level = level, format = format, handlers = handlers)
 
     CLEANED_XML = '/cs/group/grp-glowacka/arxiv/cleaned_xml'
-    TARS_COPY_TO = '/tmp/arxiv_phy'
+    TARS_COPY_TO = '/tmp/arxiv_cs'
     DST_DIRS = join(results_path, 'cs_lbsec') # Dir for 
-    TITLE2LABEL = get_title2label()
+    TITLE2LABEL = final
 
     # Decaprecated:
-    with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
-        PICKABLE_PIDS = False # join(results_path, 'pickable_pids_phy.pkl')
+    # with open(join(results_path, 'pickable_pids_phy.pkl'), 'rb') as pickablelst:
+    PICKABLE_PIDS = False # join(results_path, 'pickable_pids_phy.pkl')
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
     # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 
     tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
     # tarlist = ['1801.tar.gz']
-    shuffle(tarlist)
+    # shuffle(tarlist)
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
     for i, tarfn in enumerate(tarlist):
