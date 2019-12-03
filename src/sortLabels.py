@@ -42,7 +42,7 @@ def merge_to_three_cols(df1, df2, df3):
     # x = x.label.apply(pd.Series)
     x = x.apply(lambda o:Counter(o), axis=1)\
         .apply(lambda m:[i for i in m if m[i]>=2 and type(i)==str and not has_noneng(i)])\
-        .to_dict() # Split label
+        .to_dict() # Keeps labels that occur more than twice and is not NaN and is in English
     return x
 
 if __name__ == "__main__":
