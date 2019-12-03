@@ -45,9 +45,9 @@ def merge_to_three_cols(df1, df2, df3):
         .to_dict() # Keeps labels that occur more than twice and is not NaN and is in English
     return x
 
-# ay_path, al_path, do_path = join(data_path, 'AY_RESULTS.txt'), join(data_path, 'ALAN_RESULTS.txt'), join(data_path, 'DOROTA_RESULTS.txt')
-# ay_df, al_df, do_df = read_one_result(ay_path), read_one_result(al_path), read_one_result(do_path)
-# final = merge_to_three_cols(ay_df, al_df, do_df)
+ay_path, al_path, do_path = join(data_path, 'AY_RESULTS.txt'), join(data_path, 'ALAN_RESULTS.txt'), join(data_path, 'DOROTA_RESULTS.txt')
+ay_df, al_df, do_df = read_one_result(ay_path), read_one_result(al_path), read_one_result(do_path)
+final = merge_to_three_cols(ay_df, al_df, do_df)
 
 if __name__ == "__main__":
     ay_path, al_path, do_path = join(data_path, 'AY_RESULTS.txt'), join(data_path, 'ALAN_RESULTS.txt'), join(data_path, 'DOROTA_RESULTS.txt')
