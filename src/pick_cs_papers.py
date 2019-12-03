@@ -184,6 +184,7 @@ def pick_cs_secs(tarfn):
                 continue
             else:
                 label2text = dict()
+                label2text['abstract'] = nmlz(''.join(ab.itertext()))
                 fulltext, garbled_len= '', 0
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
@@ -195,11 +196,10 @@ def pick_cs_secs(tarfn):
                     if tk_ratio(sectext) < 10:
                         fulltext += sectext + '\n'
                         # if TITLE2LABEL.get(sectitle) != None:
-                        for lb in TITLE2LABEL.get(sectitle):
+                        for lb in TITLE2LABEL.get(sectitle, []):
                             label2text[lb] = sectext + '\n'
                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                         garbled_len += len(sectext)
-                label2text['abstract'] = nmlz(''.join(ab.itertext()))
                 label2text['fulltext'] = fulltext
 
                 # Write out text to subcate dirs
@@ -208,12 +208,12 @@ def pick_cs_secs(tarfn):
                     for seccate in label2text: 
                         output_path = join(DST_DIRS, seccate+'/'+txtfname) # labelname should be dirname
                         seccate_text = label2text.get(seccate, '')
-                        if seccate_text != '':
-                            print(output_path, seccate_text)
-                            time.sleep(20)
-                            # with open(output_path, 'w') as seccatefile:
-                            #     seccatefile.write(seccate_text)
-
+                        if seccate_text != '' and seccate != 'back_matter':
+                            # print(output_path, seccate_text)
+                            # time.sleep(5)
+                            with open(output_path, 'w') as seccatefile:
+                                seccatefile.write(seccate_text)
+                    
                 else:
                     logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
                     skipped += 1

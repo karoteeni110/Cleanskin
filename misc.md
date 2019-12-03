@@ -120,3 +120,25 @@ y@whq-58:~$ for i in `seq 50 50 1000`; do echo $i; done
 950
 1000
 ```
+
+### labels
+```
+sum([1 for i in final if 'related_work' in final[i]])
+44
+sum([1 for i in final if 'introduction' in final[i]])
+31
+sum([1 for i in final if 'methods' in final[i]])
+410
+sum([1 for i in final if 'back_matter' in final[i]])
+57
+sum([1 for i in final if 'discussion' in final[i]])
+62
+sum([1 for i in final if 'conclusion' in final[i]])
+115
+sum([1 for i in final if 'abstract' in final[i]])
+1
+sum([1 for i in final if 'background' in final[i]])
+142
+sum([1 for i in final if 'results' in final[i]])
+244
+```
