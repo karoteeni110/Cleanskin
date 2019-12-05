@@ -213,37 +213,42 @@ def pick_cs_secs(tarfn):
                     sectext = nmlz(' '.join(sec.itertext()))
                     if sectitle not in TITLE2LABEL:
                         if has_informative_subsec(sec):
-                            for subsec in sec:
+                            for idx, subsec in enumerate(list(sec)):
                                 sectitle = subsec.get('title','').lower().strip().replace(' ','_')
-                                sectext = nmlz(' '.join(subsec.itertext()))
+                                if idx==0:
+                                    sectext = nmlz(sec.text) + ' ' + nmlz(' '.join(subsec.itertext()))
+                                else:
+                                    sectext = nmlz(' '.join(subsec.itertext()))
                                 if tk_ratio(sectext) < 10:
                                     fulltext += sectext + '\n'
                                     for lb in TITLE2LABEL.get(sectitle, []):
                                         label2text[lb] = sectext + '\n'
                                 elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                                     garbled_len += len(sectext)
-                            continue # skip this sec
+                            continue # following stuff won't happen
 
                         elif has_informative_subsubsec(sec):
                             for subsec in sec:
-                                for subsubsec in sec:
+                                for idx, subsubsec in enumerate(list(subsec)):
                                     sectitle = subsubsec.get('title','').lower().strip().replace(' ','_')
-                                    sectext = nmlz(' '.join(subsubsec.itertext()))
+                                    if idx==0:
+                                        sectext = nmlz(subsec.text) + ' ' + nmlz(' '.join(subsubsec.itertext()))
+                                    else:
+                                        sectext = nmlz(' '.join(subsubsec.itertext()))
                                     if tk_ratio(sectext) < 10:
                                         fulltext += sectext + '\n'
                                         for lb in TITLE2LABEL.get(sectitle, []):
                                             label2text[lb] = sectext + '\n'
                                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                                         garbled_len += len(sectext)
-                            continue # skip this sec
-
-                    else: # do not split
-                        if tk_ratio(sectext) < 10:
-                            fulltext += sectext + '\n'
-                            for lb in TITLE2LABEL.get(sectitle, []):
-                                label2text[lb] = sectext + '\n'
-                        elif len(sectext) > 300 : # some short notes may be weird; just exclude it
-                            garbled_len += len(sectext)
+                            continue # following stuff won't happen
+                    
+                    if tk_ratio(sectext) < 10:
+                        fulltext += sectext + '\n'
+                        for lb in TITLE2LABEL.get(sectitle, []):
+                            label2text[lb] = label2text.get(lb, '') + sectext + '\n'
+                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
+                        garbled_len += len(sectext)
                 # label2text['fulltext'] = fulltext
 
                 # Write out text to subcate dirs
