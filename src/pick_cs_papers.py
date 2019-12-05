@@ -216,7 +216,7 @@ def pick_cs_secs(tarfn):
                             for idx, subsec in enumerate(list(sec)):
                                 sectitle = subsec.get('title','').lower().strip().replace(' ','_')
                                 if idx==0:
-                                    sectext = nmlz(sec.text) + ' ' + nmlz(' '.join(subsec.itertext()))
+                                    sectext = nmlz(sec.text or ' ') + nmlz(' '.join(subsec.itertext()))
                                 else:
                                     sectext = nmlz(' '.join(subsec.itertext()))
                                 if tk_ratio(sectext) < 10:
@@ -232,7 +232,7 @@ def pick_cs_secs(tarfn):
                                 for idx, subsubsec in enumerate(list(subsec)):
                                     sectitle = subsubsec.get('title','').lower().strip().replace(' ','_')
                                     if idx==0:
-                                        sectext = nmlz(subsec.text) + ' ' + nmlz(' '.join(subsubsec.itertext()))
+                                        sectext = nmlz(subsec.text or ' ') + nmlz(' '.join(subsubsec.itertext()))
                                     else:
                                         sectext = nmlz(' '.join(subsubsec.itertext()))
                                     if tk_ratio(sectext) < 10:
@@ -257,7 +257,7 @@ def pick_cs_secs(tarfn):
                     for seccate in label2text: 
                         output_path = join(DST_DIRS, seccate+'/'+txtfname) # labelname should be dirname
                         seccate_text = label2text.get(seccate, '')
-                        if seccate_text != '' and seccate != 'back_matter':
+                        if seccate_text != '' and seccate not in ('back_matter', 'abstract'):
                             # print(output_path, seccate_text)
                             # time.sleep(5)
                             with open(output_path, 'w') as seccatefile:
