@@ -202,7 +202,7 @@ def pick_cs_secs(tarfn):
                 continue
             else:
                 label2text = dict()
-                # label2text['abstract'] = nmlz(''.join(ab.itertext()))
+                label2text['abstract'] = nmlz(''.join(ab.itertext()))
                 fulltext, garbled_len= '', 0
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
@@ -249,7 +249,7 @@ def pick_cs_secs(tarfn):
                             label2text[lb] = label2text.get(lb, '') + sectext + '\n'
                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                         garbled_len += len(sectext)
-                # label2text['fulltext'] = fulltext
+                label2text['fulltext'] = fulltext
 
                 # Write out text to subcate dirs
                 if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
@@ -257,7 +257,7 @@ def pick_cs_secs(tarfn):
                     for seccate in label2text: 
                         output_path = join(DST_DIRS, seccate+'/'+txtfname) # labelname should be dirname
                         seccate_text = label2text.get(seccate, '')
-                        if seccate_text != '' and seccate not in ('back_matter', 'abstract'):
+                        if seccate_text != '' and seccate != 'back_matter':
                             # print(output_path, seccate_text)
                             # time.sleep(5)
                             with open(output_path, 'w') as seccatefile:
