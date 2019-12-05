@@ -167,6 +167,24 @@ def pick_cs_headings(tarfn):
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
     return extracted, allpaper
 
+def have_subsec(sec):
+    for subelem in sec:
+        if 'section' in subelem.tag:
+            return True
+    return False
+
+def has_informative_subsec(sec):
+    for subsec in sec:
+        if subsec.get('title','').lower().strip().replace(' ','_') in TITLE2LABEL:
+            return True
+    return False
+
+def has_informative_subsubsec(sec):
+    for subsubsec in sec.findall('.//subsubsection'):
+        if subsubsec.get('title','').lower().strip().replace(' ','_') in TITLE2LABEL:
+            return True
+    return False
+
 def pick_cs_secs(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     skipped, allpaper = 0, 0
@@ -184,23 +202,49 @@ def pick_cs_secs(tarfn):
                 continue
             else:
                 label2text = dict()
-                label2text['abstract'] = nmlz(''.join(ab.itertext()))
+                # label2text['abstract'] = nmlz(''.join(ab.itertext()))
                 fulltext, garbled_len= '', 0
                 # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
-
+                
                 # Put sections into `label2text`
                 for sec in secelems: # root[3:] does not include metadata
-                    sectitle = sec.get('title','').lower().strip().replace('_',' ')
-                    sectext = nmlz(''.join(sec.itertext()))
-                    if tk_ratio(sectext) < 10:
-                        fulltext += sectext + '\n'
-                        # if TITLE2LABEL.get(sectitle) != None:
-                        for lb in TITLE2LABEL.get(sectitle, []):
-                            label2text[lb] = sectext + '\n'
-                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
-                        garbled_len += len(sectext)
-                label2text['fulltext'] = fulltext
+                    sectitle = sec.get('title','').lower().strip().replace(' ','_')
+                    sectext = nmlz(' '.join(sec.itertext()))
+                    if sectitle not in TITLE2LABEL:
+                        if has_informative_subsec(sec):
+                            for subsec in sec:
+                                sectitle = subsec.get('title','').lower().strip().replace(' ','_')
+                                sectext = nmlz(' '.join(subsec.itertext()))
+                                if tk_ratio(sectext) < 10:
+                                    fulltext += sectext + '\n'
+                                    for lb in TITLE2LABEL.get(sectitle, []):
+                                        label2text[lb] = sectext + '\n'
+                                elif len(sectext) > 300 : # some short notes may be weird; just exclude it
+                                    garbled_len += len(sectext)
+                            continue # skip this sec
+
+                        elif has_informative_subsubsec(sec):
+                            for subsec in sec:
+                                for subsubsec in sec:
+                                    sectitle = subsubsec.get('title','').lower().strip().replace(' ','_')
+                                    sectext = nmlz(' '.join(subsubsec.itertext()))
+                                    if tk_ratio(sectext) < 10:
+                                        fulltext += sectext + '\n'
+                                        for lb in TITLE2LABEL.get(sectitle, []):
+                                            label2text[lb] = sectext + '\n'
+                                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
+                                        garbled_len += len(sectext)
+                            continue # skip this sec
+
+                    else: # do not split
+                        if tk_ratio(sectext) < 10:
+                            fulltext += sectext + '\n'
+                            for lb in TITLE2LABEL.get(sectitle, []):
+                                label2text[lb] = sectext + '\n'
+                        elif len(sectext) > 300 : # some short notes may be weird; just exclude it
+                            garbled_len += len(sectext)
+                # label2text['fulltext'] = fulltext
 
                 # Write out text to subcate dirs
                 if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
