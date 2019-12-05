@@ -222,7 +222,8 @@ def pick_cs_secs(tarfn):
                                 if tk_ratio(sectext) < 10:
                                     fulltext += sectext + '\n'
                                     for lb in TITLE2LABEL.get(sectitle, []):
-                                        label2text[lb] = sectext + '\n'
+                                        if lb != 'abstract':
+                                            label2text[lb] = label2text.get(lb, '') + sectext + '\n'
                                 elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                                     garbled_len += len(sectext)
                             continue # following stuff won't happen
@@ -238,7 +239,8 @@ def pick_cs_secs(tarfn):
                                     if tk_ratio(sectext) < 10:
                                         fulltext += sectext + '\n'
                                         for lb in TITLE2LABEL.get(sectitle, []):
-                                            label2text[lb] = sectext + '\n'
+                                            if lb != 'abstract':
+                                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
                                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                                         garbled_len += len(sectext)
                             continue # following stuff won't happen
@@ -246,7 +248,8 @@ def pick_cs_secs(tarfn):
                     if tk_ratio(sectext) < 10:
                         fulltext += sectext + '\n'
                         for lb in TITLE2LABEL.get(sectitle, []):
-                            label2text[lb] = label2text.get(lb, '') + sectext + '\n'
+                            if lb != 'abstract':
+                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
                     elif len(sectext) > 300 : # some short notes may be weird; just exclude it
                         garbled_len += len(sectext)
                 label2text['fulltext'] = fulltext
