@@ -27,6 +27,8 @@ fulltext_dir = join(cs_lda_dir, 'fulltext')
 kldiv_dir = join(src_path, 'KLdiv')
 perpsets_testdir = join(results_path, 'perpsets/10test')
 perpsets_traindir = join(results_path, 'perpsets/90train')
+secklds = join(data_path, 'cs_sec_klds')
+
 
 if __name__ == "__main__":
     # Check that we are reading the correct file
