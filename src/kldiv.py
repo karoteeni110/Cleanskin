@@ -58,10 +58,19 @@ def get_acro2cate_dict():
             acro2cate[acro] = fn
     return acro2cate # cate_series.map(acro2cate)
 
+def align_dfs(ft_df,sec_df, n_tpc=100):
+    innerjoin = pd.merge(ft_df, sec_df, how='inner', on='pid')
+    ft_df = innerjoin.iloc[:,:n_tpc+1]\
+            .rename(columns = lambda x:x.strip('_x'))
+    sec_df = pd.concat([innerjoin.iloc[:,0],innerjoin.iloc[:, n_tpc+1:]], axis=1)\
+            .rename(columns = lambda x:x.strip('_y'))
+
+    return ft_df, sec_df
+
 def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
     """ 
     """
-    
+    fulltext_df, sec_df = align_dfs(fulltext_df, sec_df)
     if fulltext_df.iloc[:,0].equals(sec_df.iloc[:,0]) and fulltext_df.shape==sec_df.shape: # pids must be aligned
         print("Dataframes aligned. Calculating KLdiv...")
         # Compute KLdiv
@@ -89,8 +98,10 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         # return div_df
     else:
         print('DFs not aligned.')
-        print('Full-text pids:', fulltext_df.pid)
-        print('Sec pids:', sec_df.pid)
+        print('Full-text pids:')
+        print(fulltext_df.pid)
+        print('Sec pids:')
+        print(sec_df.pid)
         exit(0)
 
 def show_errbar():
@@ -122,9 +133,9 @@ def ytick():
 if __name__ == "__main__":
     # ytick()
     # show_errbar()
-    ft_df = read_data(join(data_path, '50tpc/cs_ft_composition_50tp.txt'))
-    abt_df = read_data(join(kldiv_dir, 'cs_abt_composition.txt'))
-    # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_abstract_kld.txt'), ['Computer_Science.xml'])
+    ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
+    abt_df = read_data(join(data_path, '100tp_sec_compo/cs_intro_comp_100tpc.txt'))
+    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_intro_kld.txt'), ['Computer_Science.xml'])
 
     # ft_df = read_data(join(data_path, '200tpc/cs_ft_composition_200tp.txt'))
     # abt_df = read_data(join(data_path, '200tpc/cs_abt_composition_200tp.txt'))
