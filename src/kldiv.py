@@ -105,6 +105,7 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         exit(0)
 
 def show_errbar():
+    """ABANDONED"""
     # plt.style.use('seaborn-whitegrid')
     y = np.linspace(0, 4, 3)  # categories, str
     dx = 0.8
@@ -119,6 +120,7 @@ def show_errbar():
     plt.show()
 
 def ytick():
+    """ABANDONED"""
     _, ax = plt.subplots()
     x = ['one', 'two', 'three']
     y = ['two', 'three', 'four']
@@ -129,13 +131,19 @@ def ytick():
     ax.set_yticklabels(x)
     plt.show()
 
+def get_sec_structure_vecs():
+    """Compute section-structure vectors, returns in pd.dataframe
+    Columns:  
+    name,Abstract,Introduction,Background,Related Work,Methods,Results,Discussion,Conclusion
+    name: subfields of the subject.
+        For CS, name = []'machine_learning', 'numerical_analysis', ...
+    """
+    return 
 
 if __name__ == "__main__":
-    # ytick()
-    # show_errbar()
     ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
-    abt_df = read_data(join(data_path, '100tp_sec_compo/cs_intro_comp_100tpc.txt'))
-    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_intro_kld.txt'), ['Computer_Science.xml'])
+    abt_df = read_data(join(data_path, '100tp_sec_compo/cs_results_comp_100tpc.txt'))
+    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_results_kld.txt'), ['Computer_Science.xml'])
 
     # ft_df = read_data(join(data_path, '200tpc/cs_ft_composition_200tp.txt'))
     # abt_df = read_data(join(data_path, '200tpc/cs_abt_composition_200tp.txt'))
