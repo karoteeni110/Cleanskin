@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 from newCleaner import get_root
 from random import choice
-from paths import kldiv_dir, data_path, metadatas_path, secklds
+from paths import kldiv_dir, data_path,metadatas_path,secklds,results_path
 from metadata import get_pid2meta
 from os.path import join, basename
 from os import listdir
@@ -134,12 +134,12 @@ def ytick():
 def read_sectionKLD_df(txtpath):
     """Read pd.dataframe from txt file
     Take first row as header
-    df.name depends on filename: df.name = re.search(fn, '_(\w+)_kld.txt')"""
+    df.name depends on filename: df.name = re.search(fn, '_(\\w+)_kld.txt')"""
     df = pd.read_csv(txtpath, header=0)
     df.name = re.search(r'_(\w+)_kld.txt',basename(txtpath)).group(1)
     return df
 
-def get_sec_structure_vecs():
+def get_sec_structure_vecs(all_secdf_dict, dst=False):
     """
     Compute section-structure vectors, returns in pd.dataframe
     Columns:  
@@ -147,15 +147,38 @@ def get_sec_structure_vecs():
     name: subfields of the subject.
         For CS, name = []'machine_learning', 'numerical_analysis', ...
     """
-    return 
+    # Initialisation
+    abst_df = all_secdf_dict['abstract']
+    name = abst_df.category.unique()
+    secvec_df = pd.DataFrame({'name':name})
+
+    # Fill in dataframe cell by cell
+    for sec in ['abstract','introduction','background','relatedwork','methods','results','discussion','conclusion']:
+    # for sec in all_secdf_dict: # col
+        print("Getting",sec,"vectors...")
+        col = []
+        for field in secvec_df.name: # row
+            seckld = all_secdf_dict[sec]
+            col.append(seckld[seckld.category==field]['kld'].mean())
+        secvec_df[sec] = col
+        print("... done")
+    
+    secvec_df.columns = secvec_df.columns.str.title()
+    secvec_df = secvec_df.rename(columns={'Relatedwork':'Related Work', 'Name':'name'})
+
+    if not dst:
+        return secvec_df
+    else:
+        secvec_df.to_csv(path_or_buf=dst, index=False)
+        return secvec_df
 
 if __name__ == "__main__":
-    #ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
-    #abt_df = read_data(join(data_path, '100tp_sec_compo/cs_bg_comp_100tpc.txt'))
-    #get_div_dfs(ft_df, abt_df, join(data_path, 'cs_bg_kld.txt'), ['Computer_Science.xml'])
-    all_sec_dfs = []
-    for txtfn in listdir(secklds):
-        secdf = read_sectionKLD_df(join(secklds, txtfn))
-
-    print()
-    print()
+    ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
+    abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
+    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
+    
+    # all_sec_dfs = dict()  
+    # for txtfn in listdir(secklds):
+    #     secdf = read_sectionKLD_df(join(secklds, txtfn))
+    #     all_sec_dfs[secdf.name] = secdf
+    # get_sec_structure_vecs(all_sec_dfs,dst=join(results_path, 'my_secvec.txt'))

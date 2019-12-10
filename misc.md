@@ -142,3 +142,10 @@ sum([1 for i in final if 'background' in final[i]])
 sum([1 for i in final if 'results' in final[i]])
 244
 ```
+
+### history
+
+```
+yz@whq-58:/home/local/yzan/Desktop/mallet-2.0.8$ ./bin/mallet train-topics --input cs_ft.mallet --num-topics 100 --output-model cs_ftmodel_100tpc.mallet --output-doc-topics cs_ft_comp_100tpc.txt --output-topic-keys cs_ft_keys_100tpc.txt --inferencer-filename cs_ft_inferencer_100tpc.mallet
+Mallet LDA: 100 topics, 7 topic bits, 1111111 topic mask
+```

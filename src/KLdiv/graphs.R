@@ -49,7 +49,7 @@ ggplot(abstract2, aes(x=reorder(category, kld, FUN=mean), y=kld)) + geom_errorba
 dev.off()
 
 ########## REPRODUCE OLD FIGURE 1
-abstract <- read.csv('../../data/old_cs_abstract_kld.txt', header=T)
+abstract <- read.csv('../../data/cs_abstract_kld_100tp.txt', header=T)
 abstract2 <- summarySE(abstract, measurevar = 'kld', groupvars = c('category'))
 # check dist:
 # ggplot() + geom_density(data=abstract, aes(kld, col=category))
