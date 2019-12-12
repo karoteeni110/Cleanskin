@@ -131,12 +131,15 @@ def ytick():
     ax.set_yticklabels(x)
     plt.show()
 
-def read_sectionKLD_df(txtpath):
+def read_sectionKLD_df(txtpath, dfname=False):
     """Read pd.dataframe from txt file
     Take first row as header
     df.name depends on filename: df.name = re.search(fn, '_(\\w+)_kld.txt')"""
     df = pd.read_csv(txtpath, header=0)
-    df.name = re.search(r'_(\w+)_kld.txt',basename(txtpath)).group(1)
+    if not dfname:
+        df.name = re.search(r'_(\w+)_kld.txt',basename(txtpath)).group(1)
+    else:
+        df.name = dfname
     return df
 
 def get_sec_structure_vecs(all_secdf_dict, dst=False):
@@ -173,12 +176,23 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
         return secvec_df
 
 if __name__ == "__main__":
-    ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
-    abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
-    get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
+    #ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
+    #abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
+    # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
     
-    # all_sec_dfs = dict()  
-    # for txtfn in listdir(secklds):
-    #     secdf = read_sectionKLD_df(join(secklds, txtfn))
-    #     all_sec_dfs[secdf.name] = secdf
-    # get_sec_structure_vecs(all_sec_dfs,dst=join(results_path, 'my_secvec.txt'))
+    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_composition_100tpc_2.txt')
+    # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo2.txt')
+    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2.txt',['Computer_Science.xml'])
+    
+    # ft_df = read_data('/home/yzan/Desktop/Mallet/cs_ft_composition_100tpc.txt')
+    # abt_df = read_data('/home/yzan/Desktop/Mallet/cs_abt_compo_fromdev.txt')
+    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt',['Computer_Science.xml'])
+
+    all_sec_dfs = dict()  
+    for txtfn in listdir(secklds):
+        if 'abstract' not in txtfn:
+            secdf = read_sectionKLD_df(join(secklds, txtfn))
+        else:
+            secdf = read_sectionKLD_df('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt', dfname='abstract')
+        all_sec_dfs[secdf.name] = secdf
+    get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec_fromdev.txt')# dst=join(results_path, 'my_secvec.txt'))
