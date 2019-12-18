@@ -184,15 +184,15 @@ if __name__ == "__main__":
     # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo2.txt')
     # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2.txt',['Computer_Science.xml'])
     
-    # ft_df = read_data('/home/yzan/Desktop/Mallet/cs_ft_composition_100tpc.txt')
-    # abt_df = read_data('/home/yzan/Desktop/Mallet/cs_abt_compo_fromdev.txt')
-    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt',['Computer_Science.xml'])
+    ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_compo_oldextra.txt')
+    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_oldabst_compo.txt')
+    get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2_oldextraredo.txt',['Computer_Science.xml'])
 
-    all_sec_dfs = dict()  
-    for txtfn in listdir(secklds):
-        if 'abstract' not in txtfn:
-            secdf = read_sectionKLD_df(join(secklds, txtfn))
-        else:
-            secdf = read_sectionKLD_df('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt', dfname='abstract')
-        all_sec_dfs[secdf.name] = secdf
-    get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec_fromdev.txt')# dst=join(results_path, 'my_secvec.txt'))
+    # all_sec_dfs = dict()  
+    # for txtfn in listdir(secklds):
+    #     if 'abstract' not in txtfn:
+    #         secdf = read_sectionKLD_df(join(secklds, txtfn))
+    #     else:
+    #         secdf = read_sectionKLD_df('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt', dfname='abstract')
+    #     all_sec_dfs[secdf.name] = secdf
+    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec_fromdev.txt')# dst=join(results_path, 'my_secvec.txt'))

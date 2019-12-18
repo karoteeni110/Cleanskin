@@ -25,6 +25,9 @@ def align_dfs(ftdf,secdf):
     new_secdf = pd.concat([x['pid'], x.iloc[:, 101:]], axis=1)
     return new_ftdf, new_secdf
 
+def cp_abnormal_fulltext(oldft_path,newft_path,dst):
+    pass
+
 if __name__ == "__main__":
     ft_df = read_data(join(data_path,'old_topicmodel_data/full_nonstem_100_inf_props.txt'))
     secs_df = read_data(join(data_path,'old_topicmodel_data/secs_nonstem_100_props.txt'))
