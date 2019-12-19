@@ -1,6 +1,8 @@
 from kldiv import read_data, get_div_dfs
-from paths import data_path
-from os.path import join
+from paths import data_path, results_path
+from os.path import join, basename
+from os import listdir
+from shutil import copyfile
 import pandas as pd
 import numpy as np
 
@@ -25,12 +27,35 @@ def align_dfs(ftdf,secdf):
     new_secdf = pd.concat([x['pid'], x.iloc[:, 101:]], axis=1)
     return new_ftdf, new_secdf
 
-def cp_abnormal_fulltext(oldft_path,newft_path,dst):
-    pass
+def word_count(txtpath):
+    with open(txtpath, 'r') as f:
+        words = f.read().strip().split()
+    return len(words)
+
+def cp_abnormal_fulltext(oldft_path,newft_path):
+    wc1, wc2 = word_count(oldft_path), word_count(newft_path)
+    diff = wc1 - wc2
+    txtname = basename(newft_path)
+    if diff > 100 or diff < -100:
+        print('Word count diff %d: %s' % (diff, txtname))
+        copyfile(newft_path, '/home/yzan/Desktop/cs_lda/new_%s' % txtname)
+        copyfile('/home/yzan/Desktop/cs_lda/fulltext/%s' % txtname, '/home/yzan/Desktop/cs_lda/old_%s' % txtname)
+        print()
+        return True
+        
 
 if __name__ == "__main__":
-    ft_df = read_data(join(data_path,'old_topicmodel_data/full_nonstem_100_inf_props.txt'))
-    secs_df = read_data(join(data_path,'old_topicmodel_data/secs_nonstem_100_props.txt'))
-    abst_df = get_abst_df(secs_df)
-    ft_df, abst_df = align_dfs(ft_df, abst_df)
-    get_div_dfs(ft_df, abst_df, join(join(data_path, 'old_cs_abstract_kld.txt')), ['Computer_Science.xml'])
+    # ft_df = read_data(join(data_path,'old_topicmodel_data/full_nonstem_100_inf_props.txt'))
+    # secs_df = read_data(join(data_path,'old_topicmodel_data/secs_nonstem_100_props.txt'))
+    # abst_df = get_abst_df(secs_df)
+    # ft_df, abst_df = align_dfs(ft_df, abst_df)
+    # get_div_dfs(ft_df, abst_df, join(join(data_path, 'old_cs_abstract_kld.txt')), ['Computer_Science.xml'])
+    
+    newftdir = join(results_path, 'cs_lbsec/fulltext')
+    for fttxt in listdir(newftdir):
+        newft_path = join(newftdir, fttxt)
+        oldft_path = join('/home/yzan/Desktop/cs_lda/fulltext',fttxt)
+        if fttxt in ['1804.05088.txt', '1607.03659.txt']:
+            continue
+        if cp_abnormal_fulltext(oldft_path,newft_path):
+            exit(0)

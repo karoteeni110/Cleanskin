@@ -167,24 +167,6 @@ def pick_cs_headings(tarfn):
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
     return extracted, allpaper
 
-def have_subsec(sec):
-    for subelem in sec:
-        if 'section' in subelem.tag:
-            return True
-    return False
-
-def has_informative_subsec(sec):
-    for subsec in sec:
-        if subsec.get('title','').lower().strip().replace(' ','_') in TITLE2LABEL:
-            return True
-    return False
-
-def has_informative_subsubsec(sec):
-    for subsubsec in sec.findall('.//subsubsection'):
-        if subsubsec.get('title','').lower().strip().replace(' ','_') in TITLE2LABEL:
-            return True
-    return False
-
 def pick_cs_secs(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     skipped, allpaper = 0, 0
@@ -199,73 +181,64 @@ def pick_cs_secs(tarfn):
             if ab is None: 
                 logging.info('Skipped: %s (abstract not found)' % xml)
                 skipped += 1
-                continue
+                continue # Skip the whole paper
             else:
                 label2text = dict()
                 label2text['abstract'] = nmlz(''.join(ab.itertext()))
                 fulltext, garbled_len= '', 0
-                # secelems = (root[3:] if root.get('categories') else root)
                 secelems = rm_backmatter(root)
                 
-                # Put sections into `label2text`
-                for sec in secelems: # root[3:] does not include metadata
-                    sectitle = sec.get('title','').lower().strip().replace(' ','_')
+                # Put sections into `fulltext` and `label2text`
+                for sec in secelems:
+                    normed_sectitle = sec.get('title','').lower().strip().replace(' ','_')
                     sectext = nmlz(' '.join(sec.itertext()))
-                    if sectitle not in TITLE2LABEL:
-                        if has_informative_subsec(sec):
-                            for idx, subsec in enumerate(list(sec)):
-                                sectitle = subsec.get('title','').lower().strip().replace(' ','_')
-                                if idx==0:
-                                    sectext = nmlz(sec.text or ' ') + nmlz(' '.join(subsec.itertext()))
-                                else:
-                                    sectext = nmlz(' '.join(subsec.itertext()))
-                                if tk_ratio(sectext) < 10:
-                                    fulltext += sectext + '\n'
-                                    for lb in TITLE2LABEL.get(sectitle, []):
-                                        if lb != 'abstract':
-                                            label2text[lb] = label2text.get(lb, '') + sectext + '\n'
-                                elif len(sectext) > 300 : # some short notes may be weird; just exclude it
-                                    garbled_len += len(sectext)
-                            continue # following stuff won't happen
-
-                        elif has_informative_subsubsec(sec):
-                            for subsec in sec:
-                                for idx, subsubsec in enumerate(list(subsec)):
-                                    sectitle = subsubsec.get('title','').lower().strip().replace(' ','_')
-                                    if idx==0:
-                                        sectext = nmlz(subsec.text or ' ') + nmlz(' '.join(subsubsec.itertext()))
-                                    else:
-                                        sectext = nmlz(' '.join(subsubsec.itertext()))
-                                    if tk_ratio(sectext) < 10:
-                                        fulltext += sectext + '\n'
-                                        for lb in TITLE2LABEL.get(sectitle, []):
-                                            if lb != 'abstract':
-                                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
-                                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
-                                        garbled_len += len(sectext)
-                            continue # following stuff won't happen
                     
-                    if tk_ratio(sectext) < 10:
+                    # Skip section if it is garbled or too short
+                    if tk_ratio(sectext) >= 10:
+                        if len(sectext) > 300: # exclude short notes when compute garbled length
+                            garbled_len += len(sectext)
+                        continue 
+
+                    # If not, add section to `fulltext` 
+                    # then analyse heading OR children's headings
+                    else:
                         fulltext += sectext + '\n'
-                        for lb in TITLE2LABEL.get(sectitle, []):
-                            if lb != 'abstract':
-                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
-                    elif len(sectext) > 300 : # some short notes may be weird; just exclude it
-                        garbled_len += len(sectext)
-                label2text['fulltext'] = fulltext
+                        label2text['fulltext'] = fulltext # Update `label2text['fulltext']`
 
-                # Write out text to subcate dirs
-                if garbled_len/(len(fulltext)+garbled_len) < 0.5: 
+                        # Fill in `label2text` with section
+                        if normed_sectitle in TITLE2LABEL:
+                            for lb in TITLE2LABEL[normed_sectitle]:
+                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
+                        # OR with subsections
+                        else:
+                            matched_subsecs = [subsec for subsec in sec.findall('.//subsection') \
+                                            if subsec.get('title','').lower().strip().replace(' ','_') \
+                                                in TITLE2LABEL]
+                            if matched_subsecs != []:
+                                for subsec in matched_subsecs:
+                                    subsectext = nmlz(' '.join(subsec.itertext()))
+                                    for lb in TITLE2LABEL[subsec.get('title')]:
+                                        label2text[lb] = label2text.get(lb, '') + subsectext + '\n'
+                        # OR with subsubsections:
+                            else:
+                                matched_subsubsecs = [subsec for subsec in sec.findall('.//subsubsection') \
+                                            if subsec.get('title','').lower().strip().replace(' ','_') \
+                                                in TITLE2LABEL]
+                                for subsubsec in matched_subsubsecs:
+                                    subsubsectext = nmlz(' '.join(subsubsec.itertext()))
+                                    for lb in TITLE2LABEL[subsubsec.get('title')]:
+                                        label2text[lb] = label2text.get(lb, '') + subsubsectext + '\n'
+                
+                # All labels & fulltext collected, write out to subcate dirs 
+                if garbled_len/(len(fulltext)+garbled_len) < 0.5:
                     txtfname = xmlext2txt(xml)
-                    for seccate in label2text: 
-                        output_path = join(DST_DIRS, seccate+'/'+txtfname) # labelname should be dirname
-                        seccate_text = label2text.get(seccate, '')
-                        if seccate_text != '' and seccate != 'back_matter':
-                            # print(output_path, seccate_text)
-                            # time.sleep(5)
-                            with open(output_path, 'w') as seccatefile:
-                                seccatefile.write(seccate_text)
-                    
+                    for seccate in label2text:
+                        dst = join(DST_DIRS, seccate+'/'+txtfname) # labelname is dirname
+                        content = label2text.get(seccate, '')
+                        if len(content)>1 and seccate != 'back_matter':
+                            with open(dst, 'w') as seccatefile:
+                                seccatefile.write(content)
+
                 else:
                     logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
                     skipped += 1
