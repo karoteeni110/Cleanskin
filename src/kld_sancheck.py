@@ -52,10 +52,11 @@ if __name__ == "__main__":
     # get_div_dfs(ft_df, abst_df, join(join(data_path, 'old_cs_abstract_kld.txt')), ['Computer_Science.xml'])
     
     newftdir = join(results_path, 'cs_lbsec/fulltext')
-    for fttxt in listdir(newftdir):
+    oldftdir = '/home/yzan/Desktop/cs_lda/fulltext'
+    for fttxt in listdir(newftdir)[:1000]:
         newft_path = join(newftdir, fttxt)
-        oldft_path = join('/home/yzan/Desktop/cs_lda/fulltext',fttxt)
-        if fttxt in ['1804.05088.txt', '1607.03659.txt']:
+        oldft_path = join(oldftdir, fttxt)
+        if fttxt in ['1804.05088.txt', '1607.03659.txt', '1205.0260.txt']:
             continue
         if cp_abnormal_fulltext(oldft_path,newft_path):
-            exit(0)
+            pass
