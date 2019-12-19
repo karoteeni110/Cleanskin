@@ -51,11 +51,14 @@ def nmlz(text):
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    """Clear backmatter elems"""
+    """Clear <title>,<abstract>,<author>,<acknowledgements>,<bibliography>,
+    <section title=(abstract | references | acknowledgements | TITLE2LABEL['backmatter']) >"""
     elems = docroot.findall('.//*')
     for elem in elems:
-        if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography') \
-            or re.search(r'(\b(references?|acknowledge?ments?)\b)' , elem.get('title', ''), flags=re.I):
+        if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography')\
+            or re.search(r'(\b(references?|acknowledge?ments?|abstract)\b)',\
+                 elem.get('title', '').strip(), flags=re.I) \
+            or TITLE2LABEL.get(elem.get('title','').lower().strip().replace(' ','_'), '') == 'backmatter':
             elem.clear()
     return docroot
     
@@ -218,7 +221,8 @@ def pick_cs_secs(tarfn):
                             if matched_subsecs != []:
                                 for subsec in matched_subsecs:
                                     subsectext = nmlz(' '.join(subsec.itertext()))
-                                    for lb in TITLE2LABEL[subsec.get('title')]:
+                                    normed_tt = subsec.get('title','').lower().strip().replace(' ','_')
+                                    for lb in TITLE2LABEL[normed_tt]:
                                         label2text[lb] = label2text.get(lb, '') + subsectext + '\n'
                         # OR with subsubsections:
                             else:
@@ -227,7 +231,8 @@ def pick_cs_secs(tarfn):
                                                 in TITLE2LABEL]
                                 for subsubsec in matched_subsubsecs:
                                     subsubsectext = nmlz(' '.join(subsubsec.itertext()))
-                                    for lb in TITLE2LABEL[subsubsec.get('title')]:
+                                    normed_tt = subsec.get('title','').lower().strip().replace(' ','_')
+                                    for lb in TITLE2LABEL[normed_tt]:
                                         label2text[lb] = label2text.get(lb, '') + subsubsectext + '\n'
                 
                 # All labels & fulltext collected, write out to subcate dirs 

@@ -1,6 +1,6 @@
 from kldiv import read_data, get_div_dfs
 from paths import data_path, results_path
-from os.path import join, basename
+from os.path import join, basename, dirname
 from os import listdir
 from shutil import copyfile
 import pandas as pd
@@ -36,10 +36,10 @@ def cp_abnormal_fulltext(oldft_path,newft_path):
     wc1, wc2 = word_count(oldft_path), word_count(newft_path)
     diff = wc1 - wc2
     txtname = basename(newft_path)
-    if diff > 100 or diff < -100:
+    if diff != 0:
         print('Word count diff %d: %s' % (diff, txtname))
         copyfile(newft_path, '/home/yzan/Desktop/cs_lda/new_%s' % txtname)
-        copyfile('/home/yzan/Desktop/cs_lda/fulltext/%s' % txtname, '/home/yzan/Desktop/cs_lda/old_%s' % txtname)
+        copyfile(oldft_path, '/home/yzan/Desktop/cs_lda/old_%s' % txtname)
         print()
         return True
         
