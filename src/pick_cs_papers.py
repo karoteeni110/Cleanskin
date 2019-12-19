@@ -168,7 +168,8 @@ def pick_cs_headings(tarfn):
     return extracted, allpaper
 
 def pick_cs_secs(tarfn):
-    dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
+    # dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
+    dirn = '/home/yzan/Desktop/cs_lda/0504'
     skipped, allpaper = 0, 0
     for xml in listdir(dirn):
         xmlpath = join(dirn, xml)
@@ -195,7 +196,7 @@ def pick_cs_secs(tarfn):
                     
                     # Skip section if it is garbled or too short
                     if tk_ratio(sectext) >= 10:
-                        if len(sectext) > 300: # exclude short notes when compute garbled length
+                        if len(sectext) > 300: # but don't include those too short into `garbled_len`
                             garbled_len += len(sectext)
                         continue 
 
@@ -248,12 +249,12 @@ def pick_cs_secs(tarfn):
     return extracted, allpaper
 
 def main(tar_fn):
-    cp_1tar(tar_fn)
-    unzip_1tar(tar_fn)
-    rm_oldtar(tar_fn)
+    # cp_1tar(tar_fn)
+    # unzip_1tar(tar_fn)
+    # rm_oldtar(tar_fn)
     # extracted, allpaper =  pick_cs_papers(tar_fn) # pick_cs_headings(tar_fn) 
     extracted, allpaper = pick_cs_secs(tar_fn)
-    clear_picked_dir(tar_fn)
+    # clear_picked_dir(tar_fn)
     return extracted, allpaper
 
 
@@ -278,8 +279,8 @@ if __name__ == "__main__":
     # cs_headings_txt_path = join(results_path, 'cs_headings.txt')
     # pid_heading_txt_path = join(results_path, 'pid_headings.txt')
 
-    tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
-    # tarlist = ['1801.tar.gz']
+    # tarlist = [fn for fn in listdir(CLEANED_XML) if fn not in listdir(TARS_COPY_TO)] 
+    tarlist = ['0504.tar.gz']
     # shuffle(tarlist)
     EXTRACTED_SUM, ALLPAPER_SUM = 0, 0
    
@@ -290,6 +291,7 @@ if __name__ == "__main__":
         ALLPAPER_SUM += allpaper
         # if EXTRACTED_SUM > 131703:
         #     break
+    
     logging.info('Summary: paper extracted: %s of %s' % (EXTRACTED_SUM, ALLPAPER_SUM))
         
 
