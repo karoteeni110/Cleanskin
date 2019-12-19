@@ -230,7 +230,7 @@ def pick_cs_secs(tarfn):
                                                 in TITLE2LABEL]
                                 for subsubsec in matched_subsubsecs:
                                     subsubsectext = nmlz(' '.join(subsubsec.itertext()))
-                                    normed_tt = subsec.get('title','').lower().strip().replace(' ','_')
+                                    normed_tt = subsubsec.get('title','').lower().strip().replace(' ','_')
                                     for lb in TITLE2LABEL[normed_tt]:
                                         label2text[lb] = label2text.get(lb, '') + subsubsectext + '\n'
                 
