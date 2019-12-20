@@ -180,13 +180,15 @@ if __name__ == "__main__":
     #abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
     # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
     
-    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_composition_100tpc_2.txt')
-    # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo2.txt')
-    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2.txt',['Computer_Science.xml'])
-    
     ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
-    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
-    get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abtkld.txt',['Computer_Science.xml'])
+    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo.txt')
+    get_div_dfs(ft_df, abt_df, join(secklds, 'abstract_kld.txt'),['Computer_Science.xml'])
+    
+    # for sec in ['abstract', 'introduction','background','related_work', '']
+
+    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
+    # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
+    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abtkld.txt',['Computer_Science.xml'])
 
     # all_sec_dfs = dict()  
     # for txtfn in listdir(secklds):
@@ -195,4 +197,4 @@ if __name__ == "__main__":
     #     else:
     #         secdf = read_sectionKLD_df('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt', dfname='abstract')
     #     all_sec_dfs[secdf.name] = secdf
-    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec_fromdev.txt')# dst=join(results_path, 'my_secvec.txt'))
+    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
