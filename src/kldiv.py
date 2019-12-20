@@ -137,7 +137,7 @@ def read_sectionKLD_df(txtpath, dfname=False):
     df.name depends on filename: df.name = re.search(fn, '_(\\w+)_kld.txt')"""
     df = pd.read_csv(txtpath, header=0)
     if not dfname:
-        df.name = re.search(r'_(\w+)_kld.txt',basename(txtpath)).group(1)
+        df.name = re.search(r'(\w+)_kld.txt',basename(txtpath)).group(1)
     else:
         df.name = dfname
     return df
@@ -156,7 +156,7 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
     secvec_df = pd.DataFrame({'name':name})
 
     # Fill in dataframe cell by cell
-    for sec in ['abstract','introduction','background','relatedwork','methods','results','discussion','conclusion']:
+    for sec in ['abstract','introduction','background','related_work','methods','results','discussion','conclusion']:
     # for sec in all_secdf_dict: # col
         print("Getting",sec,"vectors...")
         col = []
@@ -169,32 +169,26 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
     secvec_df.columns = secvec_df.columns.str.title()
     secvec_df = secvec_df.rename(columns={'Relatedwork':'Related Work', 'Name':'name'})
 
-    if not dst:
-        return secvec_df
-    else:
+    if dst:
         secvec_df.to_csv(path_or_buf=dst, index=False)
-        return secvec_df
+    return secvec_df
 
 if __name__ == "__main__":
     #ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
-    #abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
+    # abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
     # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
     
-    ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
-    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo.txt')
-    get_div_dfs(ft_df, abt_df, join(secklds, 'abstract_kld.txt'),['Computer_Science.xml'])
-    
-    # for sec in ['abstract', 'introduction','background','related_work', '']
+    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
+    # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:
+    #     lb_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_%s_comp.txt' % lb)
+    #     get_div_dfs(ft_df, lb_df, join(secklds, '%s_kld.txt' % lb), ['Computer_Science.xml'])
 
     # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
     # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
     # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abtkld.txt',['Computer_Science.xml'])
 
-    # all_sec_dfs = dict()  
-    # for txtfn in listdir(secklds):
-    #     if 'abstract' not in txtfn:
-    #         secdf = read_sectionKLD_df(join(secklds, txtfn))
-    #     else:
-    #         secdf = read_sectionKLD_df('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt', dfname='abstract')
-    #     all_sec_dfs[secdf.name] = secdf
-    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
+    all_sec_dfs = dict()  
+    for txtfn in listdir(secklds):
+        secdf = read_sectionKLD_df(join(secklds, txtfn))
+        all_sec_dfs[secdf.name] = secdf
+    get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
