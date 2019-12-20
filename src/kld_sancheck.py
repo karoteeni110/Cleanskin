@@ -37,7 +37,7 @@ def cp_abnormal_fulltext(oldft_path,newft_path):
     diff = wc1 - wc2
     txtname = basename(newft_path)
     if diff != 0:
-        print('Word count diff %d: %s' % (diff, txtname))
+        print('%d, %s' % (diff, txtname))
         copyfile(newft_path, '/home/yzan/Desktop/cs_lda/new_%s' % txtname)
         copyfile(oldft_path, '/home/yzan/Desktop/cs_lda/old_%s' % txtname)
         print()
@@ -53,10 +53,19 @@ if __name__ == "__main__":
     
     newftdir = join(results_path, 'cs_lbsec/fulltext')
     oldftdir = '/home/yzan/Desktop/cs_lda/fulltext'
-    for fttxt in listdir(newftdir)[:1000]:
+    for fttxt in listdir(newftdir):
         newft_path = join(newftdir, fttxt)
         oldft_path = join(oldftdir, fttxt)
-        if fttxt in ['1804.05088.txt', '1607.03659.txt', '1205.0260.txt']:
+        if fttxt in []:
             continue
         if cp_abnormal_fulltext(oldft_path,newft_path):
             pass
+
+    # with open('/home/yzan/Desktop/cs_lda/topicmodel_data/shared_ids.txt', 'r') as f:
+    #     pids = f.read().splitlines()
+    # # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
+    # # abst_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
+    # # ft_df, abst_df = align_dfs(ft_df[ft_df.pid.isin(pids)], abst_df[abst_df.pid.isin(pids)])
+    # # get_div_dfs(ft_df, abst_df, '/home/yzan/Desktop/scilit_graphs/sancheck_fig1_abstkld.txt', ['Computer_Science.xml'])
+    # whatif = pd.read_csv('/home/yzan/Desktop/Mallet/abt_kld2_fromdev.txt',header=0)
+    # print()

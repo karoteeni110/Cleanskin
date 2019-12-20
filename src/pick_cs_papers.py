@@ -56,9 +56,10 @@ def rm_backmatter(docroot):
     elems = docroot.findall('.//*')
     for elem in elems:
         if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography')\
-            or re.match(r'((references?|acknowledge?ments?|abstract)$)',\
-                 elem.get('title', '').strip(), flags=re.I) \
             or TITLE2LABEL.get(elem.get('title','').lower().strip().replace(' ','_'), '') == 'backmatter':
+            elem.clear()
+        if elem.tag == 'section' and re.match(r'((references?|acknowledge?ments?|abstract)$)',\
+                 elem.get('title', '').strip(), flags=re.I):
             elem.clear()
     return docroot
     

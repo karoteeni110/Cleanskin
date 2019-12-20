@@ -184,9 +184,9 @@ if __name__ == "__main__":
     # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_compo2.txt')
     # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2.txt',['Computer_Science.xml'])
     
-    ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_compo_oldextra.txt')
-    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_oldabst_compo.txt')
-    get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abt_kld2_oldextraredo.txt',['Computer_Science.xml'])
+    ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
+    abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
+    get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abtkld.txt',['Computer_Science.xml'])
 
     # all_sec_dfs = dict()  
     # for txtfn in listdir(secklds):
