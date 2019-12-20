@@ -52,14 +52,13 @@ def nmlz(text):
 
 def rm_backmatter(docroot):
     """Clear <title>,<abstract>,<author>,<acknowledgements>,<bibliography>,
-    <section title=(abstract | references | acknowledgements | TITLE2LABEL['backmatter']) >"""
+    < title=(abstract | references | acknowledgements | TITLE2LABEL['backmatter']) >"""
     elems = docroot.findall('.//*')
     for elem in elems:
         if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography')\
             or TITLE2LABEL.get(elem.get('title','').lower().strip().replace(' ','_'), '') == 'backmatter':
             elem.clear()
-        if elem.tag == 'section' and re.match(r'((references?|acknowledge?ments?|abstract)$)',\
-                 elem.get('title', '').strip(), flags=re.I):
+        if re.match(r'((references?|acknowledge?ments?|abstract)$)', elem.get('title', '').strip(), flags=re.I):
             elem.clear()
     return docroot
     

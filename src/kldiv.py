@@ -189,6 +189,11 @@ if __name__ == "__main__":
 
     all_sec_dfs = dict()  
     for txtfn in listdir(secklds):
+        # if 'abstract' in txtfn:
+        #     secdf = read_sectionKLD_df('/home/yzan/Desktop/scilit_graphs/redoredoabst.csv', dfname='abstract')
+        # else:
         secdf = read_sectionKLD_df(join(secklds, txtfn))
         all_sec_dfs[secdf.name] = secdf
     get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
+    # x=get_acro2cate_dict()
+    # print()
