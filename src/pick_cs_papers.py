@@ -51,7 +51,7 @@ def nmlz(text):
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    """Clear <title>,<author>,<bibliography> """
+    """Clear <title>,<date>,<author>,<bibliography>"""
     elems = docroot.findall('.//*')
     for elem in elems:
         if elem.tag in ('title', 'date', 'author', 'bibliography'):
@@ -178,57 +178,58 @@ def pick_cs_secs(tarfn):
         
         if is_cs(root, xml):
             allpaper += 1
-            # Check abstract
-            ab = root.find('abstract')
-            if ab is None: 
-                logging.info('Skipped: %s (abstract not found)' % xml)
-                skipped += 1
-                continue # Skip the whole paper
-            else:
-                hd2text = dict()
-                hd2text['abstract'] = nmlz(''.join(ab.itertext()))
-                fulltext, garbled_len= '', 0
-                secelems = rm_backmatter(root)
+            hd2text = dict()
+            fulltext, garbled_len= '', 0
+            secelems = rm_backmatter(root)
+            
+            # Put sections into `fulltext` and `label2text`
+            for sec in secelems:
+                normed_sectitle = sec.get('title','').lower().strip().replace(' ','_')
+                sectext = nmlz(' '.join(sec.itertext()))
                 
-                # Put sections into `fulltext` and `label2text`
-                for sec in secelems:
-                    normed_sectitle = sec.get('title','').lower().strip().replace(' ','_')
-                    sectext = nmlz(' '.join(sec.itertext()))
+                # Skip section if it is garbled or too short
+                if tk_ratio(sectext) >= 10:
+                    if len(sectext) > 300: # but don't include those too short into `garbled_len`
+                        garbled_len += len(sectext)
+                    continue 
                     
-                    # Skip section if it is garbled or too short
-                    if tk_ratio(sectext) >= 10:
-                        if len(sectext) > 300: # but don't include those too short into `garbled_len`
-                            garbled_len += len(sectext)
-                        continue 
-
-                    # If not, add section to `fulltext` and `hd2text`
+                # If not, add section to `fulltext` and `hd2text`
+                else:
+                    # Add to `fulltext`
+                    if hd2text.get('abstract') != None and normed_sectitle == 'abstract':
+                        continue # avoid repeating abstract
                     else:
-                        fulltext += sectext + '\n'
-                        hd2text['fulltext'] = fulltext # Update `label2text['fulltext']`
+                        hd2text['fulltext'] = hd2text.get('fulltext','') + sectext + '\n'
+
+                    # Add to `section` only if it is abstract/acknowledgements or has a title
                         if sec.get('title') != None:
                             hd2text[normed_sectitle] = sectext
+                        elif sec.tag in ('abstract', 'acknowledgements'):
+                            hd2text[sec.tag] = sectext
+                           
+            # All labels & fulltext collected, write out to subcate dirs 
+            if garbled_len/(len(fulltext)+garbled_len) < 0.5:
+                sec_idx = 0
+                for hd in hd2text:
+                    txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
+                    sec_idx += 1
+                    sec_text_dst = join(DST_DIRS, 'sections/'+txtfname)
 
+                    # Write out section text
+                    with open(sec_text_dst, 'w') as sec_txt: 
+                        sec_txt.write(hd2text.get(hd, ''))
+                    # Record section title
+                    with open(join(DST_DIRS, 'sec_titles.txt'), 'a') as sec_hds: 
+                        sec_hds.write(txtfname+','+hd+'\n')
                 
-                # All labels & fulltext collected, write out to subcate dirs 
-                if garbled_len/(len(fulltext)+garbled_len) < 0.5:
-                    # txtfname = xmlext2txt(xml)
-                    sec_idx = 0
-                    for hd in hd2text:
-                        txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
-                        sec_idx += 1
-                        sec_text_dst = join(DST_DIRS, 'sections/'+txtfname)
-                        with open(sec_text_dst, 'w') as sec_txt: # Write out section text
-                            sec_txt.write(hd2text.get(hd, ''))
-                        with open(join(DST_DIRS, 'sec_titles.txt'), 'a') as sec_hds: # Record section title
-                            sec_hds.write(txtfname+','+hd+'\n')
-                    
-                    ft_dst = join(DST_DIRS, 'fulltext/'+xmlext2txt(xml))
-                    with open(ft_dst, 'w') as ft_txt: # Write out fulltext 
-                        ft_txt.write(hd2text['fulltext'])
+                # Write out fulltext 
+                ft_dst = join(DST_DIRS, 'fulltext/'+xmlext2txt(xml))
+                with open(ft_dst, 'w') as ft_txt: 
+                    ft_txt.write(hd2text['fulltext'])
 
-                else:
-                    logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
-                    skipped += 1
+            else:
+                logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
+                skipped += 1
 
     extracted = allpaper-skipped
     logging.info('Papers extracted: %s / %s' % (extracted, allpaper))
