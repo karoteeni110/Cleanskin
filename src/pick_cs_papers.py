@@ -51,15 +51,13 @@ def nmlz(text):
     return ' '.join(re.findall(r"\d*[a-zA-Z]+(?:[-'\.][a-zA-Z]+)*", text)).lower()
 
 def rm_backmatter(docroot):
-    """Clear <title>,<abstract>,<author>,<acknowledgements>,<bibliography>,
-    < title=(abstract | references | acknowledgements | TITLE2LABEL['backmatter']) >"""
+    """Clear <title>,<author>,<bibliography> """
     elems = docroot.findall('.//*')
     for elem in elems:
-        if elem.tag in ('title', 'abstract', 'author', 'acknowledgements', 'bibliography')\
-            or TITLE2LABEL.get(elem.get('title','').lower().strip().replace(' ','_'), '') == 'backmatter':
+        if elem.tag in ('title', 'date', 'author', 'bibliography'):
             elem.clear()
-        if re.match(r'((references?|acknowledge?ments?|abstract)$)', elem.get('title', '').strip(), flags=re.I):
-            elem.clear()
+        # if re.match(r'(abstract$)', elem.get('title', '').strip(), flags=re.I):
+        #     elem.clear()
     return docroot
     
 def tk_ratio(txt):
@@ -174,6 +172,7 @@ def pick_cs_secs(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
     skipped, allpaper = 0, 0
     for xml in listdir(dirn):
+        pid = xml[:-4]
         xmlpath = join(dirn, xml)
         _, root = get_root(xmlpath)
         
@@ -186,8 +185,8 @@ def pick_cs_secs(tarfn):
                 skipped += 1
                 continue # Skip the whole paper
             else:
-                label2text = dict()
-                label2text['abstract'] = nmlz(''.join(ab.itertext()))
+                hd2text = dict()
+                hd2text['abstract'] = nmlz(''.join(ab.itertext()))
                 fulltext, garbled_len= '', 0
                 secelems = rm_backmatter(root)
                 
@@ -202,47 +201,30 @@ def pick_cs_secs(tarfn):
                             garbled_len += len(sectext)
                         continue 
 
-                    # If not, add section to `fulltext` 
-                    # then analyse heading OR children's headings
+                    # If not, add section to `fulltext` and `hd2text`
                     else:
                         fulltext += sectext + '\n'
-                        label2text['fulltext'] = fulltext # Update `label2text['fulltext']`
+                        hd2text['fulltext'] = fulltext # Update `label2text['fulltext']`
+                        if sec.get('title') != None:
+                            hd2text[normed_sectitle] = sectext
 
-                        # Fill in `label2text` with section
-                        if normed_sectitle in TITLE2LABEL:
-                            for lb in TITLE2LABEL[normed_sectitle]:
-                                label2text[lb] = label2text.get(lb, '') + sectext + '\n'
-                        # OR with subsections
-                        else:
-                            matched_subsecs = [subsec for subsec in sec.findall('.//subsection') \
-                                            if subsec.get('title','').lower().strip().replace(' ','_') \
-                                                in TITLE2LABEL]
-                            if matched_subsecs != []:
-                                for subsec in matched_subsecs:
-                                    subsectext = nmlz(' '.join(subsec.itertext()))
-                                    normed_tt = subsec.get('title','').lower().strip().replace(' ','_')
-                                    for lb in TITLE2LABEL[normed_tt]:
-                                        label2text[lb] = label2text.get(lb, '') + subsectext + '\n'
-                        # OR with subsubsections:
-                            else:
-                                matched_subsubsecs = [subsec for subsec in sec.findall('.//subsubsection') \
-                                            if subsec.get('title','').lower().strip().replace(' ','_') \
-                                                in TITLE2LABEL]
-                                for subsubsec in matched_subsubsecs:
-                                    subsubsectext = nmlz(' '.join(subsubsec.itertext()))
-                                    normed_tt = subsubsec.get('title','').lower().strip().replace(' ','_')
-                                    for lb in TITLE2LABEL[normed_tt]:
-                                        label2text[lb] = label2text.get(lb, '') + subsubsectext + '\n'
                 
                 # All labels & fulltext collected, write out to subcate dirs 
                 if garbled_len/(len(fulltext)+garbled_len) < 0.5:
-                    txtfname = xmlext2txt(xml)
-                    for seccate in label2text:
-                        dst = join(DST_DIRS, seccate+'/'+txtfname) # labelname is dirname
-                        content = label2text.get(seccate, '')
-                        if len(content)>1 and seccate != 'back_matter':
-                            with open(dst, 'w') as seccatefile:
-                                seccatefile.write(content)
+                    # txtfname = xmlext2txt(xml)
+                    sec_idx = 0
+                    for hd in hd2text:
+                        txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
+                        sec_idx += 1
+                        sec_text_dst = join(DST_DIRS, 'sections/'+txtfname)
+                        with open(sec_text_dst, 'w') as sec_txt: # Write out section text
+                            sec_txt.write(hd2text.get(hd, ''))
+                        with open(join(DST_DIRS, 'sec_titles.txt'), 'a') as sec_hds: # Record section title
+                            sec_hds.write(txtfname+','+hd+'\n')
+                    
+                    ft_dst = join(DST_DIRS, 'fulltext/'+xmlext2txt(xml))
+                    with open(ft_dst, 'w') as ft_txt: # Write out fulltext 
+                        ft_txt.write(hd2text['fulltext'])
 
                 else:
                     logging.info('Skipped: %s (too few tokens in fulltext)' % xml)
