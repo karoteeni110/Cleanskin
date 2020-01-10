@@ -61,7 +61,10 @@ def rm_backmatter(docroot):
     return docroot
     
 def tk_ratio(txt):
-    return len(txt) / (len(txt.split()) or 1)
+    if len(txt.split()) == 0:
+        return 0
+    else:
+        return len(txt) / (len(txt.split()))
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
@@ -180,7 +183,7 @@ def pick_cs_secs(tarfn):
             allpaper += 1
             hd2text = dict()
             fulltext, garbled_len= '', 0
-            secelems = rm_backmatter(root)
+            secelems = rm_backmatter(root) # remove title, author, date, bibliography
             
             # Put sections into `fulltext` and `label2text`
             for sec in secelems:
@@ -208,7 +211,7 @@ def pick_cs_secs(tarfn):
                             hd2text[sec.tag] = sectext
                            
             # All labels & fulltext collected, write out to subcate dirs 
-            if garbled_len/(len(fulltext)+garbled_len) < 0.5:
+            if garbled_len/(len(fulltext)+garbled_len+0.0001) < 0.5:
                 sec_idx = 0
                 for hd in hd2text:
                     txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
