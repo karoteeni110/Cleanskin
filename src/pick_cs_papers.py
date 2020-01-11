@@ -61,10 +61,7 @@ def rm_backmatter(docroot):
     return docroot
     
 def tk_ratio(txt):
-    if len(txt.split()) == 0:
-        return 0
-    else:
-        return len(txt) / (len(txt.split()))
+    return len(txt) / (len(txt.split()) or 1)
 
 def pick_cs_papers(tarfn):
     dirn = join(TARS_COPY_TO, rm_tar_ext(tarfn))
@@ -211,19 +208,20 @@ def pick_cs_secs(tarfn):
                             hd2text[sec.tag] = sectext
                            
             # All labels & fulltext collected, write out to subcate dirs 
-            if garbled_len/(len(fulltext)+garbled_len+0.0001) < 0.5:
+            if garbled_len/(len(hd2text['fulltext'])+garbled_len+0.0001) < 0.5:
                 sec_idx = 0
                 for hd in hd2text:
-                    txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
-                    sec_idx += 1
-                    sec_text_dst = join(DST_DIRS, 'sections/'+txtfname)
+                    if hd != 'fulltext':
+                        txtfname = xml[:-4] + '_%s' % sec_idx + '.txt'
+                        sec_idx += 1
+                        sec_text_dst = join(DST_DIRS, 'sections/'+txtfname)
 
-                    # Write out section text
-                    with open(sec_text_dst, 'w') as sec_txt: 
-                        sec_txt.write(hd2text.get(hd, ''))
-                    # Record section title
-                    with open(join(DST_DIRS, 'sec_titles.txt'), 'a') as sec_hds: 
-                        sec_hds.write(txtfname+','+hd+'\n')
+                        # Write out section text
+                        with open(sec_text_dst, 'w') as sec_txt: 
+                            sec_txt.write(hd2text.get(hd, ''))
+                        # Record section title
+                        with open(join(DST_DIRS, 'sec_titles.txt'), 'a') as sec_hds: 
+                            sec_hds.write(txtfname+','+hd+'\n')
                 
                 # Write out fulltext 
                 ft_dst = join(DST_DIRS, 'fulltext/'+xmlext2txt(xml))
