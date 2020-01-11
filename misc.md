@@ -8,7 +8,7 @@ methods 55391
 introduction 120070
 results 69458
 fulltext 131703
-
+Summary: paper extracted: 132290 of 145428
 
 ##  Mallet usage
 
