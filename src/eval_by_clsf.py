@@ -25,15 +25,13 @@ def df2xy(df):
     df = df.dropna(subset=['pid'])
     df.pid = df.pid.apply(lambda x: tuple(x))
     X = df.iloc[:,1:].to_numpy()
-    y = MultiLabelBinarizer().fit_transform(df.pid)
-    return X, y, y.classes_
+    mlb = MultiLabelBinarizer()
+    return X, mlb.fit_transform(df.pid), mlb.classes_
 
 def cls_with_ft(ft_comp_df):
     X, y, y_lbs = df2xy(ft_comp_df.iloc[:1000,:])
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
     classif = OneVsRestClassifier(SVC(kernel='linear')).fit(X_train, y_train)
-    # pred = classif.predict(X_test)
-    # acc = classif.score(X_test,y_test)
 
     for cate in y_lbs:
         pred = classif.predict(X_test)
