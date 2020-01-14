@@ -20,7 +20,7 @@ Summary: paper extracted: 132290 of 145428
 ./bin/mallet import-dir --input ~/Desktop/Cleanskin/results/cs_lda/abstract --output cs_abstract.mallet --keep-sequence --remove-stopwords
 
 # Get model and inferencer (take hours)
-./bin/mallet train-topics --input cs_fulltext.mallet --num-topics N --output-model cs_ftmodel_100tpc.mallet --output-doc-topics cs_ft_composition_100tpc.txt --output-topic-keys cs_ft_keys_100tpc.txt --inferencer-filename cs_ft_inferencer_100tpc.mallet
+./bin/mallet train-topics --input cs_fulltext.mallet --num-topics N --output-model cs_ftmd_100tpc.mallet --output-doc-topics cs_ft_comp_100tpc.txt --output-topic-keys cs_ft_keys_100tpc.txt --inferencer-filename cs_ft_inferer_100tpc.mallet --evaluator-filename cs_ft_evaler_100tpc.mallet
 
 # Infer & get distribution (fast)
 ./bin/mallet infer-topics --inferencer cs_ft_inferencer_100tpc.mallet --input cs_abstract.mallet --output-doc-topics cs_abt_composition_100tpc.txt
@@ -153,8 +153,3 @@ sum([1 for i in final if 'results' in final[i]])
 ```
 
 ### history
-
-```
-yz@whq-58:/home/local/yzan/Desktop/mallet-2.0.8$ ./bin/mallet train-topics --input cs_ft.mallet --num-topics 100 --output-model cs_ftmodel_100tpc.mallet --output-doc-topics cs_ft_comp_100tpc.txt --output-topic-keys cs_ft_keys_100tpc.txt --inferencer-filename cs_ft_inferencer_100tpc.mallet
-Mallet LDA: 100 topics, 7 topic bits, 1111111 topic mask
-```
