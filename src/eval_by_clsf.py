@@ -19,30 +19,41 @@ def example():
     classif = OneVsRestClassifier(SVC(kernel='linear'))
     pred = classif.fit(X, Y).predict(X)
 
-def df2xy(df):
-    catedict = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
-    df.pid = df.pid.map(catedict)
-    df = df.dropna(subset=['pid'])
-    df.loc[:,'pid'] = df.pid.apply(lambda x: tuple(x))
-    X = df.iloc[:,1:].to_numpy()
+def df2xy(train_df, test_df):
+    """"""
     mlb = MultiLabelBinarizer()
-    return X, mlb.fit_transform(df.pid), mlb.classes_
+    for xdf in [0,1]:
+        df = [train_df, test_df][xdf]
+        df.pid = df.pid.map(CATEDICT)
+        df = df.dropna(subset=['pid']) # Drop those categories 
+        df.loc[:,'pid'] = df.pid.apply(lambda x: tuple(x)) # list to tuple 
+        if xdf == 0: # if it is train df
+            X_train = df.iloc[:,1:].to_numpy()
+            y_train = mlb.fit_transform(df.pid)
+        else: # test df
+            X_test = df.iloc[:,1:].to_numpy()
+            y_test = mlb.transform(df.pid) # DIFFERENT FROM fit_transform!!!
+    # return X, mlb.fit_transform(df.pid), mlb.classes_
+    return X_train, X_test, y_train, y_test, mlb.classes_
 
-def cls_with_ft(ft_comp_df):
-    X, y, y_lbs = df2xy(ft_comp_df)#.iloc[:1000,:])
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
+def cls_with_ft(train_df, test_df):
+    X_train, X_test, y_train, y_test, y_lbs = df2xy(train_df, test_df)
     classif = OneVsRestClassifier(SVC(kernel='linear')).fit(X_train, y_train)
     
     pred = classif.predict(X_test)
-    y_test, pred = y_test.T, pred.T # transpose
-    for idx, cate in enumerate(y_lbs):     
+    y_test, pred = y_test.T, pred.T # transpose for cate-wise comparing 
+    for idx, cate in enumerate(y_lbs):
         cate_acc = accuracy_score(y_test[idx], pred[idx])
         print(cate, cate_acc)
 
 if __name__ == "__main__":
-    abst_comp_path = '/home/yzan/Desktop/mallet-2.0.8/cs_abstract_comp.txt'
+    abst_comp_path = '/home/yzan/Desktop/mallet-2.0.8/cs_related_work_comp.txt'
     ft_comp_path = '/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt'
 
+    # abst_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp/cs_50_perdoc.txt'
+    # ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs/model_50/composition.txt'
+
     abst_comp, ft_comp = read_data(abst_comp_path), read_data(ft_comp_path)
-    cls_with_ft(abst_comp)
+    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    cls_with_ft(train_df=abst_comp.sample(n=10000), test_df=ft_comp.sample(n=10000))
     print()
