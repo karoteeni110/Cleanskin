@@ -23,19 +23,20 @@ def df2xy(df):
     catedict = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
     df.pid = df.pid.map(catedict)
     df = df.dropna(subset=['pid'])
-    df.pid = df.pid.apply(lambda x: tuple(x))
+    df.loc[:,'pid'] = df.pid.apply(lambda x: tuple(x))
     X = df.iloc[:,1:].to_numpy()
     mlb = MultiLabelBinarizer()
     return X, mlb.fit_transform(df.pid), mlb.classes_
 
 def cls_with_ft(ft_comp_df):
-    X, y, y_lbs = df2xy(ft_comp_df.iloc[:1000,:])
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
+    X, y, y_lbs = df2xy(ft_comp_df)#.iloc[:1000,:])
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
     classif = OneVsRestClassifier(SVC(kernel='linear')).fit(X_train, y_train)
-
-    for cate in y_lbs:
-        pred = classif.predict(X_test)
-        cate_acc = accuracy_score(y_test, pred)
+    
+    pred = classif.predict(X_test)
+    y_test, pred = y_test.T, pred.T # transpose
+    for idx, cate in enumerate(y_lbs):     
+        cate_acc = accuracy_score(y_test[idx], pred[idx])
         print(cate, cate_acc)
 
 if __name__ == "__main__":
@@ -43,5 +44,5 @@ if __name__ == "__main__":
     ft_comp_path = '/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt'
 
     abst_comp, ft_comp = read_data(abst_comp_path), read_data(ft_comp_path)
-    cls_with_ft(ft_comp)
+    cls_with_ft(abst_comp)
     print()
