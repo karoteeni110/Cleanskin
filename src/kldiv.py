@@ -58,7 +58,8 @@ def get_acro2cate_dict():
             acro2cate[acro] = fn
     return acro2cate # cate_series.map(acro2cate)
 
-def align_dfs(ft_df,sec_df, n_tpc=100):
+def align_dfs(ft_df,sec_df):
+    n_tpc = len(ft_df.columns)-1
     innerjoin = pd.merge(ft_df, sec_df, how='inner', on='pid')
     ft_df = innerjoin.iloc[:,:n_tpc+1]\
             .rename(columns = lambda x:x.strip('_x'))
