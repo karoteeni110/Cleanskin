@@ -34,16 +34,17 @@ def df2xy(train_df, test_df):
             X_train = df.iloc[:,1:].to_numpy()
             # y_train = mlb.fit_transform(df.pid) # [0,0,0,...,1] format labels
             # y_train = np.apply_along_axis(lambda bilb:','.join(str(i) for i in bilb), 1, y_train) # '010101' format labels
-            y_train = le.fit_transform(df.pid) 
+            y_train = le.fit_transform(df.pid)
+            mlb = mlb.fit(df.pid)
         else: # test df
             X_test = df.iloc[:,1:].to_numpy()
             # y_test = mlb.transform(df.pid) # DIFFERENT FROM fit_transform!!!
             # y_test = np.apply_along_axis(lambda bilb:''.join(str(i) for i in bilb))
             y_test = le.transform(df.pid)
-    return X_train, X_test, y_train, y_test, le.classes_
+    return X_train, X_test, y_train, y_test, le.classes_, mlb.classes_
 
 def cls_with_ft(train_df, test_df):
-    X_train, X_test, y_train, y_test, y_lbs = df2xy(train_df, test_df)
+    X_train, X_test, y_train, y_test, y_le_labels, y_mlb_labels = df2xy(train_df, test_df)
     print('Training...')
     classif = OneVsOneClassifier(SVC(kernel='linear')).fit(X_train, y_train)
     
@@ -51,8 +52,8 @@ def cls_with_ft(train_df, test_df):
     # GET subfield wise test sets
     # for idx, cate in enumerate(y_lbs):
     pred = classif.predict(X_test)
-    cate_acc = confusion_matrix(y_test, pred, labels=y_lbs,normalize='true')
-    for klass,acc in zip(y_lbs,cate_acc):
+    cm = confusion_matrix(y_test,pred)
+    for klass,acc in zip(y_le_labels,np.diag(cm)):
         print(klass, acc)
 
 if __name__ == "__main__":
