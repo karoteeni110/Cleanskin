@@ -20,11 +20,10 @@ def example():
     classif = OneVsOneClassifier(SVC(kernel='linear'))
     pred = classif.fit(X, Y).predict(X)
 
-def traindf2xy(train_df):
+def df2train(df):
     """"""
     mlb, le = MultiLabelBinarizer(), LabelEncoder()    
-    df = train_df
-    df.pid = df.pid.map(CATEDICT)
+    df.loc[:,'pid'] = df.pid.map(CATEDICT)
     df = df.dropna(subset=['pid']).sample(frac=1) # Drop those categories and shuffle
     df.loc[:,'pid'] = df.pid.apply(tuple)
     df.loc[:,'pid'] = df.pid.apply(sorted).apply(lambda x: ','.join(str(i) for i in x)) # list to str 
@@ -38,23 +37,31 @@ def traindf2xy(train_df):
         # y_test = le.transform(df.pid)
     return X_train, y_train, le
 
-def testdf2xy(test_df, cate, lbler):
-    X_test, y_test = 0, 0
-    cate_df = test_df[test_df]
+def dfpid2cate(df):
+    df.loc[:,'pid'] = df.pid.map(CATEDICT)
+    df = df.dropna(subset=['pid']).sample(frac=1)
+    df.loc[:,'pid'] = df.pid.apply(tuple)
+    df.loc[:,'pid'] = df.pid.apply(sorted).apply(lambda x: ','.join(str(i) for i in x))
+    return df
+
+def df2test(df, cate, labeler, y_train):
+    catedf = df.loc[df.pid.str.contains(cate)].loc[df.pid.isin(y_train)]
+    X_test = catedf.iloc[:,1:].to_numpy()
+    y_test = labeler.transform(catedf.pid)
     return X_test, y_test
 
 def cls_with_ft(train_df, test_df):
-    X_train, y_train, le = traindf2xy(train_df)
+    X_train, y_train, le = df2train(train_df)
     print('Training...')
     classif = OneVsOneClassifier(SVC(kernel='linear')).fit(X_train, y_train)
     
     print('Testing...')
     # GET subfield wise test sets
-    # for idx, cate in enumerate(y_lbs):
-    pred = classif.predict(X_test)
-    cm = confusion_matrix(y_test,pred)
-    for klass,acc in zip(y_le_labels,np.diag(cm)):
-        print(klass, acc)
+    subfields = set([i for l in CATEDICT.values() for i in l])
+    test_df = dfpid2cate(test_df)
+    for sf in subfields:
+        X_test, y_test = df2test(test_df, sf, le, y_train)
+        print(sf, classif.score(X_test, y_test))
 
 if __name__ == "__main__":
     abst_comp_path = '/home/yzan/Desktop/mallet-2.0.8/cs_abstract_comp.txt'
@@ -65,6 +72,8 @@ if __name__ == "__main__":
 
     abst_comp, ft_comp = read_data(abst_comp_path), read_data(ft_comp_path)
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    # a = df2test(abst_comp, 'AI')
+    # print()
     cls_with_ft(train_df=ft_comp.iloc[:10000,:], test_df=abst_comp.iloc[:10000,:])
     print()
 
