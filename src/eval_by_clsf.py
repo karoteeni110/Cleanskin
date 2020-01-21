@@ -74,7 +74,7 @@ if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
     # a = df2test(abst_comp, 'AI')
     # print()
-    cls_with_ft(train_df=ft_comp.iloc[:10000,:], test_df=abst_comp.iloc[:10000,:])
+    cls_with_ft(train_df=ft_comp.sample(frac=0.1), test_df=abst_comp.sample(frac=0.1))
     print()
 
     # TODO
