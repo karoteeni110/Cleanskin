@@ -28,6 +28,7 @@ kldiv_dir = join(src_path, 'KLdiv')
 perpsets_testdir = join(results_path, 'perpsets/10test')
 perpsets_traindir = join(results_path, 'perpsets/90train')
 secklds = join(data_path, 'cs_sec_klds')
+f_sectitles = join(data_path, 'sec_titles.txt')
 
 
 if __name__ == "__main__":
