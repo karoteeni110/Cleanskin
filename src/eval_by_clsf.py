@@ -116,8 +116,7 @@ def one_vs_rest_clsf(train_df, test_df, results_dst=None):
 
 if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
-    pd.options.mode.chained_assignment = None # Mute caveats
-    
+    pd.options.mode.chained_assignment = None # Mute caveats 
     
     for i in range(200,4200,200):
         ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_%d/fulltext_composition.txt' % i
