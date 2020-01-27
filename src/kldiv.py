@@ -10,25 +10,27 @@ from metadata import get_pid2meta
 from os.path import join, basename
 from os import listdir
 
-def read_data(mallet_out):
+def read_data(mallet_out,sepchar='\t',skiprow=0,drop_first_col=True):
     pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
-    with open(mallet_out, 'r') as f:
-        data = f.read().split('\n')
-        first_line = data[0]
-    if first_line[0] == '0': 
-        df = pd.read_csv(mallet_out, sep="\t", header=None, float_precision='high').drop(0,axis=1)
-    else:
-        df = pd.read_csv(mallet_out, skiprows=1, sep="\t", header=None, float_precision='high').drop(0, axis=1)
+    df = pd.read_csv(mallet_out, skiprows=skiprow, sep=sepchar, header=None, float_precision='high')
+    if drop_first_col:
+        df = df.drop(0, axis=1)
 
-    # Strip file extension
-    if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': 
-        print('Stripping extention name in pid...')
-        df.loc[:,1] = df.loc[:,1].apply(lambda x:x.split('/')[-1][:-4]) 
-        print('... done')
+    # Strip pid extension
+    if '/' in df.iloc[1,0]: 
+        print('Stripping dirname...')
+        df.iloc[:,0] = df.iloc[:,0].apply(lambda x:basename(x))
+    if df.iloc[1,0][-4:]=='.txt':
+        print('Stripping extention...')
+        df.iloc[:,0] = df.iloc[:,0].apply(lambda x:x[:-4])
+    if '_' in df.iloc[1,0]:
+        print("Stripping _i...")
+        df.iloc[:,0] = df.iloc[:,0].apply(lambda x:x.split('_')[0])
+    print('... done')
 
     # df.iloc[:,1:].to_list()
-    df = df.rename(columns={1:'pid'})
+    df.rename(columns={df.columns[0]:'pid'}, inplace=True)
     return df
 
 def get_pid2cate_dict(metaxml_list=listdir(metadatas_path), random_cate=False):
@@ -183,10 +185,6 @@ if __name__ == "__main__":
     # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:
     #     lb_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_%s_comp.txt' % lb)
     #     get_div_dfs(ft_df, lb_df, join(secklds, '%s_kld.txt' % lb), ['Computer_Science.xml'])
-
-    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
-    # abt_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_abt_comp.txt')
-    # get_div_dfs(ft_df, abt_df, '/home/yzan/Desktop/mallet-2.0.8/abtkld.txt',['Computer_Science.xml'])
 
     all_sec_dfs = dict()  
     for txtfn in listdir(secklds):
