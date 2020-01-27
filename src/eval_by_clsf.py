@@ -115,17 +115,21 @@ def one_vs_rest_clsf(train_df, test_df, results_dst=None):
         print('Results at', results_dst)
 
 if __name__ == "__main__":
-    abst_comp_path = '/home/ad/home/y/yzan/Desktop/Cleanskin/data/model_i_comp/model_200_abstract.txt'
-    ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt'
-
-    # abst_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs/cs_testcomp/cs_50_perdoc.txt'
-    # ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs/model_50/composition.txt'
-    pd.options.mode.chained_assignment = None # Mute caveats
-    abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
-    ft_comp = read_data(ft_comp_path)
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
-    one_vs_rest_clsf(train_df=ft_comp,test_df=abst_comp,results_dst=join(results_path,'model/200tpc_ft2abst_LSVCclf.txt'))
-    print()
+    pd.options.mode.chained_assignment = None # Mute caveats
+    
+    
+    for i in range(200,4200,200):
+        ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_%d/fulltext_composition.txt' % i
+        # abst_comp_path = '/home/ad/home/y/yzan/Desktop/Cleanskin/data/model_i_comp/model_200_abstract.txt'
+
+        pd.options.mode.chained_assignment = None # Mute caveats
+        # abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
+        ft_comp = read_data(ft_comp_path).sample(frac=1) # shuffle
+        train_size = int(len(ft_comp)*0.8)
+        one_vs_rest_clsf(train_df=ft_comp.iloc[:train_size,:],test_df=ft_comp.iloc[train_size:,:],\
+            results_dst=join(results_path,'model/%dtpc_ft2ft_LSVCclf.txt' % i))
+        print()
 
     # abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
     # ft_comp = read_data(ft_comp_path)
