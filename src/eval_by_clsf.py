@@ -118,7 +118,7 @@ if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
     pd.options.mode.chained_assignment = None # Mute caveats 
     
-    for i in range(200,4200,200):
+    for i in range(4400,5200,200):
         ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_%d/fulltext_composition.txt' % i
         # abst_comp_path = '/home/ad/home/y/yzan/Desktop/Cleanskin/data/model_i_comp/model_200_abstract.txt'
 
