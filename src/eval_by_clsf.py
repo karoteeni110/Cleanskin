@@ -13,8 +13,10 @@ from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder
 from sklearn.metrics import accuracy_score, confusion_matrix
 import numpy as np
 import pandas as pd
-import itertools
+from memory_profiler import profile
 from os.path import join
+from os import listdir
+import matplotlib.pyplot as plt
 
 
 def example():
@@ -114,23 +116,47 @@ def one_vs_rest_clsf(train_df, test_df, results_dst=None):
         results.to_csv(results_dst,index=False)
         print('Results at', results_dst)
 
-if __name__ == "__main__":
-    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
-    pd.options.mode.chained_assignment = None # Mute caveats 
-    
-    for i in range(4400,5200,200):
-        ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_%d/fulltext_composition.txt' % i
-        # abst_comp_path = '/home/ad/home/y/yzan/Desktop/Cleanskin/data/model_i_comp/model_200_abstract.txt'
+def plot_results():
+    summary = 0
+    for tpc in range(200, 5000, 200):
+        if tpc == 4200:
+            continue
+        tpc_df = pd.read_csv(join(results_path, 'model/%dtpc_ft2ft_LSVCclf.txt') % tpc)
+        tpc_df.rename(columns={'acc':tpc}, inplace=True)
+        if type(summary) != int:
+            summary = pd.merge(summary, tpc_df, on='subfield')
+        else:
+            summary = tpc_df
+    summary = summary.T
+    summary.rename(columns=summary.loc['subfield'], inplace=True)
+    summary = summary.drop('subfield', axis=0)
+    ax = summary.plot.line()
+    ax.set_xticks(summary.index.to_list())
+    ax.set_ylabel('acc')    
+    ax.set_xlabel('#topics')
+    plt.show()
 
-        pd.options.mode.chained_assignment = None # Mute caveats
-        # abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
-        ft_comp = read_data(ft_comp_path).sample(frac=1) # shuffle
-        train_size = int(len(ft_comp)*0.8)
-        one_vs_rest_clsf(train_df=ft_comp.iloc[:train_size,:],test_df=ft_comp.iloc[train_size:,:],\
-            results_dst=join(results_path,'model/%dtpc_ft2ft_LSVCclf.txt' % i))
-        print()
+
+
+if __name__ == "__main__":
+    # CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    # pd.options.mode.chained_assignment = None # Mute caveats 
+    
+    # for i in range(5000,5200,200):
+    #     ft_comp_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_%d/fulltext_composition.txt' % i
+    #     # abst_comp_path = '/home/ad/home/y/yzan/Desktop/Cleanskin/data/model_i_comp/model_200_abstract.txt'
+
+    #     pd.options.mode.chained_assignment = None # Mute caveats
+    #     # abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
+    #     ft_comp = read_data(ft_comp_path).sample(frac=1) # shuffle
+    #     train_size = int(len(ft_comp)*0.8)
+    #     one_vs_rest_clsf(train_df=ft_comp.iloc[:train_size,:],test_df=ft_comp.iloc[train_size:,:],\
+    #         results_dst=join(results_path,'model/%dtpc_ft2ft_LSVCclf.txt' % i))
+    #     print()
 
     # abst_comp = read_data(abst_comp_path,sepchar=',',skiprow=1,drop_first_col=False)
     # ft_comp = read_data(ft_comp_path)
     # X_train, y_train, mlb = df2train_mlb(ft_comp.sample(frac=0.01))
     # X_test, y_test = df2test_mlb(dfpid2cate(abst_comp).sample(frac=0.2), mlb, 'AI')
+
+    plot_results()
