@@ -176,6 +176,20 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
         secvec_df.to_csv(path_or_buf=dst, index=False)
     return secvec_df
 
+def data_barplot():
+    ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
+    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    acro2cate = get_acro2cate_dict()
+    catelist = np.concatenate(ft_df.pid.map(CATEDICT).dropna().to_numpy())
+    a= pd.Series(catelist).map(acro2cate)
+    ax = a.value_counts().plot.bar()
+    plt.axhline(y=3000, ls='--', color='r')
+    plt.ylabel('Frequency')
+    plt.yticks(np.arange(0,24000,1000))
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=35, horizontalalignment='right')
+    plt.show()
+    print()
+
 if __name__ == "__main__":
     # ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
     # abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
@@ -197,11 +211,4 @@ if __name__ == "__main__":
     # # x=get_acro2cate_dict()
     # # print()
 
-    ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
-    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
-    acro2cate = get_acro2cate_dict()
-    catelist = np.concatenate(ft_df.pid.map(CATEDICT).dropna().map(acro2cate).to_numpy())
-    a=pd.Series(catelist).map(acro2cate)
-    ax = a.hist()
-    plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
-    print()
+    data_barplot()
