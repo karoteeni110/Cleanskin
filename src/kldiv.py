@@ -177,7 +177,7 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
     return secvec_df
 
 if __name__ == "__main__":
-    #ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
+    # ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
     # abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
     # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
     
@@ -186,13 +186,22 @@ if __name__ == "__main__":
     #     lb_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_%s_comp.txt' % lb)
     #     get_div_dfs(ft_df, lb_df, join(secklds, '%s_kld.txt' % lb), ['Computer_Science.xml'])
 
-    all_sec_dfs = dict()  
-    for txtfn in listdir(secklds):
-        # if 'abstract' in txtfn:
-        #     secdf = read_sectionKLD_df('/home/yzan/Desktop/scilit_graphs/redoredoabst.csv', dfname='abstract')
-        # else:
-        secdf = read_sectionKLD_df(join(secklds, txtfn))
-        all_sec_dfs[secdf.name] = secdf
-    get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
-    # x=get_acro2cate_dict()
-    # print()
+    # all_sec_dfs = dict()  
+    # for txtfn in listdir(secklds):
+    #     # if 'abstract' in txtfn:
+    #     #     secdf = read_sectionKLD_df('/home/yzan/Desktop/scilit_graphs/redoredoabst.csv', dfname='abstract')
+    #     # else:
+    #     secdf = read_sectionKLD_df(join(secklds, txtfn))
+    #     all_sec_dfs[secdf.name] = secdf
+    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
+    # # x=get_acro2cate_dict()
+    # # print()
+
+    ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
+    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    acro2cate = get_acro2cate_dict()
+    catelist = np.concatenate(ft_df.pid.map(CATEDICT).dropna().map(acro2cate).to_numpy())
+    a=pd.Series(catelist).map(acro2cate)
+    ax = a.hist()
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+    print()

@@ -153,6 +153,9 @@ def histos(datadict):
     # # plt.axis([np.min(x), np.max(x), np.min(y), np.max(y)])
     plt.show()
 
+def count_histo():
+    pass
+
 if __name__ == "__main__":
     CATE_COH_PKLPATH = join(results_path, 'cs_coh.pkl')
     DUMPDICT = False
@@ -177,15 +180,15 @@ if __name__ == "__main__":
     histos(perpdict)
     # doubleplot(cohdict2, cohdict, pc)
 
-    tpcnum_range = range(5,101,5)
-    modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
-    diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
-    cohdict2, cmt2, cc2 = get_alldiag(diag_xmls, 'eff_num_words')
+    # tpcnum_range = range(5,101,5)
+    # modeldirx = '/cs/group/grp-glowacka/arxiv/models/cs/model_'
+    # diag_xmls = [join(modeldirx+str(tpcnum), 'diagnostics.xml') for tpcnum in tpcnum_range]
+    # cohdict2, cmt2, cc2 = get_alldiag(diag_xmls, 'eff_num_words')
     
-    tpcnum_range = [50,100]
-    testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs_10k'
-    eval_txts = [join(testcompdirx, 'cs_10kiter_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
-    perpdict2, pmt2, pc2 = get_allperp(eval_txts)
+    # tpcnum_range = [50,100]
+    # testcompdirx = '/cs/group/grp-glowacka/arxiv/models/cs_10k'
+    # eval_txts = [join(testcompdirx, 'cs_10kiter_heldout_'+str(tpcnum)+'tpc.txt') for tpcnum in tpcnum_range]
+    # perpdict2, pmt2, pc2 = get_allperp(eval_txts)
 
     # doubleplot(perpdict, perpdict2, pmt2, 'CS')
     
