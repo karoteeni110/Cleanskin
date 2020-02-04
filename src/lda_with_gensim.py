@@ -4,38 +4,45 @@
 from sys import exit, argv, stderr
 import os.path
 import re
+from os import listdir
 
 from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel
 
 
-def extract_documents(fname, whitelist) :
-    pids = []
+def extract_documents(dirn, whitelist) :
+    ids = []
     docs = []
-    with open(fname) as f :
-        for line in f :
-            line = line.strip()
-            if not line : 
-                continue
-            line = line.encode('utf-8', errors='replace').decode()
-            id,line = line.split(" ", 1)
+    print('Reading documents...')
+    for i,fname in enumerate(listdir(dirn)):
+        fpath = os.path.join(dirn, fname)
+        with open(fpath) as f :
+            for line in f :
+                line = line.strip()
+                if not line : 
+                    continue
+                line = line.encode('utf-8', errors='replace').decode()
+                # id,line = line.split(" ", 1)
+                id = fname.split('.txt')[0].split('_')[0]
 
-            if id not in whitelist :
-                continue
+                if id not in whitelist :
+                    continue
 
-            pids.append(id)
-            docs.append(line)
-            #if len(docs) == 100 :
-            #    break
-    return pids,docs
+                ids.append(id)
+                docs.append(line)
+                #if len(docs) == 100 :
+                #    break
+        if (i+1)%1000==0:
+            print(i+1,'/', len(listdir(dirn)), '...')
+    return ids,docs
 
 if len(argv) != 6 :
     print("Usage: {} <fulltext_dir> <abstract_dir> <dst_dir> <#topics> <seed>\n".format(argv[0]))
     exit(1)
 
-ft_dir = argv[1]
-ab_dir = argv[2]
+ft_fname = argv[1]
+ab_fname = argv[2]
 results_dir = argv[3]
 num_topics = [ int(i) for i in argv[4].split(',')] #int(argv[4])
 random_seed = int(argv[5])
@@ -45,18 +52,13 @@ if not os.path.exists(results_dir) :
     exit(1)
 
 whitelist = set()
-with open('chiir_whitelist_300.txt') as f :
+with open('./data/cs_whitelist_3k.txt') as f :
     for line in f :
         whitelist.add(line.strip())
 
-ids,docs = extract_documents(ft_dir, whitelist)
-ab_ids,ab_docs = extract_documents(ab_dir, whitelist)
+ids,docs = extract_documents(ft_fname, whitelist)
+ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
 print("read", len(docs),"documents")
-
-
-# print("tokenizing...")
-# docs = tokenize_filter(docs)
-# ab_docs = tokenize_filter(ab_docs)
 
 
 print("building dictionary...")
