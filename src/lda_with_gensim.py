@@ -17,6 +17,9 @@ def extract_documents(dirn, whitelist) :
     print('Reading documents...')
     for i,fname in enumerate(listdir(dirn)):
         fpath = os.path.join(dirn, fname)
+        id = fname.split('.txt')[0].split('_')[0]
+        ids.append(id)
+        doc = []
         with open(fpath) as f :
             for line in f :
                 line = line.strip()
@@ -24,15 +27,14 @@ def extract_documents(dirn, whitelist) :
                     continue
                 line = line.encode('utf-8', errors='replace').decode()
                 # id,line = line.split(" ", 1)
-                id = fname.split('.txt')[0].split('_')[0]
-
+                
                 if id not in whitelist :
                     continue
 
-                ids.append(id)
-                docs.append(line)
+                doc.append(line)
                 #if len(docs) == 100 :
                 #    break
+            docs.append(doc)
         if (i+1)%1000==0:
             print(i+1,'/', len(listdir(dirn)), '...')
     return ids,docs
