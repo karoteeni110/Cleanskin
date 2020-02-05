@@ -64,14 +64,7 @@ with open(ft_fname, 'rb') as f:
 print("Reading abstract...")
 with open(ab_fname, 'rb') as f:
     ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
-
 print("read", len(docs),"documents")
-
-# with open(os.path.join(data_path,'cs_extract_ft.pkl'), 'wb') as f:
-#     pickle.dump([ids,docs],f)
-# with open(os.path.join(data_path,'cs_extract_ab.pkl'), 'wb') as f:
-#     pickle.dump([ab_ids, ab_docs],f)
-# exit(0)
 
 print("building dictionary...")
 dictionary = Dictionary(docs) 
@@ -82,7 +75,7 @@ ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
 
 # Train LDA model.
 chunksize = 2000
-passes = 10      # num epoches
+passes = 5      # num epoches
 iterations = 50   # max passes of E-step
 eval_every = None
 
@@ -99,18 +92,18 @@ for t in num_topics :
 
     print("topics = {}".format(t))
 
-    model = LdaMulticore(
+    model = LdaModel(
         corpus=corpus,
         id2word=id2word,
         chunksize=chunksize,
-        #alpha='auto',
+        alpha='auto',
         eta='auto',
         iterations=iterations,
         num_topics=t,
         passes=passes,
         eval_every=eval_every,
         random_state=random_seed,
-        workers=3
+        # workers=3
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)
