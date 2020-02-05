@@ -16,7 +16,7 @@ def extract_documents(dirn, whitelist):
     ids = []
     docs = []
     print('Reading documents...')
-    for i,fname in enumerate(listdir(dirn)[:100]):
+    for i,fname in enumerate(listdir(dirn)):
         fpath = os.path.join(dirn, fname)
         id = fname.split('.txt')[0].split('_')[0]
         if id not in whitelist :
@@ -40,7 +40,7 @@ def extract_documents(dirn, whitelist):
     return ids,docs
 
 if len(argv) != 6 :
-    print("Usage: {} <fulltext_dir> <abstract_dir> <dst_dir> <#topics> <seed>\n".format(argv[0]))
+    print("Usage: {} <fulltext_pkl> <abstract_pkl> <dst_dir> <#topics> <seed>\n".format(argv[0]))
     exit(1)
 
 ft_fname = argv[1]
@@ -54,35 +54,31 @@ if not os.path.exists(results_dir) :
     exit(1)
 
 whitelist = set()
-with open(os.path.join(data_path, 'cs_whitelist_3k.txt')) as f :
+with open(os.path.join(results_dir, 'cs_whitelist_3k.txt')) as f :
     for line in f :
         whitelist.add(line.strip())
 
-ids,docs = extract_documents(ft_fname, whitelist)
-ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
+print("Reading fulltext...")
+with open(ft_fname, 'rb') as f:
+    ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
+print("Reading abstract...")
+with open(ab_fname, 'rb') as f:
+    ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
+
 print("read", len(docs),"documents")
 
-with open(os.path.join(data_path,'cs_extract_ft.pkl'), 'wb') as f:
-    pickle.dump([ids,docs],f)
-with open(os.path.join(data_path,'cs_extract_ab.pkl'), 'wb') as f:
-    pickle.dump([ab_ids, ab_docs],f)
-exit(0)
+# with open(os.path.join(data_path,'cs_extract_ft.pkl'), 'wb') as f:
+#     pickle.dump([ids,docs],f)
+# with open(os.path.join(data_path,'cs_extract_ab.pkl'), 'wb') as f:
+#     pickle.dump([ab_ids, ab_docs],f)
+# exit(0)
 
 print("building dictionary...")
-dictionary = Dictionary(docs) # os.path.join(data_path, 'cs_dict.pkl')
+dictionary = Dictionary(docs) 
 print('Number of unique tokens: %d' % len(dictionary))
-# dictionary.save('./cs_dict.pkl')
-
 corpus = [dictionary.doc2bow(doc) for doc in docs]
-# with open(os.path.join(data_path,'ft_corpus.pkl'), 'rb') as f:
-#     corpus = pickle.load(f, encoding='utf-8', errors='ignore')
-
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
-# with open(os.path.join(data_path,'ab_corpus.pkl'), 'rb') as f:
-#     ab_corpus = pickle.load(f, encoding='utf-8', errors='ignore')
 
-# ids, docs= [fname.split('.txt')[0].split('_')[0] for fname in listdir(ft_fname)], [dictionary.bow for bow in corpus]
-# ab_ids, ab_docs = [fname.split('.txt')[0].split('_')[0] for fname in listdir(ab_fname)], [bow.get_texts() for bow in ab_corpus]
 
 # Train LDA model.
 chunksize = 2000
