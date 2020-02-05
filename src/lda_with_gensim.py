@@ -3,12 +3,13 @@
 
 from sys import exit, argv, stderr
 import os.path
-import re
+import re, pickle
 from os import listdir
+
 
 from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
-from gensim.models import LdaModel
+from gensim.models import LdaModel,LdaMulticore
 
 
 def extract_documents(dirn, whitelist) :
@@ -65,8 +66,15 @@ print("read", len(docs),"documents")
 print("building dictionary...")
 dictionary = Dictionary(docs)
 print('Number of unique tokens: %d' % len(dictionary))
+dictionary.save('./cs_dict.pkl')
+
 corpus = [dictionary.doc2bow(doc) for doc in docs]
+with open('./ft_corpus.pkl','wb') as f:
+    pickle.dump(corpus,f)
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
+with open('./ab_corpus.pkl','wb') as f:
+    pickle.dump(ab_corpus,f)
+exit(0)
 
 
 # Train LDA model.
@@ -88,7 +96,7 @@ for t in num_topics :
 
     print("topics = {}".format(t))
 
-    model = LdaModel(
+    model = LdaMulticore(
         corpus=corpus,
         id2word=id2word,
         chunksize=chunksize,
@@ -98,7 +106,8 @@ for t in num_topics :
         num_topics=t,
         passes=passes,
         eval_every=eval_every,
-        random_state=random_seed
+        random_state=random_seed,
+        workers=3
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)
