@@ -24,7 +24,7 @@ def main(threshold):
         catelist = catelist.drop(cate_blacklist_idx) # update catelist
         cate_freq = cate_count(catelist)# update cate_freq
     
-    catelist.pid.to_csv('whitelist.txt', index=False, header=False)
+    catelist.pid.to_csv('whitelist_%s.txt' % threshold, index=False, header=False)
 
 
 if __name__ == "__main__":
