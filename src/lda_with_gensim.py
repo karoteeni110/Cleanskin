@@ -59,8 +59,13 @@ with open(os.path.join(results_dir, 'cs_whitelist_3k.txt')) as f :
         whitelist.add(line.strip())
 
 print("Reading fulltext...")
-ids, docs = extract_documents(ft_fname, whitelist)
+ids,docs = extract_documents(ft_fname, whitelist)
 ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
+with open('./data/cs_extract_ft','wb') as f:
+    pickle.dump([ids,docs],f)
+with open('./data/cs_extract_ab','wb') as f:
+    pickle.dump([ab_ids,ab_docs],f)
+
 # with open(ft_fname, 'rb') as f:
 #     ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
 # print("Reading abstract...")
@@ -105,7 +110,7 @@ for t in num_topics :
         passes=passes,
         eval_every=eval_every,
         random_state=random_seed,
-        # workers=3
+        distributed=True
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)
