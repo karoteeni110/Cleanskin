@@ -65,7 +65,7 @@ with open('./data/cs_extract_ft','wb') as f:
     pickle.dump([ids,docs],f)
 with open('./data/cs_extract_ab','wb') as f:
     pickle.dump([ab_ids,ab_docs],f)
-
+exit(0)
 # with open(ft_fname, 'rb') as f:
 #     ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
 # print("Reading abstract...")
@@ -74,7 +74,8 @@ with open('./data/cs_extract_ab','wb') as f:
 print("read", len(docs),"documents")
 
 print("building dictionary...")
-dictionary = Dictionary(docs) 
+dictionary = Dictionary(docs)
+dictionary.filter_extremes(no_below=20, no_above=0.5)
 print('Number of unique tokens: %d' % len(dictionary))
 corpus = [dictionary.doc2bow(doc) for doc in docs]
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
