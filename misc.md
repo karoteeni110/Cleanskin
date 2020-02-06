@@ -48,6 +48,12 @@ cs.SI 5263
 6 6
 1 7
 
+## gensim
+
+read 57149 documents
+building dictionary...
+Number of unique tokens: 492526
+
 
 ## cs
 background 35483
