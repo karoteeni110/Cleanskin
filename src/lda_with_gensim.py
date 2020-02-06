@@ -92,18 +92,18 @@ for t in num_topics :
 
     print("topics = {}".format(t))
 
-    model = LdaModel(
+    model = LdaMulticore(
         corpus=corpus,
         id2word=id2word,
         chunksize=chunksize,
-        alpha='auto',
+        #alpha='auto',
         eta='auto',
         iterations=iterations,
         num_topics=t,
         passes=passes,
         eval_every=eval_every,
         random_state=random_seed,
-        # workers=3
+        workers=3
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)

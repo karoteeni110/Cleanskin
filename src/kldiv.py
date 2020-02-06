@@ -177,18 +177,21 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
     return secvec_df
 
 def data_barplot():
-    ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
+    # ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
+    ft_df = pd.read_csv('/home/yzan/Desktop/gensimdata/cs_whitelist.txt', 
+            sep='\n', names=['pid'])
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
     acro2cate = get_acro2cate_dict()
     catelist = np.concatenate(ft_df.pid.map(CATEDICT).dropna().to_numpy())
     a= pd.Series(catelist).map(acro2cate)
-    ax = a.value_counts().plot.bar()
-    plt.axhline(y=3000, ls='--', color='r')
-    plt.ylabel('Frequency')
-    plt.yticks(np.arange(0,24000,1000))
-    plt.setp(ax.xaxis.get_majorticklabels(), rotation=35, horizontalalignment='right')
-    plt.show()
-    print()
+    print(a.value_counts())
+    # ax = a.value_counts().plot.bar()
+    # plt.axhline(y=3000, ls='--', color='r')
+    # plt.ylabel('Frequency')
+    # plt.yticks(np.arange(0,24000,1000))
+    # plt.setp(ax.xaxis.get_majorticklabels(), rotation=35, horizontalalignment='right')
+    # plt.show()
+    # print()
 
 def get_whitelist():
     pass
