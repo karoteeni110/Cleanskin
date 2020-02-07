@@ -3,7 +3,7 @@
 
 from sys import exit, argv, stderr
 import os.path
-import re, pickle
+import re, pickle, psutil, sys, traceback
 from os import listdir
 from paths import data_path
 
@@ -11,6 +11,21 @@ from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel,LdaMulticore
 
+PROCESS = psutil.Process(os.getpid())
+MEGA = 10 ** 6
+MEGA_STR = ' ' * MEGA
+
+def print_memory_usage():
+    """Prints current memory usage stats.
+    See: https://stackoverflow.com/a/15495136
+
+    :return: None
+    """
+    total, available, percent, used, free = psutil.virtual_memory()
+    total, available, used, free = total / MEGA, available / MEGA, used / MEGA, free / MEGA
+    proc = PROCESS.memory_info()[1] / MEGA
+    print('process = %s total = %s available = %s used = %s free = %s percent = %s'
+          % (proc, total, available, used, free, percent))
 
 def extract_documents(dirn, whitelist):
     ids = []
@@ -26,18 +41,19 @@ def extract_documents(dirn, whitelist):
         doc = []
         with open(fpath) as f :
             doc = f.read().encode('utf-8', errors='replace').decode()
-            doc = re.split(r'\s',doc)
-            # for line in f :
-                # line = line.strip()
-                # if not line : 
-                #     continue
-                # line = line.encode('utf-8', errors='replace').decode()
-                # id,line = line.split(" ", 1)
             docs.append(doc)
 
         if (i+1)%1000==0:
             print(i+1,'/', len(listdir(dirn)), '...')
     return ids,docs
+
+def tokenize_filter(docs) :
+    # tokenizer = RegexpTokenizer(r'\w+')
+    for idx in range(len(docs)):
+        docs[idx] = re.split(r'\s',docs[idx])  # Split into words.
+        if (idx+1)%1000==0:
+            print(idx, '/', range(len(docs)))
+    return docs
 
 if len(argv) != 6 :
     print("Usage: {} <fulltext_pkl> <abstract_pkl> <dst_dir> <#topics> <seed>\n".format(argv[0]))
@@ -59,27 +75,27 @@ with open(os.path.join(results_dir, 'cs_whitelist_3k.txt')) as f :
         whitelist.add(line.strip())
 
 print("Reading fulltext...")
-ids,docs = extract_documents(ft_fname, whitelist)
-ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
-# print(docs[0])
-# print()
-# print(ab_docs[0])
-# exit(0)
-with open('./data/cs_extract_ft','wb') as f:
-    pickle.dump([ids,docs],f)
-with open('./data/cs_extract_ab','wb') as f:
-    pickle.dump([ab_ids,ab_docs],f)
+# ids,docs = extract_documents(ft_fname, whitelist)
+# ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
+# try:
+#     with open('./cs_extract_ft','wb') as f:
+#         pickle.dump([ids,docs],f)
+#     with open('./cs_extract_ab','wb') as f:
+#         pickle.dump([ab_ids,ab_docs],f)
+# except MemoryError:
+#     print('memory error')
+#     print_memory_usage()
 
-# with open(ft_fname, 'rb') as f:
-#     ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
-# print("Reading abstract...")
-# with open(ab_fname, 'rb') as f:
-#     ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
-# print("read", len(docs),"documents")
+with open(ft_fname, 'rb') as f:
+    ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
+print("Reading abstract...")
+with open(ab_fname, 'rb') as f:
+    ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
+print("read", len(docs),"documents")
 
-# print("tokenizing...")
-# docs = tokenize_filter(docs)
-# ab_docs = tokenize_filter(ab_docs)
+print("tokenizing...")
+docs = tokenize_filter(docs)
+ab_docs = tokenize_filter(ab_docs)
 
 print("building dictionary...")
 dictionary = Dictionary(docs)
@@ -123,7 +139,6 @@ for t in num_topics :
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)
-
 
     # Average topic coherence 
     avg_topic_coherence = sum([t[1] for t in top_topics]) / t
