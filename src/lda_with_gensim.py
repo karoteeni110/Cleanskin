@@ -16,7 +16,7 @@ def extract_documents(dirn, whitelist):
     ids = []
     docs = []
     print('Reading documents...')
-    for i,fname in enumerate(listdir(dirn)[:100]):
+    for i,fname in enumerate(listdir(dirn)):
         fpath = os.path.join(dirn, fname)
         id = fname.split('.txt')[0].split('_')[0]
         if id not in whitelist :
@@ -83,6 +83,7 @@ with open('./data/cs_extract_ab','wb') as f:
 
 print("building dictionary...")
 dictionary = Dictionary(docs)
+dictionary.filter_extremes()
 print('Number of unique tokens: %d' % len(dictionary))
 corpus = [dictionary.doc2bow(doc) for doc in docs]
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
