@@ -16,7 +16,7 @@ def extract_documents(dirn, whitelist):
     ids = []
     docs = []
     print('Reading documents...')
-    for i,fname in enumerate(listdir(dirn)):
+    for i,fname in enumerate(listdir(dirn)[:100]):
         fpath = os.path.join(dirn, fname)
         id = fname.split('.txt')[0].split('_')[0]
         if id not in whitelist :
@@ -26,7 +26,7 @@ def extract_documents(dirn, whitelist):
         doc = []
         with open(fpath) as f :
             doc = f.read().encode('utf-8', errors='replace').decode()
-            doc = doc.split('\n')
+            doc = re.split(r'\s',doc)
             # for line in f :
                 # line = line.strip()
                 # if not line : 
@@ -59,23 +59,30 @@ with open(os.path.join(results_dir, 'cs_whitelist_3k.txt')) as f :
         whitelist.add(line.strip())
 
 print("Reading fulltext...")
-# ids,docs = extract_documents(ft_fname, whitelist)
-# ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
-# with open('./data/cs_extract_ft','wb') as f:
-#     pickle.dump([ids,docs],f)
-# with open('./data/cs_extract_ab','wb') as f:
-#     pickle.dump([ab_ids,ab_docs],f)
+ids,docs = extract_documents(ft_fname, whitelist)
+ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
+# print(docs[0])
+# print()
+# print(ab_docs[0])
+# exit(0)
+with open('./data/cs_extract_ft','wb') as f:
+    pickle.dump([ids,docs],f)
+with open('./data/cs_extract_ab','wb') as f:
+    pickle.dump([ab_ids,ab_docs],f)
 
-with open(ft_fname, 'rb') as f:
-    ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
-print("Reading abstract...")
-with open(ab_fname, 'rb') as f:
-    ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
-print("read", len(docs),"documents")
+# with open(ft_fname, 'rb') as f:
+#     ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
+# print("Reading abstract...")
+# with open(ab_fname, 'rb') as f:
+#     ab_ids,ab_docs = pickle.load(f) # extract_documents(ab_fname, whitelist)
+# print("read", len(docs),"documents")
+
+# print("tokenizing...")
+# docs = tokenize_filter(docs)
+# ab_docs = tokenize_filter(ab_docs)
 
 print("building dictionary...")
 dictionary = Dictionary(docs)
-dictionary.filter_extremes(no_below=20, no_above=0.5)
 print('Number of unique tokens: %d' % len(dictionary))
 corpus = [dictionary.doc2bow(doc) for doc in docs]
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
@@ -100,18 +107,18 @@ for t in num_topics :
 
     print("topics = {}".format(t))
 
-    model = LdaMulticore(
+    model = LdaModel(
         corpus=corpus,
         id2word=id2word,
         chunksize=chunksize,
-        #alpha='auto',
+        alpha='auto',
         eta='auto',
         iterations=iterations,
         num_topics=t,
         passes=passes,
         eval_every=eval_every,
         random_state=random_seed,
-        workers=3
+        #workers=3
     )
 
     top_topics = model.top_topics(corpus, docs, dictionary, coherence='c_v', topn=20, processes=4)
