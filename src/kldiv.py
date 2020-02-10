@@ -178,7 +178,7 @@ def get_sec_structure_vecs(all_secdf_dict, dst=False):
 
 def data_barplot():
     # ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
-    ft_df = pd.read_csv('/home/yzan/Desktop/whitelist.txt', 
+    ft_df = pd.read_csv('/home/yzan/Desktop/trypid.txt', 
             sep='\n', names=['pid'])
     CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
     acro2cate = get_acro2cate_dict()
@@ -192,9 +192,6 @@ def data_barplot():
     # plt.setp(ax.xaxis.get_majorticklabels(), rotation=35, horizontalalignment='right')
     # plt.show()
     # print()
-
-def get_whitelist():
-    pass
 
 if __name__ == "__main__":
     # ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
