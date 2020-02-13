@@ -54,6 +54,46 @@ read 57149 documents
 building dictionary...
 Number of unique tokens: 492526
 
+Computational Complexity                           3000
+Distributed, Parallel, and Cluster Computing       2997
+Cryptography and Security                          2960
+Systems and Control                                2958
+Logic in Computer Science                          2945
+Discrete Mathematics                               2935
+Social and Information Networks                    2912
+Computer Vision and Pattern Recognition            2884
+Networking and Internet Architecture               2856
+Artificial Intelligence                            2807
+Information Theory                                 2805
+Computation and Language                           2713
+Computer Science and Game Theory                   2699
+Data Structures and Algorithms                     2650
+Robotics                                           2635
+Computational Geometry                             2280
+Machine Learning                                   2105
+Software Engineering                               2044
+Neural and Evolutionary Computation                1760
+Numerical Analysis                                 1701
+Information Retrieval                              1629
+Computers and Society                              1592
+Programming Languages                              1424
+Formal Languages and Automata Theory               1401
+Computational Engineering, Finance, and Science    1354
+Databases                                          1328
+Human-Computer Interaction                         1249
+Multiagent Systems                                 1004
+Symbolic Computation                                987
+Sound                                               920
+Digital Libraries                                   840
+Emerging Technologies                               703
+Performance                                         695
+Mathematical Software                               672
+Multimedia                                          589
+Graphics                                            559
+Other                                               484
+Hardware Architecture                               393
+Operating Systems                                   179
+General Literature                                   73
 
 ## cs
 background 35483

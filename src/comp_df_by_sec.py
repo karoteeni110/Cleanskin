@@ -2,7 +2,7 @@
     and write out the dataframe to secname.txt"""
 import pandas as pd
 import numpy as np
-from paths import f_sectitles, data_path, models_path
+from paths import f_sectitles, data_path, models_path, src_path
 from os.path import join, basename
 from os import listdir
 
@@ -55,12 +55,12 @@ def subset_from_secs_comp(secs_comp, fns):
     return subset
 
 if __name__ == "__main__":
-    abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
-    for model_i in listdir(models_path):
-        if model_i[:6] == 'model_' and model_i not in ['model_200', 'model_400']:
-            secs_comp_df = read_sec_comp(join(models_path, model_i)+'/secs_comp.txt')
-            secdf = subset_from_secs_comp(secs_comp_df, abst_fns)
-            dst = join(data_path, 'model_i_comp/'+model_i+'_abstract.txt')
-            secdf.to_csv(path_or_buf=dst, index=False)
-            print(model_i, 'to', dst)
-    
+    # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
+    # for model_i in listdir(models_path):
+    #     if model_i[:6] == 'model_' and model_i not in ['model_200', 'model_400']:
+    secs_comp_df = read_sec_comp(join(src_path, 'KLDiv/10_1_abstract_composition.txt'))
+    # secdf = subset_from_secs_comp(secs_comp_df, abst_fns)
+    dst = join(data_path, 'model_i_comp/'+model_i+'_abstract.txt')
+    secdf.to_csv(path_or_buf=dst, index=False)
+    print(model_i, 'to', dst)
+

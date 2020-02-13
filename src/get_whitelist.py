@@ -18,11 +18,13 @@ def main(threshold):
     ft_df = ft_df.sample(frac=1)
     catelist = pd.concat([ft_df, ft_df.pid.map(CATEDICT).rename('cate')],axis=1).dropna()
     cate_freq = cate_count(catelist)
+    a=cate_count(pd.concat([ft_df,ft_df.pid.map(CATEDICT).rename('cate')],axis=1).dropna())
 
     while len(cate_freq[cate_freq>threshold]) > 0:
-        cate_to_sample = cate_freq.index[cate_freq>threshold][-1] # the most frequent cate
+        cate_to_sample = cate_freq.index[cate_freq>threshold][0] # the most frequent cate
         how_many = cate_freq[cate_to_sample]
-        cate_blacklist_idx = catelist[catelist.cate.apply(lambda x: cate_to_sample in x)].sample(n=how_many-threshold).index
+        remove_n = np.min([how_many-threshold, 1000]) # Remove papers slowly: incre = 1000
+        cate_blacklist_idx = catelist[catelist.cate.apply(lambda x: cate_to_sample in x)].sample(n=remove_n).index
         catelist = catelist.drop(cate_blacklist_idx) # update catelist
         cate_freq = cate_count(catelist)# update cate_freq
         print()

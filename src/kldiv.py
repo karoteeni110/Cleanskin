@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 from newCleaner import get_root
 from random import choice
-from paths import kldiv_dir, data_path,metadatas_path,secklds,results_path
+from paths import kldiv_dir, data_path,metadatas_path,secklds,results_path, src_path
 from metadata import get_pid2meta
 from os.path import join, basename
 from os import listdir
@@ -194,9 +194,9 @@ def data_barplot():
     # print()
 
 if __name__ == "__main__":
-    # ft_df = read_data(join(data_path, '100tp_sec_compo/cs_ft_comp_100tpc.txt'))
-    # abt_df = read_data(join(data_path, '100tp_sec_compo/cs_abt_composition_100tpc.txt'))
-    # get_div_dfs(ft_df, abt_df, join(data_path, 'cs_sec_klds/cs_abstract_kld.txt'), ['Computer_Science.xml'])
+    ft_df = read_data(join(src_path, 'KLDiv/100_1_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
+    abt_df = read_data(join(src_path, 'KLdiv/100_1_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
+    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/100_1_kld.txt'), ['Computer_Science.xml'])
     
     # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
     # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:
@@ -214,4 +214,4 @@ if __name__ == "__main__":
     # # x=get_acro2cate_dict()
     # # print()
 
-    data_barplot()
+    # data_barplot()
