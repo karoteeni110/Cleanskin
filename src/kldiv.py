@@ -13,7 +13,7 @@ from os import listdir
 def read_data(mallet_out,sepchar='\t',skiprow=0,drop_first_col=True):
     pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
-    df = pd.read_csv(mallet_out, skiprows=skiprow, sep=sepchar, header=None, float_precision='high')
+    df = pd.read_csv(mallet_out, skiprows=skiprow, sep=sepchar, header=None, float_precision='high', low_memory=False)
     if drop_first_col:
         df = df.drop(0, axis=1)
 
@@ -194,9 +194,10 @@ def data_barplot():
     # print()
 
 if __name__ == "__main__":
-    ft_df = read_data(join(src_path, 'KLDiv/100_1_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
-    abt_df = read_data(join(src_path, 'KLdiv/100_1_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
-    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/100_1_kld.txt'), ['Computer_Science.xml'])
+    grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
+    ft_df = read_data(join(grp_dir, '50_130_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
+    abt_df = read_data(join(grp_dir, '50_130_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
+    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/50_130_kld.txt'), ['Computer_Science.xml'])
     
     # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
     # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:

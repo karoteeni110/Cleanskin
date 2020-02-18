@@ -6,6 +6,7 @@ import os.path
 import re, pickle, psutil, sys, traceback
 from os import listdir
 from paths import data_path
+import numpy as np
 
 from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
@@ -108,6 +109,10 @@ print("building dictionary...")
 dictionary = Dictionary(docs)
 dictionary.filter_extremes()
 print('Number of unique tokens: %d' % len(dictionary))
+
+corpus_memory_friendly = MyCorpus()  # doesn't load the corpus into memory!
+# print(corpus_memory_friendly)
+
 corpus = [dictionary.doc2bow(doc) for doc in docs]
 ab_corpus = [dictionary.doc2bow(doc) for doc in ab_docs]
 
@@ -142,6 +147,7 @@ for t in num_topics :
         passes=passes,
         eval_every=eval_every,
         random_state=random_seed,
+        dtype=np.float64
         #workers=3
     )
 
