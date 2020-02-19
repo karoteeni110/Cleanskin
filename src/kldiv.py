@@ -195,9 +195,9 @@ def data_barplot():
 
 if __name__ == "__main__":
     grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
-    ft_df = read_data(join(grp_dir, '50_130_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
-    abt_df = read_data(join(grp_dir, '50_130_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
-    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/50_130_kld.txt'), ['Computer_Science.xml'])
+    ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
+    abt_df = read_data(join(grp_dir, '30_13064_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
+    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/30_13064_kld.txt'), ['Computer_Science.xml'])
     
     # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
     # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:
