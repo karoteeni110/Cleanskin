@@ -92,8 +92,8 @@ if __name__ == "__main__":
     # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
     allcatefn = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
     # for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
-    cate_fns = except_abst_fn(allcatefn)
-    cate_ids, cate_docs = extract_documents('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/sections', cate_fns)
+    nonabst_cate_fns = except_abst_fn(allcatefn)
+    cate_ids, cate_docs = extract_documents('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/sections', nonabst_cate_fns)
     try:
         with open('./cs_extract_nonabst_cate_130k','wb') as f:
             pickle.dump([cate_ids,cate_docs],f)

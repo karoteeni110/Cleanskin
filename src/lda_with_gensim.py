@@ -53,7 +53,7 @@ def tokenize_filter(docs) :
     for idx in range(len(docs)):
         docs[idx] = re.split(r'\s',docs[idx])  # Split into words.
         if (idx+1)%1000==0:
-            print(idx, '/', range(len(docs)))
+            print(idx, '/', len(docs))
     return docs
 
 if len(argv) != 6 :
