@@ -27,7 +27,7 @@ ft_fname = argv[1]
 ab_fname = argv[2]
 results_dir = argv[3]
 model_path = argv[4]
-cate_name = argv[5]
+catename = argv[5]
 
 if not os.path.exists(results_dir) :
     print("{} does not exist, exiting...\n".format(results_dir), file=stderr)
