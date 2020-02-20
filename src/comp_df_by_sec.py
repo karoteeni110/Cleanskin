@@ -2,7 +2,8 @@
     and write out the dataframe to secname.txt"""
 import pandas as pd
 import numpy as np
-from paths import f_sectitles, data_path, models_path, src_path
+from paths import f_sectitles, data_path, src_path
+from sortLabels import final
 from os.path import join, basename
 from os import listdir
 
@@ -37,15 +38,43 @@ def read_sec_comp(mallet_out):
     df = df.rename(columns={1:'fn'})
     return df
 
-def extract_sec(bigdf, dst=join(data_path,'abst_fname.txt'), sec='abstract', writeout=False):
-    if sec=='abstract':
-        print('Extracting %s fnames...' % sec)
-        df = bigdf[bigdf.heading.str.match(sec)]
-    else:
-        pass
+def extract_abst(bigdf, dst=join(data_path,'abst_fname.txt'), writeout=False):
+    sec = 'abstract'
+    print('Extracting %s fnames...' % sec)
+    df = bigdf[bigdf.heading.str.match(sec)]
+
     if writeout:
         print('Writing out %s to %s' % (sec, dst))
         df.to_csv(path_or_buf=dst, index=False)
+
+def extract_othercate(bigdf, dst, writeout=False):
+    print('Extracting intro, background etc fnames...')
+    df = pd.concat([bigdf.fn,bigdf.heading.map(final).rename('cate')],axis=1).dropna()
+    # for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+    if writeout:
+        print('Writing out %s to %s' % ('useful sections', dst))
+        df.to_csv(path_or_buf=dst, index=False)
+
+def subset_fn(fndf, catename):
+    return fndf[fndf.heading.apply(lambda a: catename in a)].fn
+
+def extract_documents(dirn, fnlist):
+    ids = []
+    docs = []
+    print('Reading documents...')
+    for fname in fnlist:
+        fpath = join(dirn, fname)
+        pid = fname.split('.txt')[0].split('_')[0]
+
+        ids.append(pid)
+        doc = []
+        with open(fpath) as f :
+            doc = f.read().encode('utf-8', errors='replace').decode()
+            docs.append(doc)
+
+        if (i+1)%1000==0:
+            print(i+1,'/', len(fnlist), '...')
+    return ids,docs
 
 def subset_from_secs_comp(secs_comp, fns):
     print('Subsetting...')
@@ -55,12 +84,20 @@ def subset_from_secs_comp(secs_comp, fns):
     return subset
 
 if __name__ == "__main__":
+    # bigdif = read_sec_hdings(join(data_path,'sec_titles.txt'))
     # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
-    # for model_i in listdir(models_path):
-    #     if model_i[:6] == 'model_' and model_i not in ['model_200', 'model_400']:
-    secs_comp_df = read_sec_comp(join(src_path, 'KLDiv/10_1_abstract_composition.txt'))
-    # secdf = subset_from_secs_comp(secs_comp_df, abst_fns)
-    dst = join(data_path, 'model_i_comp/'+model_i+'_abstract.txt')
-    secdf.to_csv(path_or_buf=dst, index=False)
-    print(model_i, 'to', dst)
+    allcatefn = read_sec_hdings(join(data_path, 'cate_fname'))
+    for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+        cate_fns = subset_fn(allcatefn, cate)
+    print()
+    # nonabst_cate_fname = extract_sec(bigdif, dst=join(data_path, 'nonabst_cate_fname.txt'),sec)
+
+    # # 
+    # # for model_i in listdir(models_path):
+    # #     if model_i[:6] == 'model_' and model_i not in ['model_200', 'model_400']:
+    # secs_comp_df = read_sec_comp(join(src_path, 'KLDiv/10_1_abstract_composition.txt'))
+    # # secdf = subset_from_secs_comp(secs_comp_df, abst_fns)
+    # dst = join(data_path, 'model_i_comp/'+model_i+'_abstract.txt')
+    # secdf.to_csv(path_or_buf=dst, index=False)
+    # print(model_i, 'to', dst)
 

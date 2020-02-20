@@ -50,7 +50,9 @@ ay_df, al_df, do_df = read_one_result(ay_path), read_one_result(al_path), read_o
 final = merge_to_three_cols(ay_df, al_df, do_df)
 
 if __name__ == "__main__":
-    ay_path, al_path, do_path = join(data_path, 'AY_RESULTS.txt'), join(data_path, 'ALAN_RESULTS.txt'), join(data_path, 'DOROTA_RESULTS.txt')
-    ay_df, al_df, do_df = read_one_result(ay_path), read_one_result(al_path), read_one_result(do_path)
-    final = merge_to_three_cols(ay_df, al_df, do_df)
+    pass
+    # ay_path, al_path, do_path = join(data_path, 'AY_RESULTS.txt'), join(data_path, 'ALAN_RESULTS.txt'), join(data_path, 'DOROTA_RESULTS.txt')
+    # ay_df, al_df, do_df = read_one_result(ay_path), read_one_result(al_path), read_one_result(do_path)
+    # final = merge_to_three_cols(ay_df, al_df, do_df)
+    nolabel_fnames()
     print()

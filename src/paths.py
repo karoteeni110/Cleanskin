@@ -29,7 +29,6 @@ perpsets_testdir = join(results_path, 'perpsets/10test')
 perpsets_traindir = join(results_path, 'perpsets/90train')
 secklds = join(data_path, 'cs_sec_klds')
 f_sectitles = join(data_path, 'sec_titles.txt')
-models_path = '/cs/group/grp-glowacka/arxiv/models/cs_5ktpc'
 
 
 if __name__ == "__main__":

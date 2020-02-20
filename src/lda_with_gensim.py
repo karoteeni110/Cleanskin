@@ -12,21 +12,21 @@ from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel,LdaMulticore
 
-PROCESS = psutil.Process(os.getpid())
-MEGA = 10 ** 6
-MEGA_STR = ' ' * MEGA
+# PROCESS = psutil.Process(os.getpid())
+# MEGA = 10 ** 6
+# MEGA_STR = ' ' * MEGA
 
-def print_memory_usage():
-    """Prints current memory usage stats.
-    See: https://stackoverflow.com/a/15495136
+# def print_memory_usage():
+#     """Prints current memory usage stats.
+#     See: https://stackoverflow.com/a/15495136
 
-    :return: None
-    """
-    total, available, percent, used, free = psutil.virtual_memory()
-    total, available, used, free = total / MEGA, available / MEGA, used / MEGA, free / MEGA
-    proc = PROCESS.memory_info()[1] / MEGA
-    print('process = %s total = %s available = %s used = %s free = %s percent = %s'
-          % (proc, total, available, used, free, percent))
+#     :return: None
+#     """
+#     total, available, percent, used, free = psutil.virtual_memory()
+#     total, available, used, free = total / MEGA, available / MEGA, used / MEGA, free / MEGA
+#     proc = PROCESS.memory_info()[1] / MEGA
+#     print('process = %s total = %s available = %s used = %s free = %s percent = %s'
+#           % (proc, total, available, used, free, percent))
 
 def extract_documents(dirn, whitelist):
     ids = []
@@ -83,7 +83,7 @@ try:
         pickle.dump([ids,docs],f)
 except MemoryError:
     print('memory error')
-    print_memory_usage()
+    # print_memory_usage()
 
 print("Reading abstract...")
 ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
@@ -92,7 +92,7 @@ try:
         pickle.dump([ab_ids,ab_docs],f)
 except MemoryError:
     print('memory error')
-    print_memory_usage()
+    # print_memory_usage()
 exit(0)
 #with open(ft_fname, 'rb') as f:
 #    ids,docs = pickle.load(f) # extract_documents(ft_fname, whitelist)
@@ -110,7 +110,7 @@ dictionary = Dictionary(docs)
 dictionary.filter_extremes()
 print('Number of unique tokens: %d' % len(dictionary))
 
-corpus_memory_friendly = MyCorpus()  # doesn't load the corpus into memory!
+# corpus_memory_friendly = MyCorpus()  # doesn't load the corpus into memory!
 # print(corpus_memory_friendly)
 
 corpus = [dictionary.doc2bow(doc) for doc in docs]
