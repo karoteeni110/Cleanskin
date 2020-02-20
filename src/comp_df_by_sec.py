@@ -2,6 +2,7 @@
     and write out the dataframe to secname.txt"""
 import pandas as pd
 import numpy as np
+import pickle
 from paths import f_sectitles, data_path, src_path
 from sortLabels import final
 from os.path import join, basename
@@ -56,15 +57,18 @@ def extract_othercate(bigdf, dst, writeout=False):
         df.to_csv(path_or_buf=dst, index=False)
 
 def subset_fn(fndf, catename):
-    return fndf[fndf.heading.apply(lambda a: catename in a)].fn
+    return fndf[fndf.heading.apply(lambda a: catename in a)].fn[1:].to_list()
+
+def except_abst_fn(fndf):
+    return fndf[fndf.heading.apply(lambda a: 'abstract' not in a)].fn[1:].to_list()
 
 def extract_documents(dirn, fnlist):
     ids = []
     docs = []
     print('Reading documents...')
-    for fname in fnlist:
+    for i,fname in enumerate(fnlist):
         fpath = join(dirn, fname)
-        pid = fname.split('.txt')[0].split('_')[0]
+        pid = fname.split('_')[0]
 
         ids.append(pid)
         doc = []
@@ -86,9 +90,16 @@ def subset_from_secs_comp(secs_comp, fns):
 if __name__ == "__main__":
     # bigdif = read_sec_hdings(join(data_path,'sec_titles.txt'))
     # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
-    allcatefn = read_sec_hdings(join(data_path, 'cate_fname'))
-    for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
-        cate_fns = subset_fn(allcatefn, cate)
+    allcatefn = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
+    # for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+    cate_fns = except_abst_fn(allcatefn)
+    cate_ids, cate_docs = extract_documents('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/sections', cate_fns)
+    try:
+        with open('./cs_extract_nonabst_cate_130k','wb') as f:
+            pickle.dump([cate_ids,cate_docs],f)
+    except MemoryError:
+        print('memory error')
+
     print()
     # nonabst_cate_fname = extract_sec(bigdif, dst=join(data_path, 'nonabst_cate_fname.txt'),sec)
 
