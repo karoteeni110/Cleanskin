@@ -4,7 +4,7 @@ from sys import exit, argv, stderr
 import os.path
 import re, pickle, psutil, sys, traceback
 from os import listdir
-from paths import data_path
+#from paths import data_path
 import numpy as np
 
 from nltk.tokenize import RegexpTokenizer
@@ -44,6 +44,7 @@ with open(ab_fname, 'rb') as f:
 print("read", len(ab_docs),"documents")
 
 print("tokenizing...")
+docs = tokenize_filter(docs)
 ab_docs = tokenize_filter(ab_docs)
 
 print("loading dictionary...")
@@ -68,11 +69,11 @@ print("model = {}".format(model_fn))
 model = LdaModel.load(model_path, mmap='r')
 
 topic_dist = model.get_document_topics(ab_corpus)
-with open(results_dir + '/%d_%d_%d_composition_compact.txt' % (t, random_seed, catename), 'w') as f :
+with open(results_dir + '/%d_%d_%s_composition_compact.txt' % (t, random_seed, catename), 'w') as f :
     for id,d in zip(ids, topic_dist) :
         print(id, ' '.join(["%d=%f" % (tid,prob) for tid,prob in d ]), file=f)
 
-with open(results_dir + '/%d_%d_%d_composition.txt' % (t, random_seed, catename), 'w') as f :
+with open(results_dir + '/%d_%d_%s_composition.txt' % (t, random_seed, catename), 'w') as f :
     for id,d in zip(ids, topic_dist) :
         remainder = 0.0 if (len(d) == t) else (1.0 - sum([ prob for _,prob in d ])) / float(t - len(d))
         tmp = dict(d)
