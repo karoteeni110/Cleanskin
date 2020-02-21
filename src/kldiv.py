@@ -194,9 +194,8 @@ def data_barplot():
     # plt.show()
     # print()
 
+def compute_kld_by_cate():
     
-CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
-if __name__ == "__main__":
     grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
     nonab_df = read_data(join(grp_dir, '30_13064_nonabstcate_composition.txt'), sepchar=' ', drop_first_col=False)
@@ -210,15 +209,26 @@ if __name__ == "__main__":
         label_pids = subset_fn(fn2label, label)
         print('Subsetting...')
         sec_df = pd.merge(label_pids,nonab_df,how='left',on='pid').drop('heading',axis=1)
+        # sec_df = pd.merge(label_pids,nonab_df,how='inner',on='pid').drop('heading',axis=1)
         # Remove _i 
-        sec_df.loc[:,'fn'] = sec_df.fn.apply(lambda fn:fn.split('_')[0])
+        sec_df.loc[:,'pid'] = sec_df.pid.apply(lambda fn:fn.split('_')[0])
         get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/30_13064_%s_kld.txt' % label), ['Computer_Science.xml'])
 
-    # all_sec_dfs = dict()  
-    # for txtfn in listdir(secklds):
-    #     # if 'abstract' in txtfn:
-    #     #     secdf = read_sectionKLD_df('/home/yzan/Desktop/scilit_graphs/redoredoabst.csv', dfname='abstract')
-    #     # else:
-    #     secdf = read_sectionKLD_df(join(secklds, txtfn))
-    #     all_sec_dfs[secdf.name] = secdf
-    # get_sec_structure_vecs(all_sec_dfs,dst =join(results_path, 'my_secvec.txt'))
+def for_plotpy():
+    all_sec_dfs = dict()
+    for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+        secdf = read_sectionKLD_df(join(data_path, 'cs_kld/30_13064_%s_kld.txt' % label))
+        all_sec_dfs[label] = secdf
+    all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/30_13064_abalign_kld.txt'))
+    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_13064_abalign_secvec.txt'))
+
+if __name__ == "__main__":
+    for_plotpy()
+
+    # CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
+    # compute_kld_by_cate()
+
+    # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
+    # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
+    # ab_df = read_data(join(grp_dir, '30_13064_abalign_composition.txt'), sepchar=' ', drop_first_col=False)
+    # get_div_dfs(ft_df, ab_df, join(data_path, 'cs_kld/30_13064_%s_kld.txt' % 'abalign'), ['Computer_Science.xml'])

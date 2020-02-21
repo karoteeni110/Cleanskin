@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from os.path import join
 from paths import data_path
 
-df = pd.read_csv(join(data_path, '30_13064_secvec.txt'))
+secvec_fn = '30_13064_abalign_secvec.txt'
+df = pd.read_csv(join(data_path, secvec_fn))
 #df = pd.read_csv('paper_topic_vectors.txt')
 df = df.set_index('name')
-
 
 sns.set()
 sns.set(font_scale=0.6)
@@ -23,7 +23,7 @@ plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
 
 g.ax_col_dendrogram.set_visible(False)
 
-g.savefig("my_tree.pdf")
+g.savefig(secvec_fn.replace('txt','pdf'))
 
 plt.show()
 
