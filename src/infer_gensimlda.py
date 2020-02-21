@@ -71,11 +71,11 @@ model = LdaModel.load(model_path, mmap='r')
 
 topic_dist = model.get_document_topics(ab_corpus)
 with open(results_dir + '/%d_%d_%s_composition_compact.txt' % (t, random_seed, catename), 'w') as f :
-    for id,d in zip(ids, topic_dist) :
+    for id,d in zip(ab_ids, topic_dist) :
         print(id, ' '.join(["%d=%f" % (tid,prob) for tid,prob in d ]), file=f)
 
 with open(results_dir + '/%d_%d_%s_composition.txt' % (t, random_seed, catename), 'w') as f :
-    for id,d in zip(ids, topic_dist) :
+    for id,d in zip(ab_ids, topic_dist) :
         remainder = 0.0 if (len(d) == t) else (1.0 - sum([ prob for _,prob in d ])) / float(t - len(d))
         tmp = dict(d)
         print(id, ' '.join([str(tmp.get(i, remainder)) for i in range(t)]), file=f)

@@ -18,7 +18,7 @@ def read_sec_hdings(sec_titles):
     return df
 
 def read_sec_comp(mallet_out):
-    """Read mallet output: sec compositions"""
+    """Read gensim output: sec compositions"""
     pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
     # with open(mallet_out, 'r') as f:
@@ -27,7 +27,7 @@ def read_sec_comp(mallet_out):
     # if first_line[0] == '0': 
     #     df = pd.read_csv(mallet_out,sep="\t",header=None,float_precision='high').drop(0,axis=1)
     # else:
-    df = pd.read_csv(mallet_out,skiprows=1,sep="\t",header=None,float_precision='high').drop(0, axis=1)
+    df = pd.read_csv(mallet_out,sep=" ",header=None,low_memory=False)
 
     # Strip file extension
     if '/' in df.iloc[1,0] and df.iloc[1,0][-4:]=='.txt': 
@@ -36,7 +36,7 @@ def read_sec_comp(mallet_out):
         print('... done')
 
     # df.iloc[:,1:].to_list()
-    df = df.rename(columns={1:'fn'})
+    df = df.rename(columns={0:'pid'})
     return df
 
 def extract_abst(bigdf, dst=join(data_path,'abst_fname.txt'), writeout=False):
@@ -68,7 +68,7 @@ def extract_documents(dirn, fnlist):
     print('Reading documents...')
     for i,fname in enumerate(fnlist):
         fpath = join(dirn, fname)
-        pid = fname.split('_')[0]
+        pid = fname.split('.txt')[0]
 
         ids.append(pid)
         doc = []
@@ -87,28 +87,23 @@ def subset_from_secs_comp(secs_comp, fns):
     print('... done')
     return subset
 
-if __name__ == "__main__":
-    # bigdif = read_sec_hdings(join(data_path,'sec_titles.txt'))
-    # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
+def dump_extract_doc():
     allcatefn = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
     # for cate in ['introduction','related_work','background','methods','results','discussion','conclusion']:
     nonabst_cate_fns = except_abst_fn(allcatefn)
-    cate_ids, cate_docs = extract_documents('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/sections', nonabst_cate_fns)
+    cate_ids, cate_docs = extract_documents('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/sections',nonabst_cate_fns)
     try:
-        with open('./cs_extract_nonabst_cate_130k','wb') as f:
+        with open('./cs_extract_nonabst_130k','wb') as f:
             pickle.dump([cate_ids,cate_docs],f)
     except MemoryError:
         print('memory error')
-
     print()
-    # nonabst_cate_fname = extract_sec(bigdif, dst=join(data_path, 'nonabst_cate_fname.txt'),sec)
 
-    # # 
-    # # for model_i in listdir(models_path):
-    # #     if model_i[:6] == 'model_' and model_i not in ['model_200', 'model_400']:
+if __name__ == "__main__":
+    # bigdif = read_sec_hdings(join(data_path,'sec_titles.txt'))
+    # abst_fns = read_sec_hdings(join(data_path, 'abstract_fname.txt'))
+    dump_extract_doc()
     # secs_comp_df = read_sec_comp(join(src_path, 'KLDiv/10_1_abstract_composition.txt'))
     # # secdf = subset_from_secs_comp(secs_comp_df, abst_fns)
-    # dst = join(data_path, 'model_i_comp/'+model_i+'_abstract.txt')
-    # secdf.to_csv(path_or_buf=dst, index=False)
-    # print(model_i, 'to', dst)
+    # dst = join(data_path, 'model_i_comp/'+'model_i'+'_abstract.txt')
 
