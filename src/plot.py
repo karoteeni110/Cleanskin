@@ -1,9 +1,10 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
+from os.path import join
+from paths import data_path
 
-
-df = pd.read_csv('my_secvec.txt')
+df = pd.read_csv(join(data_path, '30_13064_secvec.txt'))
 #df = pd.read_csv('paper_topic_vectors.txt')
 df = df.set_index('name')
 

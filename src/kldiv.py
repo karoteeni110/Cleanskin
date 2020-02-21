@@ -7,13 +7,14 @@ from newCleaner import get_root
 from random import choice
 from paths import kldiv_dir, data_path,metadatas_path,secklds,results_path, src_path
 from metadata import get_pid2meta
+from comp_df_by_sec import read_sec_hdings, subset_fn
 from os.path import join, basename
 from os import listdir
 
 def read_data(mallet_out,sepchar='\t',skiprow=0,drop_first_col=True):
     pd.set_option('precision', 21)
     print('Reading data: %s' % mallet_out)
-    df = pd.read_csv(mallet_out, skiprows=skiprow, sep=sepchar, header=None, float_precision='high', low_memory=False)
+    df = pd.read_csv(mallet_out,skiprows=skiprow,sep=sepchar,header=None,low_memory=False)
     if drop_first_col:
         df = df.drop(0, axis=1)
 
@@ -24,9 +25,9 @@ def read_data(mallet_out,sepchar='\t',skiprow=0,drop_first_col=True):
     if df.iloc[1,0][-4:]=='.txt':
         print('Stripping extention...')
         df.iloc[:,0] = df.iloc[:,0].apply(lambda x:x[:-4])
-    if '_' in df.iloc[1,0]:
-        print("Stripping _i...")
-        df.iloc[:,0] = df.iloc[:,0].apply(lambda x:x.split('_')[0])
+    # if '_' in df.iloc[1,0]:
+    #     print("Stripping _i...")
+    #     df.iloc[:,0] = df.iloc[:,0].apply(lambda x:x.split('_')[0])
     print('... done')
 
     # df.iloc[:,1:].to_list()
@@ -195,14 +196,15 @@ def data_barplot():
 
 if __name__ == "__main__":
     grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
-    ft_df = read_data(join(grp_dir, '100_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
-    abt_df = read_data(join(grp_dir, '100_13064_abstract_composition.txt'), sepchar=' ', drop_first_col=False)
-    get_div_dfs(ft_df, abt_df, join(src_path, 'KLdiv/100_13064_kld.txt'), ['Computer_Science.xml'])
-    
-    # ft_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_ft_comp.txt')
-    # for lb in ['results']:# ['abstract', 'introduction','background','related_work', 'conclusion','methods', 'discussion', 'result']:
-    #     lb_df = read_data('/home/yzan/Desktop/mallet-2.0.8/cs_%s_comp.txt' % lb)
-    #     get_div_dfs(ft_df, lb_df, join(secklds, '%s_kld.txt' % lb), ['Computer_Science.xml'])
+    ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
+    nonab_df = read_data(join(grp_dir, '30_13064_nonabstcate_composition.txt'), sepchar=' ', drop_first_col=False)
+
+    fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
+    fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
+    for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+        label_pids = subset_fn(fn2label, label)
+        sec_df = nonab_df[nonab_df.pid.apply(lambda pid:pid in label_pids)]
+        get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/30_13064_%s_kld.txt' % label), ['Computer_Science.xml'])
 
     # all_sec_dfs = dict()  
     # for txtfn in listdir(secklds):
@@ -211,8 +213,4 @@ if __name__ == "__main__":
     #     # else:
     #     secdf = read_sectionKLD_df(join(secklds, txtfn))
     #     all_sec_dfs[secdf.name] = secdf
-    # get_sec_structure_vecs(all_sec_dfs,dst = '/home/yzan/Desktop/scilit_graphs/secvec.txt') # dst=join(results_path, 'my_secvec.txt'))
-    # # x=get_acro2cate_dict()
-    # # print()
-
-    # data_barplot()
+    # get_sec_structure_vecs(all_sec_dfs,dst =join(results_path, 'my_secvec.txt'))
