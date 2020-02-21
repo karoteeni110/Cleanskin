@@ -7,7 +7,7 @@ from newCleaner import get_root
 from random import choice
 from paths import kldiv_dir, data_path,metadatas_path,secklds,results_path, src_path
 from metadata import get_pid2meta
-from comp_df_by_sec import read_sec_hdings, subset_fn
+from comp_df_by_sec import read_sec_hdings, subset_fn, subset_from_secs_comp
 from os.path import join, basename
 from os import listdir
 
@@ -84,7 +84,7 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         
         div_df = pd.concat([fulltext_df.pid, pd.Series(kldiv_paper, name='kld')], axis=1)
 
-        catedict = get_pid2cate_dict(metaxml_list)
+        catedict = CATEDICT
         cate_series = fulltext_df.pid.map(catedict).apply(pd.Series) # fill with NaN 
         # Repeat each paper n times (n=len(categories)) 
         div_df = cate_series.merge(div_df, left_index=True, right_index=True) \
@@ -181,7 +181,7 @@ def data_barplot():
     # ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
     ft_df = pd.read_csv('/home/yzan/Desktop/trypid.txt', 
             sep='\n', names=['pid'])
-    CATEDICT = get_pid2cate_dict(metaxml_list=['Computer_Science.xml'])
+    
     acro2cate = get_acro2cate_dict()
     catelist = np.concatenate(ft_df.pid.map(CATEDICT).dropna().to_numpy())
     a= pd.Series(catelist).map(acro2cate)
@@ -194,6 +194,8 @@ def data_barplot():
     # plt.show()
     # print()
 
+    
+CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
 if __name__ == "__main__":
     grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
@@ -201,9 +203,15 @@ if __name__ == "__main__":
 
     fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
     fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
+    fn2label.rename({'fn':'pid'},axis=1,inplace=True)
+    
     for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+        print(label)
         label_pids = subset_fn(fn2label, label)
-        sec_df = nonab_df[nonab_df.pid.apply(lambda pid:pid in label_pids)]
+        print('Subsetting...')
+        sec_df = pd.merge(label_pids,nonab_df,how='left',on='pid').drop('heading',axis=1)
+        # Remove _i 
+        sec_df.loc[:,'fn'] = sec_df.fn.apply(lambda fn:fn.split('_')[0])
         get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/30_13064_%s_kld.txt' % label), ['Computer_Science.xml'])
 
     # all_sec_dfs = dict()  

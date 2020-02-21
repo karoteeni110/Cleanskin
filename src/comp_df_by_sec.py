@@ -57,7 +57,7 @@ def extract_othercate(bigdf, dst, writeout=False):
         df.to_csv(path_or_buf=dst, index=False)
 
 def subset_fn(fndf, catename):
-    return fndf[fndf.heading.apply(lambda a: catename in a)].fn[1:].to_list()
+    return fndf[fndf.heading.apply(lambda a: catename in a)]
 
 def except_abst_fn(fndf):
     return fndf[fndf.heading.apply(lambda a: 'abstract' not in a)].fn[1:].to_list()
