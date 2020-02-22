@@ -223,9 +223,9 @@ def for_plotpy():
     get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_13064_abalign_secvec.txt'))
 
 if __name__ == "__main__":
-    for_plotpy()
+    # for_plotpy()
 
-    # CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
+    CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
     # compute_kld_by_cate()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'

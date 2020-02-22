@@ -48,52 +48,48 @@ cs.SI 5263
 6 6
 1 7
 
-## gensim
+## 6k subsample: whitelist_3000.txt
 
-read 57149 documents
-building dictionary...
-Number of unique tokens: 492526
-
-Computational Complexity                           3000
-Distributed, Parallel, and Cluster Computing       2997
-Cryptography and Security                          2960
-Systems and Control                                2958
-Logic in Computer Science                          2945
-Discrete Mathematics                               2935
-Social and Information Networks                    2912
-Computer Vision and Pattern Recognition            2884
-Networking and Internet Architecture               2856
-Artificial Intelligence                            2807
-Information Theory                                 2805
-Computation and Language                           2713
-Computer Science and Game Theory                   2699
-Data Structures and Algorithms                     2650
-Robotics                                           2635
-Computational Geometry                             2280
-Machine Learning                                   2105
-Software Engineering                               2044
-Neural and Evolutionary Computation                1760
-Numerical Analysis                                 1701
-Information Retrieval                              1629
-Computers and Society                              1592
-Programming Languages                              1424
-Formal Languages and Automata Theory               1401
-Computational Engineering, Finance, and Science    1354
-Databases                                          1328
-Human-Computer Interaction                         1249
-Multiagent Systems                                 1004
-Symbolic Computation                                987
-Sound                                               920
-Digital Libraries                                   840
-Emerging Technologies                               703
-Performance                                         695
-Mathematical Software                               672
-Multimedia                                          589
-Graphics                                            559
-Other                                               484
-Hardware Architecture                               393
-Operating Systems                                   179
-General Literature                                   73
+Distributed, Parallel, and Cluster Computing       3000
+Networking and Internet Architecture               3000
+Logic in Computer Science                          3000
+Discrete Mathematics                               2998
+Data Structures and Algorithms                     2997
+Machine Learning                                   2992
+Cryptography and Security                          2991
+Computation and Language                           2989
+Systems and Control                                2983
+Information Theory                                 2977
+Computer Vision and Pattern Recognition            2963
+Social and Information Networks                    2953
+Computational Complexity                           2950
+Artificial Intelligence                            2914
+Computer Science and Game Theory                   2720
+Robotics                                           2664
+Computational Geometry                             2300
+Software Engineering                               2062
+Neural and Evolutionary Computation                1848
+Numerical Analysis                                 1718
+Information Retrieval                              1687
+Computers and Society                              1639
+Programming Languages                              1420
+Formal Languages and Automata Theory               1407
+Computational Engineering, Finance, and Science    1380
+Databases                                          1327
+Human-Computer Interaction                         1297
+Multiagent Systems                                 1023
+Symbolic Computation                                979
+Sound                                               968
+Digital Libraries                                   850
+Performance                                         718
+Emerging Technologies                               705
+Mathematical Software                               673
+Multimedia                                          606
+Graphics                                            581
+Other                                               491
+Hardware Architecture                               389
+Operating Systems                                   175
+General Literature                                   72
 
 ## cs
 background 35483

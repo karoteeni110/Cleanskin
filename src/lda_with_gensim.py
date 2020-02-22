@@ -12,31 +12,14 @@ from nltk.tokenize import RegexpTokenizer
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel,LdaMulticore
 
-# PROCESS = psutil.Process(os.getpid())
-# MEGA = 10 ** 6
-# MEGA_STR = ' ' * MEGA
-
-# def print_memory_usage():
-#     """Prints current memory usage stats.
-#     See: https://stackoverflow.com/a/15495136
-
-#     :return: None
-#     """
-#     total, available, percent, used, free = psutil.virtual_memory()
-#     total, available, used, free = total / MEGA, available / MEGA, used / MEGA, free / MEGA
-#     proc = PROCESS.memory_info()[1] / MEGA
-#     print('process = %s total = %s available = %s used = %s free = %s percent = %s'
-#           % (proc, total, available, used, free, percent))
-
 def extract_documents(dirn, whitelist):
     ids = []
     docs = []
-    print('Reading documents...')
     for i,fname in enumerate(listdir(dirn)):
         fpath = os.path.join(dirn, fname)
         id = fname.split('.txt')[0].split('_')[0]
-        # if id not in whitelist :
-        #     continue
+        if id not in whitelist :
+            continue
 
         ids.append(id)
         doc = []
@@ -71,7 +54,7 @@ if not os.path.exists(results_dir) :
     exit(1)
 
 whitelist = set()
-with open(os.path.join(results_dir, 'cs_whitelist_3k.txt')) as f :
+with open(os.path.join(results_dir, 'whitelist_3000.txt')) as f :
     for line in f :
         whitelist.add(line.strip())
 
@@ -79,16 +62,18 @@ print("Reading fulltext...")
 ids,docs = extract_documents(ft_fname, whitelist)
 
 try:
-    with open('./cs_extract_ft_130k','wb') as f:
+    with open(results_dir + '/cs_extract_ft_6k','wb') as f:
         pickle.dump([ids,docs],f)
 except MemoryError:
     print('memory error')
     # print_memory_usage()
+del ids
+del docs
 
 print("Reading abstract...")
 ab_ids,ab_docs = extract_documents(ab_fname, whitelist)
 try:
-    with open('./cs_extract_ab_130k','wb') as f:
+    with open(results_dir + '/cs_extract_ab_6k','wb') as f:
         pickle.dump([ab_ids,ab_docs],f)
 except MemoryError:
     print('memory error')

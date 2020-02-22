@@ -10,6 +10,15 @@ def cate_count(catelist):
     a = pd.Series(a)
     return a.value_counts()
 
+def data_barplot(ft_df):
+    # ft_df = read_data('/cs/group/grp-glowacka/arxiv/models/cs_5ktpc/model_200/fulltext_composition.txt')
+    # ft_df = pd.read_csv('/home/yzan/Desktop/trypid.txt', 
+    #         sep='\n', names=['pid'])
+    acro2cate = get_acro2cate_dict()
+    catelist_forcount = np.concatenate(ft_df.pid.map(CATEDICT).dropna().to_numpy())
+    a=pd.Series(catelist_forcount).map(acro2cate)
+    print(a.value_counts())
+
 def main(threshold):
     print('Reading pids...')
     ft_df = pd.DataFrame(listdir('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/cs_ft'), 
@@ -18,7 +27,6 @@ def main(threshold):
     ft_df = ft_df.sample(frac=1)
     catelist = pd.concat([ft_df, ft_df.pid.map(CATEDICT).rename('cate')],axis=1).dropna()
     cate_freq = cate_count(catelist)
-    a=cate_count(pd.concat([ft_df,ft_df.pid.map(CATEDICT).rename('cate')],axis=1).dropna())
 
     while len(cate_freq[cate_freq>threshold]) > 0:
         cate_to_sample = cate_freq.index[cate_freq>threshold][0] # the most frequent cate
