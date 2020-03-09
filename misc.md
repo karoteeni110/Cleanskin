@@ -48,6 +48,50 @@ cs.SI 5263
 6 6
 1 7
 
+## Before subsample
+
+LG    23025
+IT    21423
+CV    19221
+AI    10435
+CL     8530
+DS     8395
+SI     6778
+NI     6624
+DM     6117
+CR     5815
+SY     5516
+DC     5128
+LO     4871
+CC     4550
+RO     4030
+NE     3940
+GT     3571
+IR     3024
+CG     2875
+CY     2394
+SE     2385
+NA     2141
+HC     1855
+DB     1772
+SD     1710
+PL     1701
+FL     1678
+CE     1652
+MA     1539
+MM     1113
+SC     1105
+PF     1033
+DL     1002
+GR      872
+ET      840
+MS      790
+AR      496
+OS      214
+OH       63
+GL       63
+
+
 ## 6k subsample: whitelist_3000.txt
 
 Distributed, Parallel, and Cluster Computing       3000

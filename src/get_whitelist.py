@@ -21,9 +21,12 @@ def data_barplot(ft_df):
 
 def main(threshold):
     print('Reading pids...')
-    ft_df = pd.DataFrame(listdir('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/cs_ft'), 
-                columns=['pid'])\
-                    .apply(lambda x: x[0][:-4],axis=1,result_type='broadcast')
+    ft_df = pd.read_csv('/Volumes/Valar Morghulis/thesis/data/cs_kld/30_13064_abalign_kld.txt')\
+        .drop(['kld','category'],axis=1)\
+            .drop_duplicates()
+    #ft_df = pd.DataFrame(listdir('/home/ad/home/y/yzan/Desktop/Cleanskin/results/cs_lbsec/cs_ft'), 
+    #            columns=['pid'])\
+    #                .apply(lambda x: x[0][:-4],axis=1,result_type='broadcast')
     ft_df = ft_df.sample(frac=1)
     catelist = pd.concat([ft_df, ft_df.pid.map(CATEDICT).rename('cate')],axis=1).dropna()
     cate_freq = cate_count(catelist)

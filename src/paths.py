@@ -20,7 +20,8 @@ cleanlog_path = join(results_path, 'tmplog.txt')
 no_sec_latex_path = join(results_path, 'no_section_latex')
 no_sec_xml = join(results_path, 'no_sec_xml')
 cleaned_nonsecs = join(results_path, 'cleaned_nonsecs')
-metadatas_path = join(data_path, 'arxiv_metadata')
+metadatas_path = '/Volumes/Valar Morghulis/thesis/data/arxiv_metadata'
+#join(data_path, 'arxiv_metadata')
 
 cs_lda_dir = join(results_path, 'cs_lda')
 fulltext_dir = join(cs_lda_dir, 'fulltext')
