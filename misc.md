@@ -91,6 +91,8 @@ OS      214
 OH       63
 GL       63
 
+mean: 4507.15 
+median: 2389.5
 
 ## 6k subsample: whitelist_3000.txt
 
