@@ -267,7 +267,7 @@ def for_plotpy(seed):
         secdf = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)))
         all_sec_dfs[label] = secdf
     # all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt'))
-    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_%s_secvec.txt' % seed))
+    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, 'cs_kld/130kdoc_secvec/30_%s_secvec.txt' % seed))
 
 def for_plotpy_100model():
     seeds = []
@@ -279,12 +279,37 @@ def for_plotpy_100model():
     for seed in seeds:
         for_plotpy(seed)
 
+def avg_100model_secvec():
+    seeds = []
+    for fn in listdir(grp_dir):
+        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        if seed is not None and seed not in seeds:
+            seeds.append(seed.group(1))
+
+    finalvec = 0
+    for seed in seeds:
+        model_vec_path = join(data_path, 'cs_kld/130kdoc_secvec/30_%s_secvec.txt' % seed)
+        modelvec_df = pd.read_csv(model_vec_path,sep=',',index_col=0)
+
+        if type(finalvec) == int:
+            finalvec = modelvec_df
+        else:
+            finalvec += modelvec_df
+    
+    print()
+    print(finalvec)
+    dst = join(data_path, '30x100_secvec.txt')
+    finalvec.div(len(seeds)).to_csv(path_or_buf=dst)
+    print('100 model secvec DONE! %s' % dst)
+
 if __name__ == "__main__":
     # for_plotpy()
 
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
     # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
+    for_plotpy_100model()
+    # avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
