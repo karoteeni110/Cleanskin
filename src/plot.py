@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from os.path import join
 from paths import data_path
 
-secvec_fn = '30_13064_abalign_secvec.txt'
+secvec_fn = '30x100_secvec.txt'
 df = pd.read_csv(join(data_path, secvec_fn))
 #df = pd.read_csv('paper_topic_vectors.txt')
 df = df.set_index('name')
@@ -18,8 +18,8 @@ g = sns.clustermap(df, metric='euclidean', method='complete', linewidths=.25, co
 ax = g.ax_heatmap
 ax.set_ylabel('')    
 ax.set_xlabel('')
-plt.setp(ax.yaxis.get_majorticklabels(), rotation=0)
-plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+#plt.setp(ax.yaxis.get_majorticklabels(), rotation=0)
+#plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
 
 g.ax_col_dendrogram.set_visible(False)
 

@@ -231,23 +231,23 @@ def compute_kld_by_cate(seed):
 
 def compute_abst_avg_kld():  
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
     fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
     fn2label.rename({'fn':'pid'},axis=1,inplace=True)
 
     seeds = []
     for fn in listdir(grp_dir):
-        seed = re.match(r'30_(\d+)_abstract_composition\.txt', fn)
+        seed = re.match(r'70_(\d+)_abstract_composition\.txt', fn)
         if seed is not None:
             seeds.append(seed.group(1))
 
     kld_df = 0
     for s in seeds:
-        ft_df = read_data(join(grp_dir, '30_%s_fulltext_composition.txt' % s), sepchar=' ', drop_first_col=False)
-        ab_df = read_data(join(grp_dir, '30_%s_abstract_composition.txt' % s), sepchar=' ', drop_first_col=False)
+        ft_df = read_data(join(grp_dir, '70_%s_fulltext_composition.txt' % s), sepchar=' ', drop_first_col=False)
+        ab_df = read_data(join(grp_dir, '70_%s_abstract_composition.txt' % s), sepchar=' ', drop_first_col=False)
         ft_df, ab_df = ft_df.reset_index(), ab_df.reset_index()
-        new_kld = get_div_dfs(ft_df, ab_df, 'NOdst', ['Computer_Science.xml']).set_index('pid')
+        new_kld = get_div_dfs(ft_df, ab_df, '', ['Computer_Science.xml']).set_index('pid')
         
         # if type(kld_df) == int:
         #     kld_df = new_kld
@@ -257,7 +257,7 @@ def compute_abst_avg_kld():
         
         print()
         print(kld_df)
-        dst = join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt' % s)
+        dst = join(data_path, 'cs_kld/6kdoc_70x100/70_%s_abstract_kld.txt' % s)
         # kld_df.div(len(seeds)).to_csv(path_or_buf=dst, index=False)
         kld_df.to_csv(path_or_buf=dst)
         print('KLD DONE! %s' % dst)
@@ -266,16 +266,16 @@ def compute_abst_avg_kld():
 def for_plotpy(seed):
     all_sec_dfs = dict()
     for label in ['abstract','introduction','related_work','background','methods','results','discussion','conclusion']:
-        secdf = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)))
+        secdf = read_sectionKLD_df(join(data_path, 'cs_kld/6kdoc_70x100/70_%s_%s_kld.txt' % (seed,label)))
         all_sec_dfs[label] = secdf
     # all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt'))
-    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, 'cs_kld/130kdoc_secvec/30_%s_secvec.txt' % seed))
+    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, 'cs_kld/6kdoc_secvec/70_%s_secvec.txt' % seed))
 
 def for_plotpy_100model():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     for fn in listdir(grp_dir):
-        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
             seeds.append(seed.group(1))
 
@@ -284,15 +284,15 @@ def for_plotpy_100model():
 
 def avg_100model_secvec():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     for fn in listdir(grp_dir):
-        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
             seeds.append(seed.group(1))
 
     finalvec = 0
     for i, seed in enumerate(seeds):
-        model_vec_path = join(data_path, 'cs_kld/130kdoc_secvec/30_%s_secvec.txt' % seed)
+        model_vec_path = join(data_path, 'cs_kld/6kdoc_secvec/70_%s_secvec.txt' % seed)
         modelvec_df = pd.read_csv(model_vec_path,sep=',',index_col=0)
 
         if type(finalvec) == int:
@@ -305,7 +305,7 @@ def avg_100model_secvec():
     
     print()
     print(finalvec)
-    dst = join(data_path, '30x100_secvec.txt')
+    dst = join(data_path, '70x100_secvec.txt')
     finalvec.div(len(seeds)).to_csv(path_or_buf=dst)
     print('100 model secvec DONE! %s' % dst)
 
@@ -315,8 +315,8 @@ if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
     # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
-    # for_plotpy_100model()
-    avg_100model_secvec()
+    for_plotpy_100model()
+    # avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
