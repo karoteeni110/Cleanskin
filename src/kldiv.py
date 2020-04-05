@@ -260,7 +260,6 @@ def compute_abst_avg_kld():
     kld_df.div(len(seeds)).to_csv(path_or_buf=dst, index=False)
     print('KLD stats DONE! %s' % dst)
     
-    
 
 def for_plotpy(seed):
     all_sec_dfs = dict()
@@ -270,11 +269,21 @@ def for_plotpy(seed):
     # all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt'))
     get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_%s_secvec.txt' % seed))
 
+def for_plotpy_100model():
+    seeds = []
+    for fn in listdir(grp_dir):
+        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        if seed is not None and seed not in seeds:
+            seeds.append(seed.group(1))
+
+    for seed in seeds:
+        for_plotpy(seed)
+
 if __name__ == "__main__":
     # for_plotpy()
 
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
-    compute_kld_by_cate_100model()
+    # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
