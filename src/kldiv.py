@@ -284,13 +284,14 @@ def for_plotpy_100model():
 
 def avg_100model_secvec():
     seeds = []
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
     for fn in listdir(grp_dir):
         seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
             seeds.append(seed.group(1))
 
     finalvec = 0
-    for seed in seeds:
+    for i, seed in enumerate(seeds):
         model_vec_path = join(data_path, 'cs_kld/130kdoc_secvec/30_%s_secvec.txt' % seed)
         modelvec_df = pd.read_csv(model_vec_path,sep=',',index_col=0)
 
@@ -298,6 +299,9 @@ def avg_100model_secvec():
             finalvec = modelvec_df
         else:
             finalvec += modelvec_df
+        
+        if (i+1) % 10 == 0:
+            print(i+1,'/',len(seeds)) 
     
     print()
     print(finalvec)
@@ -311,8 +315,8 @@ if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
     # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
-    for_plotpy_100model()
-    # avg_100model_secvec()
+    # for_plotpy_100model()
+    avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
