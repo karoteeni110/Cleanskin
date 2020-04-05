@@ -98,9 +98,9 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         div_df = div_df[div_df.category.notnull()]
         div_df = div_df.loc[ ~(div_df['category'].str.match(r'(General Literature|Other)')) ]
         
-        div_df.to_csv(path_or_buf=dst, index=False)
-        print('KLD stats DONE! %s' % dst)
-        # return div_df
+        # div_df.to_csv(path_or_buf=dst, index=False)
+        # print('KLD stats DONE! %s' % dst)
+        return div_df
     else:
         print('DFs not aligned.')
         print('Full-text pids:')
@@ -238,7 +238,7 @@ def compute_abst_avg_kld():
 
     seeds = []
     for fn in listdir(grp_dir):
-        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        seed = re.match(r'30_(\d+)_abstract_composition\.txt', fn)
         if seed is not None:
             seeds.append(seed.group(1))
 
@@ -249,16 +249,18 @@ def compute_abst_avg_kld():
         ft_df, ab_df = ft_df.reset_index(), ab_df.reset_index()
         new_kld = get_div_dfs(ft_df, ab_df, 'NOdst', ['Computer_Science.xml']).set_index('pid')
         
-        if type(kld_df) == int:
-            kld_df = new_kld
-        else:
-            kld_df.loc[:,'kld'] += new_kld.kld
+        # if type(kld_df) == int:
+        #     kld_df = new_kld
+        # else:
+        #     kld_df.loc[:,'kld'] += new_kld.kld
+        kld_df = new_kld
         
-    print()
-    print(kld_df)
-    dst = join(data_path, 'cs_kld/130kdoc_30x100/30x100_nonabst_kld.txt')
-    kld_df.div(len(seeds)).to_csv(path_or_buf=dst, index=False)
-    print('KLD stats DONE! %s' % dst)
+        print()
+        print(kld_df)
+        dst = join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt' % s)
+        # kld_df.div(len(seeds)).to_csv(path_or_buf=dst, index=False)
+        kld_df.to_csv(path_or_buf=dst)
+        print('KLD DONE! %s' % dst)
     
 
 def for_plotpy(seed):
@@ -271,6 +273,7 @@ def for_plotpy(seed):
 
 def for_plotpy_100model():
     seeds = []
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
     for fn in listdir(grp_dir):
         seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
