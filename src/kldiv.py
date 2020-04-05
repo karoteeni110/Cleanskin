@@ -262,13 +262,13 @@ def compute_abst_avg_kld():
     
     
 
-def for_plotpy():
+def for_plotpy(seed):
     all_sec_dfs = dict()
-    for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
-        secdf = read_sectionKLD_df(join(data_path, 'cs_kld/30_13064_%s_kld.txt' % label))
+    for label in ['abstract','introduction','related_work','background','methods','results','discussion','conclusion']:
+        secdf = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)))
         all_sec_dfs[label] = secdf
-    all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/30_13064_abalign_kld.txt'))
-    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_13064_abalign_secvec.txt'))
+    # all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt'))
+    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, '30_%s_secvec.txt' % seed))
 
 if __name__ == "__main__":
     # for_plotpy()
