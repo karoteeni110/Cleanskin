@@ -98,9 +98,9 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         div_df = div_df[div_df.category.notnull()]
         div_df = div_df.loc[ ~(div_df['category'].str.match(r'(General Literature|Other)')) ]
         
-        # div_df.to_csv(path_or_buf=dst, index=False)
-        # print('KLD stats DONE! %s' % dst)
-        return div_df
+        div_df.to_csv(path_or_buf=dst, index=False)
+        print('KLD stats DONE! %s' % dst)
+        # return div_df
     else:
         print('DFs not aligned.')
         print('Full-text pids:')
@@ -195,32 +195,39 @@ def data_barplot():
     # plt.show()
     # print()
 
-def compute_kld_by_cate():  
-    # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
+def compute_kld_by_cate_100model():
     grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
     seeds = []
     for fn in listdir(grp_dir):
-        seed = re.match(r'70_(\d+)_abstract_composition\.txt', fn)
+        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None:
             seeds.append(seed.group(1))
-    
-    for seed in seeds:        
-        ft_df = read_data(join(grp_dir, '30_%s_fulltext_composition.txt' % seed), sepchar=' ', drop_first_col=False)
-        nonab_df = read_data(join(grp_dir, '30_%s_nonabstcate_composition.txt' % seed), sepchar=' ', drop_first_col=False)
 
-        fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
-        fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
-        fn2label.rename({'fn':'pid'},axis=1,inplace=True)
+    for seed in seeds:
+        compute_kld_by_cate(seed)
+
+def compute_kld_by_cate(seed):  
+    # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+   
+    ft_df = read_data(join(grp_dir, '30_%s_fulltext_composition.txt' % seed), sepchar=' ', drop_first_col=False)
+    ft_df = ft_df.reset_index()
+    nonab_df = read_data(join(grp_dir, '30_%s_nonabst_composition.txt' % seed), sepchar=' ', drop_first_col=False)
+
+    fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
+    fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
+    fn2label.rename({'fn':'pid'},axis=1,inplace=True)
+    
+    for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
+        print(label)
+        label_pids = subset_fn(fn2label, label)
+        print('Subsetting...')
+        sec_df = pd.merge(label_pids,nonab_df,how='left',on='pid').drop('heading',axis=1)
+        # sec_df = pd.merge(label_pids,nonab_df,how='inner',on='pid').drop('heading',axis=1)
+        # Remove _i 
+        sec_df.loc[:,'pid'] = sec_df.pid.apply(lambda fn:fn.split('_')[0])
         
-        for label in ['introduction','related_work','background','methods','results','discussion','conclusion']:
-            print(label)
-            label_pids = subset_fn(fn2label, label)
-            print('Subsetting...')
-            sec_df = pd.merge(label_pids,nonab_df,how='left',on='pid').drop('heading',axis=1)
-            # sec_df = pd.merge(label_pids,nonab_df,how='inner',on='pid').drop('heading',axis=1)
-            # Remove _i 
-            sec_df.loc[:,'pid'] = sec_df.pid.apply(lambda fn:fn.split('_')[0])
-            get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)), ['Computer_Science.xml'])
+        get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)), ['Computer_Science.xml'])
 
 def compute_abst_avg_kld():  
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
@@ -238,9 +245,9 @@ def compute_abst_avg_kld():
     kld_df = 0
     for s in seeds:
         ft_df = read_data(join(grp_dir, '30_%s_fulltext_composition.txt' % s), sepchar=' ', drop_first_col=False)
-        ab_df = read_data(join(grp_dir, '30_%s_nonabst_composition.txt' % s), sepchar=' ', drop_first_col=False)
+        ab_df = read_data(join(grp_dir, '30_%s_abstract_composition.txt' % s), sepchar=' ', drop_first_col=False)
         ft_df, ab_df = ft_df.reset_index(), ab_df.reset_index()
-        new_kld = get_div_dfs(ft_df, ab_df, '', ['Computer_Science.xml']).set_index('pid')
+        new_kld = get_div_dfs(ft_df, ab_df, 'NOdst', ['Computer_Science.xml']).set_index('pid')
         
         if type(kld_df) == int:
             kld_df = new_kld
@@ -267,8 +274,8 @@ if __name__ == "__main__":
     # for_plotpy()
 
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
-    # compute_kld_by_cate()
-    compute_abst_avg_kld()
+    compute_kld_by_cate_100model()
+    # compute_abst_avg_kld()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
