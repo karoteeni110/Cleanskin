@@ -269,11 +269,11 @@ def for_plotpy(seed):
         secdf = read_sectionKLD_df(join(data_path, 'cs_kld/6kdoc_70x100/70_%s_%s_kld.txt' % (seed,label)))
         all_sec_dfs[label] = secdf
     # all_sec_dfs['abstract'] = read_sectionKLD_df(join(data_path, 'cs_kld/130kdoc_30x100/30_%s_abstract_kld.txt'))
-    get_sec_structure_vecs(all_sec_dfs,dst =join(data_path, 'cs_kld/6kdoc_secvec/70_%s_secvec.txt' % seed))
+    get_sec_structure_vecs(all_sec_dfs,dst=join(data_path, 'cs_kld/6kdoc_secvec/70_%s_secvec.txt' % seed))
 
 def for_plotpy_100model():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     for fn in listdir(grp_dir):
         seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
@@ -284,7 +284,7 @@ def for_plotpy_100model():
 
 def avg_100model_secvec():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_esults'
     for fn in listdir(grp_dir):
         seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
@@ -313,9 +313,9 @@ if __name__ == "__main__":
     # for_plotpy()
 
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
-    compute_kld_by_cate_100model()
+    # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
-    # for_plotpy_100model()
+    for_plotpy_100model()
     # avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
