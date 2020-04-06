@@ -284,7 +284,7 @@ def for_plotpy_100model():
 
 def avg_100model_secvec():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_esults'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     for fn in listdir(grp_dir):
         seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
@@ -315,8 +315,8 @@ if __name__ == "__main__":
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
     # compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
-    for_plotpy_100model()
-    # avg_100model_secvec()
+    # for_plotpy_100model()
+    avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
     # ft_df = read_data(join(grp_dir, '30_13064_fulltext_composition.txt'), sepchar=' ', drop_first_col=False)
