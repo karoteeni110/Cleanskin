@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from os.path import join
 from paths import data_path
 
-secvec_fn = '30x100_secvec.txt'
+secvec_fn = '70x100_secvec.txt'
 df = pd.read_csv(join(data_path, secvec_fn))
 #df = pd.read_csv('paper_topic_vectors.txt')
 df = df.set_index('name')
