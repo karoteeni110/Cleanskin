@@ -98,9 +98,9 @@ def get_div_dfs(fulltext_df, sec_df, dst, metaxml_list=listdir(metadatas_path)):
         div_df = div_df[div_df.category.notnull()]
         div_df = div_df.loc[ ~(div_df['category'].str.match(r'(General Literature|Other)')) ]
         
-        # div_df.to_csv(path_or_buf=dst, index=False)
-        # print('KLD stats DONE! %s' % dst)
-        return div_df
+        div_df.to_csv(path_or_buf=dst, index=False)
+        print('KLD stats DONE! %s' % dst)
+        # return div_df
     else:
         print('DFs not aligned.')
         print('Full-text pids:')
@@ -196,10 +196,10 @@ def data_barplot():
     # print()
 
 def compute_kld_by_cate_100model():
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
     seeds = []
     for fn in listdir(grp_dir):
-        seed = re.match(r'30_(\d+)_nonabst_composition\.txt', fn)
+        seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None:
             seeds.append(seed.group(1))
 
@@ -208,11 +208,11 @@ def compute_kld_by_cate_100model():
 
 def compute_kld_by_cate(seed):  
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/30x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
    
-    ft_df = read_data(join(grp_dir, '30_%s_fulltext_composition.txt' % seed), sepchar=' ', drop_first_col=False)
+    ft_df = read_data(join(grp_dir, '70_%s_fulltext_composition.txt' % seed), sepchar=' ', drop_first_col=False)
     ft_df = ft_df.reset_index()
-    nonab_df = read_data(join(grp_dir, '30_%s_nonabst_composition.txt' % seed), sepchar=' ', drop_first_col=False)
+    nonab_df = read_data(join(grp_dir, '70_%s_nonabst_composition.txt' % seed), sepchar=' ', drop_first_col=False)
 
     fn2label = read_sec_hdings(join(data_path, 'catesec_fname.txt'))
     fn2label.loc[:,'fn'] = fn2label.fn.str.strip('.txt')
@@ -222,12 +222,12 @@ def compute_kld_by_cate(seed):
         print(label)
         label_pids = subset_fn(fn2label, label)
         print('Subsetting...')
-        sec_df = pd.merge(label_pids,nonab_df,how='left',on='pid').drop('heading',axis=1)
+        sec_df = pd.merge(label_pids,nonab_df,how='inner',on='pid').drop('heading',axis=1)
         # sec_df = pd.merge(label_pids,nonab_df,how='inner',on='pid').drop('heading',axis=1)
         # Remove _i 
         sec_df.loc[:,'pid'] = sec_df.pid.apply(lambda fn:fn.split('_')[0])
         
-        get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/130kdoc_30x100/30_%s_%s_kld.txt' % (seed,label)), ['Computer_Science.xml'])
+        get_div_dfs(ft_df, sec_df, join(data_path, 'cs_kld/6kdoc_70x100/70_%s_%s_kld.txt' % (seed,label)), ['Computer_Science.xml'])
 
 def compute_abst_avg_kld():  
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/30x100_results'
@@ -273,7 +273,7 @@ def for_plotpy(seed):
 
 def for_plotpy_100model():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100'
     for fn in listdir(grp_dir):
         seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
@@ -284,7 +284,7 @@ def for_plotpy_100model():
 
 def avg_100model_secvec():
     seeds = []
-    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100_results'
+    grp_dir = '/Volumes/Valar Morghulis/thesis/cs_gensim/6kdoc_70x100'
     for fn in listdir(grp_dir):
         seed = re.match(r'70_(\d+)_nonabst_composition\.txt', fn)
         if seed is not None and seed not in seeds:
@@ -313,9 +313,9 @@ if __name__ == "__main__":
     # for_plotpy()
 
     CATEDICT = get_pid2cate_dict(['Computer_Science.xml'])
-    # compute_kld_by_cate_100model()
+    compute_kld_by_cate_100model()
     # compute_abst_avg_kld()
-    for_plotpy_100model()
+    # for_plotpy_100model()
     # avg_100model_secvec()
 
     # grp_dir ='/cs/group/grp-glowacka/arxiv/models/cs_gensim/results'
