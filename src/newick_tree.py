@@ -61,11 +61,13 @@ def saveNewicktree(src, dst):
     newick = getNewick(tree, "", leaf_names)
     with open(dst,'w') as f:
         f.write(newick)
+    plt.close('all')
 
 if __name__ == "__main__":
     # fn = '6kdoc_70x100_secvec.txt'
-    for fn in listdir(data_path+'/cs_kld/130kdoc_secvec'):
-        src = data_path+'/cs_kld/130kdoc_secvec/'+fn
+    srcdir = data_path+'/cs_kld/6kdoc_secvec'
+    for fn in listdir(srcdir):
+        src = srcdir + '/' + fn
         dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
         # print(dst)
         saveNewicktree(src, dst)
