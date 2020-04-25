@@ -2,6 +2,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 from os.path import join
+from os import listdir
 from scipy.cluster import hierarchy
 import string 
 import numpy as np
@@ -49,20 +50,24 @@ def getTree(g):
 
 def getLeafnames(df,leaveslist):
     leaf_names = {leafid:name2acro[df.index[leafid]] for leafid in leaveslist}
-    # leaf_names = {leafid:df.index[leafid] for leafid in ll}
+    # leaf_names = {leafid:df.index[leafid] for leafid in leaveslist}
     return leaf_names
 
 def saveNewicktree(src, dst):
-    df = getDf(fpath)
+    df = getDf(src)
     g = getCluster(df)
     tree, ll = getTree(g)
     leaf_names = getLeafnames(df,ll)
-    print(getNewick(tree, "", leaf_names))
+    newick = getNewick(tree, "", leaf_names)
+    with open(dst,'w') as f:
+        f.write(newick)
 
 if __name__ == "__main__":
-    fn = '6kdoc_70x100_secvec.txt'
-    fpath = join(data_path, fn)
-    dst = join(data_path, '/newickTrees' + fn[:-3] + 'tree')
-    saveNewicktree(fpath, dst)
+    # fn = '6kdoc_70x100_secvec.txt'
+    for fn in listdir(data_path+'/cs_kld/130kdoc_secvec'):
+        src = data_path+'/cs_kld/130kdoc_secvec/'+fn
+        dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
+        # print(dst)
+        saveNewicktree(src, dst)
     
 
