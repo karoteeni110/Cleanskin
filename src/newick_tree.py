@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from os.path import join
 from os import listdir
 from scipy.cluster import hierarchy
+from itertools import combinations
 import string 
 import numpy as np
+from subprocess import run, PIPE
 
 from paths import data_path
 from kldiv import get_acro2cate_dict
@@ -63,13 +65,54 @@ def saveNewicktree(src, dst):
         f.write(newick)
     plt.close('all')
 
+def computeRf(tree_dir, dst, absolute=False):
+    fn = listdir(tree_dir)
+    tpairs = combinations(fn,2)
+    rows_list = []
+    c = 1
+    for t1,t2 in tpairs:
+
+        t1path, t2path = join(tree_dir,t1), join(tree_dir,t2)
+        if absolute:
+            cmd = 'rf -a %s %s ' % (t1path, t2path)
+        else:
+            cmd = 'rf %s %s' % (t1path, t2path)
+        dist = run(cmd, shell=True, stdout=PIPE, text=True).stdout.replace('\n','')
+        
+        row = {'t1':t1,'t2':t2,'dist':dist}
+        rows_list.append(row)
+
+        if c % 10 == 0:
+            print(c,'/', 100*99/2)
+        c+=1
+
+        # if c == 100:
+        #     break
+
+    print('RF Computation done.')
+    dist_df = pd.DataFrame(rows_list)
+    dist_df.to_csv(dst,index=False)
+
+def show_bootstrap_sample(csvpath):
+    df = pd.read_csv(csvpath)
+    df.plot.hist(bins=20)
+    plt.show()
+
+
 if __name__ == "__main__":
-    # fn = '6kdoc_70x100_secvec.txt'
-    srcdir = data_path+'/cs_kld/6kdoc_secvec'
-    for fn in listdir(srcdir):
-        src = srcdir + '/' + fn
-        dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
-        # print(dst)
-        saveNewicktree(src, dst)
+    # srcdir = data_path+'/cs_kld/6kdoc_secvec'
+    # for fn in listdir(srcdir):
+    #     src = srcdir + '/' + fn
+    #     dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
+    #     # print(dst)
+    #     saveNewicktree(src, dst)
+
+    # src = srcdir + '/' + fn
+    # dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
+    # saveNewicktree(src, dst)
+
+    # computeRf(join(data_path, '6kdoc_newickTrees'), join(data_path, '6kdoc_rfdist_a.csv'), absolute=True)
+
+    show_bootstrap_sample(join(data_path, '130kdoc_rfdist_a.csv'))
     
 
