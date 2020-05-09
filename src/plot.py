@@ -5,27 +5,32 @@ from os.path import join
 from paths import data_path
 from scipy.cluster import hierarchy
 import numpy as np
+from os import listdir
 
-secvec_fn = '6kdoc_70x100_secvec.txt'
-df = pd.read_csv(join(data_path, secvec_fn))
-#df = pd.read_csv('paper_topic_vectors.txt')
-df = df.set_index('name')
 
-sns.set()
-sns.set(font_scale=0.6)
-#g = sns.clustermap(df, metric='euclidean', method='average', linewidths=.25, col_cluster=False, square=True, cmap="mako", robust=True)
-g = sns.clustermap(df, metric='euclidean', method='complete', linewidths=.25, col_cluster=True, square=True, cmap="mako", robust=True)
-#g = sns.clustermap(df, metric='euclidean', method='complete', linewidths=.25, col_cluster=True, square=False, cmap="mako", robust=True)
+dirp = '/Users/Karoteeni/coooode/Cleanskin/data/cs_kld/130kdoc_secvec'
+for fn in listdir(dirp):
+    fpath = join(dirp, fn)
 
-ax = g.ax_heatmap
-ax.set_ylabel('')    
-ax.set_xlabel('')
-#plt.setp(ax.yaxis.get_majorticklabels(), rotation=0)
-#plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+    df = pd.read_csv(fpath)
+    #df = pd.read_csv('paper_topic_vectors.txt')
+    df = df.set_index('name')
 
-g.ax_col_dendrogram.set_visible(False)
+    sns.set()
+    sns.set(font_scale=0.6)
+    #g = sns.clustermap(df, metric='euclidean', method='average', linewidths=.25, col_cluster=False, square=True, cmap="mako", robust=True)
+    g = sns.clustermap(df, metric='euclidean', method='complete', linewidths=.25, col_cluster=True, square=True, cmap="mako", robust=True)
+    #g = sns.clustermap(df, metric='euclidean', method='complete', linewidths=.25, col_cluster=True, square=False, cmap="mako", robust=True)
 
-# g.savefig(secvec_fn.replace('txt','pdf'))
+    ax = g.ax_heatmap
+    ax.set_ylabel('')    
+    ax.set_xlabel('')
+    #plt.setp(ax.yaxis.get_majorticklabels(), rotation=0)
+    #plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
 
-plt.show()
+    g.ax_col_dendrogram.set_visible(False)
+
+    g.savefig(fpath.replace('txt','pdf'))
+
+# plt.show()
 

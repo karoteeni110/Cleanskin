@@ -1,10 +1,12 @@
 import seaborn as sns
 import pandas as pd
+from pandas.plotting import bootstrap_plot
 import matplotlib.pyplot as plt
 from os.path import join
 from os import listdir
 from scipy.cluster import hierarchy
 from itertools import combinations
+from random import shuffle
 import string 
 import numpy as np
 from subprocess import run, PIPE
@@ -67,7 +69,11 @@ def saveNewicktree(src, dst):
 
 def computeRf(tree_dir, dst, absolute=False):
     fn = listdir(tree_dir)
-    tpairs = combinations(fn,2)
+    # tpairs = combinations(fn,2)
+    
+    shuffle(fn)
+    tpairs = [(fn[i], fn[i+1]) for i in range(0,len(fn),2)]
+    
     rows_list = []
     c = 1
     for t1,t2 in tpairs:
@@ -83,7 +89,7 @@ def computeRf(tree_dir, dst, absolute=False):
         rows_list.append(row)
 
         if c % 10 == 0:
-            print(c,'/', 100*99/2)
+            print(c,'/', len(tpairs))
         c+=1
 
         # if c == 100:
@@ -93,9 +99,26 @@ def computeRf(tree_dir, dst, absolute=False):
     dist_df = pd.DataFrame(rows_list)
     dist_df.to_csv(dst,index=False)
 
-def show_bootstrap_sample(csvpath):
+def show_kde(csvpath):
     df = pd.read_csv(csvpath)
-    df.plot.hist(bins=20)
+    ax = df.dist.plot.kde()
+    plt.show()
+
+def show_bootstrap_kde(csvpath):
+    df = pd.read_csv(csvpath)
+    
+    sampling = []
+    repeat_n = 1000
+    for i in range(repeat_n):
+        sample = df.dist.sample(n=len(df.dist), replace=True)
+        sampling.append(sample.mean())
+    sampling = pd.Series(sampling)
+    
+    # Sanity check
+    ax = sampling.plot.hist()
+    plt.show()
+
+    bootstrap_plot(sampling, size=len(df.dist), samples=repeat_n)
     plt.show()
 
 
@@ -111,8 +134,10 @@ if __name__ == "__main__":
     # dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
     # saveNewicktree(src, dst)
 
-    # computeRf(join(data_path, '6kdoc_newickTrees'), join(data_path, '6kdoc_rfdist_a.csv'), absolute=True)
+    rfcsv = join(data_path, '6kdoc_rfdist_a.csv')
+    # computeRf(join(data_path, '130kdoc_newickTrees'), rfcsv, absolute=True)
+    show_bootstrap_kde(rfcsv)
 
-    show_bootstrap_sample(join(data_path, '130kdoc_rfdist_a.csv'))
+    # show_bootstrap_sample(join(data_path, '130kdoc_rfdist_a.csv'))
     
 
