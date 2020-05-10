@@ -166,10 +166,16 @@ if __name__ == "__main__":
     # computeRf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
     # show_bootstrap_kde(rfcsv)
 
-    rfcsv = join(data_path, 'CHIIR_vs_130k.csv')
-    CHIIRvs100_Rf(join(data_path, '130kdoc_newickTrees'), rfcsv, absolute=False)
+    rfcsv = join(data_path, 'CHIIR_vs_6k.csv')
+    CHIIRvs100_Rf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
 
+    # d1 = pd.read_csv(join(data_path, '6kdoc_rfdist.csv')).dist
+    # d2 = pd.read_csv(join(data_path, '130kdoc_rfdist.csv')).dist
+    # df = pd.DataFrame({
+    # '6k data set': d1,
+    # '130k data set': d2,
+    # })
+    # ax = df.plot.kde()
+    # plt.show()
 
-    # show_bootstrap_sample(join(data_path, '130kdoc_rfdist_a.csv'))
-    
 
