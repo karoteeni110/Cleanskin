@@ -2,7 +2,7 @@ import seaborn as sns
 import pandas as pd
 from pandas.plotting import bootstrap_plot
 import matplotlib.pyplot as plt
-from os.path import join
+from os.path import join, basename
 from os import listdir
 from scipy.cluster import hierarchy
 from itertools import combinations
@@ -69,15 +69,14 @@ def saveNewicktree(src, dst):
 
 def computeRf(tree_dir, dst, absolute=False):
     fn = listdir(tree_dir)
-    # tpairs = combinations(fn,2)
+    tpairs = combinations(fn,2)
     
-    shuffle(fn)
-    tpairs = [(fn[i], fn[i+1]) for i in range(0,len(fn),2)]
+    # shuffle(fn)
+    # tpairs = [(fn[i], fn[i+1]) for i in range(0,len(fn),2)]
     
     rows_list = []
     c = 1
     for t1,t2 in tpairs:
-
         t1path, t2path = join(tree_dir,t1), join(tree_dir,t2)
         if absolute:
             cmd = 'rf -a %s %s ' % (t1path, t2path)
@@ -89,7 +88,36 @@ def computeRf(tree_dir, dst, absolute=False):
         rows_list.append(row)
 
         if c % 10 == 0:
-            print(c,'/', len(tpairs))
+            print(c,'/', 4950)
+        c+=1
+
+        # if c == 100:
+        #     break
+
+    print('RF Computation done.')
+    dist_df = pd.DataFrame(rows_list)
+    dist_df.to_csv(dst,index=False)
+
+def CHIIRvs100_Rf(tree_dir, dst, absolute=False):
+    fn = listdir(tree_dir)
+    
+    rows_list = []
+    c = 1
+    for t1 in fn:
+        t2 = 'CHIIR_newick.tree'
+        t1path, t2path = join(tree_dir,t1), join(data_path, t2)
+        
+        if absolute:
+            cmd = 'rf -a %s %s ' % (t1path, t2path)
+        else:
+            cmd = 'rf %s %s' % (t1path, t2path)
+        dist = run(cmd, shell=True, stdout=PIPE, text=True).stdout.replace('\n','')
+        
+        row = {'t1':t1,'t2':t2,'dist':dist}
+        rows_list.append(row)
+
+        if c % 10 == 0:
+            print(c,'/', len(fn))
         c+=1
 
         # if c == 100:
@@ -130,13 +158,17 @@ if __name__ == "__main__":
     #     # print(dst)
     #     saveNewicktree(src, dst)
 
-    # src = srcdir + '/' + fn
-    # dst = join(data_path, 'newickTrees/' + fn[:-3] + 'tree')
+    # src = '/Users/Karoteeni/coooode/scilit_graphs/section_structure_vectors.txt'
+    # dst = join(data_path, 'CHIIR_newick')
     # saveNewicktree(src, dst)
 
-    rfcsv = join(data_path, '6kdoc_rfdist_a.csv')
-    # computeRf(join(data_path, '130kdoc_newickTrees'), rfcsv, absolute=True)
-    show_bootstrap_kde(rfcsv)
+    # rfcsv = join(data_path, '6kdoc_rfdist.csv')
+    # computeRf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
+    # show_bootstrap_kde(rfcsv)
+
+    rfcsv = join(data_path, 'CHIIR_vs_130k.csv')
+    CHIIRvs100_Rf(join(data_path, '130kdoc_newickTrees'), rfcsv, absolute=False)
+
 
     # show_bootstrap_sample(join(data_path, '130kdoc_rfdist_a.csv'))
     
