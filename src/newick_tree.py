@@ -67,6 +67,13 @@ def saveNewicktree(src, dst):
         f.write(newick)
     plt.close('all')
 
+def computeNewick(df):
+    g = getCluster(df)
+    tree, ll = getTree(g)
+    leaf_names = getLeafnames(df,ll)
+    newick = getNewick(tree, "", leaf_names)
+    return newick
+
 def computeRf(tree_dir, dst, absolute=False):
     fn = listdir(tree_dir)
     tpairs = combinations(fn,2)
@@ -132,6 +139,16 @@ def show_kde(csvpath):
     ax = df.dist.plot.kde()
     plt.show()
 
+def show_ensemble_dist_plot(csvpath):
+    df = pd.read_csv(csvpath)
+    m = df.groupby(['N']).mean()
+    df = df.rename(columns={'dist':'RF distance'})
+    m = m.rename(columns={'dist':'Mean distance'})
+
+    ax = df.plot.hexbin(x='N',y='RF distance',gridsize=30)
+    m.plot(ax=ax)
+    plt.show()
+
 def show_bootstrap_kde(csvpath):
     df = pd.read_csv(csvpath)
     
@@ -149,6 +166,68 @@ def show_bootstrap_kde(csvpath):
     bootstrap_plot(sampling, size=len(df.dist), samples=repeat_n)
     plt.show()
 
+def avg_n_secvec(vec_path_list):
+    finalvec = 0
+    for vec_path in vec_path_list:
+        vec_df = getDf(vec_path)
+
+        if type(finalvec) == int:
+            finalvec = vec_df
+        else:
+            finalvec += vec_df
+    
+    # print()
+    return finalvec.div(len(vec_path_list))
+
+def sample_n(l, n, replace=False):
+    shuffle(l)
+    return l[:n]
+
+def vec2newick(vec,dst):
+    g = getCluster(vec)
+    tree, ll = getTree(g)
+    leaf_names = getLeafnames(vec,ll)
+    newick = getNewick(tree, "", leaf_names)
+    with open(dst,'w') as f:
+        f.write(newick)
+    plt.close('all')
+
+def get_rf(secvec1,secvec2):
+    tree_dir = data_path
+    t1path, t2path = join(tree_dir,'t1.tree'), join(tree_dir,'t2.tree') 
+    vec2newick(secvec1, t1path)
+    vec2newick(secvec2, t2path)
+
+    #cmd = 'rf -a %s %s ' % (t1path, t2path)
+    cmd = 'rf %s %s' % (t1path, t2path)
+    dist = run(cmd, shell=True, stdout=PIPE, text=True).stdout.replace('\n','')
+
+    return dist
+
+def n_ensemble_treepair(all_vec_path, n, repeat=1000):
+    dists = []
+    
+    for i in range(repeat):
+        ensemble1 = avg_n_secvec(sample_n(all_vec_path, n)) 
+        ensemble2 = avg_n_secvec(sample_n(all_vec_path, n))
+        dist = get_rf(ensemble1, ensemble2) 
+        dists.append(dist)
+
+        if (i+1) % 10 == 0:
+            print(n,':',i+1,'/',repeat)
+
+    df = pd.DataFrame(data={'N':[n]*len(dists), 'dist':dists})
+    return df
+
+def get_ensembles():
+    dist_dfs = []
+    all_vec_path = [join('/Users/Karoteeni/coooode/Cleanskin/data/cs_kld/130kdoc_secvec',i) 
+                    for i in listdir('/Users/Karoteeni/coooode/Cleanskin/data/cs_kld/130kdoc_secvec')
+                    if i[-3:] == 'txt']
+    for N in range(1,51):
+        dist_dfs.append(n_ensemble_treepair(all_vec_path,N))
+    all_dist_df = pd.concat(dist_dfs)
+    all_dist_df.to_csv(join(data_path,'ensemble_n.csv'),index=False)
 
 if __name__ == "__main__":
     # srcdir = data_path+'/cs_kld/6kdoc_secvec'
@@ -158,24 +237,30 @@ if __name__ == "__main__":
     #     # print(dst)
     #     saveNewicktree(src, dst)
 
-    # src = '/Users/Karoteeni/coooode/scilit_graphs/section_structure_vectors.txt'
-    # dst = join(data_path, 'CHIIR_newick')
+    # src = '/Users/Karoteeni/coooode/Cleanskin/data/130kdoc_30x100_secvec.txt'
+    # dst = join(data_path, '130kavg_newick.tree')
     # saveNewicktree(src, dst)
 
     # rfcsv = join(data_path, '6kdoc_rfdist.csv')
     # computeRf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
     # show_bootstrap_kde(rfcsv)
 
-    rfcsv = join(data_path, 'CHIIR_vs_6k.csv')
-    CHIIRvs100_Rf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
+    # rfcsv = join(data_path, 'CHIIR_vs_130k.csv')
+    # CHIIRvs100_Rf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
+    # show_kde(rfcsv)
 
-    # d1 = pd.read_csv(join(data_path, '6kdoc_rfdist.csv')).dist
+    # # d1 = pd.read_csv(join(data_path, '6kdoc_rfdist.csv')).dist
     # d2 = pd.read_csv(join(data_path, '130kdoc_rfdist.csv')).dist
-    # df = pd.DataFrame({
-    # '6k data set': d1,
-    # '130k data set': d2,
-    # })
-    # ax = df.plot.kde()
+    # # d1 = pd.read_csv(join(data_path, 'CHIIR_vs_6k.csv')).dist
+    # # d2 = pd.read_csv(join(data_path, 'CHIIR_vs_130k.csv')).dist
+    # # df = pd.DataFrame({
+    # # '6k data set': d1,
+    # # '130k data set': d2,
+    # # })
+    # ax = d2.plot.hist()
     # plt.show()
+
+    # get_ensembles()
+    show_ensemble_dist_plot('/Users/Karoteeni/coooode/Cleanskin/data/ensemble_n.csv')
 
 
