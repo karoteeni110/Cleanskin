@@ -249,18 +249,21 @@ if __name__ == "__main__":
     # CHIIRvs100_Rf(join(data_path, '6kdoc_newickTrees'), rfcsv, absolute=False)
     # show_kde(rfcsv)
 
-    # # d1 = pd.read_csv(join(data_path, '6kdoc_rfdist.csv')).dist
-    # d2 = pd.read_csv(join(data_path, '130kdoc_rfdist.csv')).dist
-    # # d1 = pd.read_csv(join(data_path, 'CHIIR_vs_6k.csv')).dist
-    # # d2 = pd.read_csv(join(data_path, 'CHIIR_vs_130k.csv')).dist
-    # # df = pd.DataFrame({
-    # # '6k data set': d1,
-    # # '130k data set': d2,
-    # # })
-    # ax = d2.plot.hist()
-    # plt.show()
+    d1 = pd.read_csv(join(data_path, '6kdoc_rfdist.csv')).dist
+    d2 = pd.read_csv(join(data_path, '130kdoc_rfdist.csv')).dist
+    # d1 = pd.read_csv(join(data_path, 'CHIIR_vs_6k.csv')).dist
+    # d2 = pd.read_csv(join(data_path, 'CHIIR_vs_130k.csv')).dist
+    df = pd.DataFrame({
+    '6k data set': d1,
+    '130k data set': d2,
+    })
+    ax = df.plot.hist(alpha=0.6)
+    # ax = df.plot.kde()
+    # ax.set_xlim([0.0, 1.0])
+    plt.show()
 
     # get_ensembles()
-    show_ensemble_dist_plot('/Users/Karoteeni/coooode/Cleanskin/data/ensemble_n.csv')
+
+    # show_ensemble_dist_plot('/Users/Karoteeni/coooode/Cleanskin/data/ensemble_n.csv')
 
 
