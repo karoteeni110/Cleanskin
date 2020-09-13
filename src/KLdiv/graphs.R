@@ -39,10 +39,10 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE, conf.i
 
 # figure 1
 
-abstract <- read.csv('../../data/cs_kld/6kdoc_70x100/70x100_abstract_kld.txt', header=T)
+abstract <- read.csv('../../data/cs_kld/130kdoc_30x100/30x100_abstract_kld.txt', header=T)
 abstract2 <- summarySE(abstract, measurevar = 'kld', groupvars = c('category'))
     
-pdf("70x100_avg.pdf", h=7, w=6)
+pdf("30x100_abstract_avg.pdf", h=7, w=6)
 ggplot(abstract2, aes(x=reorder(category, kld, FUN=mean), y=kld)) + geom_errorbar(aes(ymin=kld-ci, ymax=kld+ci)) + geom_point() + coord_flip() + ylab('KL divergence (bits)') + xlab('') + scale_y_continuous(limits=c(0.8,1.8)) + theme_bw()# ,breaks=c(2.0,2.2,2.4,2.6,2.8,3.0)) + theme_bw()
 # ggplot(abstract2, aes(x=reorder(category, kld, FUN=mean), y=kld)) + geom_errorbar(aes(ymin=kld-ci, ymax=kld+ci)) + geom_point() + coord_flip() + ylab('KL divergence (bits)') + xlab('') + scale_y_continuous(limits=c(3,6),breaks=c(2.0,2.2,2.4,2.6,2.8,3.0)) + theme_bw()
 
